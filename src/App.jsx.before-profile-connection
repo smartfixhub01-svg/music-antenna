@@ -1,0 +1,765 @@
+import { useEffect, useState } from "react";
+import { supabase } from "./lib/supabase";
+import "./App.css";
+
+const BUCKET = "music-antenna-media";
+
+export default function App() {
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [mode, setMode] = useState("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [message, setMessage] = useState("");
+
+  const [media, setMedia] = useState([]);
+  const [feedLoading, setFeedLoading] = useState(false);
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("All");
+  const [activeMedia, setActiveMedia] = useState(null);
+  const [showUpload, setShowUpload] = useState(false);
+  const [uploadTitle, setUploadTitle] = useState("");
+  const [uploadDescription, setUploadDescription] = useState("");
+  const [uploadFile, setUploadFile] = useState(null);
+  const [allowDownload, setAllowDownload] = useState(false);
+  const [profile, setProfile] = useState(null);
+  const [artistLoading, setArtistLoading] = useState(false);
+  const [showArtistStudio, setShowArtistStudio] = useState(false);
+
+
+  useEffect(() => {
+    let alive = true;
+
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (!alive) return;
+      if (error) setMessage(error.message);
+      setSession(data?.session ?? null);
+      setLoading(false);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
+    });
+
+    return () => {
+      alive = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    loadMedia();
+  }, []);
+
+  async function loadMedia() {
+    setFeedLoading(true);
+    setMessage("");
+
+    try {
+      const { data, error } = await supabase
+        .from("media")
+        .select(
+          "id,artist_id,title,description,media_type,storage_path,thumbnail_path,status,allow_download,created_at"
+        )
+        .eq("status", "published")
+        .order("created_at", { ascending: false })
+        .limit(60);
+
+      if (error) throw error;
+
+      const items = await Promise.all(
+        (data || []).map(async (item) => {
+          const { data: signed, error: signedError } = await supabase.storage
+            .from(BUCKET)
+            .createSignedUrl(item.storage_path, 3600);
+
+          let thumbnailUrl = "";
+
+          if (item.thumbnail_path) {
+            const { data: thumb } = await supabase.storage
+              .from("track-covers")
+              .createSignedUrl(item.thumbnail_path, 3600);
+
+            thumbnailUrl = thumb?.signedUrl || "";
+          }
+
+          return {
+            ...item,
+            playbackUrl: signedError ? "" : signed?.signedUrl || "",
+            thumbnailUrl,
+          };
+        })
+      );
+
+      setMedia(items);
+    } catch (error) {
+      setMessage(
+        "Could not load published media: " +
+          (error.message || "Please check your database permissions.")
+      );
+    } finally {
+      setFeedLoading(false);
+    }
+  }
+
+  async function handleAuth(event) {
+    event.preventDefault();
+    setBusy(true);
+    setMessage("");
+
+    try {
+      if (mode === "register") {
+        const { data, error } = await supabase.auth.signUp({
+          email: email.trim(),
+          password,
+          options: {
+            data: { display_name: displayName.trim() },
+          },
+        });
+
+        if (error) throw error;
+
+        if (data.session) {
+          setMessage("Account created successfully!");
+        } else {
+          setMessage(
+            "Registration received. Check your email to confirm your account."
+          );
+          setMode("login");
+        }
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password,
+        });
+
+        if (error) throw error;
+        setMessage("Welcome back to Music Antenna!");
+      }
+    } catch (error) {
+      setMessage(error.message || "Authentication failed.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleLogout() {
+    setBusy(true);
+    const { error } = await supabase.auth.signOut();
+    setMessage(error ? error.message : "Signed out successfully.");
+    setBusy(false);
+  }
+
+  async function handleUpload(event) {
+    event.preventDefault();
+
+    if (!session) {
+      setMessage("Please sign in before uploading.");
+      return;
+    }
+
+    if (!uploadFile || !uploadTitle.trim()) {
+      setMessage("Enter a title and select an audio or video file.");
+      return;
+    }
+
+    const isVideo = uploadFile.type.startsWith("video/");
+    const isAudio = uploadFile.type.startsWith("audio/");
+
+    if (!isVideo && !isAudio) {
+      setMessage("Choose a supported audio or video file.");
+      return;
+    }
+
+    if (uploadFile.size > 50 * 1024 * 1024) {
+      setMessage("This upload exceeds the bucket's 50 MB file limit.");
+      return;
+    }
+
+    setBusy(true);
+    setMessage("Uploading your media...");
+
+    try {
+      const safeName = uploadFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const path =
+        session.user.id +
+        "/" +
+        Date.now() +
+        "-" +
+        safeName;
+
+      const { error: storageError } = await supabase.storage
+        .from(BUCKET)
+        .upload(path, uploadFile, {
+          contentType: uploadFile.type,
+          upsert: false,
+        });
+
+      if (storageError) throw storageError;
+
+      const { error: insertError } = await supabase.from("media").insert({
+        artist_id: session.user.id,
+        title: uploadTitle.trim(),
+        description: uploadDescription.trim(),
+        media_type: isVideo ? "video" : "audio",
+        storage_path: path,
+        status: "published",
+        allow_download: allowDownload,
+      });
+
+      if (insertError) {
+        setMessage(
+          "The file uploaded, but the media record could not be saved: " +
+            insertError.message +
+            ". The uploaded file remains in storage."
+        );
+        return;
+      }
+
+      setMessage("Your media was published successfully!");
+      setUploadTitle("");
+      setUploadDescription("");
+      setUploadFile(null);
+      setAllowDownload(false);
+      setShowUpload(false);
+
+      const fileInput = document.getElementById("media-file");
+      if (fileInput) fileInput.value = "";
+
+      await loadMedia();
+    } catch (error) {
+      setMessage(
+        "Upload failed: " +
+          (error.message || "Check your storage and database policies.")
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const visibleMedia = media.filter((item) => {
+    const query = search.toLowerCase().trim();
+
+    const matchesSearch =
+      !query ||
+      item.title.toLowerCase().includes(query) ||
+      (item.description || "").toLowerCase().includes(query);
+
+    const matchesCategory =
+      category === "All" ||
+      (category === "Music" && item.media_type === "audio") ||
+      (category === "Videos" && item.media_type === "video");
+
+    return matchesSearch && matchesCategory;
+  });
+
+  if (loading) {
+    return (
+      <main className="auth-page">
+        <section className="auth-card">
+          <div className="auth-logo">♫</div>
+          <h1>Music Antenna</h1>
+          <p>Connecting securely...</p>
+        </section>
+      </main>
+    );
+  }
+
+  if (!session) {
+    return (
+      <main className="auth-page">
+        <section className="auth-card">
+          <div className="auth-logo">♫</div>
+          <p className="auth-eyebrow">YOUR SOUND. YOUR WORLD.</p>
+
+          <h1>
+            {mode === "register" ? "Join Music Antenna" : "Welcome back"}
+          </h1>
+
+          <p className="auth-description">
+            {mode === "register"
+              ? "Create your account and join the music community."
+              : "Sign in to discover music and videos."}
+          </p>
+
+          <form onSubmit={handleAuth}>
+            {mode === "register" && (
+              <label>
+                Display name
+                <input
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  placeholder="Your artist or display name"
+                  maxLength={80}
+                  autoComplete="name"
+                  required
+                />
+              </label>
+            )}
+
+            <label>
+              Email address
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                autoComplete="email"
+                required
+              />
+            </label>
+
+            <label>
+              Password
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="At least 8 characters"
+                minLength={8}
+                autoComplete={
+                  mode === "register" ? "new-password" : "current-password"
+                }
+                required
+              />
+            </label>
+
+            <button className="auth-submit" disabled={busy}>
+              {busy
+                ? "Please wait..."
+                : mode === "register"
+                  ? "Create account"
+                  : "Sign in"}
+            </button>
+          </form>
+
+          {message && (
+            <p className="auth-message" role="status">
+              {message}
+            </p>
+          )}
+
+          <p className="auth-switch">
+            {mode === "register"
+              ? "Already have an account?"
+              : "New to Music Antenna?"}{" "}
+            <button
+              type="button"
+              onClick={() => {
+                setMode(mode === "register" ? "login" : "register");
+                setMessage("");
+              }}
+            >
+              {mode === "register" ? "Sign in" : "Create account"}
+            </button>
+          </p>
+
+          <p className="auth-footnote">
+            Secure accounts powered by Supabase.
+          </p>
+        </section>
+      </main>
+    );
+  }
+
+  const displayUser =
+    session.user.user_metadata?.display_name ||
+    session.user.email?.split("@")[0] ||
+    "Listener";
+
+  return (
+    <div className="ma-app">
+      <header className="ma-header">
+        <a
+          className="ma-brand"
+          href="#home"
+          onClick={() => setActiveMedia(null)}
+        >
+          <span className="ma-brand-icon">♫</span>
+          <span>Music <b>Antenna</b></span>
+        </a>
+
+        <div className="ma-search">
+          <span>⌕</span>
+          <input
+            aria-label="Search music and videos"
+            placeholder="Search music and videos"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          {search && (
+            <button onClick={() => setSearch("")} aria-label="Clear search">
+              ×
+            </button>
+          )}
+        </div>
+
+        <div className="ma-user">
+          <span className="ma-avatar">
+            {displayUser.charAt(0).toUpperCase()}
+          </span>
+          <span className="ma-user-name">{displayUser}</span>
+          <button
+            className="ma-logout"
+            onClick={handleLogout}
+            disabled={busy}
+          >
+            Sign out
+          </button>
+        </div>
+      </header>
+
+      <div className="ma-layout">
+        <aside className="ma-sidebar">
+          <button
+            className="ma-nav-item selected"
+            onClick={() => {
+              setActiveMedia(null);
+              setCategory("All");
+            }}
+          >
+            <span>⌂</span> Home
+          </button>
+
+          <button
+            className="ma-nav-item"
+            onClick={() => {
+              setActiveMedia(null);
+              setCategory("Music");
+            }}
+          >
+            <span>♫</span> Music
+          </button>
+
+          <button
+            className="ma-nav-item"
+            onClick={() => {
+              setActiveMedia(null);
+              setCategory("Videos");
+            }}
+          >
+            <span>▶</span> Videos
+          </button>
+
+          <div className="ma-sidebar-line" />
+
+          <button
+            className="ma-nav-item"
+            onClick={() => setShowUpload(!showUpload)}
+          >
+            <span>＋</span> Upload media
+          </button>
+
+          <div className="ma-sidebar-bottom">
+            <span className="ma-brand-icon">♫</span>
+            <p>Music Antenna</p>
+            <small>Your sound. Your world.</small>
+          </div>
+        </aside>
+
+        <main className="ma-main" id="home">
+          <section className="ma-hero">
+            <div>
+              <p className="ma-hero-label">YOUR SOUND. YOUR WORLD.</p>
+              <h1>Discover your next favourite.</h1>
+              <p>Music, videos and artists—all in one place.</p>
+              <button
+                className="ma-primary"
+                onClick={() =>
+                  document
+                    .getElementById("media-feed")
+                    ?.scrollIntoView({ behavior: "smooth" })
+                }
+              >
+                Explore media <span>→</span>
+              </button>
+            </div>
+            <div className="ma-hero-art" aria-hidden="true">
+              <span>♫</span>
+              <i>♪</i>
+              <b>♬</b>
+            </div>
+          </section>
+
+          {showUpload && (
+            <section className="ma-upload-panel">
+              <div className="ma-section-heading">
+                <div>
+                  <p className="ma-kicker">CREATOR STUDIO</p>
+                  <h2>Upload your music or video</h2>
+                </div>
+                <button
+                  className="ma-close"
+                  onClick={() => setShowUpload(false)}
+                  aria-label="Close upload form"
+                >
+                  ×
+                </button>
+              </div>
+
+              <p className="ma-muted">
+                Current storage limit: 50 MB per file. Uploaded files will be
+                published if your account has the required database and storage
+                permissions.
+              </p>
+
+              <form className="ma-upload-form" onSubmit={handleUpload}>
+                <label>
+                  Title
+                  <input
+                    value={uploadTitle}
+                    onChange={(e) => setUploadTitle(e.target.value)}
+                    maxLength={200}
+                    placeholder="Give your upload a title"
+                    required
+                  />
+                </label>
+
+                <label>
+                  Description
+                  <textarea
+                    value={uploadDescription}
+                    onChange={(e) => setUploadDescription(e.target.value)}
+                    placeholder="Tell listeners about your upload"
+                    rows={3}
+                  />
+                </label>
+
+                <label>
+                  Audio or video file
+                  <input
+                    id="media-file"
+                    type="file"
+                    accept="audio/mpeg,audio/mp4,audio/aac,audio/ogg,audio/wav,audio/flac,video/mp4,video/webm,video/quicktime"
+                    onChange={(e) =>
+                      setUploadFile(e.target.files?.[0] || null)
+                    }
+                    required
+                  />
+                </label>
+
+                <label className="ma-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={allowDownload}
+                    onChange={(e) => setAllowDownload(e.target.checked)}
+                  />
+                  Allow downloads (download links are not enabled yet)
+                </label>
+
+                <button className="ma-primary" disabled={busy}>
+                  {busy ? "Please wait..." : "Upload and publish"}
+                </button>
+              </form>
+            </section>
+          )}
+
+          {activeMedia && (
+            <section className="ma-player-panel">
+              <button
+                className="ma-back"
+                onClick={() => setActiveMedia(null)}
+              >
+                ← Back to feed
+              </button>
+
+              {activeMedia.playbackUrl ? (
+                activeMedia.media_type === "video" ? (
+                  <video
+                    className="ma-player"
+                    src={activeMedia.playbackUrl}
+                    poster={activeMedia.thumbnailUrl || undefined}
+                    controls
+                    playsInline
+                    autoPlay
+                  />
+                ) : (
+                  <div className="ma-audio-player">
+                    <div className="ma-audio-art">♫</div>
+                    <audio
+                      src={activeMedia.playbackUrl}
+                      controls
+                      autoPlay
+                    />
+                  </div>
+                )
+              ) : (
+                <p className="ma-message">
+                  Playback is unavailable. Check the storage bucket policies
+                  and media storage path.
+                </p>
+              )}
+
+              <h2>{activeMedia.title}</h2>
+              <p className="ma-muted">
+                {activeMedia.description || "No description provided."}
+              </p>
+
+              <div className="ma-player-actions">
+                <button
+                  className="ma-secondary"
+                  onClick={async () => {
+                    const shareUrl = window.location.href.split("#")[0];
+                    try {
+                      await navigator.clipboard.writeText(shareUrl);
+                      setMessage("Page link copied. Share it with your friends.");
+                    } catch {
+                      setMessage("Copy this page address to share it.");
+                    }
+                  }}
+                >
+                  ↗ Share page
+                </button>
+              </div>
+            </section>
+          )}
+
+          <section className="ma-feed-section" id="media-feed">
+            <div className="ma-section-heading">
+              <div>
+                <p className="ma-kicker">THE COMMUNITY</p>
+                <h2>{category === "All" ? "Explore media" : category}</h2>
+              </div>
+              <button
+                className="ma-refresh"
+                onClick={loadMedia}
+                disabled={feedLoading}
+              >
+                ↻ Refresh
+              </button>
+            </div>
+
+            <div className="ma-categories">
+              {["All", "Music", "Videos"].map((item) => (
+                <button
+                  key={item}
+                  className={
+                    category === item
+                      ? "ma-chip ma-chip-active"
+                      : "ma-chip"
+                  }
+                  onClick={() => {
+                    setCategory(item);
+                    setActiveMedia(null);
+                  }}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+
+            {message && <p className="ma-message">{message}</p>}
+
+            {feedLoading ? (
+              <div className="ma-empty">
+                <span className="ma-spinner">♫</span>
+                <h3>Loading your feed...</h3>
+                <p>Fetching published media from Supabase.</p>
+              </div>
+            ) : visibleMedia.length === 0 ? (
+              <div className="ma-empty">
+                <span className="ma-empty-icon">♫</span>
+                <h3>
+                  {search ? "No matching media found" : "Your feed is waiting"}
+                </h3>
+                <p>
+                  {search
+                    ? "Try another search term."
+                    : "No published media is available yet. Upload your first track or video."}
+                </p>
+                {!search && (
+                  <button
+                    className="ma-primary"
+                    onClick={() => setShowUpload(true)}
+                  >
+                    ＋ Upload media
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="ma-media-grid">
+                {visibleMedia.map((item) => (
+                  <article className="ma-media-card" key={item.id}>
+                    <button
+                      className="ma-thumbnail"
+                      onClick={() => setActiveMedia(item)}
+                      aria-label={"Play " + item.title}
+                    >
+                      {item.thumbnailUrl ? (
+                        <img src={item.thumbnailUrl} alt="" loading="lazy" />
+                      ) : (
+                        <span className="ma-thumbnail-art">
+                          {item.media_type === "video" ? "▶" : "♫"}
+                        </span>
+                      )}
+                      <span className="ma-play-button">
+                        {item.media_type === "video" ? "▶" : "♫"}
+                      </span>
+                      <span className="ma-media-type">
+                        {item.media_type === "video" ? "VIDEO" : "AUDIO"}
+                      </span>
+                    </button>
+
+                    <div className="ma-card-info">
+                      <span className="ma-card-avatar">♫</span>
+                      <div className="ma-card-text">
+                        <h3>{item.title}</h3>
+                        <p>
+                          {item.description || "Music Antenna creator"}
+                        </p>
+                        <small>
+                          {new Date(item.created_at).toLocaleDateString()}
+                        </small>
+                      </div>
+                    </div>
+
+                    <button
+                      className="ma-card-open"
+                      onClick={() => setActiveMedia(item)}
+                    >
+                      {item.media_type === "video"
+                        ? "Watch video →"
+                        : "Listen now →"}
+                    </button>
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
+
+          <footer className="ma-footer">
+            <span>♫ Music Antenna</span>
+            <span>Your sound. Your world.</span>
+          </footer>
+        </main>
+      </div>
+
+      <nav className="ma-mobile-nav">
+        <button
+          onClick={() => {
+            setActiveMedia(null);
+            setCategory("All");
+          }}
+        >
+          <span>⌂</span>Home
+        </button>
+        <button onClick={() => setCategory("Music")}>
+          <span>♫</span>Music
+        </button>
+        <button onClick={() => setShowUpload(!showUpload)}>
+          <span>＋</span>Upload
+        </button>
+        <button onClick={() => setCategory("Videos")}>
+          <span>▶</span>Videos
+        </button>
+        <button onClick={handleLogout}>
+          <span>↪</span>Account
+        </button>
+      </nav>
+    </div>
+  );
+}

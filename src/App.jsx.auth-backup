@@ -1,0 +1,222 @@
+import { useEffect, useState } from "react";
+import { supabase } from "./lib/supabase";
+import "./App.css";
+
+export default function App() {
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [mode, setMode] = useState("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (error) setMessage(error.message);
+      setSession(data?.session ?? null);
+      setLoading(false);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  async function handleAuth(event) {
+    event.preventDefault();
+    setBusy(true);
+    setMessage("");
+
+    try {
+      if (mode === "register") {
+        const { data, error } = await supabase.auth.signUp({
+          email: email.trim(),
+          password,
+          options: {
+            data: {
+              display_name: displayName.trim(),
+            },
+          },
+        });
+
+        if (error) throw error;
+
+        if (data.session) {
+          setMessage("Account created successfully!");
+        } else {
+          setMessage(
+            "Registration received. Check your email to confirm your account before signing in."
+          );
+          setMode("login");
+        }
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password,
+        });
+
+        if (error) throw error;
+        setMessage("Welcome back to Music Antenna!");
+      }
+    } catch (error) {
+      setMessage(error.message || "Authentication failed.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleLogout() {
+    setBusy(true);
+    const { error } = await supabase.auth.signOut();
+    setMessage(error ? error.message : "You have signed out.");
+    setBusy(false);
+  }
+
+  if (loading) {
+    return (
+      <main className="auth-page">
+        <div className="auth-card">
+          <h1>♫ Music Antenna</h1>
+          <p>Connecting securely...</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (session) {
+    const name =
+      session.user.user_metadata?.display_name ||
+      session.user.email?.split("@")[0] ||
+      "Listener";
+
+    return (
+      <main className="auth-page">
+        <section className="auth-card">
+          <div className="auth-logo">♫</div>
+          <p className="auth-eyebrow">YOUR SOUND. YOUR WORLD.</p>
+          <h1>Welcome, {name}</h1>
+          <p className="auth-description">
+            You are signed in to Music Antenna.
+          </p>
+          <div className="account-info">
+            <span>ACCOUNT EMAIL</span>
+            <strong>{session.user.email}</strong>
+          </div>
+          {message && <p className="auth-message">{message}</p>}
+          <button
+            className="auth-submit"
+            onClick={handleLogout}
+            disabled={busy}
+          >
+            {busy ? "Please wait..." : "Sign out"}
+          </button>
+          <p className="auth-footnote">
+            Music Antenna · Real accounts powered by Supabase
+          </p>
+        </section>
+      </main>
+    );
+  }
+
+  return (
+    <main className="auth-page">
+      <section className="auth-card">
+        <div className="auth-logo">♫</div>
+        <p className="auth-eyebrow">YOUR SOUND. YOUR WORLD.</p>
+
+        <h1>
+          {mode === "register" ? "Join Music Antenna" : "Welcome back"}
+        </h1>
+
+        <p className="auth-description">
+          {mode === "register"
+            ? "Create your account and join the music community."
+            : "Sign in to continue to your music community."}
+        </p>
+
+        <form onSubmit={handleAuth}>
+          {mode === "register" && (
+            <label>
+              Display name
+              <input
+                type="text"
+                value={displayName}
+                onChange={(event) => setDisplayName(event.target.value)}
+                placeholder="Your artist or display name"
+                autoComplete="name"
+                maxLength={80}
+                required
+              />
+            </label>
+          )}
+
+          <label>
+            Email address
+            <input
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="you@example.com"
+              autoComplete="email"
+              required
+            />
+          </label>
+
+          <label>
+            Password
+            <input
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="At least 8 characters"
+              autoComplete={
+                mode === "register" ? "new-password" : "current-password"
+              }
+              minLength={8}
+              required
+            />
+          </label>
+
+          <button className="auth-submit" disabled={busy}>
+            {busy
+              ? "Please wait..."
+              : mode === "register"
+                ? "Create account"
+                : "Sign in"}
+          </button>
+        </form>
+
+        {message && (
+          <p className="auth-message" role="status">
+            {message}
+          </p>
+        )}
+
+        <p className="auth-switch">
+          {mode === "register"
+            ? "Already have an account?"
+            : "New to Music Antenna?"}{" "}
+          <button
+            type="button"
+            onClick={() => {
+              setMode(mode === "register" ? "login" : "register");
+              setMessage("");
+            }}
+          >
+            {mode === "register" ? "Sign in" : "Create account"}
+          </button>
+        </p>
+
+        <p className="auth-footnote">
+          Your account is secured through Supabase Authentication.
+        </p>
+      </section>
+    </main>
+  );
+}

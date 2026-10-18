@@ -1,0 +1,2756 @@
+import { useEffect, useRef, useState } from "react";
+
+function timeAgo(dateString) {
+  const date = new Date(dateString);
+  const now = new Date();
+  const seconds = Math.floor((now - date) / 1000);
+  if (seconds < 60) return seconds + "s ago";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return minutes + "m ago";
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return hours + "h ago";
+  const days = Math.floor(hours / 24);
+  if (days < 30) return days + "d ago";
+  const months = Math.floor(days / 30);
+  if (months < 12) return months + "mo ago";
+  const years = Math.floor(days / 365);
+  return years + "y ago";
+}
+import { supabase } from "./lib/supabase";
+import "./App.css";
+
+const BUCKET = "music-antenna-media";
+
+export default function App() {
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [mode, setMode] = useState("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [accountType, setAccountType] = useState("listener");
+  const [justTriedRegister, setJustTriedRegister] = useState(false);
+  const [authTab, setAuthTab] = useState("listener");
+  const [showPassword, setShowPassword] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const [media, setMedia] = useState([]);
+  const [feedLoading, setFeedLoading] = useState(false);
+  const [search, setSearch] = useState("");
+  const [navVisible, setNavVisible] = useState(true);
+
+  useEffect(() => {
+    let lastNavScrollY = window.scrollY;
+    let ticking = false;
+
+    const handleNavScroll = () => {
+      if (ticking) return;
+      ticking = true;
+
+      window.requestAnimationFrame(() => {
+        const currentY = window.scrollY;
+        if (currentY < 40 || currentY < lastNavScrollY - 5) {
+          setNavVisible(true);
+        } else if (currentY > lastNavScrollY + 5) {
+          setNavVisible(false);
+        }
+        lastNavScrollY = currentY;
+        ticking = false;
+      });
+    };
+
+    window.addEventListener("scroll", handleNavScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleNavScroll);
+  }, []);
+
+  const [category, setCategory] = useState("All");
+  const [activeMedia, setActiveMedia] = useState(null);
+  const [showUpload, setShowUpload] = useState(false);
+  const viewCountedRef = useRef(false);
+  const [uploadTitle, setUploadTitle] = useState("");
+  const [uploadDescription, setUploadDescription] = useState("");
+  const [uploadFile, setUploadFile] = useState(null);
+  const [allowDownload, setAllowDownload] = useState(false);
+  const [uploadCategory, setUploadCategory] = useState("Music");
+  const [uploadArtistName, setUploadArtistName] = useState("");
+  const [uploadProducerName, setUploadProducerName] = useState("");
+  const [uploadThumbnailFile, setUploadThumbnailFile] = useState(null);
+  const [uploadScheduleMode, setUploadScheduleMode] = useState("now");
+  const [uploadScheduledAt, setUploadScheduledAt] = useState("");
+  const [profile, setProfile] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showBecomeArtistForm, setShowBecomeArtistForm] = useState(false);
+  const [baName, setBaName] = useState("");
+  const [baBio, setBaBio] = useState("");
+  const [baCategory, setBaCategory] = useState("Music");
+  const [baPhoto, setBaPhoto] = useState(null);
+  const [baCover, setBaCover] = useState(null);
+  const [baBusy, setBaBusy] = useState(false);
+  const [showAccountPage, setShowAccountPage] = useState(false);
+
+  const [showChannelPage, setShowChannelPage] = useState(false);
+  const [subscriberCount, setSubscriberCount] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState("");
+  const [commentsLoading, setCommentsLoading] = useState(false);
+
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [channelProfile, setChannelProfile] = useState(null);
+  const [channelMedia, setChannelMedia] = useState([]);
+  const [channelLoading, setChannelLoading] = useState(false);
+  const [channelTab, setChannelTab] = useState("Videos");
+
+
+  const [watchArtist, setWatchArtist] = useState(null);
+
+  const [likedIds, setLikedIds] = useState(() => {
+    try {
+      const raw = localStorage.getItem("ma_likes");
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    if (channelProfile?.id) {
+      checkSubscription(channelProfile.id);
+    }
+  }, [channelProfile?.id, session?.user?.id]);
+
+  useEffect(() => {
+    if (!activeMedia?.artist_id) {
+      setWatchArtist(null);
+      return;
+    }
+    let alive = true;
+    (async () => {
+      try {
+        const { data } = await supabase
+          .from("profiles")
+          .select("id,display_name,username,avatar_url,bio")
+          .eq("id", activeMedia.artist_id)
+          .maybeSingle();
+        if (alive) setWatchArtist(data || null);
+      } catch {
+        if (alive) setWatchArtist(null);
+      }
+    })();
+    return () => { alive = false; };
+  }, [activeMedia?.artist_id]);
+
+  useEffect(() => {
+    if (activeMedia?.artist_id) {
+      checkSubscription(activeMedia.artist_id);
+    }
+  }, [activeMedia?.artist_id, session?.user?.id]);
+
+  useEffect(() => {
+    if (activeMedia?.id) {
+      viewCountedRef.current = false;
+      fetchWatchDetails(activeMedia.id);
+    }
+  }, [activeMedia?.id, session?.user?.id]);
+
+
+  useEffect(() => {
+    if (!activeMedia?.id) return;
+    supabase.rpc("increment_view", { media_id: activeMedia.id }).then(() => {}, () => {});
+  }, [activeMedia?.id]);
+
+  function openPlayer(item) {
+    if (!item) return;
+    setShowAccountPage(false);
+    setShowChannelPage(false);
+    setActiveMedia(item);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function toggleLike(id) {
+    setLikedIds((prev) => {
+      const next = prev.includes(id)
+        ? prev.filter((x) => x !== id)
+        : [...prev, id];
+      try {
+        localStorage.setItem("ma_likes", JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }
+
+  const [history, setHistory] = useState(() => {
+    try {
+      const raw = localStorage.getItem("ma_history");
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    if (!activeMedia) return;
+    const entry = {
+      id: activeMedia.id,
+      title: activeMedia.title,
+      media_type: activeMedia.media_type,
+      thumbnailUrl: activeMedia.thumbnailUrl,
+      created_at: activeMedia.created_at,
+    };
+    setHistory((prev) => {
+      const filtered = prev.filter((x) => x.id !== entry.id);
+      const next = [entry, ...filtered].slice(0, 20);
+      try {
+        localStorage.setItem("ma_history", JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, [activeMedia]);
+
+  const [showProfileEditor, setShowProfileEditor] = useState(false);
+  const [profileName, setProfileName] = useState("");
+  const [profileBio, setProfileBio] = useState("");
+  const [profilePhotoFile, setProfilePhotoFile] = useState(null);
+  const [coverPhotoFile, setCoverPhotoFile] = useState(null);
+  const [profileSaving, setProfileSaving] = useState(false);
+
+  const [artistLoading, setArtistLoading] = useState(false);
+  const [showArtistStudio, setShowArtistStudio] = useState(false);
+
+
+  useEffect(() => {
+    let alive = true;
+
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (!alive) return;
+      if (error) setMessage(error.message);
+      setSession(data?.session ?? null);
+      setLoading(false);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
+    });
+
+    return () => {
+      alive = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    loadMedia();
+  }, []);
+
+  useEffect(() => {
+    let alive = true;
+
+    async function fetchProfile() {
+      if (!session?.user?.id) {
+        setProfile(null);
+        return;
+      }
+
+      setArtistLoading(true);
+
+      try {
+        const user = session.user;
+        const name =
+          user.user_metadata?.display_name ||
+          user.email?.split("@")[0] ||
+          "Music Antenna User";
+
+        let { data, error } = await supabase
+          .from("profiles")
+          .select("id,display_name,role,created_at,username,bio,avatar_url,cover_url,updated_at")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (error) throw error;
+
+        if (!data) {
+          const result = await supabase
+            .from("profiles")
+            .insert({
+              id: user.id,
+              display_name: name,
+              role: ["artist", "listener"].includes(user.user_metadata?.account_type)
+                ? user.user_metadata.account_type
+                : "listener",
+            })
+            .select("id,display_name,role,created_at,username,bio,avatar_url,cover_url,updated_at")
+            .single();
+
+          if (result.error) throw result.error;
+          data = result.data;
+        }
+
+        if (alive) setProfile(data);
+      } catch (error) {
+        if (alive) {
+          setMessage(
+            "Could not load your profile: " +
+              (error.message || "Unknown error")
+          );
+        }
+      } finally {
+        if (alive) setArtistLoading(false);
+      }
+    }
+
+    fetchProfile();
+
+    return () => {
+      alive = false;
+    };
+  }, [session?.user?.id]);
+
+  async function loadMedia() {
+    setFeedLoading(true);
+    setMessage("");
+    try {
+      const { data, error } = await supabase
+        .from("media")
+        .select("id,artist_id,title,description,media_type,storage_path,thumbnail_path,status,allow_download,created_at,views")
+        .eq("status", "published")
+        .order("created_at", { ascending: false })
+        .limit(60);
+      if (error) throw error;
+      const items = await Promise.all(
+        (data || []).map(async (item) => {
+          const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(item.storage_path);
+          let thumbnailUrl = "";
+          if (item.thumbnail_path) {
+            const { data: thumb } = supabase.storage.from("track-covers").getPublicUrl(item.thumbnail_path);
+            thumbnailUrl = thumb?.publicUrl || "";
+          }
+          return { ...item, playbackUrl: pub?.publicUrl || "", thumbnailUrl };
+        })
+      );
+      setMedia(items);
+    } catch (error) {
+      setMessage("Could not load published media: " + (error.message || "Unknown error"));
+    } finally {
+      setFeedLoading(false);
+    }
+  }
+
+  function openBecomeArtistForm() {
+    setBaName(profile?.display_name || displayUser || "");
+    setBaBio(profile?.bio || "");
+    setBaCategory("Music");
+    setBaPhoto(null);
+    setBaCover(null);
+    setShowBecomeArtistForm(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  async function submitBecomeArtist(event) {
+    event.preventDefault();
+    if (!session?.user?.id) {
+      setMessage("Please sign in first.");
+      return;
+    }
+    const name = baName.trim();
+    if (!name) {
+      setMessage("Enter your artist name.");
+      return;
+    }
+
+    setBaBusy(true);
+    setMessage("");
+
+    try {
+      let avatarUrl = profile?.avatar_url || null;
+      let coverUrl = profile?.cover_url || null;
+
+      if (baPhoto) {
+        avatarUrl = await uploadProfileImage(baPhoto, "avatar");
+      }
+      if (baCover) {
+        coverUrl = await uploadProfileImage(baCover, "cover");
+      }
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .update({
+          display_name: name,
+          bio: baBio.trim() || null,
+          role: "artist",
+          avatar_url: avatarUrl,
+          cover_url: coverUrl,
+        })
+        .eq("id", session.user.id)
+        .select("id,display_name,role,created_at,username,bio,avatar_url,cover_url,updated_at")
+        .single();
+
+      if (error) throw error;
+
+      setProfile(data);
+      setShowBecomeArtistForm(false);
+      setShowAccountPage(true);
+      setMessage("Welcome, " + name + "! Your artist profile is now active.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (error) {
+      setMessage("Could not activate artist profile: " + (error.message || "Unknown error"));
+    } finally {
+      setBaBusy(false);
+    }
+  }
+
+  async function handleBecomeArtist() {
+    if (!session?.user?.id) {
+      setMessage("Please sign in first.");
+      return;
+    }
+
+    setArtistLoading(true);
+    setMessage("");
+
+    try {
+      const { data, error } = await supabase.rpc("become_artist");
+
+      if (error) throw error;
+
+      setProfile(data);
+      setShowArtistStudio(true);
+      setMessage("Welcome! Your artist profile is now active.");
+    } catch (error) {
+      setMessage(
+        "Could not activate artist profile: " +
+        (error.message || "Unknown error")
+      );
+    } finally {
+      setArtistLoading(false);
+    }
+  }
+
+  async function doAuth(modeVal, accountTypeVal) {
+    setBusy(true);
+    setMessage("");
+
+    try {
+      if (modeVal === "register") {
+        const { data, error } = await supabase.auth.signUp({
+          email: email.trim(),
+          password,
+          options: {
+            data: {
+              display_name: displayName.trim(),
+              account_type: accountTypeVal,
+            },
+          },
+        });
+
+        if (error) throw error;
+
+        if (data.session) {
+          setMessage("Account created successfully!");
+        } else {
+          setMessage("Registration received. Check your email to confirm your account.");
+          setMode("login");
+        }
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password,
+        });
+        if (error) throw error;
+        setMessage("Welcome back to Music Antenna!");
+      }
+    } catch (error) {
+      const raw = (error.message || "Authentication failed.").toLowerCase();
+      const alreadyRegistered =
+        raw.includes("already registered") ||
+        raw.includes("already exists") ||
+        raw.includes("user already");
+
+      if (modeVal === "register" && alreadyRegistered) {
+        setMode("login");
+        setJustTriedRegister(true);
+        const who = accountTypeVal === "artist" ? "Creator" : "Listener";
+        setMessage(
+          "This email is already registered as a " + who + ". " +
+          "Enter your password and tap Sign in."
+        );
+      } else {
+        setMessage(error.message || "Authentication failed.");
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function handleAuth(event) {
+    event.preventDefault();
+    doAuth(mode, accountType);
+  }
+
+  function clearAuthFields() {
+    setEmail("");
+    setPassword("");
+    setDisplayName("");
+    setShowPassword(false);
+    setMessage("");
+  }
+
+  function handleListenerLogin(event) {
+    event.preventDefault();
+    setAccountType("listener");
+    setMode("login");
+    doAuth("login", "listener");
+  }
+
+  function handleCreatorLogin(event) {
+    event.preventDefault();
+    setAccountType("artist");
+    setMode("login");
+    doAuth("login", "artist");
+  }
+
+  function startListenerSignup() {
+    setAccountType("listener");
+    setAuthTab("listener");
+    setMode("register");
+    setJustTriedRegister(false);
+    setMessage("");
+  }
+
+  function startCreatorSignup() {
+    setAccountType("artist");
+    setAuthTab("creator");
+    setMode("register");
+    setJustTriedRegister(false);
+    setMessage("");
+  }
+
+  async function fetchWatchDetails(mediaId) {
+    if (!mediaId) return;
+    // Fetch Likes
+    try {
+      const { count } = await supabase.from("likes").select("*", { count: "exact", head: true }).eq("media_id", mediaId);
+      setLikesCount(count || 0);
+      if (session?.user?.id) {
+        const { data } = await supabase.from("likes").select("id").eq("media_id", mediaId).eq("user_id", session.user.id).maybeSingle();
+        setIsLiked(!!data);
+      } else {
+        setIsLiked(false);
+      }
+    } catch (e) { console.error(e); }
+
+    // Fetch Comments
+    setCommentsLoading(true);
+    try {
+      const { data } = await supabase.from("comments").select("*, profiles(display_name, avatar_url)").eq("media_id", mediaId).order("created_at", { ascending: false });
+      setComments(data || []);
+    } catch (e) { console.error(e); }
+    setCommentsLoading(false);
+  }
+
+  async function handleToggleLike(mediaId) {
+    if (!session?.user?.id) return setMessage("Sign in to like videos.");
+    try {
+      if (isLiked) {
+        await supabase.from("likes").delete().eq("media_id", mediaId).eq("user_id", session.user.id);
+        setLikesCount(prev => Math.max(0, prev - 1));
+        setIsLiked(false);
+      } else {
+        await supabase.from("likes").insert({ media_id: mediaId, user_id: session.user.id });
+        setLikesCount(prev => prev + 1);
+        setIsLiked(true);
+      }
+    } catch (e) { setMessage(e.message); }
+  }
+
+  async function handlePostComment(e) {
+    e.preventDefault();
+    if (!session?.user?.id) return setMessage("Sign in to comment.");
+    if (!newComment.trim()) return;
+    const textToSend = newComment.trim();
+    try {
+      const { data, error } = await supabase.from("comments").insert({
+        media_id: activeMedia.id, user_id: session.user.id, content: textToSend
+      }).select("*, profiles(display_name, avatar_url)").single();
+      if (error) throw error;
+      setComments([data, ...comments]);
+      setNewComment("");
+    } catch (err) { setMessage("Comment Error: " + err.message); }
+  }
+
+  async function checkSubscription(channelId) {
+    if (!channelId) return;
+    try {
+      const { count } = await supabase
+        .from("subscriptions")
+        .select("*", { count: "exact", head: true })
+        .eq("channel_id", channelId);
+      setSubscriberCount(count || 0);
+
+      if (session?.user?.id) {
+        const { data } = await supabase
+          .from("subscriptions")
+          .select("id")
+          .eq("channel_id", channelId)
+          .eq("subscriber_id", session.user.id)
+          .maybeSingle();
+        setIsSubscribed(!!data);
+      } else {
+        setIsSubscribed(false);
+      }
+    } catch (err) {
+      console.error("Sub check failed", err);
+    }
+  }
+
+  async function handleToggleSubscribe(channelId) {
+    if (!session?.user?.id) return setMessage("Please sign in to subscribe.");
+    try {
+      if (isSubscribed) {
+        const { error } = await supabase.from("subscriptions").delete().eq("channel_id", channelId).eq("subscriber_id", session.user.id);
+        if (error) throw error;
+        setSubscriberCount(prev => Math.max(0, prev - 1));
+        setIsSubscribed(false);
+      } else {
+        const { error } = await supabase.from("subscriptions").insert({ channel_id: channelId, subscriber_id: session.user.id });
+        if (error) throw error;
+        setSubscriberCount(prev => prev + 1);
+        setIsSubscribed(true);
+      }
+    } catch (err) { setMessage("Sub Error: " + err.message); }
+  }
+
+  async function openChannel(artistId) {
+    if (!artistId) return;
+    setChannelLoading(true);
+    setShowChannelPage(true);
+    setChannelProfile(null);
+    setChannelMedia([]);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    try {
+      const { data: prof, error: profErr } = await supabase
+        .from("profiles")
+        .select("id,display_name,role,created_at,username,bio,avatar_url,cover_url,updated_at")
+        .eq("id", artistId)
+        .maybeSingle();
+      if (profErr) throw profErr;
+      setChannelProfile(prof || { id: artistId, display_name: "Unknown artist" });
+
+      const { data: list, error: listErr } = await supabase
+        .from("media")
+        .select("id,artist_id,title,description,media_type,storage_path,thumbnail_path,status,allow_download,created_at,views")
+        .eq("artist_id", artistId)
+        .eq("status", "published")
+        .order("created_at", { ascending: false })
+        .limit(60);
+      if (listErr) throw listErr;
+
+      const items = await Promise.all(
+        (list || []).map(async (item) => {
+          const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(item.storage_path);
+          let thumbnailUrl = "";
+          if (item.thumbnail_path) {
+            const { data: thumb } = supabase.storage.from("track-covers").getPublicUrl(item.thumbnail_path);
+            thumbnailUrl = thumb?.publicUrl || "";
+          }
+          return { ...item, playbackUrl: pub?.publicUrl || "", thumbnailUrl };
+        })
+      );
+      setChannelMedia(items);
+    } catch (error) {
+      setMessage("Could not load channel: " + error.message);
+    } finally {
+      setChannelLoading(false);
+    }
+  }
+
+  async function handleLogout() {
+    setBusy(true);
+    const { error } = await supabase.auth.signOut();
+    setMessage(error ? error.message : "Signed out successfully.");
+    setBusy(false);
+  }
+
+
+  async function handleSaveProfile(event) {
+    event.preventDefault();
+
+    if (!session?.user?.id) {
+      setMessage("Please sign in to edit your profile.");
+      return;
+    }
+
+    const name = profileName.trim();
+    if (!name) {
+      setMessage("Enter a username or display name.");
+      return;
+    }
+
+    for (const file of [profilePhotoFile, coverPhotoFile]) {
+      if (file && !file.type.startsWith("image/")) {
+        setMessage("Choose image files for your profile picture and cover.");
+        return;
+      }
+      if (file && file.size > 5 * 1024 * 1024) {
+        setMessage("Each profile image must be 5 MB or smaller.");
+        return;
+      }
+    }
+
+    setProfileSaving(true);
+    setMessage("Saving profile...");
+
+    try {
+      let avatarUrl = profile?.avatar_url || null;
+      let coverUrl = profile?.cover_url || null;
+
+      async function uploadProfileImage(file, kind) {
+        if (!file) return null;
+
+        const extension = file.name.split(".").pop().replace(/[^a-zA-Z0-9]/g, "");
+        const path = `${session.user.id}/profile-${kind}-${Date.now()}.${extension || "jpg"}`;
+
+        const { error } = await supabase.storage
+          .from("track-covers")
+          .upload(path, file, {
+            contentType: file.type,
+            upsert: false,
+          });
+
+        if (error) throw error;
+
+        const { data } = supabase.storage
+          .from("track-covers")
+          .getPublicUrl(path);
+
+        return data.publicUrl;
+      }
+
+      if (profilePhotoFile) {
+        avatarUrl = await uploadProfileImage(profilePhotoFile, "avatar");
+      }
+
+      if (coverPhotoFile) {
+        coverUrl = await uploadProfileImage(coverPhotoFile, "cover");
+      }
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .update({
+          display_name: name,
+          username: name,
+          bio: profileBio.trim(),
+          avatar_url: avatarUrl,
+          cover_url: coverUrl,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", session.user.id)
+        .select("id,display_name,role,created_at,username,bio,avatar_url,cover_url,updated_at")
+        .single();
+
+      if (error) throw error;
+
+      setProfile(data);
+      setProfilePhotoFile(null);
+      setCoverPhotoFile(null);
+      setShowProfileEditor(false);
+      setMessage("Profile saved successfully.");
+    } catch (error) {
+      setMessage("Could not save profile: " + (error.message || "Check your database and image-storage permissions."));
+    } finally {
+      setProfileSaving(false);
+    }
+  }
+
+
+  function extractVideoFrame(file) {
+    return new Promise((resolve) => {
+      try {
+        const url = URL.createObjectURL(file);
+        const video = document.createElement("video");
+        video.preload = "metadata";
+        video.muted = true;
+        video.playsInline = true;
+        video.crossOrigin = "anonymous";
+        video.src = url;
+        const cleanup = () => { try { URL.revokeObjectURL(url); } catch {} };
+        const fail = () => { cleanup(); resolve(null); };
+        video.onloadedmetadata = () => { try { video.currentTime = Math.min(0.5, (video.duration || 1) / 3); } catch { fail(); } };
+        video.onseeked = () => {
+          try {
+            const canvas = document.createElement("canvas");
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 360;
+            canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob((blob) => { cleanup(); resolve(blob); }, "image/jpeg", 0.82);
+          } catch { fail(); }
+        };
+        video.onerror = fail;
+        setTimeout(fail, 8000);
+      } catch { resolve(null); }
+    });
+  }
+
+  async function handleUpload(event) {
+    event.preventDefault();
+
+    if (!session) {
+      setMessage("Please sign in before uploading.");
+      return;
+    }
+
+
+
+    if (!uploadFile || !uploadTitle.trim()) {
+      setMessage("Enter a title and select an audio or video file.");
+      return;
+    }
+
+    const isVideo = uploadFile.type.startsWith("video/");
+    const isAudio = uploadFile.type.startsWith("audio/");
+
+    if (!isVideo && !isAudio) {
+      setMessage("Choose a supported audio or video file.");
+      return;
+    }
+
+    if (uploadFile.size > 50 * 1024 * 1024) {
+      setMessage("This upload exceeds the bucket's 50 MB file limit.");
+      return;
+    }
+
+    setBusy(true);
+    setMessage("Uploading your media...");
+
+    try {
+      const safeName = uploadFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const path =
+        session.user.id +
+        "/" +
+        Date.now() +
+        "-" +
+        safeName;
+
+      const { error: storageError } = await supabase.storage
+        .from(BUCKET)
+        .upload(path, uploadFile, {
+          contentType: uploadFile.type,
+          upsert: false,
+        });
+
+      if (storageError) throw storageError;
+
+      // Upload custom thumbnail (if provided)
+      let thumbnailPath = null;
+      let thumbSource = uploadThumbnailFile;
+
+      // If no custom thumbnail and it's a video, auto-generate from the first frame
+      if (!thumbSource && isVideo) {
+        setMessage("Generating video thumbnail...");
+        const frameBlob = await extractVideoFrame(uploadFile);
+        if (frameBlob) {
+          thumbSource = new File(
+            [frameBlob],
+            "auto-frame-" + Date.now() + ".jpg",
+            { type: "image/jpeg" }
+          );
+        }
+      }
+
+      if (thumbSource) {
+        const thumbSafe = thumbSource.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const thumbPath =
+          session.user.id + "/" + Date.now() + "-thumb-" + thumbSafe;
+        const { error: thumbErr } = await supabase.storage
+          .from("track-covers")
+          .upload(thumbPath, thumbSource, {
+            contentType: thumbSource.type || "image/jpeg",
+            upsert: false,
+          });
+        if (thumbErr) {
+          setMessage("Thumbnail upload failed: " + thumbErr.message);
+        } else {
+          thumbnailPath = thumbPath;
+        }
+      }
+
+      const isScheduled = uploadScheduleMode === "schedule" && uploadScheduledAt;
+      const finalStatus = isScheduled ? "scheduled" : "published";
+      const scheduledIso = isScheduled
+        ? new Date(uploadScheduledAt).toISOString()
+        : null;
+
+      const { error: insertError } = await supabase.from("media").insert({
+        artist_id: session.user.id,
+        title: uploadTitle.trim(),
+        description: uploadDescription.trim(),
+        media_type: isVideo ? "video" : "audio",
+        storage_path: path,
+        thumbnail_path: thumbnailPath,
+        status: finalStatus,
+        allow_download: allowDownload,
+        category: uploadCategory,
+        artist_name: uploadArtistName.trim() || null,
+        producer_name: isAudio ? (uploadProducerName.trim() || null) : null,
+        scheduled_at: scheduledIso,
+        visibility: "public",
+      });
+
+      if (insertError) {
+        setMessage(
+          "The file uploaded, but the media record could not be saved: " +
+            insertError.message +
+            ". The uploaded file remains in storage."
+        );
+        return;
+      }
+
+      setMessage(
+        isScheduled
+          ? "Your media was scheduled for " + new Date(scheduledIso).toLocaleString()
+          : "Your media was published successfully!"
+      );
+      setUploadTitle("");
+      setUploadDescription("");
+      setUploadFile(null);
+      setAllowDownload(false);
+      setUploadCategory("Music");
+      setUploadArtistName("");
+      setUploadProducerName("");
+      setUploadThumbnailFile(null);
+      setUploadScheduleMode("now");
+      setUploadScheduledAt("");
+      setShowUpload(false);
+
+      const fileInput = document.getElementById("media-file");
+      if (fileInput) fileInput.value = "";
+      const thumbInput = document.getElementById("media-thumb");
+      if (thumbInput) thumbInput.value = "";
+
+      await loadMedia();
+    } catch (error) {
+      setMessage(
+        "Upload failed: " +
+          (error.message || "Check your storage and database policies.")
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const visibleMedia = media.filter((item) => {
+    const query = search.toLowerCase().trim();
+
+    const matchesSearch =
+      !query ||
+      item.title.toLowerCase().includes(query) ||
+      (item.description || "").toLowerCase().includes(query);
+
+    const matchesCategory =
+      category === "All" ||
+      (category === "Music" && item.media_type === "audio") ||
+      (category === "Videos" && item.media_type === "video");
+
+    return matchesSearch && matchesCategory;
+  });
+
+  if (loading) {
+    return (
+      <main className="auth-page">
+        <section className="auth-card">
+          <div className="auth-logo">♫</div>
+          <h1>Music Antenna</h1>
+          <p>Connecting securely...</p>
+        </section>
+      </main>
+    );
+  }
+
+  if (!session) {
+    return (
+      <main
+        className={
+          "auth-page auth-screen " +
+          (authTab === "creator" ? "auth-screen-creator" : "auth-screen-listener")
+        }
+      >
+        <section className="auth-screen-card">
+          <div className="auth-screen-brand">
+            <div className="auth-logo">♫</div>
+            <span>Music <b>Antenna</b></span>
+          </div>
+
+          {authTab === "listener" ? (
+            <>
+              {/* ===================== LISTENER SCREEN ===================== */}
+              <div className="auth-screen-head">
+                <span className="material-symbols-outlined auth-screen-head-icon">
+                  headphones
+                </span>
+                <h1 className="auth-screen-title">Listener sign in</h1>
+                <p className="auth-screen-sub">
+                  Discover and listen to music and videos
+                </p>
+              </div>
+
+              {mode === "login" ? (
+                <form onSubmit={handleListenerLogin} className="auth-screen-form">
+                  <label>
+                    <span>Email</span>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      autoComplete="email"
+                      required
+                    />
+                  </label>
+                  <label>
+                    <span>Password</span>
+                    <div className="auth-pw-wrap">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Your password"
+                        autoComplete="current-password"
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="auth-pw-toggle"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        <span className="material-symbols-outlined">
+                          {showPassword ? "visibility_off" : "visibility"}
+                        </span>
+                      </button>
+                    </div>
+                  </label>
+                  <button type="submit" className="auth-screen-submit" disabled={busy}>
+                    {busy ? "Please wait..." : "Sign in as Listener"}
+                  </button>
+                </form>
+              ) : (
+                <form onSubmit={handleAuth} className="auth-screen-form">
+                  <label>
+                    <span>Username</span>
+                    <input
+                      type="text"
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      placeholder="Your name"
+                      maxLength={80}
+                      autoComplete="name"
+                      required
+                    />
+                  </label>
+                  <label>
+                    <span>Email</span>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      autoComplete="email"
+                      required
+                    />
+                  </label>
+                  <label>
+                    <span>Password</span>
+                    <div className="auth-pw-wrap">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="At least 6 characters"
+                        minLength={6}
+                        autoComplete="new-password"
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="auth-pw-toggle"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        <span className="material-symbols-outlined">
+                          {showPassword ? "visibility_off" : "visibility"}
+                        </span>
+                      </button>
+                    </div>
+                  </label>
+                  <button type="submit" className="auth-screen-submit" disabled={busy}>
+                    {busy ? "Please wait..." : "Join as Listener"}
+                  </button>
+                </form>
+              )}
+
+              <div className="auth-screen-links">
+                {mode === "login" ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAccountType("listener");
+                        setAuthTab("listener");
+                        setMode("register");
+                        setJustTriedRegister(false);
+                        setShowPassword(false);
+                        setMessage("");
+                      }}
+                    >
+                      New listener? Sign up
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMessage("Password reset coming soon.")}
+                    >
+                      Reset password
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode("login");
+                      setJustTriedRegister(false);
+                      setShowPassword(false);
+                      setMessage("");
+                    }}
+                  >
+                    Already have an account? Sign in
+                  </button>
+                )}
+              </div>
+
+              <div className="auth-screen-switch">
+                <p>Are you a creator?</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    clearAuthFields();
+                    setAuthTab("creator");
+                    setAccountType("artist");
+                    setMode("login");
+                    setJustTriedRegister(false);
+                  }}
+                >
+                  Go to Creator sign in →
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* ===================== CREATOR SCREEN ===================== */}
+              <div className="auth-screen-head">
+                <span className="material-symbols-outlined auth-screen-head-icon">
+                  mic
+                </span>
+                <h1 className="auth-screen-title">Creator sign in</h1>
+                <p className="auth-screen-sub">
+                  Upload songs and videos, build your channel
+                </p>
+              </div>
+
+              {mode === "login" ? (
+                <form onSubmit={handleCreatorLogin} className="auth-screen-form">
+                  <label>
+                    <span>Email</span>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      autoComplete="email"
+                      required
+                    />
+                  </label>
+                  <label>
+                    <span>Password</span>
+                    <div className="auth-pw-wrap">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Your password"
+                        autoComplete="current-password"
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="auth-pw-toggle"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        <span className="material-symbols-outlined">
+                          {showPassword ? "visibility_off" : "visibility"}
+                        </span>
+                      </button>
+                    </div>
+                  </label>
+                  <button type="submit" className="auth-screen-submit" disabled={busy}>
+                    {busy ? "Please wait..." : "Sign in as Creator"}
+                  </button>
+                </form>
+              ) : (
+                <form onSubmit={handleAuth} className="auth-screen-form">
+                  <label>
+                    <span>Artist name</span>
+                    <input
+                      type="text"
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      placeholder="Your artist name"
+                      maxLength={80}
+                      autoComplete="name"
+                      required
+                    />
+                  </label>
+                  <label>
+                    <span>Email</span>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      autoComplete="email"
+                      required
+                    />
+                  </label>
+                  <label>
+                    <span>Password</span>
+                    <div className="auth-pw-wrap">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="At least 6 characters"
+                        minLength={6}
+                        autoComplete="new-password"
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="auth-pw-toggle"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        <span className="material-symbols-outlined">
+                          {showPassword ? "visibility_off" : "visibility"}
+                        </span>
+                      </button>
+                    </div>
+                  </label>
+                  <button type="submit" className="auth-screen-submit" disabled={busy}>
+                    {busy ? "Please wait..." : "Join as Creator"}
+                  </button>
+                </form>
+              )}
+
+              <div className="auth-screen-links">
+                {mode === "login" ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAccountType("artist");
+                        setAuthTab("creator");
+                        setMode("register");
+                        setJustTriedRegister(false);
+                        setShowPassword(false);
+                        setMessage("");
+                      }}
+                    >
+                      New creator? Sign up
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMessage("Art ID reset coming soon.")}
+                    >
+                      Reset Art ID
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode("login");
+                      setJustTriedRegister(false);
+                      setShowPassword(false);
+                      setMessage("");
+                    }}
+                  >
+                    Already have an account? Sign in
+                  </button>
+                )}
+              </div>
+
+              <div className="auth-screen-switch">
+                <p>Are you a listener?</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    clearAuthFields();
+                    setAuthTab("listener");
+                    setAccountType("listener");
+                    setMode("login");
+                    setJustTriedRegister(false);
+                  }}
+                >
+                  ← Go to Listener sign in
+                </button>
+              </div>
+            </>
+          )}
+
+          {message && (
+            <p className="auth-screen-message" role="status">{message}</p>
+          )}
+
+          <p className="auth-screen-footnote">Secure accounts powered by Supabase.</p>
+        </section>
+      </main>
+    );
+  }
+
+  const displayUser =
+    session.user.user_metadata?.display_name ||
+    session.user.email?.split("@")[0] ||
+    "Listener";
+
+
+  function handleTimeUpdate(e) {
+    if (!viewCountedRef.current && e.target.currentTime >= 30 && activeMedia?.id) {
+      viewCountedRef.current = true;
+      supabase.rpc("increment_view", { media_id: activeMedia.id }).then(() => {
+        setMedia(prev => prev.map(m => m.id === activeMedia.id ? { ...m, views: (m.views || 0) + 1 } : m));
+      });
+    }
+  }
+
+  return (
+    <div className="ma-app">
+      <header className="ma-header">
+        <div className="ma-header-left">
+          <button className="ma-icon-btn" aria-label="Guide"
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}>
+            <span className="material-symbols-outlined">menu</span>
+          </button>
+          <a className="ma-brand" href="#home"
+            onClick={() => { setActiveMedia(null); setShowAccountPage(false); }}>
+            <span className="ma-brand-icon">♫</span>
+            <span className="ma-brand-text">Music <b>Antenna</b></span>
+          </a>
+        </div>
+
+        <div className="ma-search">
+          <div className="ma-search-box">
+            <input aria-label="Search" placeholder="Search" value={search}
+              onChange={(e) => setSearch(e.target.value)} />
+            {search && (
+              <button className="ma-search-clear" onClick={() => setSearch("")} aria-label="Clear">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            )}
+          </div>
+          <button className="ma-search-btn" aria-label="Search">
+            <span className="material-symbols-outlined">search</span>
+          </button>
+          <button className="ma-mic-btn" aria-label="Voice search">
+            <span className="material-symbols-outlined">mic</span>
+          </button>
+        </div>
+
+        <div className="ma-user">
+          <button className="ma-icon-btn" aria-label="Notifications"
+            onClick={() => setMessage("You're all caught up.")}>
+            <span className="material-symbols-outlined">notifications</span>
+          </button>
+
+          <div className="ma-avatar-wrap">
+            <button className="ma-avatar-btn" onClick={() => setMenuOpen(!menuOpen)} aria-label="Account">
+              {profile?.avatar_url ? (
+                <img className="ma-avatar-img" src={profile.avatar_url} alt="" onError={(e) => { e.currentTarget.style.display = "none"; }} />
+              ) : (
+                <span className="ma-avatar">{displayUser.charAt(0).toUpperCase()}</span>
+              )}
+            </button>
+
+            {menuOpen && (
+              <>
+                <div className="ma-menu-backdrop" onClick={() => setMenuOpen(false)} />
+                <div className="ma-avatar-menu" role="menu">
+                  <div className="ma-avatar-menu-header">
+                    {profile?.avatar_url ? (
+                      <img className="ma-avatar-menu-img" src={profile.avatar_url} alt="" />
+                    ) : (
+                      <span className="ma-avatar-menu-img ma-avatar-menu-placeholder">
+                        {displayUser.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                    <div>
+                      <strong>{profile?.display_name || displayUser}</strong>
+                      <span>@{profile?.username || profile?.display_name || "music-antenna"}</span>
+                    </div>
+                  </div>
+                  <div className="ma-avatar-menu-line" />
+                  <button onClick={() => { setMenuOpen(false); setShowAccountPage(true); setShowProfileEditor(false); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+                    <span className="material-symbols-outlined">account_circle</span> Your channel
+                  </button>
+                  <button onClick={() => { setMenuOpen(false); setProfileName(profile?.username || profile?.display_name || ""); setProfileBio(profile?.bio || ""); setShowAccountPage(true); setShowProfileEditor(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+                    <span className="material-symbols-outlined">edit</span> Edit profile
+                  </button>
+                  <div className="ma-avatar-menu-line" />
+                  <button onClick={() => { setMenuOpen(false); handleLogout(); }}>
+                    <span className="material-symbols-outlined">logout</span> Sign out
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <div className={"ma-layout" + (sidebarCollapsed ? " ma-layout-collapsed" : "") + ((showAccountPage || showChannelPage || showBecomeArtistForm || activeMedia) ? " ma-layout-hidden" : "")}>
+        <aside className="ma-sidebar">
+          <button
+            className="ma-nav-item selected"
+            onClick={() => {
+              setActiveMedia(null);
+              setCategory("All");
+            }}
+          >
+            <span>⌂</span> Home
+          </button>
+
+          <button
+            className="ma-nav-item"
+            onClick={() => {
+              setActiveMedia(null);
+              setCategory("Music");
+            }}
+          >
+            <span>♫</span> Music
+          </button>
+
+          <button
+            className="ma-nav-item"
+            onClick={() => {
+              setActiveMedia(null);
+              setCategory("Videos");
+            }}
+          >
+            <span>▶</span> Videos
+          </button>
+
+          <div className="ma-sidebar-line" />
+
+          {profile?.role !== "artist" && (
+            <button
+              className="ma-nav-item"
+              onClick={handleBecomeArtist}
+              disabled={artistLoading || !profile}
+            >
+              <span>🎤</span>{" "}
+              {artistLoading ? "Please wait..." : "Become an Artist"}
+            </button>
+          )}
+
+          {profile?.role === "artist" && (
+            <button
+              className="ma-nav-item"
+              onClick={() => {
+                setShowArtistStudio(!showArtistStudio);
+                setShowUpload(true);
+              }}
+            >
+              <span>🎚</span> Artist Studio
+            </button>
+          )}
+
+          <button
+            className="ma-nav-item"
+            onClick={() => setShowUpload(!showUpload)}
+          >
+            <span>＋</span> Upload media
+          </button>
+
+          <div className="ma-sidebar-bottom">
+            <span className="ma-brand-icon">♫</span>
+            <p>Music Antenna</p>
+            <small>Your sound. Your world.</small>
+          </div>
+        </aside>
+
+        <main className="ma-main" id="home">
+          {showArtistStudio && profile?.role === "artist" && (
+            <section className="ma-upload-panel" id="media-upload-panel">
+              <div className="ma-section-heading ma-hide-desktop-only">
+                <div>
+                  <p className="ma-kicker">ARTIST STUDIO</p>
+                  <h2>Welcome, {profile.display_name || displayUser}!</h2>
+                </div>
+                <button
+                  className="ma-close"
+                  onClick={() => setShowArtistStudio(false)}
+                  aria-label="Close Artist Studio"
+                >
+                  ×
+                </button>
+              </div>
+
+              <p className="ma-muted">
+                Your artist profile is active. Upload your music or videos
+                and share your work with Music Antenna listeners.
+              </p>
+
+              <button
+                className="ma-primary"
+                onClick={() => {
+                  setShowUpload(true);
+                  document
+                    .getElementById("media-upload-panel")
+                    ?.scrollIntoView({ behavior: "smooth" });
+                }}
+              >
+                Upload music or video →
+              </button>
+            </section>
+          )}
+
+          <section className="ma-hero ma-discovery-hero ma-hero-hidden">
+            <div className="ma-discovery-copy">
+              <p className="ma-hero-label">MUSIC ANTENNA</p>
+              <h1>Discover your sound.</h1>
+              <p>Search for any artist, song or music video to get started.</p>
+              <div className="ma-discovery-actions">
+                <button className="ma-primary"
+                  onClick={() => setShowUpload(true)}>
+                  ＋ Upload media
+                </button>
+                <button className="ma-discovery-browse"
+                  onClick={() => document.getElementById("media-feed")
+                    ?.scrollIntoView({ behavior: "smooth" })}>
+                  Browse latest ↓
+                </button>
+              </div>
+            </div>
+            <div className="ma-hero-art" aria-hidden="true">
+              <span>♫</span><i>♪</i><b>♬</b>
+            </div>
+          </section>
+
+
+          {showUpload && (
+            <section className="yt-upload">
+              <div className="yt-upload-topbar">
+                <button
+                  className="yt-icon-btn"
+                  aria-label="Close"
+                  onClick={() => setShowUpload(false)}
+                >
+                  <span className="material-symbols-outlined">close</span>
+                </button>
+                <h2 className="yt-upload-heading">Upload media</h2>
+                <div className="yt-upload-topbar-right" />
+              </div>
+
+              <form className="yt-upload-form" onSubmit={handleUpload}>
+                <div className="yt-upload-dropzone">
+                  <span className="material-symbols-outlined">upload</span>
+                  <p>Drag and drop video or audio files</p>
+                  <p className="yt-upload-dropzone-sub">
+                    Your files stay private until you publish
+                  </p>
+                  <label className="yt-upload-select">
+                    <input
+                      id="media-file"
+                      type="file"
+                      accept="audio/mpeg,audio/mp4,audio/aac,audio/ogg,audio/wav,audio/flac,video/mp4,video/webm,video/quicktime"
+                      onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+                      required
+                    />
+                    <span>Select files</span>
+                  </label>
+                  {uploadFile && (
+                    <p className="yt-upload-chosen">
+                      <span className="material-symbols-outlined">
+                        {uploadFile.type.startsWith("video/") ? "movie" : "music_note"}
+                      </span>
+                      {uploadFile.name} ({Math.round(uploadFile.size / 1024 / 1024 * 10) / 10} MB)
+                    </p>
+                  )}
+                </div>
+
+                <label className="yt-upload-field">
+                  <span>Title <b>*</b></span>
+                  <input
+                    value={uploadTitle}
+                    onChange={(e) => setUploadTitle(e.target.value)}
+                    maxLength={200}
+                    placeholder="Add a title that describes your upload"
+                    required
+                  />
+                </label>
+
+                <label className="yt-upload-field">
+                  <span>Description</span>
+                  <textarea
+                    value={uploadDescription}
+                    onChange={(e) => setUploadDescription(e.target.value)}
+                    placeholder="Tell listeners about your upload"
+                    rows={4}
+                  />
+                </label>
+
+                <label className="yt-upload-field">
+                  <span>Category</span>
+                  <select
+                    value={uploadCategory}
+                    onChange={(e) => setUploadCategory(e.target.value)}
+                  >
+                    <option>Music</option>
+                    <option>DJ Mix</option>
+                    <option>Gospel</option>
+                    <option>Comedy</option>
+                    <option>Interview</option>
+                    <option>Podcast</option>
+                    <option>News</option>
+                    <option>Sports</option>
+                    <option>Other</option>
+                  </select>
+                </label>
+
+                <label className="yt-upload-field">
+                  <span>Artist name</span>
+                  <input
+                    value={uploadArtistName}
+                    onChange={(e) => setUploadArtistName(e.target.value)}
+                    placeholder={profile?.display_name || "Your artist name"}
+                    maxLength={80}
+                  />
+                </label>
+
+                {uploadFile && uploadFile.type.startsWith("audio/") && (
+                  <label className="yt-upload-field">
+                    <span>Producer name</span>
+                    <input
+                      value={uploadProducerName}
+                      onChange={(e) => setUploadProducerName(e.target.value)}
+                      placeholder="Producer / beatmaker"
+                      maxLength={80}
+                    />
+                  </label>
+                )}
+
+                <div className="yt-upload-field">
+                  <span>
+                    {uploadFile && uploadFile.type.startsWith("audio/")
+                      ? "Cover image"
+                      : "Thumbnail"}
+                  </span>
+                  <label className="yt-upload-thumb">
+                    <input
+                      id="media-thumb"
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      onChange={(e) => setUploadThumbnailFile(e.target.files?.[0] || null)}
+                    />
+                    <span className="material-symbols-outlined">image</span>
+                    <span className="yt-upload-thumb-text">
+                      {uploadThumbnailFile
+                        ? uploadThumbnailFile.name
+                        : "Upload a picture (optional)"}
+                    </span>
+                  </label>
+                  <small className="yt-upload-hint">
+                    {uploadFile && uploadFile.type.startsWith("audio/")
+                      ? "Shown on the watch page and player. 16:9 recommended."
+                      : "Falls back to the video's first frame if not provided."}
+                  </small>
+                </div>
+
+                <label className="ma-checkbox yt-upload-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={allowDownload}
+                    onChange={(e) => setAllowDownload(e.target.checked)}
+                  />
+                  Allow downloads
+                </label>
+
+                <div className="yt-upload-publish">
+                  <span className="yt-upload-publish-label">Visibility</span>
+                  <div className="yt-upload-radio-row">
+                    <label className="yt-upload-radio">
+                      <input
+                        type="radio"
+                        name="publish-mode"
+                        value="now"
+                        checked={uploadScheduleMode === "now"}
+                        onChange={() => setUploadScheduleMode("now")}
+                      />
+                      <span>Publish now</span>
+                    </label>
+                    <label className="yt-upload-radio">
+                      <input
+                        type="radio"
+                        name="publish-mode"
+                        value="schedule"
+                        checked={uploadScheduleMode === "schedule"}
+                        onChange={() => setUploadScheduleMode("schedule")}
+                      />
+                      <span>Schedule</span>
+                    </label>
+                  </div>
+
+                  {uploadScheduleMode === "schedule" && (
+                    <input
+                      className="yt-upload-datetime"
+                      type="datetime-local"
+                      value={uploadScheduledAt}
+                      onChange={(e) => setUploadScheduledAt(e.target.value)}
+                      required
+                    />
+                  )}
+                </div>
+
+                <div className="yt-upload-actions">
+                  <button
+                    type="button"
+                    className="yt-upload-cancel"
+                    onClick={() => setShowUpload(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="yt-upload-submit"
+                    disabled={busy}
+                  >
+                    {busy
+                      ? "Please wait..."
+                      : uploadScheduleMode === "schedule"
+                        ? "Schedule"
+                        : "Publish"}
+                  </button>
+                </div>
+              </form>
+            </section>
+          )}
+
+          {false && (
+            <section className="ma-player-panel">
+              <button
+                className="ma-back"
+                onClick={() => setActiveMedia(null)}
+              >
+                ← Back to feed
+              </button>
+
+              {activeMedia.playbackUrl ? (
+                activeMedia.media_type === "video" ? (
+                  <video
+                    className="ma-player"
+                    src={activeMedia.playbackUrl}
+                    poster={activeMedia.thumbnailUrl || undefined}
+                    controls
+                    playsInline
+                    autoPlay
+                  />
+                ) : (
+                  <div className="ma-audio-player">
+                    <div className="ma-audio-art">♫</div>
+                    <audio
+                      src={activeMedia.playbackUrl}
+                      controls
+                      autoPlay
+                    />
+                  </div>
+                )
+              ) : (
+                <p className="ma-message">
+                  Playback is unavailable. Check the storage bucket policies
+                  and media storage path.
+                </p>
+              )}
+
+              <h2>{activeMedia.title}</h2>
+              <p className="ma-muted">
+                {activeMedia.description || "No description provided."}
+              </p>
+
+              <div className="ma-player-actions">
+                <button
+                  className="ma-secondary"
+                  onClick={async () => {
+                    const shareUrl = window.location.href.split("#")[0];
+                    try {
+                      await navigator.clipboard.writeText(shareUrl);
+                      setMessage("Page link copied. Share it with your friends.");
+                    } catch {
+                      setMessage("Copy this page address to share it.");
+                    }
+                  }}
+                >
+                  ↗ Share page
+                </button>
+              </div>
+            </section>
+          )}
+
+          <section className="ma-feed-section" id="media-feed">
+            <div className="ma-section-heading ma-hide-desktop-only">
+              <div>
+                <p className="ma-kicker">THE COMMUNITY</p>
+                <h2>{category === "All" ? "Explore media" : category}</h2>
+              </div>
+              <button
+                className="ma-refresh"
+                onClick={loadMedia}
+                disabled={feedLoading}
+              >
+                ↻ Refresh
+              </button>
+            </div>
+
+            <div className="yt-chips">
+              {["All", "Music", "Videos"].map((c) => (
+                <button
+                  key={c}
+                  className={"yt-chip" + (category === c ? " yt-chip-active" : "")}
+                  onClick={() => {
+                    setCategory(c);
+                    setActiveMedia(null);
+                  }}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+
+            {message && <p className="ma-message">{message}</p>}
+
+            {feedLoading ? (
+              <div className="ma-empty">
+                <span className="ma-spinner">♫</span>
+                <h3>Loading your feed...</h3>
+                <p>Fetching published media from Supabase.</p>
+              </div>
+            ) : visibleMedia.length === 0 ? (
+              <div className="ma-empty">
+                <span className="ma-empty-icon">♫</span>
+                <h3>
+                  {search ? "No matching media found" : "Discover your sound"}
+                </h3>
+                <p>
+                  {search
+                    ? "Try another search term."
+                    : "Search for an artist, song or music video. Newly published tracks and videos will appear here."}
+                </p>
+                {!search && (
+                  <button
+                    className="ma-primary"
+                    onClick={() => setShowUpload(true)}
+                  >
+                    ＋ Upload media
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="ma-media-grid">
+                {visibleMedia.map((item) => (
+                  <article className="yt-video" key={item.id}>
+                    <button
+                      className="yt-thumb"
+                      onClick={() => openPlayer(item)}
+                      aria-label={"Play " + item.title}
+                    >
+                      {item.thumbnailUrl ? (
+                        <img src={item.thumbnailUrl} alt="" loading="lazy" />
+                      ) : (
+                        <div className="yt-thumb-fallback">
+                          <span>{item.media_type === "video" ? "▶" : "♫"}</span>
+                        </div>
+                      )}
+                      <span className="yt-duration">
+                        {item.media_type === "video" ? "VIDEO" : "AUDIO"}
+                      </span>
+                    </button>
+
+                    <div className="yt-video-row">
+                      <div className="yt-video-avatar" style={{ overflow: "hidden" }}>
+                        {item.profiles?.avatar_url ? (
+                          <img src={item.profiles.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        ) : (
+                          "♫"
+                        )}
+                      </div>
+                      <div className="yt-video-info">
+                        <h3 className="yt-video-title">{item.title}</h3>
+                        <p className="yt-video-channel">
+                          {item.profiles?.display_name || "Unknown Artist"}
+                        </p>
+                        <p className="yt-video-meta">
+                          {item.views || 0} views • {timeAgo(item.created_at)}
+                        </p>
+                      </div>
+                      <button className="yt-video-menu" aria-label="More">⋮</button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
+
+          <footer className="ma-footer">
+            <span>♫ Music Antenna</span>
+            <span>Your sound. Your world.</span>
+          </footer>
+        </main>
+      </div>
+
+
+      {activeMedia && (
+        <section className="yt-watch">
+          <div className="yt-watch-topbar">
+            <button className="yt-icon-btn yt-watch-back" aria-label="Back"
+              onClick={() => setActiveMedia(null)}>
+              <span className="material-symbols-outlined">arrow_back</span>
+            </button>
+            <div className="yt-watch-topbar-right">
+              <button className="yt-icon-btn" aria-label="Search"
+                onClick={() => { setActiveMedia(null); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+                <span className="material-symbols-outlined">search</span>
+              </button>
+              <button className="yt-icon-btn" aria-label="More">
+                <span className="material-symbols-outlined">more_vert</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="yt-watch-player">
+            {activeMedia.playbackUrl ? (
+              activeMedia.media_type === "video" ? (
+                <video
+                  onTimeUpdate={handleTimeUpdate}
+                  className="yt-watch-video"
+                  src={activeMedia.playbackUrl}
+                  poster={activeMedia.thumbnailUrl || undefined}
+                  controls
+                  playsInline
+                  autoPlay
+                />
+              ) : (
+                <div className="yt-watch-audio">
+                  <div className="yt-watch-audio-art">
+                    {activeMedia.thumbnailUrl ? (
+                      <img src={activeMedia.thumbnailUrl} alt="" />
+                    ) : (
+                      <span className="material-symbols-outlined">music_note</span>
+                    )}
+                  </div>
+                  <audio src={activeMedia.playbackUrl} controls autoPlay onTimeUpdate={handleTimeUpdate} />
+                </div>
+              )
+            ) : (
+              <p className="yt-watch-error">This item's playback URL is missing.</p>
+            )}
+          </div>
+
+          <div className="yt-watch-body">
+            <h1 className="yt-watch-title">{activeMedia.title}</h1>
+            <p className="yt-watch-meta">
+              @{watchArtist?.username || watchArtist?.display_name || "music-antenna"}
+              {" · "}{activeMedia.views || 0} views
+              {" · "}{new Date(activeMedia.created_at).toLocaleDateString()}
+            </p>
+
+            <div className="yt-watch-actions">
+              <button className="yt-watch-action" onClick={() => handleToggleLike(activeMedia.id)}>
+                <span className="material-symbols-outlined" style={{ fontVariationSettings: isLiked ? "'FILL' 1" : "'FILL' 0" }}>
+                  thumb_up
+                </span>
+                <span className="yt-watch-action-label">
+                  {likesCount > 0 ? likesCount : "Like"}
+                </span>
+              </button>
+              <button className="yt-watch-action" onClick={() => setMessage("Dislikes coming soon.")}>
+                <span className="material-symbols-outlined">thumb_down</span>
+              </button>
+              <button className="yt-watch-action" onClick={() => setMessage("Share coming soon.")}>
+                <span className="material-symbols-outlined">share</span>
+                <span className="yt-watch-action-label">Share</span>
+              </button>
+              <button className="yt-watch-action" onClick={() => setMessage("Save coming soon.")}>
+                <span className="material-symbols-outlined">bookmark</span>
+                <span className="yt-watch-action-label">Save</span>
+              </button>
+              <button className="yt-watch-action" onClick={() => setMessage("More options coming soon.")}>
+                <span className="material-symbols-outlined">more_vert</span>
+              </button>
+            </div>
+
+            <div className="yt-watch-channel">
+              {watchArtist?.avatar_url ? (
+                <img className="yt-watch-avatar" src={watchArtist.avatar_url} alt=""
+                  onError={(e) => { e.currentTarget.style.display = "none"; }} />
+              ) : (
+                <div className="yt-watch-avatar yt-watch-avatar-fallback">
+                  {(watchArtist?.display_name || "M").charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div className="yt-watch-channel-info">
+                <h3 className="yt-watch-channel-name"
+                  onClick={() => {
+                    if (watchArtist?.id) {
+                      setActiveMedia(null);
+                      openChannel(watchArtist.id);
+                    }
+                  }}>
+                  {watchArtist?.display_name || "Unknown artist"}
+                </h3>
+                <p className="yt-watch-channel-sub">{subscriberCount} subscribers</p>
+              </div>
+              {activeMedia.artist_id === session?.user?.id ? (
+                <button className="yt-watch-subscribe" onClick={() => setMessage("Edit video coming soon.")}>
+                  Edit video
+                </button>
+              ) : (
+                <button 
+                  className={"yt-watch-subscribe" + (isSubscribed ? " subscribed" : "")}
+                  onClick={() => handleToggleSubscribe(activeMedia.artist_id)}
+                >
+                  {isSubscribed ? "Subscribed" : "Subscribe"}
+                </button>
+              )}
+            </div>
+
+            <div className="yt-watch-desc">
+              <p className="yt-watch-desc-text">
+                {activeMedia.description || "No description yet."}
+              </p>
+            </div>
+
+            <div className="yt-comments-section">
+              <h3 className="yt-comments-header">{comments.length} Comments</h3>
+              
+              <form className="yt-comment-form" onSubmit={handlePostComment}>
+                <div className="yt-comment-input-row">
+                  <div className="yt-video-avatar">
+                    {profile?.avatar_url ? <img src={profile.avatar_url} style={{width:'100%', height:'100%', objectFit:'cover'}} /> : "♫"}
+                  </div>
+                  <input 
+                    type="text" 
+                    placeholder="Add a comment..." 
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                  />
+                </div>
+                {newComment && (
+                  <div className="yt-comment-actions">
+                    <button type="button" onClick={() => setNewComment("")}>Cancel</button>
+                    <button type="submit">Comment</button>
+                  </div>
+                )}
+              </form>
+
+              <div className="yt-comments-list">
+                {comments.map(c => (
+                  <div className="yt-comment" key={c.id}>
+                    <div className="yt-video-avatar">
+                      {c.profiles?.avatar_url ? <img src={c.profiles.avatar_url} style={{width:'100%', height:'100%', objectFit:'cover'}} /> : "♫"}
+                    </div>
+                    <div className="yt-comment-content">
+                      <p className="yt-comment-author">
+                        @{c.profiles?.display_name || "user"} <span>{timeAgo(c.created_at)}</span>
+                      </p>
+                      <p className="yt-comment-text">{c.content}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {(() => {
+              const more = media
+                .filter((m) => m.artist_id === activeMedia.artist_id && m.id !== activeMedia.id)
+                .slice(0, 6);
+              if (more.length === 0) return null;
+              return (
+                <>
+                  <h3 className="yt-watch-more-title">More from this artist</h3>
+                  <div className="ma-media-grid">
+                    {more.map((item) => (
+                      <article className="yt-video" key={item.id}>
+                        <button className="yt-thumb" onClick={() => openPlayer(item)}
+                          aria-label={"Play " + item.title}>
+                          {item.thumbnailUrl ? (
+                            <img src={item.thumbnailUrl} alt="" loading="lazy" />
+                          ) : (
+                            <div className="yt-thumb-fallback">
+                              <span>{item.media_type === "video" ? "▶" : "♫"}</span>
+                            </div>
+                          )}
+                          <span className="yt-duration">
+                            {item.media_type === "video" ? "VIDEO" : "AUDIO"}
+                          </span>
+                        </button>
+                        <div className="yt-video-row">
+                          <div className="yt-video-avatar">♫</div>
+                          <div className="yt-video-info">
+                            <h3 className="yt-video-title">{item.title}</h3>
+                            <p className="yt-video-meta">
+                              {item.views || 0} views · {new Date(item.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        </section>
+      )}
+
+      {showAccountPage && (
+        <section className="yt-you">
+          <div className="yt-you-topbar">
+            <button
+              className="yt-you-accounts"
+              onClick={() => setMenuOpen(!menuOpen)}
+            >
+              <span>{profile?.display_name || displayUser}</span>
+              <span className="material-symbols-outlined">expand_more</span>
+            </button>
+            <div className="yt-you-topbar-right">
+              <button
+                className="yt-icon-btn"
+                aria-label="Notifications"
+                onClick={() => setMessage("You're all caught up.")}
+              >
+                <span className="material-symbols-outlined">notifications</span>
+              </button>
+              <button className="yt-icon-btn" aria-label="Search"
+                onClick={() => { setShowAccountPage(false); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+                <span className="material-symbols-outlined">search</span>
+              </button>
+              <button className="yt-icon-btn" aria-label="Settings"
+                onClick={() => setMessage("Settings coming in Phase 5.")}>
+                <span className="material-symbols-outlined">settings</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="yt-you-identity">
+            <div className="yt-you-avatar yt-you-avatar-fallback yt-you-avatar-wrap">
+              {(profile?.display_name || displayUser || "M").charAt(0).toUpperCase()}
+              {profile?.avatar_url && (
+                <img
+                  className="yt-you-avatar-img"
+                  src={profile.avatar_url}
+                  alt=""
+                  onError={(e) => { e.currentTarget.style.display = "none"; }}
+                />
+              )}
+            </div>
+            <h2>{profile?.display_name || displayUser || "Music listener"}</h2>
+            <p className="yt-you-handle">
+              @{profile?.username || profile?.display_name || "music-antenna-user"}
+            </p>
+            <p className="yt-you-bio">
+              {profile?.bio || "Welcome to my Music Antenna channel."}
+            </p>
+          </div>
+
+          <div className="yt-you-actions">
+            <button
+              className="yt-you-btn yt-you-btn-primary"
+              onClick={() => {
+                if (session?.user?.id) {
+                  setShowAccountPage(false);
+                  openChannel(session.user.id);
+                } else {
+                  setMessage("Please sign in to view your channel.");
+                }
+              }}
+            >
+              View channel
+            </button>
+            <button
+              className="yt-you-btn yt-you-btn-secondary"
+              onClick={() => {
+                setProfileName(profile?.username || profile?.display_name || "");
+                setProfileBio(profile?.bio || "");
+                setProfilePhotoFile(null);
+                setCoverPhotoFile(null);
+                setShowProfileEditor(!showProfileEditor);
+              }}
+            >
+              {showProfileEditor ? "Close editor" : "Edit profile"}
+            </button>
+          </div>
+
+          
+
+          {profile?.role === "artist" ? (
+            <div className="yt-you-analytics">
+              <div className="yt-you-stat">
+                <span className="yt-you-stat-val">
+                  {media.filter(m => m.artist_id === session?.user?.id).length}
+                </span>
+                <span className="yt-you-stat-label">Uploads</span>
+              </div>
+              <div className="yt-you-stat">
+                <span className="yt-you-stat-val">
+                  {media.filter(m => m.artist_id === session?.user?.id).reduce((sum, m) => sum + (m.views || 0), 0)}
+                </span>
+                <span className="yt-you-stat-label">Views</span>
+              </div>
+              <div className="yt-you-stat">
+                <span className="yt-you-stat-val">0</span>
+                <span className="yt-you-stat-label">Subscribers</span>
+              </div>
+            </div>
+          ) : (
+            )}
+
+          {showProfileEditor && (
+            <section className="ma-upload-panel yt-you-editor">
+              <h2>Edit your profile</h2>
+              <p>Update your name, bio, profile picture and cover photo.</p>
+
+              {profile?.avatar_url && (
+                <p>
+                  Current profile picture:<br />
+                  <img
+                    src={profile.avatar_url}
+                    alt="Current profile"
+                    style={{ width: 88, height: 88, objectFit: "cover", borderRadius: "50%" }}
+                  />
+                </p>
+              )}
+
+              {profile?.cover_url && (
+                <p>
+                  Current cover photo:<br />
+                  <img
+                    src={profile.cover_url}
+                    alt="Current profile cover"
+                    style={{ width: "100%", maxHeight: 180, objectFit: "cover", borderRadius: 10 }}
+                  />
+                </p>
+              )}
+
+              <form className="ma-upload-form" onSubmit={handleSaveProfile}>
+                <label>
+                  Username / display name
+                  <input
+                    type="text"
+                    value={profileName}
+                    onChange={(e) => setProfileName(e.target.value)}
+                    maxLength={60}
+                    required
+                    placeholder="Your name"
+                  />
+                </label>
+
+                <label>
+                  Bio / about you
+                  <textarea
+                    value={profileBio}
+                    onChange={(e) => setProfileBio(e.target.value)}
+                    maxLength={500}
+                    rows={3}
+                    placeholder="Tell listeners about yourself"
+                  />
+                </label>
+
+                <label>
+                  Profile picture
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setProfilePhotoFile(e.target.files?.[0] || null)}
+                  />
+                </label>
+
+                <label>
+                  Cover photo
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setCoverPhotoFile(e.target.files?.[0] || null)}
+                  />
+                </label>
+
+                <button type="submit" disabled={profileSaving}>
+                  {profileSaving ? "Saving..." : "Save Profile"}
+                </button>
+              </form>
+            </section>
+          )}
+
+          {history.length > 0 && (
+            <div className="yt-you-shelf">
+              <div className="yt-you-shelf-head">
+                <h3>History</h3>
+                <span className="material-symbols-outlined">chevron_right</span>
+              </div>
+              <div className="yt-you-shelf-row">
+                {history.map((item) => (
+                  <button
+                    className="yt-you-shelf-card"
+                    key={item.id}
+                    onClick={() => {
+                      const found = media.find((m) => m.id === item.id);
+                      if (found) {
+                        openPlayer(found);
+                      } else {
+                        setMessage("This item is no longer available.");
+                      }
+                    }}
+                  >
+                    <div className="yt-you-shelf-thumb">
+                      {item.thumbnailUrl ? (
+                        <img src={item.thumbnailUrl} alt="" />
+                      ) : (
+                        <div className="yt-thumb-fallback">
+                          <span>{item.media_type === "video" ? "▶" : "♫"}</span>
+                        </div>
+                      )}
+                    </div>
+                    <p className="yt-you-shelf-title">{item.title}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <h3 className="yt-you-section-title yt-you-library-title">Library</h3>
+          <div className="yt-you-chips">
+            {["Recents", "Music", "Videos", "Playlists"].map((c) => (
+              <button key={c} className="yt-chip">
+                {c}
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            className="yt-you-liked-row"
+            onClick={() => setMessage(
+              likedIds.length === 0
+                ? "You haven't liked any videos yet."
+                : "You have " + likedIds.length + " liked videos."
+            )}
+          >
+            <div className="yt-you-liked-thumb">
+              <span className="material-symbols-outlined">thumb_up</span>
+            </div>
+            <div className="yt-you-liked-info">
+              <h4>Liked videos</h4>
+              <p>{likedIds.length === 0 ? "Private" : likedIds.length + " videos · Private"}</p>
+            </div>
+          </button>
+
+          <div className="yt-you-section">
+            <h3 className="yt-you-section-title">Your videos</h3>
+            {session?.user?.id && media.filter((m) => m.artist_id === session.user.id).length > 0 ? (
+              <div className="ma-media-grid">
+                {media
+                  .filter((m) => m.artist_id === session.user.id)
+                  .map((item) => (
+                    <article className="yt-video" key={item.id}>
+                      <button
+                        className="yt-thumb"
+                        onClick={() => openPlayer(item)}
+                        aria-label={"Play " + item.title}
+                      >
+                        {item.thumbnailUrl ? (
+                          <img src={item.thumbnailUrl} alt="" loading="lazy" />
+                        ) : (
+                          <div className="yt-thumb-fallback">
+                            <span>{item.media_type === "video" ? "▶" : "♫"}</span>
+                          </div>
+                        )}
+                        <span className="yt-duration">
+                          {item.media_type === "video" ? "VIDEO" : "AUDIO"}
+                        </span>
+                      </button>
+                      <div className="yt-video-row">
+                        <div className="yt-video-avatar">♫</div>
+                        <div className="yt-video-info">
+                          <h3 className="yt-video-title">{item.title}</h3>
+                          <button
+                            type="button"
+                            className="yt-video-channel yt-video-channel-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openChannel(item.artist_id);
+                            }}
+                          >
+                            {item.description || "Music Antenna"}
+                          </button>
+                          <p className="yt-video-meta">
+                            {new Date(item.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+              </div>
+            ) : (
+              <p className="yt-you-empty">No uploads yet.</p>
+            )}
+          </div>
+        </section>
+      )}
+
+            {showChannelPage && (
+        <section className="yt-channel">
+          <div className="yt-channel-topbar">
+            <button
+              className="yt-icon-btn"
+              aria-label="Back"
+              onClick={() => {
+                setShowChannelPage(false);
+                setChannelProfile(null);
+                setChannelMedia([]);
+              }}
+            >
+              <span className="material-symbols-outlined">arrow_back</span>
+            </button>
+            <div className="yt-channel-topbar-right">
+              <button className="yt-icon-btn" aria-label="Search"
+                onClick={() => { setShowChannelPage(false); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+                <span className="material-symbols-outlined">search</span>
+              </button>
+              <button className="yt-icon-btn" aria-label="More">
+                <span className="material-symbols-outlined">more_vert</span>
+              </button>
+            </div>
+          </div>
+
+          {channelLoading ? (
+            <div className="yt-you-empty">Loading channel…</div>
+          ) : channelProfile ? (
+            <>
+              <div className="yt-channel-banner">
+                {channelProfile.cover_url ? (
+                  <img src={channelProfile.cover_url} alt="" />
+                ) : (
+                  <div className="yt-channel-banner-placeholder" />
+                )}
+              </div>
+
+              <div className="yt-channel-head">
+                <div className="yt-channel-avatar-wrap">
+                  {channelProfile.avatar_url ? (
+                    <img
+                      className="yt-channel-avatar-img"
+                      src={channelProfile.avatar_url}
+                      alt=""
+                      onError={(e) => { e.currentTarget.style.display = "none"; }}
+                    />
+                  ) : null}
+                  <div className="yt-channel-avatar-fallback">
+                    {(channelProfile.display_name || "M").charAt(0).toUpperCase()}
+                  </div>
+                </div>
+
+                <div className="yt-channel-meta">
+                  <h1>{channelProfile.display_name || "Unknown artist"}</h1>
+                  <p className="yt-channel-sub">
+                    @{channelProfile.username || channelProfile.display_name || "music-antenna"} · {channelMedia.length} {channelMedia.length === 1 ? "upload" : "uploads"}
+                  </p>
+                  <p className="yt-channel-subscribers">
+                    0 subscribers
+                  </p>
+                  <p className="yt-channel-bio">
+                    {channelProfile.bio || "Welcome to my Music Antenna channel."}
+                  </p>
+                </div>
+              </div>
+
+              <div className="yt-channel-actions">
+                {channelProfile.id === session?.user?.id ? (
+                  <>
+                    <button
+                      type="button"
+                      className="yt-you-btn yt-you-btn-secondary"
+                      onClick={() => {
+                        setShowChannelPage(false);
+                        setShowAccountPage(true);
+                        setProfileName(profile?.username || profile?.display_name || "");
+                        setProfileBio(profile?.bio || "");
+                        setProfilePhotoFile(null);
+                        setCoverPhotoFile(null);
+                        setShowProfileEditor(true);
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: 18, verticalAlign: "middle", marginRight: 6 }}>edit</span>
+                      Edit channel
+                    </button>
+                    <button
+                      type="button"
+                      className="yt-you-btn yt-you-btn-secondary"
+                      onClick={() => setMessage("Analytics coming soon.")}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: 18, verticalAlign: "middle", marginRight: 6 }}>bar_chart</span>
+                      Analytics
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {channelProfile.id === session?.user?.id ? (
+                      <button
+                        type="button"
+                        className="yt-you-btn yt-you-btn-primary"
+                        onClick={() => setMessage("Customize channel coming soon.")}
+                      >
+                        Customize channel
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className={"yt-you-btn " + (isSubscribed ? "yt-you-btn-secondary" : "yt-you-btn-primary")}
+                        onClick={() => handleToggleSubscribe(channelProfile.id)}
+                      >
+                        {isSubscribed ? "Subscribed" : "Subscribe"}
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className="yt-you-btn yt-you-btn-secondary"
+                      onClick={() => setMessage("Join coming soon.")}
+                    >
+                      Join
+                    </button>
+                  </>
+                )}
+              </div>
+
+              <div className="yt-channel-tabs">
+                {["Home", "Videos", "Shorts", "Playlists", "About"].map((t) => (
+                  <button
+                    key={t}
+                    className={"yt-channel-tab" + (channelTab === t ? " yt-channel-tab-active" : "")}
+                    onClick={() => setChannelTab(t)}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+
+              {channelMedia.length > 0 ? (
+                <div className="ma-media-grid">
+                  {channelMedia.map((item) => (
+                    <article className="yt-video" key={item.id}>
+                      <button
+                        className="yt-thumb"
+                        onClick={() => openPlayer(item)}
+                        aria-label={"Play " + item.title}
+                      >
+                        {item.thumbnailUrl ? (
+                          <img src={item.thumbnailUrl} alt="" loading="lazy" />
+                        ) : (
+                          <div className="yt-thumb-fallback">
+                            <span>{item.media_type === "video" ? "▶" : "♫"}</span>
+                          </div>
+                        )}
+                        <span className="yt-duration">
+                          {item.media_type === "video" ? "VIDEO" : "AUDIO"}
+                        </span>
+                      </button>
+                      <div className="yt-video-row">
+                        <div className="yt-video-avatar">♫</div>
+                        <div className="yt-video-info">
+                          <h3 className="yt-video-title">{item.title}</h3>
+                          <p className="yt-video-meta">
+                            {new Date(item.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <p className="yt-you-empty">This artist hasn't uploaded anything yet.</p>
+              )}
+            </>
+          ) : (
+            <p className="yt-you-empty">Channel not found.</p>
+          )}
+        </section>
+      )}
+
+      {showBecomeArtistForm && (
+        <section className="yt-become-page">
+          <div className="yt-become-topbar">
+            <button className="yt-icon-btn" aria-label="Back"
+              onClick={() => setShowBecomeArtistForm(false)}>
+              <span className="material-symbols-outlined">arrow_back</span>
+            </button>
+            <h2 className="yt-become-heading">Become an Artist</h2>
+            <div className="yt-become-topbar-right" />
+          </div>
+
+          <p className="yt-become-intro">
+            Tell us about yourself. This upgrades your current account into an
+            artist profile — you keep the same login and history.
+          </p>
+
+          <form className="yt-become-form" onSubmit={submitBecomeArtist}>
+            <label className="yt-upload-field">
+              <span>Artist name <b>*</b></span>
+              <input
+                value={baName}
+                onChange={(e) => setBaName(e.target.value)}
+                maxLength={80}
+                placeholder="The name your audience will see"
+                required
+              />
+            </label>
+
+            <label className="yt-upload-field">
+              <span>About / Bio</span>
+              <textarea
+                value={baBio}
+                onChange={(e) => setBaBio(e.target.value)}
+                maxLength={500}
+                rows={4}
+                placeholder="What do you create? Who is your audience?"
+              />
+            </label>
+
+            <label className="yt-upload-field">
+              <span>Category</span>
+              <select
+                value={baCategory}
+                onChange={(e) => setBaCategory(e.target.value)}
+              >
+                <option>Music</option>
+                <option>DJ</option>
+                <option>Gospel</option>
+                <option>Comedy</option>
+                <option>Interview</option>
+                <option>Podcast</option>
+                <option>News</option>
+                <option>Sports</option>
+                <option>Other</option>
+              </select>
+            </label>
+
+            <div className="yt-upload-field">
+              <span>Profile picture (optional)</span>
+              <label className="yt-upload-thumb">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={(e) => setBaPhoto(e.target.files?.[0] || null)}
+                />
+                <span className="material-symbols-outlined">account_circle</span>
+                <span className="yt-upload-thumb-text">
+                  {baPhoto ? baPhoto.name : (profile?.avatar_url ? "Keep current picture" : "Upload a picture")}
+                </span>
+              </label>
+            </div>
+
+            <div className="yt-upload-field">
+              <span>Cover photo (optional)</span>
+              <label className="yt-upload-thumb">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={(e) => setBaCover(e.target.files?.[0] || null)}
+                />
+                <span className="material-symbols-outlined">wallpaper</span>
+                <span className="yt-upload-thumb-text">
+                  {baCover ? baCover.name : (profile?.cover_url ? "Keep current cover" : "Upload a cover photo")}
+                </span>
+              </label>
+            </div>
+
+            <div className="yt-become-note">
+              <span className="material-symbols-outlined">info</span>
+              <span>
+                Your account upgrades in place. No new login, no duplicate
+                profile — same history, now with upload rights.
+              </span>
+            </div>
+
+            <div className="yt-upload-actions">
+              <button
+                type="button"
+                className="yt-upload-cancel"
+                onClick={() => setShowBecomeArtistForm(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="yt-upload-submit"
+                disabled={baBusy}
+              >
+                {baBusy ? "Activating..." : "Activate artist profile"}
+              </button>
+            </div>
+          </form>
+        </section>
+      )}
+
+<nav className={"ma-mobile-nav ma-nav-yt" + (navVisible ? "" : " ma-mobile-nav-hidden")} aria-label="Main navigation">
+        <button aria-label="Home" onClick={() => {
+          setActiveMedia(null); setShowAccountPage(false); setShowChannelPage(false); setShowUpload(false); setCategory("All"); setSearch("");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}>
+          <span className="material-symbols-outlined">home</span><small>Home</small>
+        </button>
+        <button aria-label="Shorts" onClick={() => {
+          setActiveMedia(null); setShowAccountPage(false); setShowChannelPage(false); setShowUpload(false); setCategory("Videos");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}>
+          <span className="material-symbols-outlined">video_library</span><small>Shorts</small>
+        </button>
+        <button className="ma-create-nav" aria-label="Create" onClick={() => {
+          if (profile?.role === "artist") {
+            setActiveMedia(null); setShowAccountPage(false); setShowChannelPage(false); setShowUpload(true);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          } else {
+            setMessage("Become an Artist before uploading music or videos.");
+          }
+        }}>
+          <span className="material-symbols-outlined">add</span>
+        </button>
+        <button aria-label="Subscriptions" onClick={() => {
+          setActiveMedia(null); setShowAccountPage(false); setShowChannelPage(false); setShowUpload(false);
+          setMessage("Subscriptions feed coming soon.");
+        }}>
+          <span className="material-symbols-outlined">subscriptions</span><small>Subscriptions</small>
+        </button>
+        <button aria-label="You" onClick={() => {
+          setActiveMedia(null); setShowChannelPage(false); setShowUpload(false); setShowAccountPage(true);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}>
+          {profile?.avatar_url ? (
+            <img className="ma-nav-avatar" src={profile.avatar_url} alt="" />
+          ) : (
+            <span className="ma-nav-avatar ma-nav-avatar-fallback">{displayUser.charAt(0).toUpperCase()}</span>
+          )}
+          <small>You</small>
+        </button>
+      </nav>
+    </div>
+  );
+}
