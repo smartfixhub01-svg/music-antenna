@@ -1907,25 +1907,6 @@ useEffect(() => {
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   }
 
-  // BULLETPROOF SUBSCRIBER FETCH
-  useEffect(() => {
-    if (!session?.user?.id) {
-      setMySubCount(0);
-      return;
-    }
-    
-    // Fetch from Supabase
-    supabase
-      .from("subscriptions")
-      .select("*", { count: "exact", head: true })
-      .eq("channel_id", session.user.id)
-      .then(({ count, error }) => {
-        if (!error) {
-          setMySubCount(count || 0);
-        }
-      });
-  }, [session?.user?.id]);
-
   return (
     <div className="ma-app">
         {/* PERMANENT AUDIO PLAYER (Never stops on tab change) */}
@@ -2757,13 +2738,8 @@ useEffect(() => {
                 <div style={{ fontSize: "12px", color: "#aaa" }}>Views</div>
               </div>
               <div style={{ width: "1px", height: "24px", background: "#303030" }}></div>
-              <div style={{ textAlign: "center", cursor: "pointer" }} onClick={() => { 
-                if (session?.user?.id) {
-                  supabase.from("subscriptions").select("*", { count: "exact", head: true }).eq("channel_id", session.user.id).then(({ count }) => setMySubCount(count || 0));
-                  setMessage("Refreshed subscriber count!");
-                }
-              }}>
-                <div style={{ fontSize: "18px", fontWeight: "700", color: "#f1f1f1" }}>{mySubCount || 0}</div>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: "18px", fontWeight: "700", color: "#f1f1f1" }}>{mySubCount}</div>
                 <div style={{ fontSize: "12px", color: "#aaa" }}>Subscribers</div>
               </div>
             </div>
