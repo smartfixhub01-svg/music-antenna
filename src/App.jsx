@@ -833,17 +833,31 @@ useEffect(() => {
     setActiveMedia(null);
     setManageLoading(true);
     
+    // 1. INSTANT FALLBACK: Use the videos we already know they have from the home feed
+    const localMedia = media.filter(m => m.artist_id === session.user.id);
+    if (localMedia.length > 0) {
+      setManageMedia(localMedia);
+    }
+
     try {
+      // 2. Fetch the absolute latest list from the database
       const { data, error } = await supabase
         .from("media")
         .select("*")
         .eq("artist_id", session.user.id)
         .order("created_at", { ascending: false });
         
-      if (error) throw error;
-      setManageMedia(data || []);
+      if (error) {
+        console.error("Manage page fetch error:", error);
+        // If the database fails, we already have the localMedia set above, so it won't be empty
+      } else if (data && data.length > 0) {
+        setManageMedia(data);
+      } else if (localMedia.length === 0) {
+        // Only set to empty if both the database AND local memory are empty
+        setManageMedia([]);
+      }
     } catch (err) {
-      setMessage("Error loading videos: " + err.message);
+      console.error("Manage page error:", err);
     } finally {
       setManageLoading(false);
     }
