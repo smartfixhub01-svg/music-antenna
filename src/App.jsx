@@ -3656,9 +3656,9 @@ useEffect(() => {
                       </div>
                     )}
 
-                    {/* Voice Note Preview (WhatsApp Style) */}
+                    {/* Voice Note Preview (EXACT WhatsApp Style) */}
                     {commentAudioUrl && (
-                      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                         
                         <audio 
                           ref={voicePreviewRef}
@@ -3673,55 +3673,54 @@ useEffect(() => {
                           onPause={() => setVoicePreviewPlaying(false)}
                         />
 
-                        {/* Top Row: Play, Slider, Time, Speed */}
+                        {/* Top Row: Time, Waveform, Speed */}
                         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                          <button type="button" onClick={() => {
-                            if (voicePreviewRef.current.paused) voicePreviewRef.current.play();
-                            else voicePreviewRef.current.pause();
-                          }} style={{ background: "transparent", border: 0, color: "#00a884", cursor: "pointer", display: "flex", padding: 0 }}>
-                            <span className="material-symbols-outlined" style={{ fontSize: "28px" }}>
-                              {voicePreviewPlaying ? "pause_circle" : "play_circle"}
-                            </span>
-                          </button>
-
-                          <input 
-                            type="range" 
-                            min="0" 
-                            max={voicePreviewDuration || 1} 
-                            value={voicePreviewProgress} 
-                            onChange={(e) => {
-                              const time = Number(e.target.value);
-                              if (voicePreviewRef.current) voicePreviewRef.current.currentTime = time;
-                              setVoicePreviewProgress(time);
-                            }}
-                            style={{ flex: 1, accentColor: "#00a884", height: "4px" }} 
-                          />
-
-                          <span style={{ fontSize: "12px", color: "#8696a0", minWidth: "32px" }}>
+                          <span style={{ color: "#ffffff", fontSize: "13px", fontWeight: "bold", minWidth: "32px" }}>
                             {formatVoiceTime(voicePreviewProgress)}
                           </span>
+
+                          {/* Fake Waveform */}
+                          <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "2px", height: "24px" }}>
+                            {Array.from({ length: 40 }).map((_, i) => {
+                              const isActive = (voicePreviewProgress / (voicePreviewDuration || 1)) > (i / 40);
+                              const height = 6 + (Math.sin(i * 0.5) * 6) + (i % 3 === 0 ? 6 : 0);
+                              return <div key={i} style={{ width: "2px", height: `${Math.max(4, height)}px`, borderRadius: "1px", background: isActive ? "#00a884" : "#8696a0" }} />;
+                            })}
+                          </div>
 
                           <button type="button" onClick={() => {
                             const speeds = [1, 1.5, 2];
                             const nextSpeed = speeds[(speeds.indexOf(voicePreviewSpeed) + 1) % speeds.length];
                             setVoicePreviewSpeed(nextSpeed);
                             if (voicePreviewRef.current) voicePreviewRef.current.playbackRate = nextSpeed;
-                          }} style={{ background: "#2a3942", border: 0, borderRadius: "50%", color: "#8696a0", width: "28px", height: "28px", display: "grid", placeItems: "center", fontSize: "10px", fontWeight: "bold", cursor: "pointer" }}>
+                          }} style={{ background: "transparent", border: "1px dashed #8696a0", borderRadius: "50%", color: "#ffffff", width: "26px", height: "26px", display: "grid", placeItems: "center", fontSize: "10px", fontWeight: "bold", cursor: "pointer" }}>
                             {voicePreviewSpeed}x
                           </button>
                         </div>
 
-                        {/* Bottom Row: Trash, Send */}
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "4px" }}>
-                          <button type="button" onClick={() => { setCommentAudio(null); setCommentAudioUrl(null); }} style={{ background: "transparent", border: 0, color: "#ff365f", display: "flex", alignItems: "center", gap: "4px", cursor: "pointer", fontSize: "12px" }}>
-                            <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>delete</span> Discard
+                        {/* Bottom Row: Trash, Pause/Resume, Send */}
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                          {/* Trash */}
+                          <button type="button" onClick={() => { setCommentAudio(null); setCommentAudioUrl(null); setVoicePreviewPlaying(false); setVoicePreviewProgress(0); }} style={{ background: "#33161b", border: 0, borderRadius: "50%", width: "40px", height: "40px", display: "grid", placeItems: "center", color: "#ff365f", cursor: "pointer", flexShrink: 0 }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>delete</span>
                           </button>
 
-                          <button type="submit" style={{ background: "#00a884", border: 0, borderRadius: "50%", width: "40px", height: "40px", display: "grid", placeItems: "center", color: "white", cursor: "pointer" }}>
-                            <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>send</span>
+                          {/* Pause/Resume Mic Button */}
+                          <button type="button" onClick={() => {
+                            if (voicePreviewRef.current.paused) voicePreviewRef.current.play();
+                            else voicePreviewRef.current.pause();
+                          }} style={{ flex: 1, background: "#222d34", border: 0, borderRadius: "24px", height: "40px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", color: "#ffffff", cursor: "pointer", fontSize: "14px", fontWeight: "bold" }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>mic</span>
+                            {voicePreviewPlaying ? "Pause" : "Resume"}
+                          </button>
+
+                          {/* Send */}
+                          <button type="submit" style={{ background: "#ffffff", border: 0, borderRadius: "50%", width: "40px", height: "40px", display: "grid", placeItems: "center", color: "#00a884", cursor: "pointer", flexShrink: 0 }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: "22px", fontVariationSettings: "'FILL' 1" }}>send</span>
                           </button>
                         </div>
                       </div>
+                    )}</div>
                     )}
                   </div>
                 ) : (
