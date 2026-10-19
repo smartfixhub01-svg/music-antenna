@@ -397,13 +397,14 @@ useEffect(() => {
       
       const items = await Promise.all(
         (data || []).map(async (item) => {
-          const { data: pub } = await supabase.storage.from(BUCKET).createSignedUrl(item.storage_path, 31536000);
+          // USE PUBLIC URL
+          const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(item.storage_path);
           let thumbnailUrl = "";
           if (item.thumbnail_path) {
-            const { data: thumb } = await supabase.storage.from("track-covers").createSignedUrl(item.thumbnail_path, 31536000);
-            thumbnailUrl = thumb?.signedUrl || "";
+            const { data: thumb } = supabase.storage.from("track-covers").getPublicUrl(item.thumbnail_path);
+            thumbnailUrl = thumb?.publicUrl || "";
           }
-          return { ...item, playbackUrl: pub?.signedUrl || "", thumbnailUrl };
+          return { ...item, playbackUrl: pub?.publicUrl || "", thumbnailUrl };
         })
       );
       setMedia(items);
@@ -504,7 +505,7 @@ useEffect(() => {
     }
   }
 
-  async function doAuth(modeVal, accountTypeVal) {
+    async function doAuth(modeVal, accountTypeVal) {
     setBusy(true);
     setMessage("");
 
@@ -520,38 +521,36 @@ useEffect(() => {
             },
           },
         });
-
         if (error) throw error;
-
         if (data.session) {
           setMessage("Account created successfully!");
         } else {
-          setMessage("Registration received. Check your email to confirm your account.");
+          setMessage("Check your email to confirm your account.");
           setMode("login");
         }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        // LOGIN WITH STRICT ROLE CHECK
+        const { data, error } = await supabase.auth.signInWithPassword({
           email: email.trim(),
           password,
         });
         if (error) throw error;
+
+        // Check the profile role
+        const { data: prof } = await supabase.from("profiles").select("role").eq("id", data.user.id).single();
+        
+        if (prof?.role !== accountTypeVal) {
+          await supabase.auth.signOut();
+          throw new Error(`This is a ${prof?.role || 'Listener'} account. Please go back and use the correct sign-in page.`);
+        }
+
         setMessage("Welcome back to Music Antenna!");
       }
     } catch (error) {
       const raw = (error.message || "Authentication failed.").toLowerCase();
-      const alreadyRegistered =
-        raw.includes("already registered") ||
-        raw.includes("already exists") ||
-        raw.includes("user already");
-
-      if (modeVal === "register" && alreadyRegistered) {
+      if (modeVal === "register" && raw.includes("already registered")) {
         setMode("login");
-        setJustTriedRegister(true);
-        const who = accountTypeVal === "artist" ? "Creator" : "Listener";
-        setMessage(
-          "This email is already registered as a " + who + ". " +
-          "Enter your password and tap Sign in."
-        );
+        setMessage("This email is already registered. Enter your password and tap Sign in.");
       } else {
         setMessage(error.message || "Authentication failed.");
       }
@@ -964,11 +963,10 @@ useEffect(() => {
     setShowChannelPage(true);
     setChannelProfile(null);
     setChannelMedia([]);
-    setSubscriberCount(0); // Reset to 0 while loading
+    setSubscriberCount(0);
     window.scrollTo({ top: 0, behavior: "smooth" });
 
     try {
-      // 1. Fetch Profile
       const { data: prof, error: profErr } = await supabase
         .from("profiles")
         .select("id,display_name,role,created_at,username,bio,avatar_url,cover_url,updated_at")
@@ -978,15 +976,9 @@ useEffect(() => {
       if (profErr) throw profErr;
       setChannelProfile(prof || { id: artistId, display_name: "Unknown artist" });
 
-      // 2. Fetch Subscriber Count (BULLETPROOF)
-      const { count: subs } = await supabase
-        .from("subscriptions")
-        .select("*", { count: "exact", head: true })
-        .eq("channel_id", artistId);
-      
+      const { count: subs } = await supabase.from("subscriptions").select("*", { count: "exact", head: true }).eq("channel_id", artistId);
       setSubscriberCount(subs || 0);
 
-      // 3. Fetch Media
       const { data: list, error: listErr } = await supabase
         .from("media")
         .select("id,artist_id,title,description,media_type,storage_path,thumbnail_path,status,allow_download,created_at,views")
@@ -999,16 +991,16 @@ useEffect(() => {
 
       const items = await Promise.all(
         (list || []).map(async (item) => {
-          const { data: pub } = await supabase.storage.from(BUCKET).createSignedUrl(item.storage_path, 31536000);
+          // USE PUBLIC URL
+          const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(item.storage_path);
           let thumbnailUrl = "";
           if (item.thumbnail_path) {
-            const { data: thumb } = await supabase.storage.from("track-covers").createSignedUrl(item.thumbnail_path, 31536000);
-            thumbnailUrl = thumb?.signedUrl || "";
+            const { data: thumb } = supabase.storage.from("track-covers").getPublicUrl(item.thumbnail_path);
+            thumbnailUrl = thumb?.publicUrl || "";
           }
-          return { ...item, playbackUrl: pub?.signedUrl || "", thumbnailUrl };
+          return { ...item, playbackUrl: pub?.publicUrl || "", thumbnailUrl };
         })
       );
-
       setChannelMedia(items);
     } catch (error) {
       setMessage("Could not load channel: " + error.message);
@@ -2344,6 +2336,7 @@ useEffect(() => {
           </div>
 
           <div className="yt-watch-player">
+            
             {activeMedia.playbackUrl ? (
               activeMedia.media_type === "video" ? (
                 <video
