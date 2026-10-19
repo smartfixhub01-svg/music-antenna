@@ -145,6 +145,12 @@ export default function App() {
   const [commentImage, setCommentImage] = useState(null);
   const [commentAudio, setCommentAudio] = useState(null);
   const [commentAudioUrl, setCommentAudioUrl] = useState(null);
+  const [voicePreviewPlaying, setVoicePreviewPlaying] = useState(false);
+  const [voicePreviewDuration, setVoicePreviewDuration] = useState(0);
+  const [voicePreviewProgress, setVoicePreviewProgress] = useState(0);
+  const [voicePreviewSpeed, setVoicePreviewSpeed] = useState(1);
+  const voicePreviewRef = useRef(null);
+
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const mediaRecorderRef = useRef(null);
@@ -1044,7 +1050,7 @@ useEffect(() => {
       setComments(prev => [data, ...prev]);
       setNewComment("");
       setCommentImage(null);
-      setCommentAudio(null); setCommentAudioUrl(null);
+      setCommentAudio(null); setCommentAudioUrl(null); setVoicePreviewPlaying(false); setVoicePreviewProgress(0);
       setReplyTarget(null);
       setReplyingName("");
       setMessage("Comment posted!");
@@ -1887,6 +1893,12 @@ useEffect(() => {
       // 4. Log the view in the new table for analytics
       supabase.from("video_views").insert({ media_id: activeMedia.id, user_id: session?.user?.id || null }).then(() => {});
     }
+  }
+
+  function formatVoiceTime(sec) {
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
   }
 
   return (
