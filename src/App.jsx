@@ -2780,7 +2780,7 @@ useEffect(() => {
               <button onClick={() => { setProfileName(profile?.username || ""); setProfileBio(profile?.bio || ""); setShowProfileEditor(!showProfileEditor); }} style={{ flex: 1, background: "#212121", color: "#f1f1f1", padding: "10px", borderRadius: "8px", fontWeight: "500", fontSize: "14px", border: 0, cursor: "pointer" }}>
                 {showProfileEditor ? "Close Editor" : "Edit profile"}
               </button>
-              <button style={{ background: "#212121", color: "#f1f1f1", width: "40px", height: "40px", borderRadius: "8px", display: "grid", placeItems: "center", border: 0 }}>
+              <button onClick={() => setShowShareModal(true)} style={{ background: "#212121", color: "#f1f1f1", width: "40px", height: "40px", borderRadius: "8px", display: "grid", placeItems: "center", border: 0, cursor: "pointer" }}>
                 <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>share</span>
               </button>
             </div>
@@ -2790,7 +2790,7 @@ useEffect(() => {
               <button style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "#ff365f", fontWeight: "600", fontSize: "14px", borderBottom: "2px solid #ff365f" }}>Overview</button>
               <button onClick={() => setShowManagePage(true)} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "#aaa", fontWeight: "500", fontSize: "14px" }}>Content</button>
               <button onClick={() => setShowAnalytics(true)} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "#aaa", fontWeight: "500", fontSize: "14px", cursor: "pointer" }}>Analytics</button>
-              <button style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "#aaa", fontWeight: "500", fontSize: "14px" }}>About</button>
+              <button onClick={() => setMessage("About section coming soon.")} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "#aaa", fontWeight: "500", fontSize: "14px", cursor: "pointer" }}>About</button>
             </div>
 
             {/* 6. CREATOR DASHBOARD CARD */}
@@ -2818,13 +2818,13 @@ useEffect(() => {
                   </div>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px" }}>
-                  <button onClick={() => setShowUpload(true)} style={{ background: "#272727", color: "white", border: 0, padding: "10px", borderRadius: "8px", fontSize: "12px", fontWeight: "500", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px", cursor: "pointer" }}>
+                  <button onClick={() => { setShowAccountPage(false); setShowUpload(true); }} style={{ background: "#272727", color: "white", border: 0, padding: "10px", borderRadius: "8px", fontSize: "12px", fontWeight: "500", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px", cursor: "pointer" }}>
                     <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>upload</span> Upload
                   </button>
-                  <button onClick={() => setShowManagePage(true)} style={{ background: "#272727", color: "white", border: 0, padding: "10px", borderRadius: "8px", fontSize: "12px", fontWeight: "500", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px", cursor: "pointer" }}>
+                  <button onClick={() => { setShowAccountPage(false); setShowManagePage(true); }} style={{ background: "#272727", color: "white", border: 0, padding: "10px", borderRadius: "8px", fontSize: "12px", fontWeight: "500", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px", cursor: "pointer" }}>
                     <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>format_list_bulleted</span> Manage
                   </button>
-                  <button onClick={() => setShowAnalytics(true)} style={{ background: "#272727", color: "white", border: 0, padding: "10px", borderRadius: "8px", fontSize: "12px", fontWeight: "500", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px", cursor: "pointer" }}>
+                  <button onClick={() => { setShowAccountPage(false); setShowAnalytics(true); }} style={{ background: "#272727", color: "white", border: 0, padding: "10px", borderRadius: "8px", fontSize: "12px", fontWeight: "500", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px", cursor: "pointer" }}>
                     <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>bar_chart</span> Analytics
                   </button>
                 </div>
