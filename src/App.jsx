@@ -3644,11 +3644,9 @@ useEffect(() => {
 
               <form onSubmit={handlePostComment} style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%" }}>
                 
-                {/* IF MEDIA IS ATTACHED: SHOW WHATSAPP STYLE PLAYER */}
                 {(commentImage || commentAudioUrl) ? (
                   <div style={{ display: "flex", flexDirection: "column", gap: "10px", padding: "12px", background: "#1f2c34", borderRadius: "12px", border: "1px solid #2a3942" }}>
                     
-                    {/* Image Preview */}
                     {commentImage && (
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                         <img src={URL.createObjectURL(commentImage)} style={{ height: "60px", borderRadius: "6px" }} />
@@ -3656,7 +3654,6 @@ useEffect(() => {
                       </div>
                     )}
 
-                    {/* Voice Note Preview (EXACT WhatsApp Style) */}
                     {commentAudioUrl && (
                       <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                         
@@ -3700,12 +3697,10 @@ useEffect(() => {
 
                         {/* Bottom Row: Trash, Pause/Resume, Send */}
                         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                          {/* Trash */}
                           <button type="button" onClick={() => { setCommentAudio(null); setCommentAudioUrl(null); setVoicePreviewPlaying(false); setVoicePreviewProgress(0); }} style={{ background: "#33161b", border: 0, borderRadius: "50%", width: "40px", height: "40px", display: "grid", placeItems: "center", color: "#ff365f", cursor: "pointer", flexShrink: 0 }}>
                             <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>delete</span>
                           </button>
 
-                          {/* Pause/Resume Mic Button */}
                           <button type="button" onClick={() => {
                             if (voicePreviewRef.current.paused) voicePreviewRef.current.play();
                             else voicePreviewRef.current.pause();
@@ -3714,18 +3709,14 @@ useEffect(() => {
                             {voicePreviewPlaying ? "Pause" : "Resume"}
                           </button>
 
-                          {/* Send */}
                           <button type="submit" style={{ background: "#ffffff", border: 0, borderRadius: "50%", width: "40px", height: "40px", display: "grid", placeItems: "center", color: "#00a884", cursor: "pointer", flexShrink: 0 }}>
                             <span className="material-symbols-outlined" style={{ fontSize: "22px", fontVariationSettings: "'FILL' 1" }}>send</span>
                           </button>
                         </div>
                       </div>
-                    )}</div>
                     )}
                   </div>
                 ) : (
-                  
-                  /* IF NO MEDIA: SHOW STANDARD INPUT BAR */
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <div style={{ flex: 1, display: "flex", alignItems: "center", background: "#212121", borderRadius: "24px", padding: "4px 12px", border: "1px solid #333" }}>
                       
