@@ -2676,305 +2676,156 @@ useEffect(() => {
       )}
 
       {showAccountPage && (
-        <section className="yt-you">
-          <div className="yt-you-topbar">
-            <button
-              className="yt-you-accounts"
-              onClick={() => setMenuOpen(!menuOpen)}
-            >
+        <section className="yt-you" style={{ padding: "0 16px 100px", background: "#0f0f0f", minHeight: "100vh" }}>
+          
+          {/* TOP BAR */}
+          <div className="yt-you-topbar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0" }}>
+            <button className="yt-you-accounts" onClick={() => setMenuOpen(!menuOpen)} style={{ display: "flex", alignItems: "center", gap: "6px", background: "#212121", border: "1px solid #303030", padding: "8px 14px", borderRadius: "20px", color: "#f1f1f1", fontSize: "14px", fontWeight: "500" }}>
               <span>{profile?.display_name || displayUser}</span>
-              <span className="material-symbols-outlined">expand_more</span>
+              <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>expand_more</span>
             </button>
-            <div className="yt-you-topbar-right">
-              <button
-                className="yt-icon-btn"
-                aria-label="Notifications"
-                onClick={() => setMessage("You're all caught up.")}
-              >
-                <span className="material-symbols-outlined">notifications</span>
+            
+            <div className="yt-you-topbar-right" style={{ display: "flex", gap: "8px" }}>
+              <button className="yt-icon-btn" onClick={() => setMessage("You're all caught up.")} style={{ background: "#212121", width: "36px", height: "36px", borderRadius: "50%", display: "grid", placeItems: "center", border: 0, color: "white" }}>
+                <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>notifications</span>
               </button>
-              <button className="yt-icon-btn" aria-label="Search"
-                onClick={() => { setShowAccountPage(false); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
-                <span className="material-symbols-outlined">search</span>
+              <button className="yt-icon-btn" onClick={() => setMessage("Search coming soon.")} style={{ background: "#212121", width: "36px", height: "36px", borderRadius: "50%", display: "grid", placeItems: "center", border: 0, color: "white" }}>
+                <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>search</span>
               </button>
-              <button className="yt-icon-btn" aria-label="Settings"
-                onClick={() => setMessage("Settings coming in Phase 5.")}>
-                <span className="material-symbols-outlined">settings</span>
+              <button className="yt-icon-btn" onClick={() => setMessage("Settings coming soon.")} style={{ background: "#212121", width: "36px", height: "36px", borderRadius: "50%", display: "grid", placeItems: "center", border: 0, color: "white" }}>
+                <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>settings</span>
               </button>
             </div>
           </div>
 
-          <div className="yt-you-identity">
-            <div className="yt-you-avatar yt-you-avatar-fallback yt-you-avatar-wrap">
-              {(profile?.display_name || displayUser || "M").charAt(0).toUpperCase()}
-              {profile?.avatar_url && (
-                <img
-                  className="yt-you-avatar-img"
-                  src={profile.avatar_url}
-                  alt=""
-                  onError={(e) => { e.currentTarget.style.display = "none"; }}
-                />
+          {/* PROFILE IDENTITY */}
+          <div className="yt-you-identity" style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: "16px", textAlign: "center" }}>
+            <div className="yt-you-avatar" style={{ width: "96px", height: "96px", borderRadius: "50%", background: "#ff365f", display: "grid", placeItems: "center", overflow: "hidden", marginBottom: "12px" }}>
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : (
+                <span style={{ fontSize: "40px", fontWeight: "bold", color: "white" }}>{(profile?.display_name || displayUser || "M").charAt(0).toUpperCase()}</span>
               )}
             </div>
-            <h2>{profile?.display_name || displayUser || "Music listener"}</h2>
-            <p className="yt-you-handle">
-              @{profile?.username || profile?.display_name || "music-antenna-user"}
-            </p>
-            <p className="yt-you-bio">
-              {profile?.bio || "Welcome to my Music Antenna channel."}
-            </p>
+            <h2 style={{ margin: "0 0 4px", fontSize: "22px", fontWeight: "700", color: "#f1f1f1" }}>{profile?.display_name || displayUser || "Music listener"}</h2>
+            <p style={{ margin: "0 0 8px", fontSize: "14px", color: "#aaaaaa" }}>@{profile?.username || profile?.display_name || "music-antenna-user"}</p>
+            <p style={{ margin: "0 0 16px", fontSize: "13px", color: "#aaaaaa", maxWidth: "300px" }}>{profile?.bio || "Welcome to my Music Antenna channel."}</p>
           </div>
 
-          <div className="yt-you-actions">
-            <button
-              className="yt-you-btn yt-you-btn-primary"
-              onClick={() => {
-                if (session?.user?.id) {
-                  setShowAccountPage(false);
-                  openChannel(session.user.id);
-                } else {
-                  setMessage("Please sign in to view your channel.");
-                }
-              }}
-            >
+          {/* ACTION BUTTONS */}
+          <div className="yt-you-actions" style={{ display: "flex", justifyContent: "center", gap: "12px", marginBottom: "24px" }}>
+            <button className="yt-you-btn yt-you-btn-primary" onClick={() => { setShowAccountPage(false); openChannel(session?.user?.id); }} style={{ background: "#f1f1f1", color: "#0f0f0f", padding: "10px 20px", borderRadius: "20px", fontWeight: "600", fontSize: "14px", border: 0 }}>
               View channel
             </button>
-            <button
-              className="yt-you-btn yt-you-btn-secondary"
-              onClick={() => {
-                setProfileName(profile?.username || profile?.display_name || "");
-                setProfileBio(profile?.bio || "");
-                setProfilePhotoFile(null);
-                setCoverPhotoFile(null);
-                setShowProfileEditor(!showProfileEditor);
-              }}
-            >
+            <button className="yt-you-btn yt-you-btn-secondary" onClick={() => { setProfileName(profile?.username || ""); setProfileBio(profile?.bio || ""); setShowProfileEditor(!showProfileEditor); }} style={{ background: "#272727", color: "#f1f1f1", padding: "10px 20px", borderRadius: "20px", fontWeight: "500", fontSize: "14px", border: 0 }}>
               {showProfileEditor ? "Close editor" : "Edit profile"}
             </button>
           </div>
 
-          
-
+          {/* CREATOR DASHBOARD (Only for Artists) */}
           {profile?.role === "artist" && (
-            <div className="yt-you-analytics">
-              <div className="yt-you-stat">
-                <span className="yt-you-stat-val">
-                  {media.filter(m => m.artist_id === session?.user?.id).length}
-                </span>
-                <span className="yt-you-stat-label">Uploads</span>
+            <div style={{ background: "#212121", borderRadius: "16px", padding: "16px", marginBottom: "24px", border: "1px solid #303030" }}>
+              <h3 style={{ margin: "0 0 16px", fontSize: "16px", fontWeight: "600", color: "#f1f1f1" }}>Channel Dashboard</h3>
+              <div style={{ display: "flex", justifyContent: "space-between", textAlign: "center", marginBottom: "16px" }}>
+                <div>
+                  <h2 style={{ margin: 0, color: "#3ea6ff", fontSize: "20px", fontWeight: "700" }}>{media.filter(m => m.artist_id === session?.user?.id).length}</h2>
+                  <p style={{ margin: "4px 0 0", fontSize: "12px", color: "#aaaaaa" }}>Uploads</p>
+                </div>
+                <div>
+                  <h2 style={{ margin: 0, color: "#ff365f", fontSize: "20px", fontWeight: "700" }}>{media.filter(m => m.artist_id === session?.user?.id).reduce((sum, m) => sum + (m.views || 0), 0)}</h2>
+                  <p style={{ margin: "4px 0 0", fontSize: "12px", color: "#aaaaaa" }}>Views</p>
+                </div>
+                <div>
+                  <h2 style={{ margin: 0, color: "#f1f1f1", fontSize: "20px", fontWeight: "700" }}>{mySubCount || 0}</h2>
+                  <p style={{ margin: "4px 0 0", fontSize: "12px", color: "#aaaaaa" }}>Subscribers</p>
+                </div>
               </div>
-              <div className="yt-you-stat">
-                <span className="yt-you-stat-val">
-                  {media.filter(m => m.artist_id === session?.user?.id).reduce((sum, m) => sum + (m.views || 0), 0)}
-                </span>
-                <span className="yt-you-stat-label">Views</span>
-              </div>
-              <div className="yt-you-stat">
-                <span className="yt-you-stat-val">{mySubCount}</span>
-                <span className="yt-you-stat-label">Subscribers</span>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px" }}>
+                <button onClick={() => setShowUpload(true)} style={{ background: "#272727", color: "white", border: 0, padding: "10px", borderRadius: "8px", fontSize: "13px", fontWeight: "500" }}>Upload</button>
+                <button onClick={() => setShowManagePage(true)} style={{ background: "#272727", color: "white", border: 0, padding: "10px", borderRadius: "8px", fontSize: "13px", fontWeight: "500" }}>Manage</button>
+                <button onClick={() => setShowAnalytics(true)} style={{ background: "#272727", color: "white", border: 0, padding: "10px", borderRadius: "8px", fontSize: "13px", fontWeight: "500" }}>Analytics</button>
               </div>
             </div>
           )}
 
+          {/* PROFILE EDITOR (If Open) */}
           {showProfileEditor && (
-            <section className="ma-upload-panel yt-you-editor">
-              <h2>Edit your profile</h2>
-              <p>Update your name, bio, profile picture and cover photo.</p>
-
-              {profile?.avatar_url && (
-                <p>
-                  Current profile picture:<br />
-                  <img
-                    src={profile.avatar_url}
-                    alt="Current profile"
-                    style={{ width: 88, height: 88, objectFit: "cover", borderRadius: "50%" }}
-                  />
-                </p>
-              )}
-
-              {profile?.cover_url && (
-                <p>
-                  Current cover photo:<br />
-                  <img
-                    src={profile.cover_url}
-                    alt="Current profile cover"
-                    style={{ width: "100%", maxHeight: 180, objectFit: "cover", borderRadius: 10 }}
-                  />
-                </p>
-              )}
-
+            <section className="ma-upload-panel yt-you-editor" style={{ background: "#212121", borderRadius: "16px", padding: "16px", marginBottom: "24px" }}>
+              <h3 style={{ margin: "0 0 16px" }}>Edit Profile</h3>
               <form className="ma-upload-form" onSubmit={handleSaveProfile}>
-                <label>
-                  Username / display name
-                  <input
-                    type="text"
-                    value={profileName}
-                    onChange={(e) => setProfileName(e.target.value)}
-                    maxLength={60}
-                    required
-                    placeholder="Your name"
-                  />
+                <label style={{ display: "block", marginBottom: "12px" }}>
+                  <span style={{ display: "block", fontSize: "12px", color: "#aaaaaa", marginBottom: "4px" }}>Display Name</span>
+                  <input type="text" value={profileName} onChange={(e) => setProfileName(e.target.value)} maxLength={60} required style={{ width: "100%", background: "#0f0f0f", border: "1px solid #303030", padding: "10px", borderRadius: "8px", color: "white" }} />
                 </label>
-
-                <label>
-                  Bio / about you
-                  <textarea
-                    value={profileBio}
-                    onChange={(e) => setProfileBio(e.target.value)}
-                    maxLength={500}
-                    rows={3}
-                    placeholder="Tell listeners about yourself"
-                  />
+                <label style={{ display: "block", marginBottom: "12px" }}>
+                  <span style={{ display: "block", fontSize: "12px", color: "#aaaaaa", marginBottom: "4px" }}>Bio</span>
+                  <textarea value={profileBio} onChange={(e) => setProfileBio(e.target.value)} maxLength={500} rows={3} style={{ width: "100%", background: "#0f0f0f", border: "1px solid #303030", padding: "10px", borderRadius: "8px", color: "white" }} />
                 </label>
-
-                <label>
-                  Profile picture
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setProfilePhotoFile(e.target.files?.[0] || null)}
-                  />
-                </label>
-
-                <label>
-                  Cover photo
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setCoverPhotoFile(e.target.files?.[0] || null)}
-                  />
-                </label>
-
-                <button type="submit" disabled={profileSaving}>
+                <button type="submit" disabled={profileSaving} style={{ background: "#3ea6ff", color: "#0f0f0f", border: 0, padding: "10px 20px", borderRadius: "20px", fontWeight: "600", width: "100%" }}>
                   {profileSaving ? "Saving..." : "Save Profile"}
                 </button>
               </form>
             </section>
           )}
 
+          {/* HISTORY */}
           {history.length > 0 && (
-            <div className="yt-you-shelf">
-              <div className="yt-you-shelf-head" onClick={() => setShowHistoryPage(true)} style={{ cursor: "pointer" }}>
-                <h3>History</h3>
-                <span className="material-symbols-outlined">chevron_right</span>
+            <div className="yt-you-shelf" style={{ marginBottom: "24px" }}>
+              <div className="yt-you-shelf-head" onClick={() => setShowHistoryPage(true)} style={{ display: "flex", alignItems: "center", gap: "4px", marginBottom: "12px", cursor: "pointer" }}>
+                <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "600", color: "#f1f1f1" }}>History</h3>
+                <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "#aaa" }}>chevron_right</span>
               </div>
-              <div className="yt-you-shelf-row">
+              <div className="yt-you-shelf-row" style={{ display: "flex", gap: "12px", overflowX: "auto", paddingBottom: "8px", scrollbarWidth: "none" }}>
                 {history.map((item) => (
-                  <button
-                    className="yt-you-shelf-card"
-                    key={item.id}
-                    onClick={() => {
-                      const found = media.find((m) => m.id === item.id);
-                      if (found) {
-                        openPlayer(found);
-                      } else {
-                        setMessage("This item is no longer available.");
-                      }
-                    }}
-                  >
-                    <div className="yt-you-shelf-thumb">
-                      {item.thumbnailUrl ? (
-                        <img src={item.thumbnailUrl} alt="" />
-                      ) : (
-                        <div className="yt-thumb-fallback">
-                          <span>{item.media_type === "video" ? "▶" : "♫"}</span>
-                        </div>
-                      )}
+                  <div key={item.id} onClick={() => { const found = media.find(m => m.id === item.id); if (found) openPlayer(found); }} style={{ flexShrink: 0, width: "160px", cursor: "pointer" }}>
+                    <div style={{ width: "160px", height: "90px", background: "#212121", borderRadius: "8px", overflow: "hidden", marginBottom: "8px" }}>
+                      {item.thumbnailUrl ? <img src={item.thumbnailUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "grid", placeItems: "center", height: "100%", color: "#aaa" }}><span className="material-symbols-outlined">movie</span></div>}
                     </div>
-                    <p className="yt-you-shelf-title">{item.title}</p>
-                  </button>
+                    <p style={{ margin: 0, fontSize: "13px", color: "#f1f1f1", fontWeight: "500", overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{item.title}</p>
+                  </div>
                 ))}
               </div>
             </div>
           )}
 
-                    <button type="button" className="yt-you-liked-row" onClick={openLikedPage}>
-            <div className="yt-you-liked-thumb">
-              <span className="material-symbols-outlined">thumb_up</span>
-            </div>
-            <div className="yt-you-liked-info">
-              <h4>Liked videos</h4>
-              <p>Private</p>
-            </div>
-          </button>
-<h3 className="yt-you-section-title yt-you-library-title">Library</h3>
-          <div className="yt-you-chips">
-          {["Recents", "Music", "Videos", "Playlists"].map((c) => (
-            <button
-              key={c}
-              className="yt-chip"
-              onClick={() => {
-                if (c === "Playlists") {
-                  fetchPlaylists();
-                  setShowAllPlaylists(true);
-                } else {
-                  setMessage(c + " section coming soon.");
-                }
-              }}
-            >
-              {c}
-            </button>
-          ))}
-        </div>
+          {/* LIBRARY CHIPS */}
+          <h3 className="yt-you-library-title" style={{ margin: "0 0 12px", fontSize: "16px", fontWeight: "600", color: "#f1f1f1" }}>Library</h3>
+          <div className="yt-you-chips" style={{ display: "flex", gap: "8px", overflowX: "auto", marginBottom: "24px" }}>
+            {["Recents", "Music", "Videos", "Playlists"].map((c) => (
+              <button key={c} className="yt-chip" onClick={() => { if (c === "Playlists") { fetchPlaylists(); setShowAllPlaylists(true); } else { setMessage(c + " coming soon."); } }} style={{ background: "#272727", color: "#f1f1f1", border: 0, padding: "8px 16px", borderRadius: "8px", fontSize: "14px", fontWeight: "500", whiteSpace: "nowrap" }}>
+                {c}
+              </button>
+            ))}
+          </div>
 
-          
-
+          {/* YOUR VIDEOS */}
           <div className="yt-you-section">
-            <h3 className="yt-you-section-title">Your videos</h3>
+            <h3 className="yt-you-section-title" style={{ margin: "0 0 16px", fontSize: "16px", fontWeight: "600", color: "#f1f1f1" }}>Your videos</h3>
             {session?.user?.id && media.filter((m) => m.artist_id === session.user.id).length > 0 ? (
-              <div className="ma-media-grid">
-                {media
-                  .filter((m) => m.artist_id === session.user.id)
-                  .map((item) => (
-                    <article className="yt-video" key={item.id}>
-                      <button
-                        className="yt-thumb"
-                        onClick={() => openPlayer(item)}
-                        aria-label={"Play " + item.title}
-                      >
-                        {item.thumbnailUrl ? (
-                          <img src={item.thumbnailUrl} alt="" loading="lazy" />
-                        ) : (
-                          <div className="yt-thumb-fallback">
-                            <span>{item.media_type === "video" ? "▶" : "♫"}</span>
-                          </div>
-                        )}
-                        <span className="yt-duration">
-                          {item.media_type === "video" ? "VIDEO" : "AUDIO"}
-                        </span>
-                      </button>
-                      <div className="yt-video-row">
-<div className="yt-video-avatar" style={{ overflow: "hidden" }}>
-                          {profile?.avatar_url ? (
-                            <img src={profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                          ) : (
-                            displayUser.charAt(0).toUpperCase()
-                          )}
-                        </div>
-                        <div className="yt-video-info">
-                          <h3 className="yt-video-title">{item.title}</h3>
-                          <button
-                            type="button"
-                            className="yt-video-channel yt-video-channel-btn"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openChannel(item.artist_id);
-                            }}
-                          >
-                            {profile?.display_name || displayUser}
-                          </button>
-                          <p className="yt-video-meta">
-                            {new Date(item.created_at).toLocaleDateString()}
-                          </p>
-                        </div>
+              <div className="ma-media-grid" style={{ display: "grid", gap: "16px", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
+                {media.filter((m) => m.artist_id === session.user.id).map((item) => (
+                  <article className="yt-video" key={item.id} onClick={() => openPlayer(item)} style={{ cursor: "pointer" }}>
+                    <div className="yt-thumb" style={{ aspectRatio: "16/9", borderRadius: "12px", overflow: "hidden", background: "#212121", position: "relative" }}>
+                      {item.thumbnailUrl ? <img src={item.thumbnailUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "grid", placeItems: "center", height: "100%", color: "#aaa", fontSize: "32px" }}><span className="material-symbols-outlined">movie</span></div>}
+                      <span style={{ position: "absolute", bottom: "8px", right: "8px", background: "rgba(0,0,0,0.8)", color: "white", padding: "2px 6px", borderRadius: "4px", fontSize: "11px", fontWeight: "bold" }}>{item.media_type === "video" ? "VIDEO" : "AUDIO"}</span>
+                    </div>
+                    <div className="yt-video-row" style={{ display: "flex", gap: "12px", marginTop: "12px" }}>
+                      <div className="yt-video-avatar" style={{ width: "36px", height: "36px", borderRadius: "50%", background: "#ff365f", display: "grid", placeItems: "center", overflow: "hidden", flexShrink: 0 }}>
+                        {profile?.avatar_url ? <img src={profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : "♫"}
                       </div>
-                    </article>
-                  ))}
+                      <div className="yt-video-info" style={{ display: "flex", flexDirection: "column" }}>
+                        <h3 style={{ margin: "0 0 4px", fontSize: "14px", fontWeight: "500", color: "#f1f1f1" }}>{item.title}</h3>
+                        <p style={{ margin: 0, fontSize: "12px", color: "#aaaaaa" }}>{item.views || 0} views • {timeAgo(item.created_at)}</p>
+                      </div>
+                    </div>
+                  </article>
+                ))}
               </div>
             ) : (
-              <p className="yt-you-empty">No uploads yet.</p>
+              <p style={{ color: "#aaaaaa", fontSize: "14px" }}>No uploads yet.</p>
             )}
           </div>
+
         </section>
       )}
 

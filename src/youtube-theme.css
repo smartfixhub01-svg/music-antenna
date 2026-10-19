@@ -1,0 +1,216 @@
+/* =====================================================
+   MUSIC ANTENNA - PROFESSIONAL YOUTUBE THEME
+   ===================================================== */
+
+/* 1. Force Fonts & Fix Giant Icons */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap');
+
+body, .ma-app, button, input, textarea, p, h1, h2, h3, h4, span, div {
+  font-family: 'Roboto', Arial, sans-serif !important;
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined' !important;
+  font-size: 24px !important;
+  width: 24px !important;
+  height: 24px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important; /* Prevents giant text if font fails */
+  line-height: 1 !important;
+}
+
+/* 2. Core Colors & Background */
+.ma-app {
+  background-color: #0f0f0f !important;
+  color: #f1f1f1 !important;
+}
+
+/* 3. Header Fixes (Remove white boxes) */
+.ma-header {
+  background-color: #0f0f0f !important;
+  border-bottom: none !important;
+  height: 56px !important;
+  padding: 0 16px !important;
+}
+.yt-icon-btn, .ma-icon-btn {
+  border: none !important;
+  outline: none !important;
+  background-color: transparent !important;
+}
+
+/* 4. Home Feed Video Cards */
+.yt-video-title {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  line-height: 1.4 !important;
+  color: #f1f1f1 !important;
+}
+.yt-video-channel, .yt-video-meta {
+  font-size: 12px !important;
+  color: #aaaaaa !important;
+}
+.yt-video-avatar {
+  width: 36px !important;
+  height: 36px !important;
+}
+
+/* 5. Watch Page Action Buttons (Like, Share, Download) */
+.yt-watch-actions {
+  display: flex !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+  padding-bottom: 16px !important;
+}
+.yt-watch-action {
+  background-color: #272727 !important;
+  height: 36px !important;
+  border-radius: 18px !important;
+  padding: 0 16px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  border: none !important;
+  display: flex !important;
+  align-items: center !important;
+}
+.yt-watch-action .material-symbols-outlined {
+  font-size: 20px !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+/* 6. Channel Page / You Tab Buttons */
+.yt-you-btn {
+  height: 36px !important;
+  padding: 0 16px !important;
+  border-radius: 18px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: none !important;
+}
+.yt-you-btn-primary {
+  background-color: #f1f1f1 !important;
+  color: #0f0f0f !important;
+}
+.yt-you-btn-secondary {
+  background-color: #272727 !important;
+  color: #f1f1f1 !important;
+}
+
+/* 7. Bottom Navigation Safe Area & Sizes */
+.ma-mobile-nav {
+  height: auto !important;
+  min-height: 56px !important;
+  padding-bottom: env(safe-area-inset-bottom) !important;
+  background-color: #0f0f0f !important;
+  border-top: 1px solid #272727 !important;
+  display: flex !important;
+  justify-content: space-around !important;
+  align-items: center !important;
+}
+.ma-mobile-nav button {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 4px !important;
+  background: transparent !important;
+  border: none !important;
+  color: #f1f1f1 !important;
+}
+.ma-mobile-nav button small {
+  font-size: 10px !important;
+  font-weight: 500 !important;
+}
+.ma-mobile-nav button .material-symbols-outlined {
+  font-size: 24px !important;
+  width: 24px !important;
+  height: 24px !important;
+}
+
+/* 8. Chips (All, Music, Videos) */
+.yt-chip {
+  background-color: #272727 !important;
+  color: #f1f1f1 !important;
+  height: 32px !important;
+  padding: 0 12px !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  display: flex !important;
+  align-items: center !important;
+  border: none !important;
+}
+.yt-chip-active {
+  background-color: #f1f1f1 !important;
+  color: #0f0f0f !important;
+}
+
+/* =====================================================
+   MUSIC ANTENNA - BRIDGE CSS (Targets actual JSX classes)
+   ===================================================== */
+
+/* 1. Force exact YouTube typography */
+.yt-video-title { font-size: 14px !important; font-weight: 500 !important; line-height: 1.4 !important; }
+.yt-video-channel, .yt-video-meta { font-size: 12px !important; color: #aaaaaa !important; }
+.yt-you-shelf-head h3, .yt-you-library-title { font-size: 16px !important; font-weight: 500 !important; color: #f1f1f1 !important; }
+.yt-you-identity h2 { font-size: 22px !important; font-weight: 700 !important; }
+
+/* 2. Home Feed Cards (Match JSX exactly) */
+.yt-video { margin-bottom: 16px !important; }
+.yt-thumb { border-radius: 12px !important; overflow: hidden !important; aspect-ratio: 16/9 !important; }
+.yt-video-row { display: flex !important; align-items: flex-start !important; gap: 12px !important; padding-top: 12px !important; }
+.yt-video-avatar { width: 36px !important; height: 36px !important; flex-shrink: 0 !important; }
+.yt-video-info { display: flex !important; flex-direction: column !important; align-items: flex-start !important; text-align: left !important; }
+
+/* 3. Bottom Navigation (Exact Height & Safe Area) */
+.ma-mobile-nav {
+  height: 56px !important;
+  padding: 0 !important;
+  padding-bottom: env(safe-area-inset-bottom) !important;
+  background: #0f0f0f !important;
+  border-top: 1px solid #272727 !important;
+}
+.ma-mobile-nav button { gap: 3px !important; color: #aaaaaa !important; }
+.ma-mobile-nav button small { font-size: 10px !important; font-weight: 500 !important; }
+.ma-mobile-nav button .material-symbols-outlined { font-size: 24px !important; }
+
+/* 4. Watch Page Action Buttons (Like, Share, Download) */
+.yt-watch-actions { display: flex !important; gap: 8px !important; overflow-x: auto !important; padding-bottom: 16px !important; border-bottom: 1px solid #272727 !important; }
+.yt-watch-action { 
+  background: #272727 !important; 
+  border-radius: 18px !important; 
+  height: 36px !important; 
+  padding: 0 16px !important; 
+  font-size: 14px !important; 
+  font-weight: 500 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+.yt-watch-action .material-symbols-outlined { font-size: 20px !important; }
+
+/* 5. Watch Page Layout */
+.yt-watch-body { padding: 12px 16px !important; }
+.yt-watch-title { font-size: 18px !important; font-weight: 700 !important; }
+.yt-watch-meta { font-size: 12px !important; color: #aaaaaa !important; }
+.yt-watch-subscribe { height: 36px !important; border-radius: 18px !important; padding: 0 16px !important; font-size: 14px !important; font-weight: 500 !important; }
+.yt-watch-desc { background: #212121 !important; border-radius: 12px !important; padding: 12px !important; font-size: 14px !important; }
+
+/* 6. Channel Page / You Tab Cards */
+.yt-you-btn { height: 36px !important; padding: 0 16px !important; border-radius: 18px !important; font-size: 14px !important; font-weight: 500 !important; }
+.yt-you-analytics { background: #212121 !important; border-radius: 12px !important; padding: 16px !important; }
+.yt-you-stat-val { font-size: 18px !important; font-weight: 700 !important; }
+.yt-you-stat-label { font-size: 12px !important; color: #aaaaaa !important; }
+
+/* 7. Category Chips */
+.yt-chips { display: flex !important; gap: 8px !important; overflow-x: auto !important; padding-bottom: 16px !important; }
+.yt-chip { background: #272727 !important; height: 32px !important; padding: 0 12px !important; border-radius: 8px !important; font-size: 14px !important; font-weight: 500 !important; }
+.yt-chip-active { background: #f1f1f1 !important; color: #0f0f0f !important; }
+
+/* 8. Header & Search */
+.ma-header { height: 56px !important; padding: 0 16px !important; background: #0f0f0f !important; }
+.ma-search { height: 40px !important; border-radius: 20px !important; border: 1px solid #303030 !important; background: #121212 !important; }
