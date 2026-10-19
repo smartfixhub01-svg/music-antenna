@@ -67,6 +67,11 @@ export default function App() {
   const [category, setCategory] = useState("All");
   const [activeMedia, setActiveMedia] = useState(null);
   const [showWatchPage, setShowWatchPage] = useState(false);
+  const [showCommentsModal, setShowCommentsModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editCommentText, setEditCommentText] = useState("");
+
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [analyticsData, setAnalyticsData] = useState({ totalViews: 0, totalSubs: 0, totalComments: 0, weeklyViews: 0, weeklySubs: 0 });
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
@@ -136,6 +141,17 @@ export default function App() {
   const [likesCount, setLikesCount] = useState(0);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [commentImage, setCommentImage] = useState(null);
+  const [commentAudio, setCommentAudio] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const timerRef = useRef(null);
+
+  const [replyTarget, setReplyTarget] = useState(null);
+  const [replyingToName, setReplyingToName] = useState("");
   const [commentsLoading, setCommentsLoading] = useState(false);
 
   const [isSubscribed, setIsSubscribed] = useState(false);
@@ -626,7 +642,11 @@ useEffect(() => {
     // Fetch Comments
     setCommentsLoading(true);
     try {
-      const { data } = await supabase.from("comments").select("*, profiles(display_name, avatar_url)").eq("media_id", mediaId).order("created_at", { ascending: false });
+      const { data } = await supabase.from("comments")
+        .select("*, profiles(display_name, avatar_url)")
+        .eq("media_id", mediaId)
+        .order("is_pinned", { ascending: false })
+        .order("created_at", { ascending: false });
       setComments(data || []);
     } catch (e) { console.error(e); }
     setCommentsLoading(false);
@@ -854,20 +874,171 @@ useEffect(() => {
     }
   }
 
+  async function handleDeleteComment(commentId) {
+    if (!window.confirm("Delete this comment?")) return;
+    try {
+      const { error } = await supabase.from("comments").delete().eq("id", commentId);
+      if (error) throw error;
+      setComments(prev => prev.filter(c => c.id !== commentId));
+    } catch (err) {
+      setMessage("Error deleting comment: " + err.message);
+    }
+  }
+
+  async function handlePinComment(commentId, currentPinned) {
+    try {
+      await supabase.from("comments").update({ is_pinned: !currentPinned }).eq("id", commentId);
+      setComments(prev => {
+        const updated = prev.map(c => c.id === commentId ? { ...c, is_pinned: !currentPinned } : c);
+        return updated.sort((a, b) => (b.is_pinned ? 1 : 0) - (a.is_pinned ? 1 : 0));
+      });
+    } catch (err) { setMessage(err.message); }
+  }
+
+  async function handleCreatorHeart(commentId, currentHeart) {
+    try {
+      await supabase.from("comments").update({ has_creator_heart: !currentHeart }).eq("id", commentId);
+      setComments(prev => prev.map(c => c.id === commentId ? { ...c, has_creator_heart: !currentHeart } : c));
+    } catch (err) { setMessage(err.message); }
+  }
+
+  async function handleLikeComment(commentId, currentLikes) {
+    try {
+      await supabase.from("comments").update({ likes: currentLikes + 1 }).eq("id", commentId);
+      setComments(prev => prev.map(c => c.id === commentId ? { ...c, likes: (c.likes || 0) + 1 } : c));
+    } catch (err) { setMessage(err.message); }
+  }
+
+  async function handleUpdateComment(commentId) {
+    if (!editCommentText.trim()) return;
+    try {
+      await supabase.from("comments").update({ content: editCommentText }).eq("id", commentId);
+      setComments(prev => prev.map(c => c.id === commentId ? { ...c, content: editCommentText } : c));
+      setEditingCommentId(null);
+    } catch (err) { setMessage(err.message); }
+  }
+
+  async function handleDeleteComment(commentId) {
+    if (!window.confirm("Delete this comment?")) return;
+    try {
+      await supabase.from("comments").delete().eq("id", commentId);
+      setComments(prev => prev.filter(c => c.id !== commentId));
+    } catch (err) { setMessage(err.message); }
+  }
+
+  async function startRecording() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      return setMessage("Microphone not supported on this browser.");
+    }
+    
+    try {
+      setMessage("Requesting microphone...");
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      
+      // Try to find a supported audio format
+      let mimeType = 'audio/webm';
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = 'audio/mp4';
+      }
+
+      mediaRecorderRef.current = new MediaRecorder(stream, { mimeType });
+      audioChunksRef.current = [];
+      
+      mediaRecorderRef.current.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+      
+      mediaRecorderRef.current.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+        setCommentAudio(audioBlob);
+        stream.getTracks().forEach(track => track.stop());
+      };
+      
+      mediaRecorderRef.current.start();
+      setIsRecording(true);
+      setRecordingTime(0);
+      setMessage("Recording started...");
+      
+      timerRef.current = setInterval(() => {
+        setRecordingTime(prev => {
+          if (prev >= 35) {
+            stopRecording();
+            setMessage("Recording stopped at 35 seconds max.");
+            setTimeout(() => setMessage(""), 3000);
+            return 35;
+          }
+          return prev + 1;
+        });
+      }, 1000);
+      
+    } catch (err) {
+      console.log("Mic Error:", err);
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        setMessage("Microphone permission denied. Please allow mic access in your browser settings.");
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        setMessage("No microphone found on this device.");
+      } else {
+        setMessage("Error: " + err.message + " (Note: Mic only works on HTTPS).");
+      }
+    }
+  }
+
+  function stopRecording() {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      clearInterval(timerRef.current);
+    }
+  }
+
   async function handlePostComment(e) {
     e.preventDefault();
     if (!session?.user?.id) return setMessage("Sign in to comment.");
-    if (!newComment.trim()) return;
-    const textToSend = newComment.trim();
+    if (!newComment.trim() && !commentImage && !commentAudio) return;
+    
+    setMessage("Posting comment...");
+    let imageUrl = null;
+    let audioUrl = null;
+
     try {
+      // Upload Image if exists
+      if (commentImage) {
+        const safeName = commentImage.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const path = session.user.id + "/" + Date.now() + "-img-" + safeName;
+        const { error: imgErr } = await supabase.storage.from("comment-media").upload(path, commentImage);
+        if (imgErr) throw imgErr;
+        imageUrl = supabase.storage.from("comment-media").getPublicUrl(path).data.publicUrl;
+      }
+
+      // Upload Audio if exists
+      if (commentAudio) {
+        const path = session.user.id + "/" + Date.now() + "-voice.webm";
+        const { error: audErr } = await supabase.storage.from("comment-media").upload(path, commentAudio);
+        if (audErr) throw audErr;
+        audioUrl = supabase.storage.from("comment-media").getPublicUrl(path).data.publicUrl;
+      }
+
       const { data, error } = await supabase.from("comments").insert({
-        media_id: activeMedia.id, user_id: session.user.id, content: textToSend
+        media_id: activeMedia.id, 
+        user_id: session.user.id, 
+        content: newComment.trim(),
+        parent_id: replyTarget ? replyTarget : null,
+        image_url: imageUrl,
+        audio_url: audioUrl
       }).select("*, profiles(display_name, avatar_url)").single();
+      
       if (error) throw error;
-      createNotification(activeMedia.artist_id, "comment", activeMedia.id);
-      setComments([data, ...comments]);
+      
+      setComments(prev => [data, ...prev]);
       setNewComment("");
-    } catch (err) { setMessage("Comment Error: " + err.message); }
+      setCommentImage(null);
+      setCommentAudio(null);
+      setReplyTarget(null);
+      setReplyingName("");
+      setMessage("Comment posted!");
+      setTimeout(() => setMessage(""), 2000);
+      
+    } catch (err) { setMessage("Error: " + err.message); }
   }
 
     async function checkSubscription(channelId) {
@@ -2385,10 +2556,7 @@ useEffect(() => {
               <button className="yt-watch-action" onClick={() => setMessage("Dislikes coming soon.")}>
                 <span className="material-symbols-outlined">thumb_down</span>
               </button>
-              <button className="yt-watch-action" onClick={() => {
-                  navigator.clipboard.writeText(window.location.href);
-                  setMessage("Link copied to clipboard!");
-                }}>
+              <button className="yt-watch-action" onClick={() => setShowShareModal(true)}>
                 <span className="material-symbols-outlined">share</span>
                 <span className="yt-watch-action-label">Share</span>
               </button>
@@ -2451,45 +2619,28 @@ useEffect(() => {
               </p>
             </div>
 
-            <div className="yt-comments-section">
-              <h3 className="yt-comments-header">{comments.length} Comments</h3>
-              
-              <form className="yt-comment-form" onSubmit={handlePostComment}>
-                <div className="yt-comment-input-row">
-                  <div className="yt-video-avatar">
-                    {profile?.avatar_url ? <img src={profile.avatar_url} style={{width:'100%', height:'100%', objectFit:'cover'}} /> : "♫"}
-                  </div>
-                  <input 
-                    type="text" 
-                    placeholder="Add a comment..." 
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                  />
-                </div>
-                {newComment && (
-                  <div className="yt-comment-actions">
-                    <button type="button" onClick={() => setNewComment("")}>Cancel</button>
-                    <button type="submit">Comment</button>
-                  </div>
-                )}
-              </form>
-
-              <div className="yt-comments-list">
-                {comments.map(c => (
-                  <div className="yt-comment" key={c.id}>
-                    <div className="yt-video-avatar">
-                      {c.profiles?.avatar_url ? <img src={c.profiles.avatar_url} style={{width:'100%', height:'100%', objectFit:'cover'}} /> : "♫"}
-                    </div>
-                    <div className="yt-comment-content">
-                      <p className="yt-comment-author">
-                        @{c.profiles?.display_name || "user"} <span>{timeAgo(c.created_at)}</span>
-                      </p>
-                      <p className="yt-comment-text">{c.content}</p>
-                    </div>
-                  </div>
-                ))}
+            <div 
+              onClick={() => setShowCommentsModal(true)}
+              style={{ width: "100%", padding: "12px 16px", background: "#212121", borderRadius: "12px", color: "#f1f1f1", marginTop: "16px", display: "flex", flexDirection: "column", gap: "12px", cursor: "pointer" }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontWeight: "bold", fontSize: "14px" }}>Comments <span style={{ color: "#aaa" }}>{comments.length}</span></span>
+                <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>expand_more</span>
               </div>
+              
+              {comments.length > 0 && (
+                <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                  <div className="yt-video-avatar" style={{ width: "28px", height: "28px" }}>
+                    {comments[0].profiles?.avatar_url ? <img src={comments[0].profiles.avatar_url} style={{width:'100%',height:'100%',objectFit:'cover'}}/> : "♫"}
+                  </div>
+                  <p style={{ margin: 0, fontSize: "13px", color: "#f1f1f1", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    {comments[0].content}
+                  </p>
+                </div>
+              )}
             </div>
+
+            
           </div>
         </section>
       )}
@@ -3312,7 +3463,6 @@ useEffect(() => {
           <small>You</small>
         </button>
       </nav>
-
       {showPlaylistModal && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div style={{ background: "#212121", width: "90%", maxWidth: "400px", borderRadius: "12px", padding: "20px", color: "#f1f1f1", fontFamily: "Roboto, sans-serif", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>
@@ -3349,6 +3499,172 @@ useEffect(() => {
           </div>
         </div>
       )}
+
+      {/* COMMENTS MODAL - BULLETPROOF VERSION */}
+      {showCommentsModal && (
+        <div 
+          style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.8)", zIndex: 9999, display: "flex", flexDirection: "column", justifyContent: "flex-end" }}
+          onClick={() => setShowCommentsModal(false)}
+        >
+          <div 
+            style={{ background: "#0f0f0f", height: "85vh", borderTopLeftRadius: "16px", borderTopRightRadius: "16px", display: "flex", flexDirection: "column" }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px", borderBottom: "1px solid #333" }}>
+              <h3 style={{ margin: 0, color: "white", fontSize: "18px" }}>Comments ({comments.length})</h3>
+              <button onClick={() => setShowCommentsModal(false)} style={{ background: "transparent", border: 0, color: "white" }}>
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            {/* Comments List */}
+            <div style={{ flex: 1, overflowY: "auto", padding: "16px", paddingBottom: "100px" }}>
+              {comments.length === 0 ? (
+                <p style={{ color: "#aaa", textAlign: "center", marginTop: "40px" }}>No comments yet. Be the first!</p>
+              ) : (
+                comments.map(c => (
+                  <div key={c.id} style={{ display: "flex", gap: "10px", marginBottom: "16px", alignItems: "flex-start", textAlign: "left" }}>
+                    
+                    {/* Avatar - Smaller */}
+                    <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "#ff365f", flexShrink: 0, overflow: "hidden", display: "grid", placeItems: "center", color: "white", fontSize: "12px" }}>
+                      {c.profiles?.avatar_url ? <img src={c.profiles.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : "♫"}
+                    </div>
+
+                    <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "flex-start", minWidth: 0 }}>
+                      
+                      {/* Name & Time - Compact */}
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "2px" }}>
+                        <span style={{ fontSize: "12px", fontWeight: "bold", color: "#f1f1f1" }}>
+                          @{c.profiles?.display_name || "user"}
+                        </span>
+                        <span style={{ fontSize: "11px", color: "#aaaaaa" }}>
+                          {timeAgo(c.created_at)}
+                        </span>
+                        {c.is_pinned && (
+                          <span style={{ fontSize: "10px", color: "#3ea6ff", display: "flex", alignItems: "center", gap: "2px" }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: "12px" }}>push_pin</span>
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Text Content */}
+                      {editingCommentId === c.id ? (
+                        <div style={{ width: "100%", marginBottom: "6px" }}>
+                          <input value={editCommentText} onChange={e => setEditCommentText(e.target.value)} style={{ width: "100%", padding: "6px", borderRadius: "6px", border: "1px solid #333", background: "#121212", color: "white", fontSize: "13px", marginBottom: "6px" }} />
+                          <div style={{ display: "flex", gap: "8px" }}>
+                            <button onClick={() => setEditingCommentId(null)} style={{ background: "transparent", border: 0, color: "#aaa", fontSize: "11px" }}>Cancel</button>
+                            <button onClick={() => handleUpdateComment(c.id)} style={{ background: "#3ea6ff", border: 0, borderRadius: "12px", padding: "2px 10px", color: "#0f0f0f", fontWeight: "bold", fontSize: "11px" }}>Save</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div style={{ width: "100%", marginBottom: "4px" }}>
+                          {c.content && <p style={{ margin: 0, fontSize: "13px", color: "#f1f1f1", lineHeight: 1.3, wordWrap: "break-word" }}>{c.content}</p>}
+                          {c.image_url && <img src={c.image_url} style={{ maxWidth: "100%", maxHeight: "160px", borderRadius: "6px", marginTop: "6px" }} />}
+                          {c.audio_url && <audio controls src={c.audio_url} style={{ width: "100%", height: "32px", marginTop: "6px" }} />}
+                          
+                          {/* Creator Heart inline with text */}
+                          {c.has_creator_heart && (
+                            <span style={{ display: "inline-flex", alignItems: "center", gap: "2px", marginTop: "2px", fontSize: "11px", color: "#ff365f" }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: "12px", fontVariationSettings: "'FILL' 1" }}>favorite</span> Creator
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Action Row - Tighter */}
+                      {editingCommentId !== c.id && (
+                        <div style={{ display: "flex", gap: "12px", alignItems: "center", width: "100%", marginTop: "2px" }}>
+                          <button onClick={() => handleLikeComment(c.id, c.likes || 0)} style={{ background: "transparent", border: 0, color: "#aaa", display: "flex", alignItems: "center", gap: "3px", fontSize: "11px", padding: 0, cursor: "pointer" }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>thumb_up</span> {c.likes || 0}
+                          </button>
+                          
+                          <button onClick={() => { setReplyTarget(c.id); setReplyingToName(c.profiles?.display_name || "user"); }} style={{ background: "transparent", border: 0, color: "#aaa", display: "flex", alignItems: "center", gap: "3px", fontSize: "11px", padding: 0, cursor: "pointer" }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>chat_bubble</span> Reply
+                          </button>
+
+                          {(session?.user?.id === activeMedia.artist_id) && (
+                            <>
+                              <button onClick={() => handlePinComment(c.id, c.is_pinned)} style={{ background: "transparent", border: 0, color: c.is_pinned ? "#3ea6ff" : "#aaa", display: "flex", alignItems: "center", padding: 0, cursor: "pointer" }}>
+                                <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>push_pin</span>
+                              </button>
+                              <button onClick={() => handleCreatorHeart(c.id, c.has_creator_heart)} style={{ background: "transparent", border: 0, color: c.has_creator_heart ? "#ff365f" : "#aaa", display: "flex", alignItems: "center", padding: 0, cursor: "pointer" }}>
+                                <span className="material-symbols-outlined" style={{ fontSize: "14px", fontVariationSettings: c.has_creator_heart ? "'FILL' 1" : "'FILL' 0" }}>favorite</span>
+                              </button>
+                            </>
+                          )}
+
+                          {(session?.user?.id === activeMedia.artist_id || session?.user?.id === c.user_id) && (
+                            <>
+                              <button onClick={() => { setEditingCommentId(c.id); setEditCommentText(c.content); }} style={{ background: "transparent", border: 0, color: "#aaa", fontSize: "11px", padding: 0, cursor: "pointer", marginLeft: "auto" }}>Edit</button>
+                              <button onClick={() => handleDeleteComment(c.id)} style={{ background: "transparent", border: 0, color: "#ff365f", fontSize: "11px", padding: 0, cursor: "pointer" }}>Delete</button>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Input Area */}
+            <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "#0f0f0f", borderTop: "1px solid #272727", padding: "12px 16px", display: "flex", flexDirection: "column", gap: "8px" }}>
+              
+              {replyTarget && (
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px", fontSize: "12px", color: "#aaa" }}>
+                  <span>Replying to <strong>@{replyingToName}</strong></span>
+                  <button onClick={() => { setReplyTarget(null); setReplyingToName(""); }} style={{ background: "transparent", border: 0, color: "#3ea6ff", cursor: "pointer" }}>Cancel</button>
+                </div>
+              )}
+
+              <form onSubmit={handlePostComment} style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                <div style={{ flex: 1, display: "flex", alignItems: "center", background: "#212121", borderRadius: "24px", padding: "4px 12px", border: "1px solid #333" }}>
+                  
+                  <button type="button" onClick={() => setShowEmojiPicker(!showEmojiPicker)} style={{ background: "transparent", border: 0, color: "#aaa", padding: 0, display: "flex", cursor: "pointer" }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>sentiment_satisfied</span>
+                  </button>
+
+                  <input 
+                    value={newComment} 
+                    onChange={e => setNewComment(e.target.value)} 
+                    placeholder="Add a comment..." 
+                    style={{ flex: 1, padding: "10px", background: "transparent", border: 0, color: "white", outline: "none", fontSize: "14px" }} 
+                  />
+
+                  <label style={{ cursor: "pointer", display: "flex", alignItems: "center", color: "#aaa" }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>image</span>
+                    <input type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => setCommentImage(e.target.files[0])} />
+                  </label>
+
+                  {isRecording ? (
+                    <button type="button" onClick={stopRecording} style={{ background: "#ff365f", borderRadius: "50%", border: 0, width: "28px", height: "28px", display: "grid", placeItems: "center", color: "white", marginLeft: "8px" }}>
+                      <span style={{ fontSize: "10px", fontWeight: "bold" }}>0:{recordingTime}</span>
+                    </button>
+                  ) : (
+                    <button type="button" onClick={startRecording} style={{ background: "transparent", border: 0, color: "#aaa", display: "flex", cursor: "pointer", padding: 0, marginLeft: "8px" }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>mic</span>
+                    </button>
+                  )}
+                </div>
+                
+                <button type="submit" style={{ background: newComment.trim() || commentImage || commentAudio ? "#3ea6ff" : "#212121", border: 0, borderRadius: "50%", width: "44px", height: "44px", display: "grid", placeItems: "center", color: newComment.trim() || commentImage || commentAudio ? "#0f0f0f" : "#555", transition: "background 0.2s" }}>
+                  <span className="material-symbols-outlined">send</span>
+                </button>
+              </form>
+
+              {showEmojiPicker && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", background: "#212121", padding: "10px", borderRadius: "10px", maxHeight: "100px", overflowY: "auto" }}>
+                  {["😀", "😂", "❤️", "🔥", "👍", "🙏", "🎉", "😍", "😭", "🤔", "👏", "💯", "🥰", "😎"].map(emoji => (
+                    <button type="button" key={emoji} onClick={() => { setNewComment(prev => prev + emoji); setShowEmojiPicker(false); }} style={{ background: "transparent", border: 0, fontSize: "24px", cursor: "pointer" }}>{emoji}</button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
