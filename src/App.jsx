@@ -146,6 +146,12 @@ export default function App() {
   const [commentAudio, setCommentAudio] = useState(null);
   const [commentAudioUrl, setCommentAudioUrl] = useState(null);
   const [voicePreviewPlaying, setVoicePreviewPlaying] = useState(false);
+  const [playingCommentId, setPlayingCommentId] = useState(null);
+  const [playingCommentProgress, setPlayingCommentProgress] = useState(0);
+  const [playingCommentDuration, setPlayingCommentDuration] = useState(0);
+  const [playingCommentSpeed, setPlayingCommentSpeed] = useState(1);
+  const playingCommentRef = useRef(null);
+
   const [voicePreviewDuration, setVoicePreviewDuration] = useState(0);
   const [voicePreviewProgress, setVoicePreviewProgress] = useState(0);
   const [voicePreviewSpeed, setVoicePreviewSpeed] = useState(1);
@@ -3585,7 +3591,71 @@ useEffect(() => {
                         <div style={{ width: "100%", marginBottom: "4px" }}>
                           {c.content && <p style={{ margin: 0, fontSize: "13px", color: "#f1f1f1", lineHeight: 1.3, wordWrap: "break-word" }}>{c.content}</p>}
                           {c.image_url && <img src={c.image_url} style={{ maxWidth: "100%", maxHeight: "160px", borderRadius: "6px", marginTop: "6px" }} />}
-                          {c.audio_url && <audio controls src={c.audio_url} onPlay={(e) => { document.querySelectorAll("audio, video").forEach(el => { if (el !== e.target) el.pause(); }); }} style={{ width: "100%", height: "32px", marginTop: "6px" }} />}
+                          {c.audio_url && (
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "#1f2c34", padding: "8px 12px", borderRadius: "12px", border: "1px solid #2a3942", marginTop: "8px", width: "fit-content" }}>
+                            <button 
+                              onClick={() => {
+                                if (playingCommentId === c.id) {
+                                  if (playingCommentRef.current.paused) playingCommentRef.current.play();
+                                  else playingCommentRef.current.pause();
+                                } else {
+                                  if (playingCommentRef.current) {
+                                    playingCommentRef.current.src = c.audio_url;
+                                    playingCommentRef.current.playbackRate = 1;
+                                    playingCommentRef.current.play();
+                                  }
+                                  setPlayingCommentId(c.id);
+                                  setPlayingCommentSpeed(1);
+                                }
+                              }} 
+                              style={{ background: "transparent", border: 0, color: "white", cursor: "pointer", display: "flex", padding: 0 }}
+                            >
+                              <span className="material-symbols-outlined" style={{ fontSize: "28px" }}>
+                                {playingCommentId === c.id && !playingCommentRef.current?.paused ? "pause_circle" : "play_circle"}
+                              </span>
+                            </button>
+
+                            <span style={{ fontSize: "11px", color: "#fff", minWidth: "28px", fontWeight: "bold" }}>
+                              {playingCommentId === c.id ? formatVoiceTime(playingCommentProgress) : "0:00"}
+                            </span>
+
+                            <div style={{ display: "flex", alignItems: "center", gap: "2px", height: "20px", flex: 1 }}>
+                              {Array.from({ length: 35 }).map((_, i) => {
+                                const isActive = playingCommentId === c.id && (playingCommentProgress / (playingCommentDuration || 1)) > (i / 35);
+                                const height = 4 + (Math.sin(i * 0.5) * 4) + (i % 3 === 0 ? 4 : 0);
+                                return <div key={i} style={{ width: "2px", height: `${Math.max(3, height)}px`, borderRadius: "1px", background: isActive ? "#00a884" : "#8696a0" }} />;
+                              })}
+                            </div>
+
+                            <button 
+                              onClick={() => {
+                                const speeds = [1, 1.5, 2];
+                                const nextSpeed = speeds[(speeds.indexOf(playingCommentSpeed) + 1) % speeds.length];
+                                setPlayingCommentSpeed(nextSpeed);
+                                if (playingCommentRef.current) playingCommentRef.current.playbackRate = nextSpeed;
+                              }} 
+                              style={{ background: "transparent", border: "1px dashed #8696a0", borderRadius: "50%", color: "#ffffff", width: "24px", height: "24px", display: "grid", placeItems: "center", fontSize: "9px", fontWeight: "bold", cursor: "pointer" }}
+                            >
+                              {playingCommentId === c.id ? `${playingCommentSpeed}x` : "1x"}
+                            </button>
+
+                            {/* Hidden Audio for playback */}
+                            <audio 
+                              ref={playingCommentId === c.id ? playingCommentRef : null}
+                              src={c.audio_url}
+                              preload="metadata"
+                              onTimeUpdate={(e) => setPlayingCommentProgress(e.target.currentTime)}
+                              onLoadedMetadata={(e) => {
+                                if (e.target.duration && e.target.duration !== Infinity) {
+                                  setPlayingCommentDuration(e.target.duration);
+                                }
+                              }}
+                              onEnded={() => { setPlayingCommentId(null); setPlayingCommentProgress(0); }}
+                              onPlay={() => { document.querySelectorAll('audio, video').forEach(el => { if (el !== playingCommentRef.current) el.pause(); }); }}
+                              style={{ display: "none" }}
+                            />
+                          </div>
+                        )}
                           
                           {/* Creator Heart inline with text */}
                           {c.has_creator_heart && (
