@@ -3356,3 +3356,170 @@ body, .ma-app {
   font-size: 12px;
   color: #aaa;
 }
+
+/* =====================================================
+   MASTER UI POLISH - STRICT YOUTUBE SPEC
+   ===================================================== */
+
+/* 1. Global Typography & Colors */
+body, .ma-app, button, input, textarea, select {
+  font-family: 'Roboto', Arial, sans-serif !important;
+  background-color: #0f0f0f;
+  color: #f1f1f1;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Hide scrollbars for a cleaner mobile app feel */
+::-webkit-scrollbar { width: 0px; background: transparent; }
+
+/* 2. Header Polish */
+.ma-header {
+  height: 56px !important;
+  padding: 0 16px !important;
+  background-color: #0f0f0f !important;
+  border-bottom: none !important;
+}
+.ma-search {
+  background-color: #121212 !important;
+  border: 1px solid #303030 !important;
+  border-radius: 40px !important;
+  height: 40px !important;
+}
+.ma-search input {
+  font-size: 16px !important;
+  color: #f1f1f1 !important;
+}
+
+/* 3. Home Feed & Video Cards */
+.ma-media-grid {
+  gap: 16px !important;
+}
+.yt-video {
+  margin-bottom: 8px !important;
+}
+.yt-thumb {
+  border-radius: 12px !important;
+  margin-bottom: 12px !important;
+}
+.yt-video-row {
+  gap: 12px !important;
+  padding: 0 !important;
+}
+.yt-video-avatar {
+  width: 36px !important;
+  height: 36px !important;
+  margin-top: 2px !important;
+}
+.yt-video-title {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  line-height: 1.4 !important;
+  margin-bottom: 4px !important;
+  color: #f1f1f1 !important;
+}
+.yt-video-channel, .yt-video-meta {
+  font-size: 12px !important;
+  color: #aaaaaa !important;
+  margin-bottom: 2px !important;
+}
+
+/* 4. Watch Page Polish */
+.yt-watch-body {
+  padding: 12px 16px !important;
+}
+.yt-watch-title {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  margin-bottom: 8px !important;
+}
+.yt-watch-meta {
+  font-size: 12px !important;
+  color: #aaaaaa !important;
+  margin-bottom: 16px !important;
+}
+.yt-watch-actions {
+  gap: 8px !important;
+  margin-bottom: 16px !important;
+  padding-bottom: 16px !important;
+  border-bottom: 1px solid #272727 !important;
+}
+.yt-watch-action {
+  background-color: #272727 !important;
+  height: 36px !important;
+  border-radius: 18px !important;
+  padding: 0 16px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+.yt-watch-action .material-symbols-outlined {
+  font-size: 20px !important;
+  margin-right: 6px;
+}
+.yt-watch-channel {
+  padding-bottom: 16px !important;
+  border-bottom: 1px solid #272727 !important;
+  margin-bottom: 16px !important;
+}
+.yt-watch-subscribe {
+  height: 36px !important;
+  border-radius: 18px !important;
+  padding: 0 16px !important;
+  font-size: 14px !important;
+}
+.yt-watch-desc {
+  background-color: #272727 !important;
+  padding: 12px !important;
+  border-radius: 12px !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  color: #f1f1f1 !important;
+}
+
+/* 5. Bottom Navigation */
+.ma-mobile-nav {
+  height: 56px !important;
+  border-top: 1px solid #272727 !important;
+  padding-bottom: env(safe-area-inset-bottom) !important;
+}
+.ma-mobile-nav button {
+  gap: 4px !important;
+}
+.ma-mobile-nav button .material-symbols-outlined {
+  font-size: 24px !important;
+}
+.ma-mobile-nav button small {
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+}
+
+/* 6. Comments Modal Polish */
+.yt-comment-input-area {
+  background-color: #0f0f0f !important;
+  border-top: 1px solid #272727 !important;
+}
+.yt-comment-input-area input {
+  background-color: #212121 !important;
+  border: 1px solid #303030 !important;
+  border-radius: 24px !important;
+  color: #f1f1f1 !important;
+  font-size: 14px !important;
+  padding: 12px 16px !important;
+}
+
+/* 7. Buttons & Chips */
+.yt-chip {
+  background-color: #272727 !important;
+  color: #f1f1f1 !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  height: 32px !important;
+  display: flex;
+  align-items: center;
+  padding: 0 12px !important;
+  border-radius: 8px !important;
+}
+.yt-chip-active {
+  background-color: #f1f1f1 !important;
+  color: #0f0f0f !important;
+}
