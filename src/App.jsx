@@ -3642,39 +3642,126 @@ useEffect(() => {
                 </div>
               )}
 
-              <form onSubmit={handlePostComment} style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                <div style={{ flex: 1, display: "flex", alignItems: "center", background: "#212121", borderRadius: "24px", padding: "4px 12px", border: "1px solid #333" }}>
-                  
-                  <button type="button" onClick={() => setShowEmojiPicker(!showEmojiPicker)} style={{ background: "transparent", border: 0, color: "#aaa", padding: 0, display: "flex", cursor: "pointer" }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>sentiment_satisfied</span>
-                  </button>
-
-                  <input 
-                    value={newComment} 
-                    onChange={e => setNewComment(e.target.value)} 
-                    placeholder="Add a comment..." 
-                    style={{ flex: 1, padding: "10px", background: "transparent", border: 0, color: "white", outline: "none", fontSize: "14px" }} 
-                  />
-
-                  <label style={{ cursor: "pointer", display: "flex", alignItems: "center", color: "#aaa" }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>image</span>
-                    <input type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => setCommentImage(e.target.files[0])} />
-                  </label>
-
-                  {isRecording ? (
-                    <button type="button" onClick={stopRecording} style={{ background: "#ff365f", borderRadius: "50%", border: 0, width: "28px", height: "28px", display: "grid", placeItems: "center", color: "white", marginLeft: "8px" }}>
-                      <span style={{ fontSize: "10px", fontWeight: "bold" }}>0:{recordingTime}</span>
-                    </button>
-                  ) : (
-                    <button type="button" onClick={startRecording} style={{ background: "transparent", border: 0, color: "#aaa", display: "flex", cursor: "pointer", padding: 0, marginLeft: "8px" }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>mic</span>
-                    </button>
-                  )}
-                </div>
+              <form onSubmit={handlePostComment} style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%" }}>
                 
-                <button type="submit" style={{ background: newComment.trim() || commentImage || commentAudio ? "#3ea6ff" : "#212121", border: 0, borderRadius: "50%", width: "44px", height: "44px", display: "grid", placeItems: "center", color: newComment.trim() || commentImage || commentAudio ? "#0f0f0f" : "#555", transition: "background 0.2s" }}>
-                  <span className="material-symbols-outlined">send</span>
-                </button>
+                {/* IF MEDIA IS ATTACHED: SHOW WHATSAPP STYLE PLAYER */}
+                {(commentImage || commentAudioUrl) ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "10px", padding: "12px", background: "#1f2c34", borderRadius: "12px", border: "1px solid #2a3942" }}>
+                    
+                    {/* Image Preview */}
+                    {commentImage && (
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <img src={URL.createObjectURL(commentImage)} style={{ height: "60px", borderRadius: "6px" }} />
+                        <button type="button" onClick={() => setCommentImage(null)} style={{ background: "transparent", border: 0, color: "#ff365f", fontSize: "12px", cursor: "pointer" }}>Remove</button>
+                      </div>
+                    )}
+
+                    {/* Voice Note Preview (WhatsApp Style) */}
+                    {commentAudioUrl && (
+                      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                        
+                        <audio 
+                          ref={voicePreviewRef}
+                          src={commentAudioUrl}
+                          onTimeUpdate={(e) => setVoicePreviewProgress(e.target.currentTime)}
+                          onLoadedMetadata={(e) => setVoicePreviewDuration(e.target.duration)}
+                          onEnded={() => setVoicePreviewPlaying(false)}
+                          onPlay={() => { 
+                            document.querySelectorAll('audio, video').forEach(el => { if (el !== voicePreviewRef.current) el.pause(); }); 
+                            setVoicePreviewPlaying(true); 
+                          }}
+                          onPause={() => setVoicePreviewPlaying(false)}
+                        />
+
+                        {/* Top Row: Play, Slider, Time, Speed */}
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                          <button type="button" onClick={() => {
+                            if (voicePreviewRef.current.paused) voicePreviewRef.current.play();
+                            else voicePreviewRef.current.pause();
+                          }} style={{ background: "transparent", border: 0, color: "#00a884", cursor: "pointer", display: "flex", padding: 0 }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: "28px" }}>
+                              {voicePreviewPlaying ? "pause_circle" : "play_circle"}
+                            </span>
+                          </button>
+
+                          <input 
+                            type="range" 
+                            min="0" 
+                            max={voicePreviewDuration || 1} 
+                            value={voicePreviewProgress} 
+                            onChange={(e) => {
+                              const time = Number(e.target.value);
+                              if (voicePreviewRef.current) voicePreviewRef.current.currentTime = time;
+                              setVoicePreviewProgress(time);
+                            }}
+                            style={{ flex: 1, accentColor: "#00a884", height: "4px" }} 
+                          />
+
+                          <span style={{ fontSize: "12px", color: "#8696a0", minWidth: "32px" }}>
+                            {formatVoiceTime(voicePreviewProgress)}
+                          </span>
+
+                          <button type="button" onClick={() => {
+                            const speeds = [1, 1.5, 2];
+                            const nextSpeed = speeds[(speeds.indexOf(voicePreviewSpeed) + 1) % speeds.length];
+                            setVoicePreviewSpeed(nextSpeed);
+                            if (voicePreviewRef.current) voicePreviewRef.current.playbackRate = nextSpeed;
+                          }} style={{ background: "#2a3942", border: 0, borderRadius: "50%", color: "#8696a0", width: "28px", height: "28px", display: "grid", placeItems: "center", fontSize: "10px", fontWeight: "bold", cursor: "pointer" }}>
+                            {voicePreviewSpeed}x
+                          </button>
+                        </div>
+
+                        {/* Bottom Row: Trash, Send */}
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "4px" }}>
+                          <button type="button" onClick={() => { setCommentAudio(null); setCommentAudioUrl(null); }} style={{ background: "transparent", border: 0, color: "#ff365f", display: "flex", alignItems: "center", gap: "4px", cursor: "pointer", fontSize: "12px" }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>delete</span> Discard
+                          </button>
+
+                          <button type="submit" style={{ background: "#00a884", border: 0, borderRadius: "50%", width: "40px", height: "40px", display: "grid", placeItems: "center", color: "white", cursor: "pointer" }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>send</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  
+                  /* IF NO MEDIA: SHOW STANDARD INPUT BAR */
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <div style={{ flex: 1, display: "flex", alignItems: "center", background: "#212121", borderRadius: "24px", padding: "4px 12px", border: "1px solid #333" }}>
+                      
+                      <button type="button" onClick={() => setShowEmojiPicker(!showEmojiPicker)} style={{ background: "transparent", border: 0, color: "#aaa", padding: 0, display: "flex", cursor: "pointer" }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>sentiment_satisfied</span>
+                      </button>
+
+                      <input 
+                        value={newComment} 
+                        onChange={e => setNewComment(e.target.value)} 
+                        placeholder="Add a comment..." 
+                        style={{ flex: 1, padding: "10px", background: "transparent", border: 0, color: "white", outline: "none", fontSize: "14px" }} 
+                      />
+
+                      <label style={{ cursor: "pointer", display: "flex", alignItems: "center", color: "#aaa" }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>image</span>
+                        <input type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => setCommentImage(e.target.files[0])} />
+                      </label>
+
+                      {isRecording ? (
+                        <button type="button" onClick={stopRecording} style={{ background: "#ff365f", borderRadius: "50%", border: 0, width: "32px", height: "32px", display: "grid", placeItems: "center", color: "white", marginLeft: "8px", cursor: "pointer" }}>
+                          <span style={{ fontSize: "12px", fontWeight: "bold" }}>{recordingTime}s</span>
+                        </button>
+                      ) : (
+                        <button type="button" onClick={startRecording} style={{ background: "transparent", border: 0, color: "#aaa", display: "flex", cursor: "pointer", padding: 0, marginLeft: "8px" }}>
+                          <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>mic</span>
+                        </button>
+                      )}
+                    </div>
+                    
+                    <button type="submit" style={{ background: newComment.trim() ? "#3ea6ff" : "#212121", border: 0, borderRadius: "50%", width: "44px", height: "44px", display: "grid", placeItems: "center", color: newComment.trim() ? "#0f0f0f" : "#555", transition: "background 0.2s", cursor: "pointer" }}>
+                      <span className="material-symbols-outlined">send</span>
+                    </button>
+                  </div>
+                )}
               </form>
 
               {showEmojiPicker && (
