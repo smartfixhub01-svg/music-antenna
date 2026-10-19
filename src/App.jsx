@@ -1907,6 +1907,25 @@ useEffect(() => {
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   }
 
+  // BULLETPROOF SUBSCRIBER FETCH
+  useEffect(() => {
+    if (!session?.user?.id) {
+      setMySubCount(0);
+      return;
+    }
+    
+    // Fetch from Supabase
+    supabase
+      .from("subscriptions")
+      .select("*", { count: "exact", head: true })
+      .eq("channel_id", session.user.id)
+      .then(({ count, error }) => {
+        if (!error) {
+          setMySubCount(count || 0);
+        }
+      });
+  }, [session?.user?.id]);
+
   return (
     <div className="ma-app">
         {/* PERMANENT AUDIO PLAYER (Never stops on tab change) */}
@@ -2790,7 +2809,7 @@ useEffect(() => {
                   </div>
                   <div style={{ background: "#212121", borderRadius: "8px", padding: "12px", textAlign: "center" }}>
                     <span className="material-symbols-outlined" style={{ color: "#ff365f", background: "rgba(255,54,95,0.1)", padding: "6px", borderRadius: "50%", fontSize: "18px", marginBottom: "8px", display: "inline-block" }}>group</span>
-                    <div style={{ fontSize: "16px", fontWeight: "700", color: "#f1f1f1" }}>{mySubCount || 0}</div>
+                    <div style={{ fontSize: "16px", fontWeight: "700", color: "#f1f1f1" }}>{mySubCount}</div>
                     <div style={{ fontSize: "11px", color: "#aaa" }}>Subscribers</div>
                   </div>
                 </div>
