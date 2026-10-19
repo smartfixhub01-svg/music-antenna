@@ -3341,19 +3341,52 @@ useEffect(() => {
       )}
 
       {activeMedia && !showWatchPage && (
-        <div className="yt-mini-player" onClick={() => setShowWatchPage(true)} style={{ cursor: "pointer" }}>
-          <div className="yt-mini-info">
-            {activeMedia.thumbnailUrl ? <img src={activeMedia.thumbnailUrl} alt="" /> : <div className="yt-mini-fallback">♫</div>}
-            <div className="yt-mini-text">
-              <h4>{activeMedia.title}</h4>
-              <p>{activeMedia.profiles?.display_name || "Artist"}</p>
-            </div>
+        <div className={"yt-mini-player" + (navVisible ? "" : " yt-mini-hidden")}>
+          
+          <div className="yt-mini-cover" onClick={() => setShowWatchPage(true)}>
+            {activeMedia.thumbnailUrl ? (
+              <img src={activeMedia.thumbnailUrl} alt="" />
+            ) : (
+              <div className="yt-mini-cover-fallback">♫</div>
+            )}
           </div>
-          <div className="yt-mini-actions">
-            <button onClick={(e) => { e.stopPropagation(); setActiveMedia(null); if (audioRef.current) audioRef.current.pause(); if (videoRef.current) videoRef.current.pause(); }}>
-              <span className="material-symbols-outlined">close</span>
+
+          <div className="yt-mini-text" onClick={() => setShowWatchPage(true)}>
+            <h4>{activeMedia.title}</h4>
+            <p>{activeMedia.profiles?.display_name || "Artist"}</p>
+          </div>
+
+          <div className="yt-mini-controls">
+            <button 
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                if (activeMedia.media_type === "audio" && audioRef.current) {
+                  audioRef.current.paused ? audioRef.current.play() : audioRef.current.pause();
+                } else if (videoRef.current) {
+                  videoRef.current.paused ? videoRef.current.play() : videoRef.current.pause();
+                }
+              }} 
+              className="yt-mini-play-btn"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: "24px", fontVariationSettings: "'FILL' 1" }}>
+                {isPlaying ? "pause" : "play_arrow"}
+              </span>
+            </button>
+            
+            <button 
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                setActiveMedia(null); 
+                setShowWatchPage(false);
+                if (audioRef.current) audioRef.current.pause(); 
+                if (videoRef.current) videoRef.current.pause(); 
+              }} 
+              className="yt-mini-close-btn"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>close</span>
             </button>
           </div>
+
         </div>
       )}
 
