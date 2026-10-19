@@ -3352,11 +3352,6 @@ useEffect(() => {
             )}
           </div>
 
-          <div className="yt-mini-text" onClick={() => setShowWatchPage(true)}>
-            <h4>{activeMedia.title}</h4>
-            <p>{activeMedia.profiles?.display_name || "Artist"}</p>
-          </div>
-
           <div className="yt-mini-controls">
             <button 
               onClick={(e) => { 
@@ -3369,7 +3364,7 @@ useEffect(() => {
               }} 
               className="yt-mini-play-btn"
             >
-              <span className="material-symbols-outlined" style={{ fontSize: "24px", fontVariationSettings: "'FILL' 1" }}>
+              <span className="material-symbols-outlined" style={{ fontSize: "22px", fontVariationSettings: "'FILL' 1" }}>
                 {isPlaying ? "pause" : "play_arrow"}
               </span>
             </button>
@@ -3384,7 +3379,7 @@ useEffect(() => {
               }} 
               className="yt-mini-close-btn"
             >
-              <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>close</span>
+              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>close</span>
             </button>
           </div>
 

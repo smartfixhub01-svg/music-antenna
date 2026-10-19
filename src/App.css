@@ -4240,42 +4240,44 @@ button {
 }
 
 /* =====================================================
-   ROBOTIC FLOATING MINI PLAYER
+   COMPACT FLOATING MINI PLAYER (NO TEXT)
    ===================================================== */
 
 .yt-mini-player {
   position: fixed !important;
-  bottom: 72px !important;
-  left: 16px !important;
-  right: 16px !important;
-  height: 56px !important;
-  background: rgba(18, 18, 18, 0.85) !important;
+  bottom: 72px !important; /* Perfectly above the nav */
+  left: 50% !important;
+  transform: translateX(-50%) !important; /* Centers it */
+  height: 48px !important;
+  width: max-content !important; /* Shrinks to fit content */
+  background: rgba(18, 18, 18, 0.9) !important;
   backdrop-filter: blur(16px) !important;
   -webkit-backdrop-filter: blur(16px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-radius: 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 24px !important;
   display: flex !important;
   align-items: center !important;
-  padding: 0 8px !important;
+  padding: 0 6px !important;
   z-index: 90 !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 54, 95, 0.1) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 54, 95, 0.2) !important;
   transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease !important;
-  margin: 0 !important;
+  gap: 8px !important;
 }
 
+/* Auto-hide logic tied to the bottom nav */
 .yt-mini-hidden {
-  transform: translateY(120px) !important;
+  transform: translate(-50%, 120px) !important;
   opacity: 0 !important;
   pointer-events: none !important;
 }
 
+/* Circular Cover Art */
 .yt-mini-cover {
-  width: 40px !important;
-  height: 40px !important;
-  border-radius: 8px !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important; /* Circular for the pill look */
   overflow: hidden !important;
   flex-shrink: 0 !important;
-  margin-right: 12px !important;
   cursor: pointer !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
@@ -4293,41 +4295,14 @@ button {
   display: grid !important;
   place-items: center !important;
   color: white !important;
-  font-size: 18px !important;
+  font-size: 16px !important;
 }
 
-.yt-mini-text {
-  flex: 1 !important;
-  min-width: 0 !important;
-  cursor: pointer !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important;
-}
-
-.yt-mini-text h4 {
-  margin: 0 !important;
-  font-size: 13px !important;
-  font-weight: 600 !important;
-  color: #f1f1f1 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-.yt-mini-text p {
-  margin: 2px 0 0 !important;
-  font-size: 11px !important;
-  color: #aaaaaa !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
+/* Controls */
 .yt-mini-controls {
   display: flex !important;
   align-items: center !important;
-  gap: 4px !important;
+  gap: 2px !important;
   flex-shrink: 0 !important;
 }
 
@@ -4339,8 +4314,8 @@ button {
   place-items: center !important;
   cursor: pointer !important;
   border-radius: 50% !important;
-  width: 36px !important;
-  height: 36px !important;
+  width: 32px !important;
+  height: 32px !important;
   transition: background 0.2s, transform 0.2s !important;
 }
 
@@ -4355,9 +4330,10 @@ button {
 }
 
 .yt-mini-close-btn {
-  color: #f1f1f1 !important;
+  color: #aaaaaa !important;
 }
 
 .yt-mini-close-btn:hover {
   background: rgba(255, 255, 255, 0.1) !important;
+  color: #f1f1f1 !important;
 }
