@@ -67,19 +67,7 @@ export default function App() {
   const [category, setCategory] = useState("All");
   const [activeMedia, setActiveMedia] = useState(null);
   const [showWatchPage, setShowWatchPage] = useState(false);
-  // BULLETPROOF SUBSCRIBER FETCH
-  useEffect(() => {
-    if (session?.user?.id) {
-      supabase.from("subscriptions")
-        .select("*", { count: "exact", head: true })
-        .eq("channel_id", session.user.id)
-        .then(({ count }) => {
-          setMySubCount(count || 0);
-        });
-    }
-  }, [session]);
-
-  const [showCommentsModal, setShowCommentsModal] = useState(false);
+const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editCommentText, setEditCommentText] = useState("");
@@ -363,6 +351,7 @@ useEffect(() => {
           // Fetch subscriber count for the You Tab
           const { count } = await supabase.from("subscriptions").select("*", { count: "exact", head: true }).eq("channel_id", user.id);
           setSubscriberCount(count || 0);
+          setMySubCount(count || 0);
         }
       } catch (error) {
         if (alive) {
@@ -1157,6 +1146,7 @@ useEffect(() => {
         totalComments = tc || 0;
       }
 
+      setMySubCount(totalSubs || 0);
       setAnalyticsData({ totalViews, totalSubs: totalSubs || 0, totalComments, weeklyViews, weeklySubs: weeklySubs || 0 });
     } catch (err) {
       setMessage("Error loading analytics: " + err.message);
