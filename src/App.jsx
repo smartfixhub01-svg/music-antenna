@@ -233,8 +233,10 @@ useEffect(() => {
     setShowShareModal(false);
     setShowCommentsModal(false);
     setShowSubscriptionsFeed(false);
-    setActiveMedia(null);       // Closes the video player
-    setShowWatchPage(false);    // Closes the watch page
+    
+    // CRITICAL FIX: Only hide the watch page, DO NOT delete the video from memory!
+    // This allows the Mini Player to keep playing in the background.
+    setShowWatchPage(false);
   }
 
   function openPlayer(item) {
