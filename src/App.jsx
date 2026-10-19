@@ -144,6 +144,7 @@ export default function App() {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [commentImage, setCommentImage] = useState(null);
   const [commentAudio, setCommentAudio] = useState(null);
+  const [commentAudioUrl, setCommentAudioUrl] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const mediaRecorderRef = useRef(null);
@@ -933,16 +934,18 @@ useEffect(() => {
     }
     
     try {
-      // Pause main video/audio if playing
+      // Safely pause main players
       wasPlayingRef.current = false;
-      if (videoRef.current && !videoRef.current.paused) {
-        videoRef.current.pause();
-        wasPlayingRef.current = true;
-      }
-      if (audioRef.current && !audioRef.current.paused) {
-        audioRef.current.pause();
-        wasPlayingRef.current = true;
-      }
+      try {
+        if (videoRef.current && !videoRef.current.paused) {
+          videoRef.current.pause();
+          wasPlayingRef.current = true;
+        }
+        if (audioRef.current && !audioRef.current.paused) {
+          audioRef.current.pause();
+          wasPlayingRef.current = true;
+        }
+      } catch (e) { console.log("Pause error", e); }
 
       setMessage("Requesting microphone...");
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -960,6 +963,7 @@ useEffect(() => {
       mediaRecorderRef.current.onstop = () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
         setCommentAudio(audioBlob);
+        setCommentAudioUrl(URL.createObjectURL(audioBlob));
         stream.getTracks().forEach(track => track.stop());
       };
       
@@ -1044,7 +1048,7 @@ useEffect(() => {
       setComments(prev => [data, ...prev]);
       setNewComment("");
       setCommentImage(null);
-      setCommentAudio(null);
+      setCommentAudio(null); setCommentAudioUrl(null);
       setReplyTarget(null);
       setReplyingName("");
       setMessage("Comment posted!");
