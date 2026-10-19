@@ -147,6 +147,7 @@ export default function App() {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const mediaRecorderRef = useRef(null);
+  const wasPlayingRef = useRef(false);
   const audioChunksRef = useRef([]);
   const timerRef = useRef(null);
 
@@ -932,14 +933,22 @@ useEffect(() => {
     }
     
     try {
+      // Pause main video/audio if playing
+      wasPlayingRef.current = false;
+      if (videoRef.current && !videoRef.current.paused) {
+        videoRef.current.pause();
+        wasPlayingRef.current = true;
+      }
+      if (audioRef.current && !audioRef.current.paused) {
+        audioRef.current.pause();
+        wasPlayingRef.current = true;
+      }
+
       setMessage("Requesting microphone...");
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       
-      // Try to find a supported audio format
       let mimeType = 'audio/webm';
-      if (!MediaRecorder.isTypeSupported(mimeType)) {
-        mimeType = 'audio/mp4';
-      }
+      if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'audio/mp4';
 
       mediaRecorderRef.current = new MediaRecorder(stream, { mimeType });
       audioChunksRef.current = [];
@@ -973,13 +982,7 @@ useEffect(() => {
       
     } catch (err) {
       console.log("Mic Error:", err);
-      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        setMessage("Microphone permission denied. Please allow mic access in your browser settings.");
-      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-        setMessage("No microphone found on this device.");
-      } else {
-        setMessage("Error: " + err.message + " (Note: Mic only works on HTTPS).");
-      }
+      setMessage("Error: " + err.message);
     }
   }
 
@@ -988,6 +991,15 @@ useEffect(() => {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
       clearInterval(timerRef.current);
+      
+      // Resume main player if it was playing before recording
+      if (wasPlayingRef.current) {
+        setTimeout(() => {
+          if (videoRef.current) videoRef.current.play().catch(()=>{});
+          if (audioRef.current) audioRef.current.play().catch(()=>{});
+        }, 300);
+        wasPlayingRef.current = false;
+      }
     }
   }
 
@@ -3561,7 +3573,7 @@ useEffect(() => {
                         <div style={{ width: "100%", marginBottom: "4px" }}>
                           {c.content && <p style={{ margin: 0, fontSize: "13px", color: "#f1f1f1", lineHeight: 1.3, wordWrap: "break-word" }}>{c.content}</p>}
                           {c.image_url && <img src={c.image_url} style={{ maxWidth: "100%", maxHeight: "160px", borderRadius: "6px", marginTop: "6px" }} />}
-                          {c.audio_url && <audio controls src={c.audio_url} style={{ width: "100%", height: "32px", marginTop: "6px" }} />}
+                          {c.audio_url && <audio controls src={c.audio_url} onPlay={() => { if (videoRef.current) videoRef.current.pause(); if (audioRef.current) audioRef.current.pause(); }} style={{ width: "100%", height: "32px", marginTop: "6px" }} />}
                           
                           {/* Creator Heart inline with text */}
                           {c.has_creator_heart && (
