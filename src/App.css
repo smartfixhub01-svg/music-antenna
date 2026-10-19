@@ -3523,3 +3523,240 @@ body, .ma-app, button, input, textarea, select {
   background-color: #f1f1f1 !important;
   color: #0f0f0f !important;
 }
+
+/* =====================================================
+   TRUE YOUTUBE DESIGN SYSTEM - FINAL OVERHAUL
+   ===================================================== */
+
+/* 1. Core Variables & Typography */
+:root {
+  --yt-bg: #0f0f0f;
+  --yt-bg-elevated: #212121;
+  --yt-bg-hover: #272727;
+  --yt-bg-button: #222222;
+  --yt-text-primary: #f1f1f1;
+  --yt-text-secondary: #aaaaaa;
+  --yt-border: #303030;
+  --yt-accent: #3ea6ff;
+}
+
+body, .ma-app, p, h1, h2, h3, h4, h5, h6, span, div, button, input {
+  font-family: 'Roboto', 'Arial', sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+}
+
+.ma-app {
+  background-color: var(--yt-bg) !important;
+  color: var(--yt-text-primary) !important;
+}
+
+/* 2. Header & Search */
+.ma-header {
+  background-color: var(--yt-bg) !important;
+  border-bottom: none !important;
+  height: 56px !important;
+  padding: 0 16px !important;
+}
+.ma-search-box {
+  background-color: var(--yt-bg-elevated) !important;
+  border: 1px solid var(--yt-border) !important;
+  border-radius: 40px !important;
+  height: 40px !important;
+  padding-left: 16px !important;
+}
+.ma-search input {
+  font-size: 16px !important;
+  color: var(--yt-text-primary) !important;
+  background: transparent !important;
+}
+
+/* 3. Home Page Video Cards */
+.yt-video {
+  margin-bottom: 16px !important;
+  background: transparent !important;
+}
+.yt-thumb {
+  border-radius: 12px !important;
+  margin-bottom: 12px !important;
+  aspect-ratio: 16 / 9 !important;
+  overflow: hidden !important;
+}
+.yt-video-row {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 12px !important;
+  padding: 0 !important;
+}
+.yt-video-avatar {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  margin-top: 2px !important;
+  flex-shrink: 0 !important;
+}
+.yt-video-info {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  text-align: left !important;
+}
+.yt-video-title {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  line-height: 1.4 !important;
+  color: var(--yt-text-primary) !important;
+  margin: 0 0 4px 0 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+.yt-video-channel, .yt-video-meta {
+  font-size: 12px !important;
+  color: var(--yt-text-secondary) !important;
+  margin: 0 !important;
+  line-height: 1.4 !important;
+}
+
+/* 4. Watch Page Player & Actions */
+.yt-watch-body {
+  padding: 12px 16px !important;
+}
+.yt-watch-title {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+  margin: 0 0 8px 0 !important;
+  text-align: left !important;
+}
+.yt-watch-meta {
+  font-size: 12px !important;
+  color: var(--yt-text-secondary) !important;
+  margin-bottom: 12px !important;
+  text-align: left !important;
+}
+
+/* Action Buttons (Like, Share, Download) */
+.yt-watch-actions {
+  display: flex !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+  padding-bottom: 16px !important;
+  margin-bottom: 16px !important;
+  border-bottom: 1px solid var(--yt-border) !important;
+  scrollbar-width: none !important;
+}
+.yt-watch-action {
+  background-color: var(--yt-bg-button) !important;
+  border: none !important;
+  border-radius: 20px !important;
+  height: 36px !important;
+  padding: 0 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  color: var(--yt-text-primary) !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+}
+.yt-watch-action:hover { background-color: #3f3f3f !important; }
+.yt-watch-action .material-symbols-outlined { font-size: 20px !important; }
+
+/* Channel Row */
+.yt-watch-channel {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding-bottom: 16px !important;
+  margin-bottom: 16px !important;
+  border-bottom: 1px solid var(--yt-border) !important;
+}
+.yt-watch-avatar { width: 40px !important; height: 40px !important; border-radius: 50% !important; }
+.yt-watch-channel-name { font-size: 16px !important; font-weight: 700 !important; margin: 0 !important; color: var(--yt-text-primary) !important; }
+.yt-watch-channel-sub { font-size: 12px !important; color: var(--yt-text-secondary) !important; margin: 0 !important; }
+.yt-watch-subscribe {
+  background-color: var(--yt-text-primary) !important;
+  color: var(--yt-bg) !important;
+  border-radius: 18px !important;
+  height: 36px !important;
+  padding: 0 16px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  border: none !important;
+}
+
+/* Description Box */
+.yt-watch-desc {
+  background-color: var(--yt-bg-elevated) !important;
+  border-radius: 12px !important;
+  padding: 12px !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  color: var(--yt-text-primary) !important;
+  text-align: left !important;
+}
+
+/* 5. Bottom Navigation */
+.ma-mobile-nav {
+  background-color: var(--yt-bg) !important;
+  border-top: 1px solid var(--yt-border) !important;
+  height: 56px !important;
+  padding: 0 !important;
+}
+.ma-mobile-nav button {
+  color: var(--yt-text-secondary) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  padding: 0 !important;
+}
+.ma-mobile-nav button.active { color: var(--yt-text-primary) !important; }
+.ma-mobile-nav button .material-symbols-outlined { font-size: 24px !important; }
+.ma-mobile-nav button small { font-size: 10px !important; font-weight: 500 !important; }
+
+/* 6. Chips (All, Music, Videos) */
+.yt-chips {
+  display: flex !important;
+  gap: 12px !important;
+  padding-bottom: 16px !important;
+  overflow-x: auto !important;
+  scrollbar-width: none !important;
+}
+.yt-chip {
+  background-color: var(--yt-bg-elevated) !important;
+  color: var(--yt-text-primary) !important;
+  border-radius: 8px !important;
+  height: 32px !important;
+  padding: 0 12px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  border: none !important;
+  display: flex !important;
+  align-items: center !important;
+  white-space: nowrap !important;
+}
+.yt-chip-active {
+  background-color: var(--yt-text-primary) !important;
+  color: var(--yt-bg) !important;
+}
+
+/* 7. Comments Modal */
+.yt-comment-input-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 8px 12px !important;
+  background: var(--yt-bg-elevated) !important;
+  border-radius: 24px !important;
+}
+.yt-comment-input-row input {
+  background: transparent !important;
+  border: none !important;
+  color: var(--yt-text-primary) !important;
+  font-size: 14px !important;
+  padding: 8px 0 !important;
+}
