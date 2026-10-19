@@ -67,6 +67,18 @@ export default function App() {
   const [category, setCategory] = useState("All");
   const [activeMedia, setActiveMedia] = useState(null);
   const [showWatchPage, setShowWatchPage] = useState(false);
+  // BULLETPROOF SUBSCRIBER FETCH
+  useEffect(() => {
+    if (session?.user?.id) {
+      supabase.from("subscriptions")
+        .select("*", { count: "exact", head: true })
+        .eq("channel_id", session.user.id)
+        .then(({ count }) => {
+          setMySubCount(count || 0);
+        });
+    }
+  }, [session]);
+
   const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState(null);
@@ -1125,16 +1137,17 @@ useEffect(() => {
     try {
       const { data: media } = await supabase.from("media").select("id, views").eq("artist_id", session.user.id);
       const totalViews = media?.reduce((sum, m) => sum + (m.views || 0), 0) || 0;
-      const mediaIds = media?.map(m => m.id) || [];
       
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-
+      const mediaIds = media?.map(m => m.id) || [];
+      
       let weeklyViews = 0;
       if (mediaIds.length > 0) {
         const { count: wv } = await supabase.from("video_views").select("*", { count: "exact", head: true }).in("media_id", mediaIds).gte("created_at", sevenDaysAgo);
         weeklyViews = wv || 0;
       }
 
+      // FETCH REAL SUBSCRIBER COUNT
       const { count: totalSubs } = await supabase.from("subscriptions").select("*", { count: "exact", head: true }).eq("channel_id", session.user.id);
       const { count: weeklySubs } = await supabase.from("subscriptions").select("*", { count: "exact", head: true }).eq("channel_id", session.user.id).gte("created_at", sevenDaysAgo);
 
@@ -1146,7 +1159,7 @@ useEffect(() => {
 
       setAnalyticsData({ totalViews, totalSubs: totalSubs || 0, totalComments, weeklyViews, weeklySubs: weeklySubs || 0 });
     } catch (err) {
-      setMessage("Analytics Error: " + err.message);
+      setMessage("Error loading analytics: " + err.message);
     } finally {
       setAnalyticsLoading(false);
     }
@@ -2738,7 +2751,13 @@ useEffect(() => {
                 <div style={{ fontSize: "12px", color: "#aaa" }}>Views</div>
               </div>
               <div style={{ width: "1px", height: "24px", background: "#303030" }}></div>
-              <div style={{ textAlign: "center" }}>
+              <div style={{ textAlign: "center", cursor: "pointer" }} onClick={() => { 
+                if (session?.user?.id) {
+                  supabase.from("subscriptions").select("*", { count: "exact", head: true }).eq("channel_id", session.user.id).then(({ count }) => setMySubCount(count || 0));
+                  setMessage("Refreshed subscriber count!");
+                  setTimeout(() => setMessage(""), 2000);
+                }
+              }}>
                 <div style={{ fontSize: "18px", fontWeight: "700", color: "#f1f1f1" }}>{mySubCount}</div>
                 <div style={{ fontSize: "12px", color: "#aaa" }}>Subscribers</div>
               </div>
