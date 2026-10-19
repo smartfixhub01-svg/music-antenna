@@ -1152,7 +1152,16 @@ useEffect(() => {
       const mediaIds = localMedia.map(m => m.id);
 
       // 2. Use the subscriber count we ALREADY know is correct from the Dashboard
-      const finalSubs = mySubCount;
+      const { count: freshSubs, error: subsError } = await supabase
+        .from("subscriptions")
+        .select("*", { count: "exact", head: true })
+        .eq("channel_id", session.user.id);
+
+      if (subsError) throw subsError;
+
+      const finalSubs = freshSubs ?? 0;
+      setMySubCount(finalSubs);
+      setSubscriberCount(finalSubs);
 
       // 3. Only fetch the weekly stats from the database (since we don't have them locally)
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -2803,7 +2812,7 @@ useEffect(() => {
             <div style={{ display: "flex", gap: "24px", borderBottom: "1px solid #303030", marginBottom: "16px" }}>
               <button style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "#ff365f", fontWeight: "600", fontSize: "14px", borderBottom: "2px solid #ff365f" }}>Overview</button>
               <button onClick={() => { setShowAccountPage(false); setShowManagePage(true); }} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "#aaa", fontWeight: "500", fontSize: "14px", cursor: "pointer" }}>Content</button>
-              <button onClick={() => setShowAnalytics(true)} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "#aaa", fontWeight: "500", fontSize: "14px", cursor: "pointer" }}>Analytics</button>
+              <button onClick={openAnalytics} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "#aaa", fontWeight: "500", fontSize: "14px", cursor: "pointer" }}>Analytics</button>
               <button onClick={() => setMessage("About section coming soon.")} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "#aaa", fontWeight: "500", fontSize: "14px", cursor: "pointer" }}>About</button>
             </div>
 
@@ -2812,7 +2821,7 @@ useEffect(() => {
               <div style={{ background: "#181818", borderRadius: "12px", padding: "16px", border: "1px solid #303030", marginBottom: "24px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
                   <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "600", color: "#f1f1f1" }}>Creator dashboard</h3>
-                  <span className="material-symbols-outlined" onClick={() => setShowAnalytics(true)} style={{ color: "#ff365f", fontSize: "20px", cursor: "pointer" }}>bar_chart</span>
+                  <span className="material-symbols-outlined" onClick={openAnalytics} style={{ color: "#ff365f", fontSize: "20px", cursor: "pointer" }}>bar_chart</span>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", marginBottom: "16px" }}>
                   <div style={{ background: "#212121", borderRadius: "8px", padding: "12px", textAlign: "center" }}>
@@ -2838,7 +2847,7 @@ useEffect(() => {
                   <button onClick={() => { setShowAccountPage(false); setShowManagePage(true); }} style={{ background: "#272727", color: "white", border: 0, padding: "10px", borderRadius: "8px", fontSize: "12px", fontWeight: "500", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px", cursor: "pointer" }}>
                     <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>format_list_bulleted</span> Manage
                   </button>
-                  <button onClick={() => { setShowAccountPage(false); setShowAnalytics(true); }} style={{ background: "#272727", color: "white", border: 0, padding: "10px", borderRadius: "8px", fontSize: "12px", fontWeight: "500", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px", cursor: "pointer" }}>
+                  <button onClick={openAnalytics} style={{ background: "#272727", color: "white", border: 0, padding: "10px", borderRadius: "8px", fontSize: "12px", fontWeight: "500", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px", cursor: "pointer" }}>
                     <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>bar_chart</span> Analytics
                   </button>
                 </div>
