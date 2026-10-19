@@ -68,6 +68,42 @@ export default function App() {
   const [activeMedia, setActiveMedia] = useState(null);
   const [showWatchPage, setShowWatchPage] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [miniPlayerPos, setMiniPlayerPos] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragRef = useRef({ startX: 0, startY: 0, initialLeft: 0, initialTop: 0 });
+
+  const handlePointerDown = (e) => {
+    if (e.target.closest('button')) return; // Don't drag if clicking a button
+    setIsDragging(true);
+    const rect = e.currentTarget.getBoundingClientRect();
+    dragRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      initialLeft: rect.left,
+      initialTop: rect.top,
+    };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e) => {
+    if (!isDragging) return;
+    const dx = e.clientX - dragRef.current.startX;
+    const dy = e.clientY - dragRef.current.startY;
+    
+    // Keep it inside the screen bounds
+    let newLeft = dragRef.current.initialLeft + dx;
+    let newTop = dragRef.current.initialTop + dy;
+    newLeft = Math.max(8, Math.min(window.innerWidth - 140, newLeft));
+    newTop = Math.max(8, Math.min(window.innerHeight - 140, newTop));
+    
+    setMiniPlayerPos({ left: newLeft, top: newTop });
+  };
+
+  const handlePointerUp = (e) => {
+    setIsDragging(false);
+    e.currentTarget.releasePointerCapture(e.pointerId);
+  };
+
 const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState(null);
@@ -3342,11 +3378,21 @@ useEffect(() => {
       )}
 
       {activeMedia && !showWatchPage && (
-        <div className={"yt-mini-player" + (navVisible ? "" : " yt-mini-hidden")}>
+        <div 
+          className={"yt-mini-player" + (navVisible || isDragging || miniPlayerPos ? "" : " yt-mini-hidden") + (isDragging ? " yt-mini-dragging" : "")}
+          style={{
+            bottom: miniPlayerPos ? 'auto' : '72px',
+            left: miniPlayerPos ? `${miniPlayerPos.left}px` : '16px',
+            top: miniPlayerPos ? `${miniPlayerPos.top}px` : 'auto',
+          }}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+        >
           
           <div className="yt-mini-cover" onClick={() => setShowWatchPage(true)}>
             {activeMedia.thumbnailUrl ? (
-              <img src={activeMedia.thumbnailUrl} alt="" />
+              <img src={activeMedia.thumbnailUrl} alt="" style={{ pointerEvents: "none" }} />
             ) : (
               <div className="yt-mini-cover-fallback">♫</div>
             )}
@@ -3364,7 +3410,7 @@ useEffect(() => {
               }} 
               className="yt-mini-play-btn"
             >
-              <span className="material-symbols-outlined" style={{ fontSize: "22px", fontVariationSettings: "'FILL' 1" }}>
+              <span className="material-symbols-outlined" style={{ fontSize: "22px", fontVariationSettings: "'FILL' 1", pointerEvents: "none" }}>
                 {isPlaying ? "pause" : "play_arrow"}
               </span>
             </button>
@@ -3374,12 +3420,13 @@ useEffect(() => {
                 e.stopPropagation(); 
                 setActiveMedia(null); 
                 setShowWatchPage(false);
+                setMiniPlayerPos(null); // Reset position when closed
                 if (audioRef.current) audioRef.current.pause(); 
                 if (videoRef.current) videoRef.current.pause(); 
               }} 
               className="yt-mini-close-btn"
             >
-              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>close</span>
+              <span className="material-symbols-outlined" style={{ fontSize: "18px", pointerEvents: "none" }}>close</span>
             </button>
           </div>
 
