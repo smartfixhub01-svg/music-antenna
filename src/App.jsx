@@ -233,6 +233,8 @@ useEffect(() => {
     setShowShareModal(false);
     setShowCommentsModal(false);
     setShowSubscriptionsFeed(false);
+    setActiveMedia(null);       // Closes the video player
+    setShowWatchPage(false);    // Closes the watch page
   }
 
   function openPlayer(item) {
@@ -370,6 +372,7 @@ useEffect(() => {
           // Fetch subscriber count for the You Tab
           const { count } = await supabase.from("subscriptions").select("*", { count: "exact", head: true }).eq("channel_id", user.id);
           setSubscriberCount(count || 0);
+          setMySubCount(count || 0);
           setMySubCount(count || 0);
         }
       } catch (error) {
@@ -833,28 +836,13 @@ useEffect(() => {
     setActiveMedia(null);
     setManageLoading(true);
     
-    // 1. INSTANT FALLBACK: Use the videos we already know they have from the home feed
     const localMedia = media.filter(m => m.artist_id === session.user.id);
-    if (localMedia.length > 0) {
-      setManageMedia(localMedia);
-    }
+    if (localMedia.length > 0) setManageMedia(localMedia);
 
     try {
-      // 2. Fetch the absolute latest list from the database
-      const { data, error } = await supabase
-        .from("media")
-        .select("*")
-        .eq("artist_id", session.user.id)
-        .order("created_at", { ascending: false });
-        
-      if (error) {
-        console.error("Manage page fetch error:", error);
-        // If the database fails, we already have the localMedia set above, so it won't be empty
-      } else if (data && data.length > 0) {
+      const { data, error } = await supabase.from("media").select("*").eq("artist_id", session.user.id).order("created_at", { ascending: false });
+      if (!error && data && data.length > 0) {
         setManageMedia(data);
-      } else if (localMedia.length === 0) {
-        // Only set to empty if both the database AND local memory are empty
-        setManageMedia([]);
       }
     } catch (err) {
       console.error("Manage page error:", err);
@@ -3360,54 +3348,20 @@ useEffect(() => {
       )}
 
     <nav className={"ma-mobile-nav ma-nav-yt" + (navVisible ? "" : " ma-mobile-nav-hidden")} aria-label="Main navigation">
-        <button aria-label="Home" onClick={() => {
-          closeAllOverlays();
-          setCategory("All");
-          setSearch("");
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        }}>
+        <button aria-label="Home" onClick={() => { closeAllOverlays(); setCategory("All"); setSearch(""); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
           <span className="material-symbols-outlined">home</span><small>Home</small>
         </button>
-        
-        <button aria-label="Shorts" onClick={() => {
-          closeAllOverlays();
-          setCategory("Videos");
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        }}>
+        <button aria-label="Shorts" onClick={() => { closeAllOverlays(); setCategory("Videos"); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
           <span className="material-symbols-outlined">video_library</span><small>Shorts</small>
         </button>
-        
-        <button className="ma-create-nav" aria-label="Create" onClick={() => {
-          if (profile?.role === "artist") {
-            closeAllOverlays();
-            setShowUpload(true);
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          } else {
-            setMessage("Become an Artist before uploading music or videos.");
-          }
-        }}>
+        <button className="ma-create-nav" aria-label="Create" onClick={() => { if (profile?.role === "artist") { closeAllOverlays(); setShowUpload(true); window.scrollTo({ top: 0, behavior: "smooth" }); } else { setMessage("Become an Artist before uploading."); } }}>
           <span className="material-symbols-outlined">add</span>
         </button>
-        
-        <button aria-label="Subscriptions" onClick={() => {
-          closeAllOverlays();
-          setShowSubscriptionsFeed(true);
-          setTimeout(() => loadMedia(), 50);
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        }}>
+        <button aria-label="Subscriptions" onClick={() => { closeAllOverlays(); setShowSubscriptionsFeed(true); setTimeout(() => loadMedia(), 50); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
           <span className="material-symbols-outlined">subscriptions</span><small>Subscriptions</small>
         </button>
-        
-        <button aria-label="You" onClick={() => {
-          closeAllOverlays();
-          setShowAccountPage(true);
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        }}>
-          {profile?.avatar_url ? (
-            <img className="ma-nav-avatar" src={profile.avatar_url} alt="" />
-          ) : (
-            <span className="ma-nav-avatar ma-nav-avatar-fallback">{displayUser.charAt(0).toUpperCase()}</span>
-          )}
+        <button aria-label="You" onClick={() => { closeAllOverlays(); setShowAccountPage(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+          {profile?.avatar_url ? <img className="ma-nav-avatar" src={profile.avatar_url} alt="" /> : <span className="ma-nav-avatar ma-nav-avatar-fallback">{displayUser.charAt(0).toUpperCase()}</span>}
           <small>You</small>
         </button>
       </nav>
