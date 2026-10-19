@@ -2806,7 +2806,7 @@ useEffect(() => {
             {/* 5. TABS */}
             <div style={{ display: "flex", gap: "24px", borderBottom: "1px solid #303030", marginBottom: "16px" }}>
               <button style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "#ff365f", fontWeight: "600", fontSize: "14px", borderBottom: "2px solid #ff365f" }}>Overview</button>
-              <button onClick={() => setShowManagePage(true)} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "#aaa", fontWeight: "500", fontSize: "14px" }}>Content</button>
+              <button onClick={() => { setShowAccountPage(false); setShowManagePage(true); }} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "#aaa", fontWeight: "500", fontSize: "14px", cursor: "pointer" }}>Content</button>
               <button onClick={() => setShowAnalytics(true)} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "#aaa", fontWeight: "500", fontSize: "14px", cursor: "pointer" }}>Analytics</button>
               <button onClick={() => setMessage("About section coming soon.")} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "#aaa", fontWeight: "500", fontSize: "14px", cursor: "pointer" }}>About</button>
             </div>
