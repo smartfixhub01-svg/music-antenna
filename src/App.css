@@ -4205,3 +4205,36 @@ button {
 .yt-video-meta {
   margin-top: 2px !important;
 }
+
+/* FIX TOUCH TARGETS & CLICKS */
+.yt-watch-action,
+.yt-you-btn,
+.yt-chip {
+  min-height: 36px !important;
+  padding: 0 16px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+.yt-watch-action *,
+.yt-you-btn *,
+.yt-chip * {
+  pointer-events: none !important; /* Prevents child elements from blocking the parent button click */
+}
+
+.yt-video-avatar,
+.yt-video-channel,
+.yt-watch-channel-info {
+  cursor: pointer !important;
+  transition: opacity 0.2s !important;
+}
+
+.yt-video-avatar:active,
+.yt-video-channel:active,
+.yt-watch-channel-info:active {
+  opacity: 0.7 !important;
+}

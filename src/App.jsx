@@ -2486,16 +2486,22 @@ useEffect(() => {
                     </button>
 
                     <div className="yt-video-row">
-                      <div className="yt-video-avatar" style={{ overflow: "hidden" }}>
+                      <div 
+                        className="yt-video-avatar" 
+                        onClick={(e) => { e.stopPropagation(); openChannel(item.artist_id); }}
+                        style={{ cursor: "pointer" }}
+                      >
                         {item.profiles?.avatar_url ? (
                           <img src={item.profiles.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                        ) : (
-                          "♫"
-                        )}
+                        ) : "♫"}
                       </div>
                       <div className="yt-video-info">
                         <h3 className="yt-video-title">{item.title}</h3>
-                        <p className="yt-video-channel">
+                        <p 
+                          className="yt-video-channel" 
+                          onClick={(e) => { e.stopPropagation(); openChannel(item.artist_id); }}
+                          style={{ cursor: "pointer" }}
+                        >
                           {item.profiles?.display_name || "Unknown Artist"}
                         </p>
                         <p className="yt-video-meta">
@@ -2583,10 +2589,14 @@ useEffect(() => {
                   {likesCount > 0 ? likesCount : "Like"}
                 </span>
               </button>
-              <button className="yt-watch-action" onClick={() => setMessage("Dislikes coming soon.")}>
+              <button className="yt-watch-action" onClick={() => {
+                  localStorage.setItem(`disliked_${activeMedia.id}`, "true");
+                  setMessage("Video disliked.");
+                  setTimeout(() => setMessage(""), 2000);
+                }}>
                 <span className="material-symbols-outlined">thumb_down</span>
               </button>
-              <button className="yt-watch-action" onClick={() => setShowShareModal(true)}>
+              <button className="yt-watch-action" onClick={() => { setShowShareModal(true); }}>
                 <span className="material-symbols-outlined">share</span>
                 <span className="yt-watch-action-label">Share</span>
               </button>
@@ -2603,7 +2613,12 @@ useEffect(() => {
                 <span className="yt-watch-action-label">Save</span>
               </button>
               
-              <button className="yt-watch-action" onClick={() => setMessage("More options coming soon.")}>
+              <button className="yt-watch-action" onClick={() => {
+                  const url = window.location.href;
+                  navigator.clipboard.writeText(url);
+                  setMessage("Link copied! Use Share to send to friends.");
+                  setTimeout(() => setMessage(""), 2000);
+                }}>
                 <span className="material-symbols-outlined">more_vert</span>
               </button>
             </div>
