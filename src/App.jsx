@@ -2693,39 +2693,25 @@ useEffect(() => {
       {showAccountPage && (
         <section className="yt-you" style={{ padding: "0 0 100px", background: "#0f0f0f", minHeight: "100vh" }}>
           
-          {/* BANNER */}
+          {/* 1. BANNER */}
           <div style={{ width: "100%", height: "120px", background: "linear-gradient(135deg, #2a1622, #121722, #ff365f)", position: "relative" }}>
-            <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, background: "url('https://wcuqehdequrealcndkyw.supabase.co/storage/v1/object/public/track-covers/logo.png') center/cover", opacity: 0.2 }}></div>
+            <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, background: "url('https://wcuqehdequrealcndkyw.supabase.co/storage/v1/object/public/track-covers/logo.png') center/cover", opacity: 0.15 }}></div>
           </div>
 
-          {/* TOP BAR / NAVIGATION */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 16px 0" }}>
-             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span style={{ fontSize: "20px", fontWeight: "bold", color: "#ff365f", display: "flex", alignItems: "center", gap: "4px" }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>graphic_eq</span>
-                  Music <span style={{ color: "#fff" }}>Antenna</span>
-                </span>
-             </div>
-             <div style={{ display: "flex", gap: "12px" }}>
-                <span className="material-symbols-outlined" style={{ color: "#aaa" }}>search</span>
-                <div style={{ position: "relative" }}>
-                  <span className="material-symbols-outlined" style={{ color: "#aaa" }}>notifications</span>
-                  <span style={{ position: "absolute", top: -4, right: -4, background: "#ff365f", color: "white", fontSize: "9px", fontWeight: "bold", width: "14px", height: "14px", borderRadius: "50%", display: "grid", placeItems: "center" }}>3</span>
-                </div>
-                <span className="material-symbols-outlined" style={{ color: "#aaa" }}>settings</span>
-             </div>
-          </div>
-
-          {/* PROFILE HEADER */}
-          <div style={{ padding: "0 16px", marginTop: "-40px", position: "relative" }}>
+          {/* 2. PROFILE HEADER (Overlapping the banner) */}
+          <div style={{ padding: "0 16px", marginTop: "-44px", position: "relative", zIndex: 2 }}>
             <div style={{ display: "flex", alignItems: "flex-end", gap: "16px" }}>
-              <div style={{ width: "88px", height: "88px", borderRadius: "50%", border: "4px solid #0f0f0f", background: "#ff365f", overflow: "hidden", flexShrink: 0, zIndex: 2 }}>
+              
+              {/* Avatar */}
+              <div style={{ width: "88px", height: "88px", borderRadius: "50%", border: "4px solid #0f0f0f", background: "#ff365f", overflow: "hidden", flexShrink: 0 }}>
                 {profile?.avatar_url ? (
                   <img src={profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 ) : (
                   <span style={{ fontSize: "32px", fontWeight: "bold", color: "white", display: "flex", width: "100%", height: "100%", alignItems: "center", justifyContent: "center" }}>{(profile?.display_name || displayUser || "M").charAt(0).toUpperCase()}</span>
                 )}
               </div>
+
+              {/* Name & Bio */}
               <div style={{ paddingBottom: "4px" }}>
                 <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "700", color: "#f1f1f1", display: "flex", alignItems: "center", gap: "4px" }}>
                   {profile?.display_name || displayUser || "Music listener"}
@@ -2740,7 +2726,7 @@ useEffect(() => {
               <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>music_note</span> Artist profile
             </p>
 
-            {/* STATS ROW */}
+            {/* 3. STATS ROW */}
             <div style={{ display: "flex", justifyContent: "space-around", alignItems: "center", padding: "12px 0", borderBottom: "1px solid #212121", marginBottom: "16px" }}>
               <div style={{ textAlign: "center" }}>
                 <div style={{ fontSize: "18px", fontWeight: "700", color: "#f1f1f1" }}>{media.filter(m => m.artist_id === session?.user?.id).length}</div>
@@ -2758,7 +2744,7 @@ useEffect(() => {
               </div>
             </div>
 
-            {/* ACTION BUTTONS */}
+            {/* 4. ACTION BUTTONS */}
             <div style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
               <button onClick={() => { setShowAccountPage(false); openChannel(session?.user?.id); }} style={{ flex: 1, background: "#ff365f", color: "#fff", padding: "10px", borderRadius: "8px", fontWeight: "600", fontSize: "14px", border: 0 }}>
                 View channel
@@ -2771,7 +2757,7 @@ useEffect(() => {
               </button>
             </div>
 
-            {/* TABS */}
+            {/* 5. TABS */}
             <div style={{ display: "flex", gap: "24px", borderBottom: "1px solid #303030", marginBottom: "16px" }}>
               <button style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "#ff365f", fontWeight: "600", fontSize: "14px", borderBottom: "2px solid #ff365f" }}>Overview</button>
               <button onClick={() => setShowManagePage(true)} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "#aaa", fontWeight: "500", fontSize: "14px" }}>Content</button>
@@ -2779,7 +2765,7 @@ useEffect(() => {
               <button style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "#aaa", fontWeight: "500", fontSize: "14px" }}>About</button>
             </div>
 
-            {/* CREATOR DASHBOARD CARD */}
+            {/* 6. CREATOR DASHBOARD CARD */}
             {profile?.role === "artist" && (
               <div style={{ background: "#181818", borderRadius: "12px", padding: "16px", border: "1px solid #303030", marginBottom: "24px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
@@ -2817,7 +2803,7 @@ useEffect(() => {
               </div>
             )}
             
-            {/* HISTORY & LIBRARY (Keeping it simple for this view) */}
+            {/* HISTORY */}
             <h3 style={{ margin: "0 0 12px", fontSize: "16px", fontWeight: "600", color: "#f1f1f1" }}>History</h3>
             <div style={{ display: "flex", gap: "12px", overflowX: "auto", paddingBottom: "16px", marginBottom: "16px" }}>
                {history.slice(0, 4).map((item) => (
@@ -2830,6 +2816,7 @@ useEffect(() => {
                 ))}
             </div>
 
+            {/* EDIT PROFILE FORM */}
             {showProfileEditor && (
               <section style={{ background: "#212121", borderRadius: "12px", padding: "16px", marginBottom: "24px" }}>
                 <h3 style={{ margin: "0 0 16px" }}>Edit Profile</h3>
