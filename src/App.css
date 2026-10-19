@@ -4162,3 +4162,46 @@ body, .ma-app {
 .yt-you-shelf-head .material-symbols-outlined {
   font-size: 16px !important;
 }
+
+/* =====================================================
+   FIX WHITE BOXES & BOTTOM NAV SAFE AREA
+   ===================================================== */
+
+/* 1. Remove ugly white borders from top bar icons */
+.yt-icon-btn, 
+.ma-icon-btn, 
+button {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+}
+
+/* 2. Specifically style the top right icons on the You tab */
+.yt-you-topbar-right button {
+  background-color: #212121 !important;
+  border-radius: 50% !important;
+  width: 36px !important;
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-left: 8px !important;
+}
+
+.yt-you-topbar-right button .material-symbols-outlined {
+  font-size: 20px !important;
+  color: #f1f1f1 !important;
+}
+
+/* 3. Fix the bottom nav safe area for Android */
+.ma-mobile-nav {
+  padding-bottom: env(safe-area-inset-bottom) !important;
+  height: auto !important;
+  min-height: 56px !important;
+}
+
+/* 4. Fix the spacing for the History video cards */
+.yt-video-meta {
+  margin-top: 2px !important;
+}
