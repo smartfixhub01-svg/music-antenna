@@ -1907,6 +1907,19 @@ useEffect(() => {
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   }
 
+  // Fetch real subscriber count for the You Tab dashboard
+  useEffect(() => {
+    if (session?.user?.id) {
+      supabase
+        .from("subscriptions")
+        .select("*", { count: "exact", head: true })
+        .eq("channel_id", session.user.id)
+        .then(({ count }) => {
+          setMySubCount(count || 0);
+        });
+    }
+  }, [session?.user?.id, showAccountPage]); // Re-run when You tab opens
+
   return (
     <div className="ma-app">
         {/* PERMANENT AUDIO PLAYER (Never stops on tab change) */}
@@ -2751,7 +2764,7 @@ useEffect(() => {
                   <p style={{ margin: "4px 0 0", fontSize: "12px", color: "#aaaaaa" }}>Views</p>
                 </div>
                 <div>
-                  <h2 style={{ margin: 0, color: "#f1f1f1", fontSize: "20px", fontWeight: "700" }}>{mySubCount || 0}</h2>
+                  <h2 style={{ margin: 0, color: "#f1f1f1", fontSize: "20px", fontWeight: "700" }}>{mySubCount}</h2>
                   <p style={{ margin: "4px 0 0", fontSize: "12px", color: "#aaaaaa" }}>Subscribers</p>
                 </div>
               </div>
