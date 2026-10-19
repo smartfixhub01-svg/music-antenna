@@ -934,18 +934,14 @@ useEffect(() => {
     }
     
     try {
-      // Safely pause main players
-      wasPlayingRef.current = false;
-      try {
-        if (videoRef.current && !videoRef.current.paused) {
-          videoRef.current.pause();
-          wasPlayingRef.current = true;
+      // Pause ALL audio and video tags on the page (Main + Mini Player)
+      window._wasPlayingBeforeRecord = false;
+      document.querySelectorAll('audio, video').forEach(el => {
+        if (!el.paused) {
+          el.pause();
+          window._wasPlayingBeforeRecord = true;
         }
-        if (audioRef.current && !audioRef.current.paused) {
-          audioRef.current.pause();
-          wasPlayingRef.current = true;
-        }
-      } catch (e) { console.log("Pause error", e); }
+      });
 
       setMessage("Requesting microphone...");
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -996,13 +992,13 @@ useEffect(() => {
       setIsRecording(false);
       clearInterval(timerRef.current);
       
-      // Resume main player if it was playing before recording
-      if (wasPlayingRef.current) {
+      // Resume the main player if it was playing before
+      if (window._wasPlayingBeforeRecord) {
         setTimeout(() => {
-          if (videoRef.current) videoRef.current.play().catch(()=>{});
-          if (audioRef.current) audioRef.current.play().catch(()=>{});
+          if (activeMedia?.media_type === 'audio' && audioRef.current) audioRef.current.play().catch(()=>{});
+          if (activeMedia?.media_type === 'video' && videoRef.current) videoRef.current.play().catch(()=>{});
         }, 300);
-        wasPlayingRef.current = false;
+        window._wasPlayingBeforeRecord = false;
       }
     }
   }
@@ -3577,7 +3573,7 @@ useEffect(() => {
                         <div style={{ width: "100%", marginBottom: "4px" }}>
                           {c.content && <p style={{ margin: 0, fontSize: "13px", color: "#f1f1f1", lineHeight: 1.3, wordWrap: "break-word" }}>{c.content}</p>}
                           {c.image_url && <img src={c.image_url} style={{ maxWidth: "100%", maxHeight: "160px", borderRadius: "6px", marginTop: "6px" }} />}
-                          {c.audio_url && <audio controls src={c.audio_url} onPlay={() => { if (videoRef.current) videoRef.current.pause(); if (audioRef.current) audioRef.current.pause(); }} style={{ width: "100%", height: "32px", marginTop: "6px" }} />}
+                          {c.audio_url && <audio controls src={c.audio_url} onPlay={(e) => { document.querySelectorAll("audio, video").forEach(el => { if (el !== e.target) el.pause(); }); }} style={{ width: "100%", height: "32px", marginTop: "6px" }} />}
                           
                           {/* Creator Heart inline with text */}
                           {c.has_creator_heart && (
