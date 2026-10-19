@@ -217,6 +217,24 @@ useEffect(() => {
 
 
 
+  function closeAllOverlays() {
+    setShowAnalytics(false);
+    setShowManagePage(false);
+    setShowUpload(false);
+    setShowHistoryPage(false);
+    setShowLikedPage(false);
+    setShowAllPlaylists(false);
+    setSelectedPlaylist(null);
+    setShowChannelPage(false);
+    setShowAccountPage(false);
+    setShowBecomeArtistForm(false);
+    setShowProfileEditor(false);
+    setShowPlaylistModal(false);
+    setShowShareModal(false);
+    setShowCommentsModal(false);
+    setShowSubscriptionsFeed(false);
+  }
+
   function openPlayer(item) {
     if (!item) return;
     setShowAnalytics(false);
@@ -809,7 +827,6 @@ useEffect(() => {
 
   async function openManagePage() {
     if (!session?.user?.id) return;
-    setShowAnalytics(false);
     setShowManagePage(true);
     setShowAccountPage(false);
     setShowChannelPage(false);
@@ -822,6 +839,7 @@ useEffect(() => {
         .select("*")
         .eq("artist_id", session.user.id)
         .order("created_at", { ascending: false });
+        
       if (error) throw error;
       setManageMedia(data || []);
     } catch (err) {
@@ -3328,11 +3346,8 @@ useEffect(() => {
       )}
 
     <nav className={"ma-mobile-nav ma-nav-yt" + (navVisible ? "" : " ma-mobile-nav-hidden")} aria-label="Main navigation">
-        <button aria-label="Home" onClick={() => { setShowAnalytics(false); 
-          setShowWatchPage(false);
-          setShowAccountPage(false);
-          setShowChannelPage(false);
-          setShowUpload(false);
+        <button aria-label="Home" onClick={() => {
+          closeAllOverlays();
           setCategory("All");
           setSearch("");
           window.scrollTo({ top: 0, behavior: "smooth" });
@@ -3340,22 +3355,17 @@ useEffect(() => {
           <span className="material-symbols-outlined">home</span><small>Home</small>
         </button>
         
-        <button aria-label="Shorts" onClick={() => { setShowAnalytics(false); 
-          setShowWatchPage(false);
-          setShowAccountPage(false);
-          setShowChannelPage(false);
-          setShowUpload(false);
-          setCategory("Videos"); // Assuming Shorts is a category, or you can use a separate state
+        <button aria-label="Shorts" onClick={() => {
+          closeAllOverlays();
+          setCategory("Videos");
           window.scrollTo({ top: 0, behavior: "smooth" });
         }}>
           <span className="material-symbols-outlined">video_library</span><small>Shorts</small>
         </button>
         
-        <button className="ma-create-nav" aria-label="Create" onClick={() => { setShowAnalytics(false); 
+        <button className="ma-create-nav" aria-label="Create" onClick={() => {
           if (profile?.role === "artist") {
-            setShowWatchPage(false);
-            setShowAccountPage(false);
-            setShowChannelPage(false);
+            closeAllOverlays();
             setShowUpload(true);
             window.scrollTo({ top: 0, behavior: "smooth" });
           } else {
@@ -3365,23 +3375,17 @@ useEffect(() => {
           <span className="material-symbols-outlined">add</span>
         </button>
         
-        <button aria-label="Subscriptions" onClick={() => { setShowAnalytics(false); 
-          setShowWatchPage(false);
-          setShowAccountPage(false);
-          setShowChannelPage(false);
-          setShowUpload(false);
+        <button aria-label="Subscriptions" onClick={() => {
+          closeAllOverlays();
           setShowSubscriptionsFeed(true);
-          setCategory("All");
           setTimeout(() => loadMedia(), 50);
           window.scrollTo({ top: 0, behavior: "smooth" });
         }}>
           <span className="material-symbols-outlined">subscriptions</span><small>Subscriptions</small>
         </button>
         
-        <button aria-label="You" onClick={() => { setShowAnalytics(false); 
-          setShowWatchPage(false);
-          setShowChannelPage(false);
-          setShowUpload(false);
+        <button aria-label="You" onClick={() => {
+          closeAllOverlays();
           setShowAccountPage(true);
           window.scrollTo({ top: 0, behavior: "smooth" });
         }}>
