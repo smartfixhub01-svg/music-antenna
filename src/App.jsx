@@ -1124,30 +1124,46 @@ useEffect(() => {
     setAnalyticsLoading(true);
 
     try {
-      const { data: media } = await supabase.from("media").select("id, views").eq("artist_id", session.user.id);
-      const totalViews = media?.reduce((sum, m) => sum + (m.views || 0), 0) || 0;
+      // 1. Fetch Media for Views
+      const { data: media, error: mediaError } = await supabase.from("media").select("id, views").eq("artist_id", session.user.id);
+      if (mediaError) throw mediaError;
       
-      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const totalViews = media?.reduce((sum, m) => sum + (m.views || 0), 0) || 0;
       const mediaIds = media?.map(m => m.id) || [];
       
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      
+      // 2. Fetch Weekly Views
       let weeklyViews = 0;
       if (mediaIds.length > 0) {
-        const { count: wv } = await supabase.from("video_views").select("*", { count: "exact", head: true }).in("media_id", mediaIds).gte("created_at", sevenDaysAgo);
-        weeklyViews = wv || 0;
+        const { count: wv, error: wvErr } = await supabase.from("video_views").select("*", { count: "exact", head: true }).in("media_id", mediaIds).gte("created_at", sevenDaysAgo);
+        if (!wvErr) weeklyViews = wv || 0;
       }
 
-      // FETCH REAL SUBSCRIBER COUNT
-      const { count: totalSubs } = await supabase.from("subscriptions").select("*", { count: "exact", head: true }).eq("channel_id", session.user.id);
+      // 3. Fetch Subscribers (using the exact same query as the dashboard)
+      const { count: totalSubs, error: subsError } = await supabase.from("subscriptions").select("*", { count: "exact", head: true }).eq("channel_id", session.user.id);
       const { count: weeklySubs } = await supabase.from("subscriptions").select("*", { count: "exact", head: true }).eq("channel_id", session.user.id).gte("created_at", sevenDaysAgo);
 
+      // Fallback: If query fails, use the local mySubCount state we already know is correct
+      const finalSubs = (subsError || totalSubs === null) ? mySubCount : totalSubs;
+
+      // 4. Fetch Comments
       let totalComments = 0;
       if (mediaIds.length > 0) {
         const { count: tc } = await supabase.from("comments").select("*", { count: "exact", head: true }).in("media_id", mediaIds);
         totalComments = tc || 0;
       }
 
-      setMySubCount(totalSubs || 0);
-      setAnalyticsData({ totalViews, totalSubs: totalSubs || 0, totalComments, weeklyViews, weeklySubs: weeklySubs || 0 });
+      // Update UI
+      setMySubCount(finalSubs); // Sync the dashboard to match
+      setAnalyticsData({
+        totalViews: totalViews,
+        totalSubs: finalSubs,
+        totalComments: totalComments,
+        weeklyViews: weeklyViews,
+        weeklySubs: weeklySubs || 0
+      });
+      
     } catch (err) {
       setMessage("Error loading analytics: " + err.message);
     } finally {
