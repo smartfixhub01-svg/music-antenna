@@ -2726,13 +2726,31 @@ useEffect(() => {
           </div>
 
           <div className="yt-you-actions">
-            <button className="yt-you-btn yt-you-btn-primary" onClick={() => { setShowAccountPage(false); openChannel(session.user.id); }}>
+            <button
+              className="yt-you-btn yt-you-btn-primary"
+              onClick={() => {
+                if (session?.user?.id) {
+                  setShowAccountPage(false);
+                  openChannel(session.user.id);
+                } else {
+                  setMessage("Please sign in to view your channel.");
+                }
+              }}
+            >
               View channel
             </button>
-            <button className="yt-you-btn yt-you-btn-secondary" onClick={() => { setProfileName(profile?.username || ""); setProfileBio(profile?.bio || ""); setShowProfileEditor(!showProfileEditor); }}>
+            <button
+              className="yt-you-btn yt-you-btn-secondary"
+              onClick={() => {
+                setProfileName(profile?.username || profile?.display_name || "");
+                setProfileBio(profile?.bio || "");
+                setProfilePhotoFile(null);
+                setCoverPhotoFile(null);
+                setShowProfileEditor(!showProfileEditor);
+              }}
+            >
               {showProfileEditor ? "Close editor" : "Edit profile"}
             </button>
-
           </div>
 
           
