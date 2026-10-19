@@ -219,6 +219,7 @@ useEffect(() => {
 
   function openPlayer(item) {
     if (!item) return;
+    setShowAnalytics(false);
     setShowAccountPage(false);
     setShowChannelPage(false);
     setActiveMedia(item);
@@ -808,6 +809,7 @@ useEffect(() => {
 
   async function openManagePage() {
     if (!session?.user?.id) return;
+    setShowAnalytics(false);
     setShowManagePage(true);
     setShowAccountPage(false);
     setShowChannelPage(false);
@@ -1173,6 +1175,7 @@ useEffect(() => {
 
   async function openChannel(artistId) {
     if (!artistId) return;
+    setShowAnalytics(false);
     setChannelLoading(true);
     setShowChannelPage(true);
     setChannelProfile(null);
@@ -1937,7 +1940,7 @@ useEffect(() => {
             <span className="material-symbols-outlined">menu</span>
           </button>
           <a className="ma-brand" href="#home"
-            onClick={() => { setActiveMedia(null); setShowAccountPage(false); }}>
+            onClick={() => { setShowAnalytics(false);  setActiveMedia(null); setShowAccountPage(false); }}>
             <span className="ma-brand-icon">♫</span>
             <span className="ma-brand-text">Music <b>Antenna</b></span>
           </a>
@@ -2016,14 +2019,14 @@ useEffect(() => {
                     </div>
                   </div>
                   <div className="ma-avatar-menu-line" />
-                  <button onClick={() => { setMenuOpen(false); setShowAccountPage(true); setShowProfileEditor(false); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+                  <button onClick={() => { setShowAnalytics(false);  setMenuOpen(false); setShowAccountPage(true); setShowProfileEditor(false); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
                     <span className="material-symbols-outlined">account_circle</span> Your channel
                   </button>
-                  <button onClick={() => { setMenuOpen(false); setProfileName(profile?.username || profile?.display_name || ""); setProfileBio(profile?.bio || ""); setShowAccountPage(true); setShowProfileEditor(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+                  <button onClick={() => { setShowAnalytics(false);  setMenuOpen(false); setProfileName(profile?.username || profile?.display_name || ""); setProfileBio(profile?.bio || ""); setShowAccountPage(true); setShowProfileEditor(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
                     <span className="material-symbols-outlined">edit</span> Edit profile
                   </button>
                   <div className="ma-avatar-menu-line" />
-                  <button onClick={() => { setMenuOpen(false); handleLogout(); }}>
+                  <button onClick={() => { setShowAnalytics(false);  setMenuOpen(false); handleLogout(); }}>
                     <span className="material-symbols-outlined">logout</span> Sign out
                   </button>
                 </div>
@@ -3325,7 +3328,7 @@ useEffect(() => {
       )}
 
     <nav className={"ma-mobile-nav ma-nav-yt" + (navVisible ? "" : " ma-mobile-nav-hidden")} aria-label="Main navigation">
-        <button aria-label="Home" onClick={() => {
+        <button aria-label="Home" onClick={() => { setShowAnalytics(false); 
           setShowWatchPage(false);
           setShowAccountPage(false);
           setShowChannelPage(false);
@@ -3337,7 +3340,7 @@ useEffect(() => {
           <span className="material-symbols-outlined">home</span><small>Home</small>
         </button>
         
-        <button aria-label="Shorts" onClick={() => {
+        <button aria-label="Shorts" onClick={() => { setShowAnalytics(false); 
           setShowWatchPage(false);
           setShowAccountPage(false);
           setShowChannelPage(false);
@@ -3348,7 +3351,7 @@ useEffect(() => {
           <span className="material-symbols-outlined">video_library</span><small>Shorts</small>
         </button>
         
-        <button className="ma-create-nav" aria-label="Create" onClick={() => {
+        <button className="ma-create-nav" aria-label="Create" onClick={() => { setShowAnalytics(false); 
           if (profile?.role === "artist") {
             setShowWatchPage(false);
             setShowAccountPage(false);
@@ -3362,7 +3365,7 @@ useEffect(() => {
           <span className="material-symbols-outlined">add</span>
         </button>
         
-        <button aria-label="Subscriptions" onClick={() => {
+        <button aria-label="Subscriptions" onClick={() => { setShowAnalytics(false); 
           setShowWatchPage(false);
           setShowAccountPage(false);
           setShowChannelPage(false);
@@ -3375,7 +3378,7 @@ useEffect(() => {
           <span className="material-symbols-outlined">subscriptions</span><small>Subscriptions</small>
         </button>
         
-        <button aria-label="You" onClick={() => {
+        <button aria-label="You" onClick={() => { setShowAnalytics(false); 
           setShowWatchPage(false);
           setShowChannelPage(false);
           setShowUpload(false);
