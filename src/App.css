@@ -4239,13 +4239,107 @@ button {
   opacity: 0.7 !important;
 }
 
+
 /* =====================================================
-   COMPACT FLOATING MINI PLAYER (NO TEXT)
+   LEFT-ALIGNED COMPACT MINI PLAYER (AUTO-HIDE)
    ===================================================== */
 
 .yt-mini-player {
   position: fixed !important;
   bottom: 72px !important; /* Perfectly above the nav */
+  left: 16px !important; /* Down left side */
+  right: auto !important; /* Prevents it from stretching */
+  height: 48px !important;
+  width: max-content !important; /* Shrinks to fit content */
+  background: rgba(18, 18, 18, 0.9) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  padding: 0 6px !important;
+  z-index: 90 !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 54, 95, 0.2) !important;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease !important;
+  gap: 8px !important;
+  margin: 0 !important;
+}
+
+/* Auto-hide: Slides down and fades out */
+.yt-mini-hidden {
+  transform: translateY(120px) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Circular Cover Art */
+.yt-mini-cover {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important; /* Circular for the pill look */
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+  cursor: pointer !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.yt-mini-cover img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+.yt-mini-cover-fallback {
+  width: 100% !important;
+  height: 100% !important;
+  background: #ff365f !important;
+  display: grid !important;
+  place-items: center !important;
+  color: white !important;
+  font-size: 16px !important;
+}
+
+/* Controls */
+.yt-mini-controls {
+  display: flex !important;
+  align-items: center !important;
+  gap: 2px !important;
+  flex-shrink: 0 !important;
+}
+
+.yt-mini-play-btn, 
+.yt-mini-close-btn {
+  background: transparent !important;
+  border: none !important;
+  display: grid !important;
+  place-items: center !important;
+  cursor: pointer !important;
+  border-radius: 50% !important;
+  width: 32px !important;
+  height: 32px !important;
+  transition: background 0.2s, transform 0.2s !important;
+}
+
+.yt-mini-play-btn {
+  background: rgba(255, 54, 95, 0.15) !important;
+  color: #ff365f !important;
+}
+
+.yt-mini-play-btn:hover {
+  background: rgba(255, 54, 95, 0.25) !important;
+  transform: scale(1.05) !important;
+}
+
+.yt-mini-close-btn {
+  color: #aaaaaa !important;
+}
+
+.yt-mini-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #f1f1f1 !important;
+}
+/* Perfectly above the nav */
   left: 50% !important;
   transform: translateX(-50%) !important; /* Centers it */
   height: 48px !important;
