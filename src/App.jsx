@@ -67,6 +67,7 @@ export default function App() {
   const [category, setCategory] = useState("All");
   const [activeMedia, setActiveMedia] = useState(null);
   const [showWatchPage, setShowWatchPage] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
 const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState(null);
@@ -3360,10 +3361,10 @@ useEffect(() => {
             <button 
               onClick={(e) => { 
                 e.stopPropagation(); 
-                if (activeMedia.media_type === "audio" && audioRef.current) {
-                  audioRef.current.paused ? audioRef.current.play() : audioRef.current.pause();
-                } else if (videoRef.current) {
-                  videoRef.current.paused ? videoRef.current.play() : videoRef.current.pause();
+                const mediaEl = activeMedia.media_type === "audio" ? audioRef.current : videoRef.current;
+                if (mediaEl) {
+                  if (mediaEl.paused) mediaEl.play();
+                  else mediaEl.pause();
                 }
               }} 
               className="yt-mini-play-btn"
