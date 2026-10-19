@@ -1152,20 +1152,22 @@ useEffect(() => {
       const mediaIds = localMedia.map(m => m.id);
 
       // 2. Use the subscriber count we ALREADY know is correct from the Dashboard
-      const { count: freshSubs, error: subsError } = await supabase
-        .from("subscriptions")
-        .select("*", { count: "exact", head: true })
-        .eq("channel_id", session.user.id);
-
-      if (subsError) throw subsError;
-
-      const finalSubs = freshSubs ?? 0;
-      setMySubCount(finalSubs);
-      setSubscriberCount(finalSubs);
-
-      // 3. Only fetch the weekly stats from the database (since we don't have them locally)
-      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      // We check mySubCount first. If it's 0, we do a fresh query just in case.
+      let finalSubs = mySubCount;
       
+      if (finalSubs === 0) {
+        const { count: freshSubs, error: subsError } = await supabase
+          .from("subscriptions")
+          .select("*", { count: "exact", head: true })
+          .eq("channel_id", session.user.id);
+          
+        if (!subsError && freshSubs !== null) {
+          finalSubs = freshSubs;
+        }
+      }
+
+      // 3. Fetch weekly stats
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
       let weeklyViews = 0;
       if (mediaIds.length > 0) {
         const { count: wv } = await supabase.from("video_views").select("*", { count: "exact", head: true }).in("media_id", mediaIds).gte("created_at", sevenDaysAgo);
@@ -1180,7 +1182,10 @@ useEffect(() => {
         totalComments = tc || 0;
       }
 
-      // 4. Set the data instantly
+      // 4. Update BOTH the Dashboard state and Analytics state to match perfectly
+      setMySubCount(finalSubs);
+      setSubscriberCount(finalSubs);
+      
       setAnalyticsData({
         totalViews: totalViews,
         totalSubs: finalSubs,
