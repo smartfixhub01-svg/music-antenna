@@ -459,96 +459,119 @@ useEffect(() => {
     setFeedLoading(true);
     if (search.trim()) setSearchLoading(true);
     setMessage("");
-    
+
     try {
-      // 1. Fetch media WITHOUT relying on the fragile join
-      let query = supabase
-        .from("media")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(150);
+      let finalData = [];
 
-      // If we are NOT searching, only show published media
-      if (!search.trim() && !showSubscriptionsFeed) {
-        query = query.eq("status", "published");
-      }
+      // ==========================================
+      // A. HANDLE SEARCH QUERY (Two-Query Strategy)
+      // ==========================================
+      if (search.trim()) {
+        const term = search.trim();
 
-      if (showSubscriptionsFeed && session?.user?.id) {
-        const { data: subs } = await supabase.from("subscriptions").select("channel_id").eq("subscriber_id", session.user.id);
-        const channelIds = subs?.map(s => s.channel_id) || [];
-        if (channelIds.length > 0) {
-          query = query.in("artist_id", channelIds);
-        } else {
-          setMedia([]);
-          setFeedLoading(false);
-          setSearchLoading(false);
-          return;
-        }
-      }
-
-      if (category === "Shorts") query = query.eq("is_short", true);
-      else if (category === "Videos") query = query.eq("media_type", "video").eq("is_short", false);
-      else if (category === "Music") query = query.eq("media_type", "audio");
-
-      const { data, error } = await query;
-      if (error) throw error;
-
-      // 2. MANUAL JOIN: Fetch profiles for all unique artist_ids
-      const uniqueArtistIds = [...new Set((data || []).map(i => i.artist_id).filter(Boolean))];
-      let profileMap = {};
-      
-      if (uniqueArtistIds.length > 0) {
-        const { data: profilesData } = await supabase
+        // 1. Find matching artist IDs from the profiles table
+        const { data: matchedProfiles } = await supabase
           .from("profiles")
-          .select("id, display_name, avatar_url")
-          .in("id", uniqueArtistIds);
-          
-        profilesData?.forEach(p => { profileMap[p.id] = p; });
+          .select("id")
+          .or(`display_name.ilike.%${term}%,username.ilike.%${term}%`);
+
+        const artistIds = matchedProfiles?.map(p => p.id) || [];
+
+        // 2. Build parallel queries (Text Match vs Artist ID Match)
+        const textQuery = supabase
+          .from("media")
+          .select("*, profiles(display_name, avatar_url)")
+          .eq("status", "published")
+          .or(`title.ilike.%${term}%,description.ilike.%${term}%`)
+          .limit(50);
+
+        let artistQuery = null;
+        if (artistIds.length > 0) {
+          artistQuery = supabase
+            .from("media")
+            .select("*, profiles(display_name, avatar_url)")
+            .eq("status", "published")
+            .in("artist_id", artistIds)
+            .limit(50);
+        }
+
+        // 3. Execute queries
+        const [textRes, artistRes] = await Promise.all([
+          textQuery,
+          artistQuery ? artistQuery : Promise.resolve({ data: [] })
+        ]);
+
+        const combined = [...(textRes.data || []), ...(artistRes.data || [])];
+
+        // 4. Remove duplicates (same video ID)
+        const uniqueMap = new Map();
+        combined.forEach(item => uniqueMap.set(item.id, item));
+        finalData = Array.from(uniqueMap.values());
+        
+      } else {
+        // ==========================================
+        // B. NORMAL FEED (No Search)
+        // ==========================================
+        let query = supabase
+          .from("media")
+          .select("*, profiles(display_name, avatar_url)")
+          .eq("status", "published")
+          .order("created_at", { ascending: false })
+          .limit(60);
+
+        if (showSubscriptionsFeed && session?.user?.id) {
+          const { data: subs } = await supabase.from("subscriptions").select("channel_id").eq("subscriber_id", session.user.id);
+          const channelIds = subs?.map(s => s.channel_id) || [];
+          if (channelIds.length > 0) {
+            query = query.in("artist_id", channelIds);
+          } else {
+            setMedia([]);
+            setFeedLoading(false);
+            setSearchLoading(false);
+            return;
+          }
+        }
+
+        if (category === "Shorts") query = query.eq("is_short", true);
+        else if (category === "Videos") query = query.eq("media_type", "video").eq("is_short", false);
+        else if (category === "Music") query = query.eq("media_type", "audio");
+
+        const { data, error } = await query;
+        if (error) throw error;
+        finalData = data || [];
       }
 
-      // 3. Attach the profiles and URLs to the media
+      // ==========================================
+      // C. PROCESS URLS & SMART SORTING
+      // ==========================================
       let items = await Promise.all(
-        (data || []).map(async (item) => {
+        finalData.map(async (item) => {
           const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(item.storage_path);
           let thumbnailUrl = "";
           if (item.thumbnail_path) {
             const { data: thumb } = supabase.storage.from("track-covers").getPublicUrl(item.thumbnail_path);
             thumbnailUrl = thumb?.publicUrl || "";
           }
-          return { 
-             ...item, 
-             playbackUrl: pub?.publicUrl || "", 
+          return {
+             ...item,
+             playbackUrl: pub?.publicUrl || "",
              thumbnailUrl,
-             // Attach profile from map, or fallback to current user's profile if it's their video
-             profiles: profileMap[item.artist_id] || (item.artist_id === session?.user?.id ? profile : null)
+             profiles: item.profiles || (item.artist_id === session?.user?.id ? profile : null)
           };
         })
       );
 
-      // 4. SEARCH & SORT
       if (search.trim()) {
         const term = search.trim().toLowerCase();
-        
-        items = items.filter(item => {
-          const title = (item.title || "").toLowerCase();
-          const desc = (item.description || "").toLowerCase();
-          const thumb = (item.thumbnail_path || "").toLowerCase();
-          const artist = (item.profiles?.display_name || "").toLowerCase();
-          
-          // Find it ANYWHERE
-          return title.includes(term) || desc.includes(term) || artist.includes(term) || thumb.includes(term);
-        });
-
-        // Smart sorting: Title > Artist > Thumbnail > Description
         items.sort((a, b) => {
           const tA = (a.title || "").toLowerCase();
           const tB = (b.title || "").toLowerCase();
+          const arA = (a.profiles?.display_name || "").toLowerCase();
+          const arB = (b.profiles?.display_name || "").toLowerCase();
           const thA = (a.thumbnail_path || "").toLowerCase();
           const thB = (b.thumbnail_path || "").toLowerCase();
           const dA = (a.description || "").toLowerCase();
           const dB = (b.description || "").toLowerCase();
-          const arA = (a.profiles?.display_name || "").toLowerCase();
-          const arB = (b.profiles?.display_name || "").toLowerCase();
 
           const aT = tA.includes(term) ? 4 : 0;
           const bT = tB.includes(term) ? 4 : 0;
