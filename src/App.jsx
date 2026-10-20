@@ -461,10 +461,70 @@ useEffect(() => {
     setMessage("");
 
     try {
-      // ---------------------------------------------------------
-      // A. NORMAL FEED (No Search)
-      // ---------------------------------------------------------
-      if (!search.trim()) {
+      let finalData = [];
+
+      // ==========================================
+      // A. HANDLE SEARCH QUERY
+      // ==========================================
+      if (search.trim()) {
+        const safeTerm = search.trim().replace(/[(),]/g, '');
+
+        // 1. Find matching profiles (Separate queries are safer than .or() with text)
+        const [p1, p2] = await Promise.all([
+          supabase.from("profiles").select("id").ilike("display_name", `%${safeTerm}%`),
+          supabase.from("profiles").select("id").ilike("username", `%${safeTerm}%`)
+        ]);
+
+        const artistIds = [...new Set([
+          ...(p1.data || []).map(p => p.id),
+          ...(p2.data || []).map(p => p.id)
+        ])];
+
+        // 2. Build Parallel Media Queries (Text Match vs Artist ID Match)
+        let textQuery = supabase
+          .from("media")
+          .select("*")
+          .eq("status", "published")
+          .or(`title.ilike.%${safeTerm}%,description.ilike.%${safeTerm}%`)
+          .limit(100);
+
+        if (category === "Shorts") textQuery = textQuery.eq("is_short", true);
+        else if (category === "Videos") textQuery = textQuery.eq("media_type", "video").eq("is_short", false);
+        else if (category === "Music") textQuery = textQuery.eq("media_type", "audio");
+
+        let artistQuery = null;
+        if (artistIds.length > 0) {
+          artistQuery = supabase
+            .from("media")
+            .select("*")
+            .eq("status", "published")
+            .in("artist_id", artistIds)
+            .limit(100);
+
+          if (category === "Shorts") artistQuery = artistQuery.eq("is_short", true);
+          else if (category === "Videos") artistQuery = artistQuery.eq("media_type", "video").eq("is_short", false);
+          else if (category === "Music") artistQuery = artistQuery.eq("media_type", "audio");
+        }
+
+        // 3. Execute Queries
+        const [textRes, artistRes] = await Promise.all([
+          textQuery,
+          artistQuery ? artistQuery : Promise.resolve({ data: [], error: null })
+        ]);
+
+        if (textRes.error) throw textRes.error;
+        if (artistRes.error) throw artistRes.error;
+
+        // 4. Combine and Remove Duplicates
+        const combined = [...(textRes.data || []), ...(artistRes.data || [])];
+        const uniqueMap = new Map();
+        combined.forEach(item => uniqueMap.set(item.id, item));
+        finalData = Array.from(uniqueMap.values());
+        
+      } else {
+        // ==========================================
+        // B. NORMAL FEED (No Search)
+        // ==========================================
         let query = supabase
           .from("media")
           .select("*")
@@ -473,9 +533,7 @@ useEffect(() => {
           .limit(60);
 
         if (showSubscriptionsFeed && session?.user?.id) {
-          const { data: subs, error: subsError } = await supabase.from("subscriptions").select("channel_id").eq("subscriber_id", session.user.id);
-          if (subsError) throw subsError;
-          
+          const { data: subs } = await supabase.from("subscriptions").select("channel_id").eq("subscriber_id", session.user.id);
           const channelIds = subs?.map(s => s.channel_id) || [];
           if (channelIds.length > 0) {
             query = query.in("artist_id", channelIds);
@@ -493,130 +551,45 @@ useEffect(() => {
 
         const { data, error } = await query;
         if (error) throw error;
-
-        // Manual join for the normal feed
-        let items = await attachProfilesAndUrls(data || []);
-        setMedia(items);
-        setFeedLoading(false);
-        setSearchLoading(false);
-        return;
+        finalData = data || [];
       }
 
-      // ---------------------------------------------------------
-      // B. SEARCH MODE
-      // ---------------------------------------------------------
-      // 1. Sanitize the term for PostgREST .or() syntax
-      const safeTerm = search.trim().replace(/[(),]/g, '');
-      if (!safeTerm) {
-        setMedia([]);
-        setFeedLoading(false);
-        setSearchLoading(false);
-        return;
-      }
-
-      // 2. Fetch ALL matching artist profiles in batches
-      const matchedProfiles = [];
-      const PROFILE_BATCH_SIZE = 500;
-      let offset = 0;
-
-      while (true) {
-        let profileQuery = supabase
-          .from("profiles")
-          .select("id")
-          .or(`display_name.ilike.%${safeTerm}%,username.ilike.%${safeTerm}%`)
-          .order("id", { ascending: true })
-          .range(offset, offset + PROFILE_BATCH_SIZE - 1);
-
-        const { data: pData, error: pError } = await profileQuery;
-        if (pError) throw pError;
-
-        const batch = pData || [];
-        matchedProfiles.push(...batch);
-
-        if (batch.length < PROFILE_BATCH_SIZE) break;
-        offset += PROFILE_BATCH_SIZE;
-      }
-
-      const artistIds = matchedProfiles.map(p => p.id);
-
-      // 3. Build Parallel Media Queries (Text Match vs Artist ID Match)
-      // Text Query
-      let textQuery = supabase
-        .from("media")
-        .select("*")
-        .eq("status", "published")
-        .or(`title.ilike.%${safeTerm}%,description.ilike.%${safeTerm}%`)
-        .limit(100);
-
-      if (category === "Shorts") textQuery = textQuery.eq("is_short", true);
-      else if (category === "Videos") textQuery = textQuery.eq("media_type", "video").eq("is_short", false);
-      else if (category === "Music") textQuery = textQuery.eq("media_type", "audio");
-
-      // Artist Query (only if we found matching artists)
-      let artistQuery = null;
-      if (artistIds.length > 0) {
-        artistQuery = supabase
-          .from("media")
-          .select("*")
-          .eq("status", "published")
-          .in("artist_id", artistIds)
-          .limit(100);
-
-        if (category === "Shorts") artistQuery = artistQuery.eq("is_short", true);
-        else if (category === "Videos") artistQuery = artistQuery.eq("media_type", "video").eq("is_short", false);
-        else if (category === "Music") artistQuery = artistQuery.eq("media_type", "audio");
-      }
-
-      // 4. Execute Queries in Parallel
-      const [textRes, artistRes] = await Promise.all([
-        textQuery,
-        artistQuery ? artistQuery : Promise.resolve({ data: [], error: null })
-      ]);
-
-      if (textRes.error) throw textRes.error;
-      if (artistRes.error) throw artistRes.error;
-
-      // 5. Combine and Remove Duplicates
-      const combined = [...(textRes.data || []), ...(artistRes.data || [])];
-      const uniqueMap = new Map();
-      combined.forEach(item => uniqueMap.set(item.id, item));
-      let finalData = Array.from(uniqueMap.values());
-
-      // 6. Fetch Profiles & URLs for the final media
+      // ==========================================
+      // C. PROCESS URLS & SMART SORTING
+      // ==========================================
       let items = await attachProfilesAndUrls(finalData);
 
-      // 7. Relevance Sorting
-      const term = safeTerm.toLowerCase();
-      items.sort((a, b) => {
-        const tA = (a.title || "").toLowerCase();
-        const tB = (b.title || "").toLowerCase();
-        const arA = (a.profiles?.display_name || "").toLowerCase();
-        const arB = (b.profiles?.display_name || "").toLowerCase();
-        const thA = (a.thumbnail_path || "").toLowerCase();
-        const thB = (b.thumbnail_path || "").toLowerCase();
-        const dA = (a.description || "").toLowerCase();
-        const dB = (b.description || "").toLowerCase();
+      if (search.trim()) {
+        const term = search.trim().toLowerCase();
+        items.sort((a, b) => {
+          const tA = (a.title || "").toLowerCase();
+          const tB = (b.title || "").toLowerCase();
+          const arA = (a.profiles?.display_name || "").toLowerCase();
+          const arB = (b.profiles?.display_name || "").toLowerCase();
+          const thA = (a.thumbnail_path || "").toLowerCase();
+          const thB = (b.thumbnail_path || "").toLowerCase();
+          const dA = (a.description || "").toLowerCase();
+          const dB = (b.description || "").toLowerCase();
 
-        const aT = tA.includes(term) ? 4 : 0;
-        const bT = tB.includes(term) ? 4 : 0;
-        const aA = arA.includes(term) ? 3 : 0;
-        const bA = arB.includes(term) ? 3 : 0;
-        const aTh = thA.includes(term) ? 2 : 0;
-        const bTh = thB.includes(term) ? 2 : 0;
-        const aD = dA.includes(term) ? 1 : 0;
-        const bD = dB.includes(term) ? 1 : 0;
+          const aT = tA.includes(term) ? 4 : 0;
+          const bT = tB.includes(term) ? 4 : 0;
+          const aA = arA.includes(term) ? 3 : 0;
+          const bA = arB.includes(term) ? 3 : 0;
+          const aTh = thA.includes(term) ? 2 : 0;
+          const bTh = thB.includes(term) ? 2 : 0;
+          const aD = dA.includes(term) ? 1 : 0;
+          const bD = dB.includes(term) ? 1 : 0;
 
-        if (aT !== bT) return bT - aT;
-        if (aA !== bA) return bA - aA;
-        if (aTh !== bTh) return bTh - aTh;
-        if (aD !== bD) return bD - aD;
-        return new Date(b.created_at) - new Date(a.created_at);
-      });
+          if (aT !== bT) return bT - aT;
+          if (aA !== bA) return bA - aA;
+          if (aTh !== bTh) return bTh - aTh;
+          if (aD !== bD) return bD - aD;
+          return new Date(b.created_at) - new Date(a.created_at);
+        });
+      }
 
       setMedia(items);
-
     } catch (error) {
-      console.error("Search Error:", error);
       setMessage("Error loading media: " + error.message);
     } finally {
       setFeedLoading(false);
