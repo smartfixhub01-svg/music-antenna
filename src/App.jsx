@@ -39,6 +39,16 @@ export default function App() {
   const [feedLoading, setFeedLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [searchLoading, setSearchLoading] = useState(false);
+
+  // 🔥 Auto-search as you type (Debounced)
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      loadMedia();
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
   const [navVisible, setNavVisible] = useState(true);
 
   useEffect(() => {
