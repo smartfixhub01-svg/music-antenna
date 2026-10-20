@@ -460,111 +460,157 @@ useEffect(() => {
     if (search.trim()) setSearchLoading(true);
     setMessage("");
 
-    try {
-      // 1. Fetch ALL published media (No limits, no joins)
-      let query = supabase
-        .from("media")
-        .select("*")
-        .eq("status", "published")
-        .order("created_at", { ascending: false });
+    const PAGE_SIZE = 500;
 
-      if (showSubscriptionsFeed && session?.user?.id) {
-        const { data: subs } = await supabase.from("subscriptions").select("channel_id").eq("subscriber_id", session.user.id);
-        const channelIds = subs?.map(s => s.channel_id) || [];
-        if (channelIds.length > 0) {
-          query = query.in("artist_id", channelIds);
-        } else {
-          setMedia([]);
-          setFeedLoading(false);
-          setSearchLoading(false);
-          return;
+    const fetchAllPages = async (makeQuery) => {
+      const rows = [];
+      for (let offset = 0; ; offset += PAGE_SIZE) {
+        const { data, error } = await makeQuery().range(offset, offset + PAGE_SIZE - 1);
+        if (error) throw error;
+        const batch = data || [];
+        rows.push(...batch);
+        if (batch.length < PAGE_SIZE) break;
+      }
+      return rows;
+    };
+
+    try {
+      const term = search.trim();
+      const pattern = "%" + term + "%";
+      let channelIds = null;
+
+      if (showSubscriptionsFeed) {
+        if (!session?.user?.id) { setMedia([]); return; }
+        const subscriptions = await fetchAllPages(() =>
+          supabase.from("subscriptions").select("channel_id")
+            .eq("subscriber_id", session.user.id)
+            .order("channel_id", { ascending: true })
+        );
+        channelIds = [...new Set(subscriptions.map(r => r.channel_id).filter(Boolean))];
+        if (channelIds.length === 0) { setMedia([]); return; }
+      }
+
+      const mediaQuery = (extra = {}) => {
+        let query = supabase.from("media").select("*").eq("status", "published");
+        if (category === "Shorts") query = query.eq("is_short", true);
+        else if (category === "Videos") query = query.eq("media_type", "video").eq("is_short", false);
+        else if (category === "Music") query = query.eq("media_type", "audio");
+        if (channelIds) query = query.in("artist_id", channelIds);
+        if (extra.artistIds) query = query.in("artist_id", extra.artistIds);
+        if (extra.field) query = query.ilike(extra.field, pattern);
+        return query.order("created_at", { ascending: false });
+      };
+
+      let mediaRows = [];
+      let matchedProfiles = [];
+
+      if (!term) {
+        mediaRows = await fetchAllPages(() => mediaQuery());
+      } else {
+        const nameProfiles = await fetchAllPages(() =>
+          supabase.from("profiles").select("*")
+            .ilike("display_name", pattern)
+            .order("id", { ascending: true })
+        );
+        matchedProfiles.push(...nameProfiles);
+
+        try {
+          const usernameProfiles = await fetchAllPages(() =>
+            supabase.from("profiles").select("*")
+              .ilike("username", pattern)
+              .order("id", { ascending: true })
+          );
+          matchedProfiles.push(...usernameProfiles);
+        } catch (error) {
+          const msg = String(error?.message || "").toLowerCase();
+          if (!msg.includes("username") && !msg.includes("column") &&
+              !msg.includes("schema cache") && !msg.includes("42703")) {
+            throw error;
+          }
+        }
+
+        const titleRows = await fetchAllPages(() => mediaQuery({ field: "title" }));
+        const descriptionRows = await fetchAllPages(() => mediaQuery({ field: "description" }));
+        mediaRows.push(...titleRows, ...descriptionRows);
+
+        const artistIds = [...new Set(matchedProfiles.map(p => p.id).filter(Boolean))];
+        for (let offset = 0; offset < artistIds.length; offset += 100) {
+          const batchIds = artistIds.slice(offset, offset + 100);
+          const artistMedia = await fetchAllPages(() => mediaQuery({ artistIds: batchIds }));
+          mediaRows.push(...artistMedia);
         }
       }
 
-      if (category === "Shorts") query = query.eq("is_short", true);
-      else if (category === "Videos") query = query.eq("media_type", "video").eq("is_short", false);
-      else if (category === "Music") query = query.eq("media_type", "audio");
+      const uniqueMedia = [...new Map(
+        mediaRows.filter(item => item?.id).map(item => [item.id, item])
+      ).values()];
 
-      const { data: mediaData, error: mediaError } = await query;
-      if (mediaError) throw mediaError;
+      const resultArtistIds = [...new Set(uniqueMedia.map(i => i.artist_id).filter(Boolean))];
+      const profileMap = new Map();
+      for (const profile of matchedProfiles) if (profile?.id) profileMap.set(profile.id, profile);
 
-      // 2. Fetch ALL profiles (No limits, no joins)
-      const { data: profilesData, error: profilesError } = await supabase
-        .from("profiles")
-        .select("id, display_name, avatar_url");
-      
-      if (profilesError) throw profilesError;
+      for (let offset = 0; offset < resultArtistIds.length; offset += 100) {
+        const batchIds = resultArtistIds.slice(offset, offset + 100);
+        const { data, error } = await supabase.from("profiles").select("*").in("id", batchIds);
+        if (error) throw error;
+        for (const profile of data || []) {
+          profileMap.set(profile.id, { ...profileMap.get(profile.id), ...profile });
+        }
+      }
 
-      // 3. Create a lookup map for profiles
-      const profileMap = {};
-      profilesData?.forEach(p => { profileMap[p.id] = p; });
+      let items = uniqueMedia.map(item => {
+        const { data: playback } = supabase.storage.from(BUCKET).getPublicUrl(item.storage_path);
+        let thumbnailUrl = "";
+        if (item.thumbnail_path) {
+          const { data: thumbnail } = supabase.storage.from("track-covers").getPublicUrl(item.thumbnail_path);
+          thumbnailUrl = thumbnail?.publicUrl || "";
+        }
+        return {
+          ...item,
+          playbackUrl: playback?.publicUrl || "",
+          thumbnailUrl,
+          profiles: profileMap.get(item.artist_id) || null
+        };
+      });
 
-      // 4. Attach profiles and URLs to media
-      let items = await Promise.all(
-        (mediaData || []).map(async (item) => {
-          const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(item.storage_path);
-          let thumbnailUrl = "";
-          if (item.thumbnail_path) {
-            const { data: thumb } = supabase.storage.from("track-covers").getPublicUrl(item.thumbnail_path);
-            thumbnailUrl = thumb?.publicUrl || "";
-          }
-          return { 
-             ...item, 
-             playbackUrl: pub?.publicUrl || "", 
-             thumbnailUrl,
-             profiles: profileMap[item.artist_id] || null
-          };
-        })
-      );
-
-      // 5. LOCAL SEARCH & SORT
-      if (search.trim()) {
-        const term = search.trim().toLowerCase();
-        
-        items = items.filter(item => {
-          const title = (item.title || "").toLowerCase();
-          const desc = (item.description || "").toLowerCase();
-          const thumb = (item.thumbnail_path || "").toLowerCase();
-          const artist = (item.profiles?.display_name || "").toLowerCase();
-          
-          return title.includes(term) || desc.includes(term) || artist.includes(term) || thumb.includes(term);
-        });
-
-        items.sort((a, b) => {
-          const tA = (a.title || "").toLowerCase();
-          const tB = (b.title || "").toLowerCase();
-          const arA = (a.profiles?.display_name || "").toLowerCase();
-          const arB = (b.profiles?.display_name || "").toLowerCase();
-          const thA = (a.thumbnail_path || "").toLowerCase();
-          const thB = (b.thumbnail_path || "").toLowerCase();
-          const dA = (a.description || "").toLowerCase();
-          const dB = (b.description || "").toLowerCase();
-
-          const aT = tA.includes(term) ? 4 : 0;
-          const bT = tB.includes(term) ? 4 : 0;
-          const aA = arA.includes(term) ? 3 : 0;
-          const bA = arB.includes(term) ? 3 : 0;
-          const aTh = thA.includes(term) ? 2 : 0;
-          const bTh = thB.includes(term) ? 2 : 0;
-          const aD = dA.includes(term) ? 1 : 0;
-          const bD = dB.includes(term) ? 1 : 0;
-
-          if (aT !== bT) return bT - aT;
-          if (aA !== bA) return bA - aA;
-          if (aTh !== bTh) return bTh - aTh;
-          if (aD !== bD) return bD - aD;
-          return new Date(b.created_at) - new Date(a.created_at);
-        });
+      if (term) {
+        const normalized = term.toLowerCase();
+        const contains = v => String(v || "").toLowerCase().includes(normalized);
+        const score = item => {
+          const title = String(item.title || "").toLowerCase();
+          const artist = String(item.profiles?.display_name || "").toLowerCase();
+          const username = String(item.profiles?.username || "").toLowerCase();
+          const description = String(item.description || "").toLowerCase();
+          if (title === normalized) return 100;
+          if (artist === normalized || username === normalized) return 95;
+          if (title.startsWith(normalized)) return 85;
+          if (artist.startsWith(normalized) || username.startsWith(normalized)) return 80;
+          if (title.includes(normalized)) return 70;
+          if (artist.includes(normalized) || username.includes(normalized)) return 65;
+          if (description.includes(normalized)) return 40;
+          return 0;
+        };
+        items = items.filter(item =>
+          contains(item.title) ||
+          contains(item.description) ||
+          contains(item.profiles?.display_name) ||
+          contains(item.profiles?.username)
+        );
+        items.sort((a, b) =>
+          score(b) - score(a) || new Date(b.created_at || 0) - new Date(a.created_at || 0)
+        );
       }
 
       setMedia(items);
     } catch (error) {
-      setMessage("Error loading media: " + error.message);
+      console.error("Music Antenna search failed:", error);
+      setMessage("Error loading media: " + (error?.message || "Unknown error"));
     } finally {
       setFeedLoading(false);
       setSearchLoading(false);
     }
   }
+
 
   // Helper function to manually join profiles and generate URLs
   async function attachProfilesAndUrls(mediaData) {
