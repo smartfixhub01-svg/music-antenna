@@ -458,27 +458,14 @@ useEffect(() => {
     setFeedLoading(true);
     setMessage("");
     try {
-      let query = supabase.from("media").select("*, profiles(display_name, avatar_url)").eq("status", "published").order("created_at", { ascending: false });
+      // 1. Fetch a large batch of recent videos WITHOUT complex text filtering
+      let query = supabase
+        .from("media")
+        .select("*, profiles(display_name, avatar_url)")
+        .eq("status", "published")
+        .order("created_at", { ascending: false })
+        .limit(100); // Get up to 100 recent videos to filter locally
 
-      if (search.trim()) {
-        const term = search.trim();
-        // 1. Search for matching artists (profiles) by name or username
-        const { data: matchedProfiles } = await supabase
-          .from("profiles")
-          .select("id")
-          .or(`display_name.ilike.%${term}%,username.ilike.%${term}%`);
-
-        const artistIds = matchedProfiles?.map(p => p.id) || [];
-
-        // 2. Build the search query
-        if (artistIds.length > 0) {
-          const idList = artistIds.join(',');
-          query = query.or(`title.ilike.%${term}%,description.ilike.%${term}%,thumbnail_path.ilike.%${term}%,artist_id.in.(${idList})`);
-        } else {
-          query = query.or(`title.ilike.%${term}%,description.ilike.%${term}%,thumbnail_path.ilike.%${term}%`);
-        }
-      }
-      
       if (showSubscriptionsFeed && session?.user?.id) {
         const { data: subs } = await supabase.from("subscriptions").select("channel_id").eq("subscriber_id", session.user.id);
         const channelIds = subs?.map(s => s.channel_id) || [];
@@ -499,10 +486,11 @@ useEffect(() => {
         query = query.eq("media_type", "audio");
       }
 
-      const { data, error } = await query.limit(60);
+      const { data, error } = await query;
       if (error) throw error;
       
-      const items = await Promise.all(
+      // 2. Process URLs
+      let items = await Promise.all(
         (data || []).map(async (item) => {
           const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(item.storage_path);
           let thumbnailUrl = "";
@@ -514,39 +502,51 @@ useEffect(() => {
         })
       );
 
-      // 3. SMART SORTING: Push exact matches to the top!
+      // 3. BULLETPROOF LOCAL FILTER & SORT
       if (search.trim()) {
         const term = search.trim().toLowerCase();
+        
+        // A. Filter the results
+        items = items.filter(item => {
+          const title = (item.title || "").toLowerCase();
+          const desc = (item.description || "").toLowerCase();
+          const artist = (item.profiles?.display_name || "").toLowerCase();
+          const thumb = (item.thumbnail_path || "").toLowerCase();
+          
+          return title.includes(term) || desc.includes(term) || artist.includes(term) || thumb.includes(term);
+        });
+
+        // B. Sort the results by Priority
         items.sort((a, b) => {
-          // Priority 1: Title match
-          const aTitle = (a.title || "").toLowerCase();
-          const bTitle = (b.title || "").toLowerCase();
-          const aTitleMatch = aTitle.includes(term) ? 4 : 0;
-          const bTitleMatch = bTitle.includes(term) ? 4 : 0;
-          if (aTitleMatch !== bTitleMatch) return bTitleMatch - aTitleMatch;
+          // Priority 1: Title
+          const tA = (a.title || "").toLowerCase();
+          const tB = (b.title || "").toLowerCase();
+          const aT = tA.includes(term) ? 4 : 0;
+          const bT = tB.includes(term) ? 4 : 0;
+          if (aT !== bT) return bT - aT;
 
-          // Priority 2: Artist Name match
-          const aArtist = (a.profiles?.display_name || "").toLowerCase();
-          const bArtist = (b.profiles?.display_name || "").toLowerCase();
-          const aArtistMatch = aArtist.includes(term) ? 3 : 0;
-          const bArtistMatch = bArtist.includes(term) ? 3 : 0;
-          if (aArtistMatch !== bArtistMatch) return bArtistMatch - aArtistMatch;
+          // Priority 2: Artist Name
+          const arA = (a.profiles?.display_name || "").toLowerCase();
+          const arB = (b.profiles?.display_name || "").toLowerCase();
+          const aA = arA.includes(term) ? 3 : 0;
+          const bA = arB.includes(term) ? 3 : 0;
+          if (aA !== bA) return bA - aA;
 
-          // Priority 3: Thumbnail filename match
-          const aThumb = (a.thumbnail_path || "").toLowerCase();
-          const bThumb = (b.thumbnail_path || "").toLowerCase();
-          const aThumbMatch = aThumb.includes(term) ? 2 : 0;
-          const bThumbMatch = bThumb.includes(term) ? 2 : 0;
-          if (aThumbMatch !== bThumbMatch) return bThumbMatch - aThumbMatch;
+          // Priority 3: Thumbnail Filename
+          const thA = (a.thumbnail_path || "").toLowerCase();
+          const thB = (b.thumbnail_path || "").toLowerCase();
+          const aTh = thA.includes(term) ? 2 : 0;
+          const bTh = thB.includes(term) ? 2 : 0;
+          if (aTh !== bTh) return bTh - aTh;
 
-          // Priority 4: Description match
-          const aDesc = (a.description || "").toLowerCase();
-          const bDesc = (b.description || "").toLowerCase();
-          const aDescMatch = aDesc.includes(term) ? 1 : 0;
-          const bDescMatch = bDesc.includes(term) ? 1 : 0;
-          if (aDescMatch !== bDescMatch) return bDescMatch - aDescMatch;
+          // Priority 4: Description
+          const dA = (a.description || "").toLowerCase();
+          const dB = (b.description || "").toLowerCase();
+          const aD = dA.includes(term) ? 1 : 0;
+          const bD = dB.includes(term) ? 1 : 0;
+          if (aD !== bD) return bD - aD;
 
-          // Fallback: Newest first
+          // Default: Newest first
           return new Date(b.created_at) - new Date(a.created_at);
         });
       }
