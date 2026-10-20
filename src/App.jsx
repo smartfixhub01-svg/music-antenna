@@ -3088,7 +3088,10 @@ return (
             )}
             
             {/* HISTORY */}
-            <h3 style={{ margin: "0 0 12px", fontSize: "16px", fontWeight: "600", color: "#f1f1f1" }}>History</h3>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", marginBottom: "12px" }}>
+        <h3 style={{ margin: "0 0 12px", fontSize: "16px", fontWeight: "600", color: "#f1f1f1" }}>History</h3>
+        <button onClick={clearWatchHistory} style={{ background: "transparent", border: "1px solid #ff0050", color: "#ff0050", padding: "4px 12px", borderRadius: "20px", fontSize: "12px", cursor: "pointer", fontWeight: "bold" }}>Clear All</button>
+      </div>
             <div style={{ display: "flex", gap: "12px", overflowX: "auto", paddingBottom: "16px", marginBottom: "16px" }}>
                {history.slice(0, 4).map((item) => (
                   <div key={item.id} onClick={() => { const found = media.find(m => m.id === item.id); if (found) openPlayer(found); }} style={{ flexShrink: 0, width: "140px", cursor: "pointer" }}>
