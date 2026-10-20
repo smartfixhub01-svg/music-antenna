@@ -461,13 +461,17 @@ useEffect(() => {
     setMessage("");
     
     try {
-      // 1. Fetch data WITHOUT complex text filtering (just get recent published videos)
+      // 1. Fetch ALL media owned by the user (or all published if not searching)
       let query = supabase
         .from("media")
         .select("*, profiles(display_name, avatar_url)")
-        .eq("status", "published")
         .order("created_at", { ascending: false })
-        .limit(150); // Get plenty of videos
+        .limit(150);
+
+      // If we are NOT searching, only show published media
+      if (!search.trim() && !showSubscriptionsFeed) {
+        query = query.eq("status", "published");
+      }
 
       if (showSubscriptionsFeed && session?.user?.id) {
         const { data: subs } = await supabase.from("subscriptions").select("channel_id").eq("subscriber_id", session.user.id);
@@ -510,7 +514,7 @@ useEffect(() => {
       if (search.trim()) {
         const term = search.trim().toLowerCase();
         
-        // Filter
+        // Filter - Extremely aggressive checking
         items = items.filter(item => {
           const title = (item.title || "").toLowerCase();
           const desc = (item.description || "").toLowerCase();
@@ -2064,11 +2068,11 @@ useEffect(() => {
         </div>
 
         <div className="ma-search">
-          <div className="ma-search-box">
+          <div className="ma-search-box" style={{ display: "flex", alignItems: "center" }}>
             <input aria-label="Search" placeholder="Search" value={search}
-              onChange={(e) => setSearch(e.target.value)} />
+              onChange={(e) => setSearch(e.target.value)} style={{ flex: 1 }} />
             {searchLoading && (
-              <span className="material-symbols-outlined" style={{ animation: "spin 1s linear infinite", fontSize: "18px", color: "#aaa", marginRight: "8px" }}>
+              <span className="material-symbols-outlined" style={{ animation: "spin 1s linear infinite", fontSize: "18px", color: "#3ea6ff", marginRight: "12px", flexShrink: 0 }}>
                 sync
               </span>
             )}
