@@ -4530,3 +4530,20 @@ button {
 .yt-mini-close-btn {
   color: #aaaaaa !important;
 }
+
+/* FIX UPLOAD FORM SCROLLING & BUTTON VISIBILITY */
+.yt-upload {
+  padding-bottom: 120px !important; /* Forces the form to scroll past the bottom nav */
+}
+
+/* Ensure the submit button is always visible and looks professional */
+.yt-upload-actions {
+  margin-bottom: 20px !important;
+  padding-bottom: 20px !important;
+}
+
+.yt-upload-submit {
+  display: inline-block !important; /* Forces it to show */
+  visibility: visible !important;
+  opacity: 1 !important;
+}
