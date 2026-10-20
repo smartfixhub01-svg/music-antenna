@@ -2111,14 +2111,18 @@ useEffect(() => {
         <div className="ma-search">
           <div className="ma-search-box" style={{ display: "flex", alignItems: "center" }}>
             <input aria-label="Search" placeholder="Search" value={search}
-              onChange={(e) => setSearch(e.target.value)} style={{ flex: 1 }} />
+              onChange={(e) => {
+                  const val = e.target.value;
+                  setSearch(val);
+                  setSearchLoading(val.trim().length > 0);
+                }} style={{ flex: 1 }} />
             {searchLoading && (
               <span className="material-symbols-outlined" style={{ animation: "spin 1s linear infinite", fontSize: "18px", color: "#3ea6ff", marginRight: "12px", flexShrink: 0 }}>
                 sync
               </span>
             )}
             {search && (
-              <button className="ma-search-clear" onClick={() => setSearch("")} aria-label="Clear">
+              <button className="ma-search-clear" onClick={() => { setSearch(""); setSearchLoading(false); }} aria-label="Clear">
                 <span className="material-symbols-outlined">close</span>
               </button>
             )}
