@@ -4547,3 +4547,48 @@ button {
   visibility: visible !important;
   opacity: 1 !important;
 }
+
+/* =====================================================
+   FORCE PUBLISH BUTTON TO BE VISIBLE AND CLICKABLE
+   ===================================================== */
+
+.yt-upload {
+  /* Add massive padding to the bottom so the form can scroll up past the nav */
+  padding-bottom: 250px !important; 
+}
+
+.yt-upload-actions {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin-top: 24px !important;
+  margin-bottom: 100px !important; /* Push it way up */
+  padding-top: 16px !important;
+  border-top: 1px solid #333 !important;
+}
+
+.yt-upload-cancel {
+  display: inline-block !important;
+  color: #aaa !important;
+  background: transparent !important;
+  border: none !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  padding: 10px 20px !important;
+}
+
+.yt-upload-submit {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  background-color: #3ea6ff !important; /* YouTube Blue */
+  color: #0f0f0f !important;
+  padding: 10px 24px !important;
+  border-radius: 20px !important;
+  font-size: 14px !important;
+  font-weight: bold !important;
+  border: none !important;
+  min-width: 100px !important;
+  z-index: 999 !important;
+}
