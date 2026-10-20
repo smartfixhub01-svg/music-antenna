@@ -501,7 +501,7 @@ useEffect(() => {
       }
 
       const mediaQuery = (extra = {}) => {
-        let query = supabase.from("media").select("*").eq("status", "published");
+        let query = supabase.from("media").select("*"); // TESTING: Removed status check
         if (category === "Shorts") query = query.eq("is_short", true);
         else if (category === "Videos") query = query.eq("media_type", "video").eq("is_short", false);
         else if (category === "Music") query = query.eq("media_type", "audio");
