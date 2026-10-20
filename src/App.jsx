@@ -2110,11 +2110,7 @@ useEffect(() => {
         <div className="ma-search">
           <div className="ma-search-box" style={{ display: "flex", alignItems: "center" }}>
             <input aria-label="Search" placeholder="Search" value={search}
-              onChange={(e) => {
-                  setSearch(e.target.value);
-                  if (e.target.value.trim()) setSearchLoading(true);
-                  else setSearchLoading(false);
-                }} style={{ flex: 1 }} />
+              onChange={(e) => setSearch(e.target.value)} style={{ flex: 1 }} />
             {searchLoading && (
               <span className="material-symbols-outlined" style={{ animation: "spin 1s linear infinite", fontSize: "18px", color: "#3ea6ff", marginRight: "12px", flexShrink: 0 }}>
                 sync
