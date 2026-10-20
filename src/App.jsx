@@ -39,6 +39,7 @@ export default function App() {
   const [feedLoading, setFeedLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [searchLoading, setSearchLoading] = useState(false);
+  const searchRequestRef = useRef(0);
   const [navVisible, setNavVisible] = useState(true);
 
   useEffect(() => {
@@ -456,6 +457,7 @@ useEffect(() => {
   }
 
   async function loadMedia() {
+    const requestId = ++searchRequestRef.current;
     setFeedLoading(true);
     if (search.trim()) setSearchLoading(true);
     setMessage("");
@@ -2110,7 +2112,7 @@ useEffect(() => {
         <div className="ma-search">
           <div className="ma-search-box" style={{ display: "flex", alignItems: "center" }}>
             <input aria-label="Search" placeholder="Search" value={search}
-              onChange={(e) => setSearch(e.target.value)} style={{ flex: 1 }} />
+              onChange={(e) => { setSearch(e.target.value); setSearchLoading(!!e.target.value.trim()); }} style={{ flex: 1 }} />
             {searchLoading && (
               <span className="material-symbols-outlined" style={{ animation: "spin 1s linear infinite", fontSize: "18px", color: "#3ea6ff", marginRight: "12px", flexShrink: 0 }}>
                 sync
