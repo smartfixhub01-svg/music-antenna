@@ -460,8 +460,23 @@ useEffect(() => {
     try {
       let query = supabase.from("media").select("*, profiles(display_name, avatar_url)").eq("status", "published").order("created_at", { ascending: false });
 
-      if (search) {
-        query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
+      if (search.trim()) {
+        const term = search.trim();
+        // 1. Search for matching artists (profiles) by name or username
+        const { data: matchedProfiles } = await supabase
+          .from("profiles")
+          .select("id")
+          .or(`display_name.ilike.%${term}%,username.ilike.%${term}%`);
+
+        const artistIds = matchedProfiles?.map(p => p.id) || [];
+
+        // 2. Build the search query
+        if (artistIds.length > 0) {
+          const idList = artistIds.join(',');
+          query = query.or(`title.ilike.%${term}%,description.ilike.%${term}%,thumbnail_path.ilike.%${term}%,artist_id.in.(${idList})`);
+        } else {
+          query = query.or(`title.ilike.%${term}%,description.ilike.%${term}%,thumbnail_path.ilike.%${term}%`);
+        }
       }
       
       if (showSubscriptionsFeed && session?.user?.id) {
@@ -489,7 +504,6 @@ useEffect(() => {
       
       const items = await Promise.all(
         (data || []).map(async (item) => {
-          // USE PUBLIC URL
           const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(item.storage_path);
           let thumbnailUrl = "";
           if (item.thumbnail_path) {
@@ -499,9 +513,47 @@ useEffect(() => {
           return { ...item, playbackUrl: pub?.publicUrl || "", thumbnailUrl };
         })
       );
+
+      // 3. SMART SORTING: Push exact matches to the top!
+      if (search.trim()) {
+        const term = search.trim().toLowerCase();
+        items.sort((a, b) => {
+          // Priority 1: Title match
+          const aTitle = (a.title || "").toLowerCase();
+          const bTitle = (b.title || "").toLowerCase();
+          const aTitleMatch = aTitle.includes(term) ? 4 : 0;
+          const bTitleMatch = bTitle.includes(term) ? 4 : 0;
+          if (aTitleMatch !== bTitleMatch) return bTitleMatch - aTitleMatch;
+
+          // Priority 2: Artist Name match
+          const aArtist = (a.profiles?.display_name || "").toLowerCase();
+          const bArtist = (b.profiles?.display_name || "").toLowerCase();
+          const aArtistMatch = aArtist.includes(term) ? 3 : 0;
+          const bArtistMatch = bArtist.includes(term) ? 3 : 0;
+          if (aArtistMatch !== bArtistMatch) return bArtistMatch - aArtistMatch;
+
+          // Priority 3: Thumbnail filename match
+          const aThumb = (a.thumbnail_path || "").toLowerCase();
+          const bThumb = (b.thumbnail_path || "").toLowerCase();
+          const aThumbMatch = aThumb.includes(term) ? 2 : 0;
+          const bThumbMatch = bThumb.includes(term) ? 2 : 0;
+          if (aThumbMatch !== bThumbMatch) return bThumbMatch - aThumbMatch;
+
+          // Priority 4: Description match
+          const aDesc = (a.description || "").toLowerCase();
+          const bDesc = (b.description || "").toLowerCase();
+          const aDescMatch = aDesc.includes(term) ? 1 : 0;
+          const bDescMatch = bDesc.includes(term) ? 1 : 0;
+          if (aDescMatch !== bDescMatch) return bDescMatch - aDescMatch;
+
+          // Fallback: Newest first
+          return new Date(b.created_at) - new Date(a.created_at);
+        });
+      }
+
       setMedia(items);
     } catch (error) {
-      setMessage("Could not load media: " + error.message);
+      setMessage("Error loading media: " + error.message);
     } finally {
       setFeedLoading(false);
     }
