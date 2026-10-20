@@ -39,6 +39,19 @@ export default function App() {
   const [feedLoading, setFeedLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [searchLoading, setSearchLoading] = useState(false);
+  
+  // History States
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [historyTab, setHistoryTab] = useState("search");
+  const [searchHistory, setSearchHistory] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("ma_search_history")) || []; } catch { return []; }
+  });
+  const [watchHistory, setWatchHistory] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("ma_watch_history")) || []; } catch { return []; }
+  });
+
+  const clearSearchHistory = () => { setSearchHistory([]); localStorage.removeItem("ma_search_history"); };
+  const clearWatchHistory = () => { setWatchHistory([]); localStorage.removeItem("ma_watch_history"); };
   const [navVisible, setNavVisible] = useState(true);
 
   useEffect(() => {
@@ -2090,7 +2103,18 @@ useEffect(() => {
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   }
 
-  return (
+  
+  useEffect(() => {
+    if (!activeMedia || !activeMedia.id) return;
+    setWatchHistory(prev => {
+      const next = [activeMedia, ...prev.filter(m => m.id !== activeMedia.id)].slice(0, 50);
+      localStorage.setItem("ma_watch_history", JSON.stringify(next));
+      return next;
+    });
+  }, [activeMedia]);
+
+return (
+    <>
     <div className="ma-app">
         {/* PERMANENT AUDIO PLAYER (Never stops on tab change) */}
         
@@ -2111,6 +2135,9 @@ useEffect(() => {
           <div className="ma-search-box" style={{ display: "flex", alignItems: "center" }}>
             <input aria-label="Search" placeholder="Search" value={search}
               onChange={(e) => setSearch(e.target.value)} style={{ flex: 1 }} />
+            <button onClick={() => setShowHistoryModal(true)} style={{ background: "none", border: "none", color: "#aaa", cursor: "pointer", padding: "0 8px", fontSize: "16px" }} title="History">
+              🕒
+            </button>
             {searchLoading && (
               <span className="material-symbols-outlined" style={{ animation: "spin 1s linear infinite", fontSize: "18px", color: "#3ea6ff", marginRight: "12px", flexShrink: 0 }}>
                 sync
@@ -3894,5 +3921,56 @@ useEffect(() => {
       )}
 
     </div>
-  );
+  
+      {showHistoryModal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", zIndex: 9999, display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <div style={{ background: "#111", padding: "20px", borderRadius: "12px", width: "90%", maxWidth: "500px", maxHeight: "80vh", overflowY: "auto", border: "1px solid #333" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+              <h2 style={{ color: "#fff", margin: 0, fontSize: "20px" }}>Your History</h2>
+              <button onClick={() => setShowHistoryModal(false)} style={{ background: "none", border: "none", color: "#fff", fontSize: "24px", cursor: "pointer" }}>×</button>
+            </div>
+            
+            <div style={{ display: "flex", gap: "10px", marginBottom: "16px" }}>
+              <button onClick={() => setHistoryTab("search")} style={{ flex: 1, padding: "8px", background: historyTab === "search" ? "#ff0050" : "#222", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer" }}>Searches</button>
+              <button onClick={() => setHistoryTab("watch")} style={{ flex: 1, padding: "8px", background: historyTab === "watch" ? "#ff0050" : "#222", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer" }}>Watched</button>
+            </div>
+
+            {historyTab === "search" ? (
+              <div>
+                {searchHistory.length === 0 && <p style={{ color: "#aaa" }}>No search history.</p>}
+                {searchHistory.map((h, i) => (
+                  <div key={i} style={{ padding: "10px", borderBottom: "1px solid #333", display: "flex", justifyContent: "space-between", color: "#fff" }}>
+                    <span onClick={() => { setSearch(h); setShowHistoryModal(false); }} style={{ cursor: "pointer", flex: 1 }}>{h}</span>
+                  </div>
+                ))}
+                {searchHistory.length > 0 && (
+                  <button onClick={clearSearchHistory} style={{ marginTop: "16px", padding: "10px", background: "transparent", color: "#ff0050", border: "1px solid #ff0050", borderRadius: "4px", width: "100%", cursor: "pointer" }}>Clear Search History</button>
+                )}
+              </div>
+            ) : (
+              <div>
+                {watchHistory.length === 0 && <p style={{ color: "#aaa" }}>No watch history.</p>}
+                {watchHistory.map((m, i) => (
+                  <div key={i} style={{ padding: "10px", borderBottom: "1px solid #333", display: "flex", alignItems: "center", gap: "10px", color: "#fff" }}>
+                    <div onClick={() => { setActiveMedia(m); setShowHistoryModal(false); }} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "10px", flex: 1 }}>
+                      {m.thumbnailUrl ? (
+                        <img src={m.thumbnailUrl} style={{ width: "40px", height: "40px", objectFit: "cover", borderRadius: "4px" }} alt="" />
+                      ) : (
+                        <div style={{ width: "40px", height: "40px", background: "#333", borderRadius: "4px" }} />
+                      )}
+                      <span style={{ fontSize: "14px" }}>{m.title}</span>
+                    </div>
+                  </div>
+                ))}
+                {watchHistory.length > 0 && (
+                  <button onClick={clearWatchHistory} style={{ marginTop: "16px", padding: "10px", background: "transparent", color: "#ff0050", border: "1px solid #ff0050", borderRadius: "4px", width: "100%", cursor: "pointer" }}>Clear Watch History</button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+    </>
+);
 }
