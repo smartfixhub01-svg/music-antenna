@@ -461,12 +461,14 @@ useEffect(() => {
     setMessage("");
     
     try {
+      // 1. Fetch media WITHOUT relying on the fragile join
       let query = supabase
         .from("media")
-        .select("*, profiles(display_name, avatar_url)")
+        .select("*")
         .order("created_at", { ascending: false })
         .limit(150);
 
+      // If we are NOT searching, only show published media
       if (!search.trim() && !showSubscriptionsFeed) {
         query = query.eq("status", "published");
       }
@@ -490,7 +492,21 @@ useEffect(() => {
 
       const { data, error } = await query;
       if (error) throw error;
+
+      // 2. MANUAL JOIN: Fetch profiles for all unique artist_ids
+      const uniqueArtistIds = [...new Set((data || []).map(i => i.artist_id).filter(Boolean))];
+      let profileMap = {};
       
+      if (uniqueArtistIds.length > 0) {
+        const { data: profilesData } = await supabase
+          .from("profiles")
+          .select("id, display_name, avatar_url")
+          .in("id", uniqueArtistIds);
+          
+        profilesData?.forEach(p => { profileMap[p.id] = p; });
+      }
+
+      // 3. Attach the profiles and URLs to the media
       let items = await Promise.all(
         (data || []).map(async (item) => {
           const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(item.storage_path);
@@ -499,10 +515,17 @@ useEffect(() => {
             const { data: thumb } = supabase.storage.from("track-covers").getPublicUrl(item.thumbnail_path);
             thumbnailUrl = thumb?.publicUrl || "";
           }
-          return { ...item, playbackUrl: pub?.publicUrl || "", thumbnailUrl };
+          return { 
+             ...item, 
+             playbackUrl: pub?.publicUrl || "", 
+             thumbnailUrl,
+             // Attach profile from map, or fallback to current user's profile if it's their video
+             profiles: profileMap[item.artist_id] || (item.artist_id === session?.user?.id ? profile : null)
+          };
         })
       );
 
+      // 4. SEARCH & SORT
       if (search.trim()) {
         const term = search.trim().toLowerCase();
         
@@ -510,13 +533,13 @@ useEffect(() => {
           const title = (item.title || "").toLowerCase();
           const desc = (item.description || "").toLowerCase();
           const thumb = (item.thumbnail_path || "").toLowerCase();
-          // GLOBAL FALLBACK: If the DB join fails, use the logged-in user's profile name
-          const artistName = item.profiles?.display_name || (item.artist_id === session?.user?.id ? profile?.display_name : "") || "";
-          const artist = artistName.toLowerCase();
+          const artist = (item.profiles?.display_name || "").toLowerCase();
           
+          // Find it ANYWHERE
           return title.includes(term) || desc.includes(term) || artist.includes(term) || thumb.includes(term);
         });
 
+        // Smart sorting: Title > Artist > Thumbnail > Description
         items.sort((a, b) => {
           const tA = (a.title || "").toLowerCase();
           const tB = (b.title || "").toLowerCase();
@@ -524,8 +547,8 @@ useEffect(() => {
           const thB = (b.thumbnail_path || "").toLowerCase();
           const dA = (a.description || "").toLowerCase();
           const dB = (b.description || "").toLowerCase();
-          const arA = (a.profiles?.display_name || (a.artist_id === session?.user?.id ? profile?.display_name : "") || "").toLowerCase();
-          const arB = (b.profiles?.display_name || (b.artist_id === session?.user?.id ? profile?.display_name : "") || "").toLowerCase();
+          const arA = (a.profiles?.display_name || "").toLowerCase();
+          const arB = (b.profiles?.display_name || "").toLowerCase();
 
           const aT = tA.includes(term) ? 4 : 0;
           const bT = tB.includes(term) ? 4 : 0;
