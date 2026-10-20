@@ -4592,3 +4592,8 @@ button {
   min-width: 100px !important;
   z-index: 999 !important;
 }
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

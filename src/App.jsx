@@ -38,6 +38,7 @@ export default function App() {
   const [media, setMedia] = useState([]);
   const [feedLoading, setFeedLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const [searchLoading, setSearchLoading] = useState(false);
   const [navVisible, setNavVisible] = useState(true);
 
   useEffect(() => {
@@ -456,15 +457,17 @@ useEffect(() => {
 
   async function loadMedia() {
     setFeedLoading(true);
+    if (search.trim()) setSearchLoading(true);
     setMessage("");
+    
     try {
-      // 1. Fetch a large batch of recent videos WITHOUT complex text filtering
+      // 1. Fetch data WITHOUT complex text filtering (just get recent published videos)
       let query = supabase
         .from("media")
         .select("*, profiles(display_name, avatar_url)")
         .eq("status", "published")
         .order("created_at", { ascending: false })
-        .limit(100); // Get up to 100 recent videos to filter locally
+        .limit(150); // Get plenty of videos
 
       if (showSubscriptionsFeed && session?.user?.id) {
         const { data: subs } = await supabase.from("subscriptions").select("channel_id").eq("subscriber_id", session.user.id);
@@ -474,6 +477,7 @@ useEffect(() => {
         } else {
           setMedia([]);
           setFeedLoading(false);
+          setSearchLoading(false);
           return;
         }
       }
@@ -502,11 +506,11 @@ useEffect(() => {
         })
       );
 
-      // 3. BULLETPROOF LOCAL FILTER & SORT
+      // 3. BULLETPROOF LOCAL SEARCH & SORT
       if (search.trim()) {
         const term = search.trim().toLowerCase();
         
-        // A. Filter the results
+        // Filter
         items = items.filter(item => {
           const title = (item.title || "").toLowerCase();
           const desc = (item.description || "").toLowerCase();
@@ -516,37 +520,30 @@ useEffect(() => {
           return title.includes(term) || desc.includes(term) || artist.includes(term) || thumb.includes(term);
         });
 
-        // B. Sort the results by Priority
+        // Sort
         items.sort((a, b) => {
-          // Priority 1: Title
           const tA = (a.title || "").toLowerCase();
           const tB = (b.title || "").toLowerCase();
-          const aT = tA.includes(term) ? 4 : 0;
-          const bT = tB.includes(term) ? 4 : 0;
-          if (aT !== bT) return bT - aT;
-
-          // Priority 2: Artist Name
           const arA = (a.profiles?.display_name || "").toLowerCase();
           const arB = (b.profiles?.display_name || "").toLowerCase();
-          const aA = arA.includes(term) ? 3 : 0;
-          const bA = arB.includes(term) ? 3 : 0;
-          if (aA !== bA) return bA - aA;
-
-          // Priority 3: Thumbnail Filename
           const thA = (a.thumbnail_path || "").toLowerCase();
           const thB = (b.thumbnail_path || "").toLowerCase();
-          const aTh = thA.includes(term) ? 2 : 0;
-          const bTh = thB.includes(term) ? 2 : 0;
-          if (aTh !== bTh) return bTh - aTh;
-
-          // Priority 4: Description
           const dA = (a.description || "").toLowerCase();
           const dB = (b.description || "").toLowerCase();
+
+          const aT = tA.includes(term) ? 4 : 0;
+          const bT = tB.includes(term) ? 4 : 0;
+          const aA = arA.includes(term) ? 3 : 0;
+          const bA = arB.includes(term) ? 3 : 0;
+          const aTh = thA.includes(term) ? 2 : 0;
+          const bTh = thB.includes(term) ? 2 : 0;
           const aD = dA.includes(term) ? 1 : 0;
           const bD = dB.includes(term) ? 1 : 0;
-          if (aD !== bD) return bD - aD;
 
-          // Default: Newest first
+          if (aT !== bT) return bT - aT;
+          if (aA !== bA) return bA - aA;
+          if (aTh !== bTh) return bTh - aTh;
+          if (aD !== bD) return bD - aD;
           return new Date(b.created_at) - new Date(a.created_at);
         });
       }
@@ -556,6 +553,7 @@ useEffect(() => {
       setMessage("Error loading media: " + error.message);
     } finally {
       setFeedLoading(false);
+      setSearchLoading(false);
     }
   }
 
@@ -2069,6 +2067,11 @@ useEffect(() => {
           <div className="ma-search-box">
             <input aria-label="Search" placeholder="Search" value={search}
               onChange={(e) => setSearch(e.target.value)} />
+            {searchLoading && (
+              <span className="material-symbols-outlined" style={{ animation: "spin 1s linear infinite", fontSize: "18px", color: "#aaa", marginRight: "8px" }}>
+                sync
+              </span>
+            )}
             {search && (
               <button className="ma-search-clear" onClick={() => setSearch("")} aria-label="Clear">
                 <span className="material-symbols-outlined">close</span>
