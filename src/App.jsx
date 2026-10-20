@@ -461,14 +461,12 @@ useEffect(() => {
     setMessage("");
     
     try {
-      // 1. Fetch ALL media owned by the user (or all published if not searching)
       let query = supabase
         .from("media")
         .select("*, profiles(display_name, avatar_url)")
         .order("created_at", { ascending: false })
         .limit(150);
 
-      // If we are NOT searching, only show published media
       if (!search.trim() && !showSubscriptionsFeed) {
         query = query.eq("status", "published");
       }
@@ -486,18 +484,13 @@ useEffect(() => {
         }
       }
 
-      if (category === "Shorts") {
-        query = query.eq("is_short", true);
-      } else if (category === "Videos") {
-        query = query.eq("media_type", "video").eq("is_short", false);
-      } else if (category === "Music") {
-        query = query.eq("media_type", "audio");
-      }
+      if (category === "Shorts") query = query.eq("is_short", true);
+      else if (category === "Videos") query = query.eq("media_type", "video").eq("is_short", false);
+      else if (category === "Music") query = query.eq("media_type", "audio");
 
       const { data, error } = await query;
       if (error) throw error;
       
-      // 2. Process URLs
       let items = await Promise.all(
         (data || []).map(async (item) => {
           const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(item.storage_path);
@@ -510,30 +503,29 @@ useEffect(() => {
         })
       );
 
-      // 3. BULLETPROOF LOCAL SEARCH & SORT
       if (search.trim()) {
         const term = search.trim().toLowerCase();
         
-        // Filter - Extremely aggressive checking
         items = items.filter(item => {
           const title = (item.title || "").toLowerCase();
           const desc = (item.description || "").toLowerCase();
-          const artist = (item.profiles?.display_name || "").toLowerCase();
           const thumb = (item.thumbnail_path || "").toLowerCase();
+          // GLOBAL FALLBACK: If the DB join fails, use the logged-in user's profile name
+          const artistName = item.profiles?.display_name || (item.artist_id === session?.user?.id ? profile?.display_name : "") || "";
+          const artist = artistName.toLowerCase();
           
           return title.includes(term) || desc.includes(term) || artist.includes(term) || thumb.includes(term);
         });
 
-        // Sort
         items.sort((a, b) => {
           const tA = (a.title || "").toLowerCase();
           const tB = (b.title || "").toLowerCase();
-          const arA = (a.profiles?.display_name || "").toLowerCase();
-          const arB = (b.profiles?.display_name || "").toLowerCase();
           const thA = (a.thumbnail_path || "").toLowerCase();
           const thB = (b.thumbnail_path || "").toLowerCase();
           const dA = (a.description || "").toLowerCase();
           const dB = (b.description || "").toLowerCase();
+          const arA = (a.profiles?.display_name || (a.artist_id === session?.user?.id ? profile?.display_name : "") || "").toLowerCase();
+          const arB = (b.profiles?.display_name || (b.artist_id === session?.user?.id ? profile?.display_name : "") || "").toLowerCase();
 
           const aT = tA.includes(term) ? 4 : 0;
           const bT = tB.includes(term) ? 4 : 0;
