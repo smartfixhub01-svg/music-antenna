@@ -1,0 +1,16 @@
+{
+  "name": "Music Antenna",
+  "short_name": "Music Antenna",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#111111",
+  "theme_color": "#ff0050",
+  "description": "Your sound. Your world.",
+  "icons": [
+    {
+      "src": "https://music-antenna.vercel.app/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}
