@@ -13,8 +13,7 @@ function timeAgo(dateString) {
   if (days < 30) return days + "d ago";
   const months = Math.floor(days / 30);
   if (months < 12) return months + "mo ago";
-  const years = Math.floor(days / 365);
-  return years + "y ago";
+  const years = Math.floor(days / 365);  return years + "y ago";
 }
 import { supabase } from "./lib/supabase";
 import "./App.css";
@@ -636,7 +635,7 @@ useEffect(() => {
 
   
   
-  async function handleUpdatePassword() {
+    async function handleUpdatePassword() {
     if (newPassword !== confirmNewPassword) {
       return setMessage("Passwords do not match.");
     }
@@ -650,15 +649,14 @@ useEffect(() => {
       if (error) throw error;
       
       setMessage("Password updated successfully! Redirecting to login...");
-      
-      // Force sign out so they have to log in with the new password
+      // Force sign out so the user is redirected to the login page
       await supabase.auth.signOut();
       
       setTimeout(() => {
         setShowResetPasswordScreen(false);
         setNewPassword("");
         setConfirmNewPassword("");
-        window.location.href = "/"; // Reload the app (now on login screen)
+        window.location.href = "/";
       }, 2000);
     } catch (err) {
       setMessage("Error: " + (err.message || "Could not update password."));
