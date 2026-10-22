@@ -5279,3 +5279,22 @@ input::placeholder, textarea::placeholder {
   width: auto !important;
   object-fit: contain !important;
 }
+
+
+/* ===== FINAL AUTH BRAND FIX ===== */
+.auth-screen-brand {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin-bottom: 24px !important;
+}
+.auth-screen-brand img {
+  display: block !important;
+  object-fit: contain !important;
+}
+.ma-brand img {
+  height: 36px !important;
+  width: auto !important;
+  object-fit: contain !important;
+}

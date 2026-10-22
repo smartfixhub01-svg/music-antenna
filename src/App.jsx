@@ -1871,7 +1871,7 @@ useEffect(() => {
     return (
       <main className="auth-page">
         <section className="auth-card">
-          <div className="auth-logo">♫</div>
+          <img src="/music-antenna-logo.png" alt="Music Antenna" style={{ width: "100%", maxWidth: "180px", height: "auto", objectFit: "contain", margin: "0 auto 16px" }} />
           <h1></h1>
           <p>Connecting securely...</p>
         </section>
@@ -1889,8 +1889,8 @@ useEffect(() => {
       >
         <section className="auth-screen-card">
           <div className="auth-screen-brand">
-            <div className="auth-logo">♫</div>
-            <span>Music <b>Antenna</b></span>
+            <img src="/music-antenna-logo.png" alt="Music Antenna" style={{ width: "100%", maxWidth: "180px", height: "auto", objectFit: "contain", margin: "0 auto 16px" }} />
+            
           </div>
 
           {authTab === "listener" ? (
@@ -1952,9 +1952,7 @@ useEffect(() => {
                 </form>
               ) : (
                 <form onSubmit={handleAuth} className="auth-screen-form">
-                  <div style={{ display: "flex", justifyContent: "center", width: "100%", marginBottom: "24px" }}>
-                    <img src="/music-antenna-logo.png" alt="Music Antenna" style={{ width: "100%", maxWidth: "180px", height: "auto", objectFit: "contain" }} />
-                  </div>
+                  
 
                   
 
@@ -2169,9 +2167,7 @@ useEffect(() => {
                 </form>
               ) : (
                 <form onSubmit={handleAuth} className="auth-screen-form">
-                  <div style={{ display: "flex", justifyContent: "center", width: "100%", marginBottom: "24px" }}>
-                    <img src="/music-antenna-logo.png" alt="Music Antenna" style={{ width: "100%", maxWidth: "180px", height: "auto", objectFit: "contain" }} />
-                  </div>
+                  
 
                   
 
