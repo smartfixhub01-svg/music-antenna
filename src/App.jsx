@@ -1179,7 +1179,7 @@ useEffect(() => {
           if (prev >= 35) {
             stopRecording();
             setMessage("Recording stopped at 35 seconds max.");
-            setTimeout(() => setMessage(""), 3000);
+            
             return 35;
           }
           return prev + 1;
@@ -1254,7 +1254,7 @@ useEffect(() => {
       setReplyTarget(null);
       setReplyingName("");
       setMessage("Comment posted!");
-      setTimeout(() => setMessage(""), 2000);
+      
       
     } catch (err) { setMessage("Error: " + err.message); }
   }
@@ -2705,7 +2705,7 @@ useEffect(() => {
               ))}
             </div>
 
-            {message && <p className="ma-message">{message}</p>}
+            
 
             {feedLoading ? (
               <div className="ma-empty">
@@ -2816,6 +2816,7 @@ useEffect(() => {
             {activeMedia.playbackUrl ? (
               activeMedia.media_type === "video" ? (
                 <video
+                  ref={videoRef}
                   onPlay={handleFirstPlay}
                   className="yt-watch-video"
                   src={activeMedia.playbackUrl}
@@ -2833,7 +2834,7 @@ useEffect(() => {
                       <span className="material-symbols-outlined">music_note</span>
                     )}
                   </div>
-                  <audio src={activeMedia.playbackUrl} controls autoPlay onPlay={handleFirstPlay} />
+                  <audio ref={audioRef} src={activeMedia.playbackUrl} controls autoPlay onPlay={handleFirstPlay} />
                 </div>
               )
             ) : (
@@ -2861,7 +2862,7 @@ useEffect(() => {
               <button className="yt-watch-action" onClick={() => {
                   localStorage.setItem(`disliked_${activeMedia.id}`, "true");
                   setMessage("Video disliked.");
-                  setTimeout(() => setMessage(""), 2000);
+                  
                 }}>
                 <span className="material-symbols-outlined">thumb_down</span>
               </button>
@@ -3006,7 +3007,7 @@ useEffect(() => {
                 if (session?.user?.id) {
                   supabase.from("subscriptions").select("*", { count: "exact", head: true }).eq("channel_id", session.user.id).then(({ count }) => setMySubCount(count || 0));
                   setMessage("Refreshed subscriber count!");
-                  setTimeout(() => setMessage(""), 2000);
+                  
                 }
               }}>
                 <div style={{ fontSize: "18px", fontWeight: "700", color: "#f1f1f1" }}>{mySubCount}</div>
@@ -3709,6 +3710,12 @@ useEffect(() => {
               Cancel
             </button>
           </div>
+        </div>
+      )}
+
+      {message && (
+        <div style={{ position: "fixed", top: "20px", left: "50%", transform: "translateX(-50%)", background: "#ff0050", color: "#fff", padding: "12px 24px", borderRadius: "8px", zIndex: 99999, boxShadow: "0 4px 12px rgba(0,0,0,0.5)", fontWeight: "bold", fontSize: "14px", textAlign: "center", whiteSpace: "nowrap" }}>
+          {message}
         </div>
       )}
 
