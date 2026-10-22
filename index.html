@@ -54,18 +54,20 @@
     <meta property="og:url" content="https://music-antenna.vercel.app/" />
     <meta name="twitter:card" content="summary_large_image" />
 
-    <script>
-      // Catch the recovery token before Supabase clears it
-      if (window.location.hash && (window.location.hash.includes('type=recovery') || window.location.hash.includes('access_token'))) {
-      }
-      if (window.location.search && (window.location.search.includes('type=recovery') || window.location.search.includes('access_token'))) {
-      }
-    </script>
+    
+
+    
 
     <script>
-      // Catch the recovery token and immediately forward to the standalone reset page
-      if (window.location.hash && (window.location.hash.includes('type=recovery') || window.location.hash.includes('access_token'))) {
-        window.location.replace('/reset.html' + window.location.hash);
+      // Catch ANY recovery token or PKCE code and forward it to the standalone reset page
+      const urlParams = window.location.href;
+      if (
+        urlParams.includes('type=recovery') || 
+        urlParams.includes('access_token') || 
+        urlParams.includes('code=')
+      ) {
+        // Pass the entire URL (hash and search) to reset.html
+        window.location.replace('/reset.html' + window.location.search + window.location.hash);
       }
     </script>
 </head>

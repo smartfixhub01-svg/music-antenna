@@ -21,7 +21,6 @@
         .logo img { width: 100%; max-width: 180px; background: #fff; padding: 12px; border-radius: 12px; }
         h2 { text-align: center; margin-bottom: 24px; }
         
-        /* FIX FOR INVISIBLE TEXT */
         input {
             width: 100%; padding: 14px; margin-bottom: 16px;
             border-radius: 8px; background: #272727; 
@@ -29,10 +28,6 @@
             -webkit-text-fill-color: #FFFFFF !important;
             border: 1px solid #303030; box-sizing: border-box;
             font-size: 16px;
-        }
-        input::placeholder {
-            color: #888888 !important;
-            -webkit-text-fill-color: #888888 !important;
         }
         
         button {
@@ -47,9 +42,10 @@
             color: #FF0033;
         }
         
-        .msg { text-align: center; margin-bottom: 16px; font-size: 14px; padding: 10px; border-radius: 8px; }
+        .msg { text-align: center; margin-bottom: 16px; font-size: 14px; padding: 10px; border-radius: 8px; word-break: break-all; }
         .error { background: rgba(255, 78, 69, 0.1); color: #FF4E45; border: 1px solid #FF4E45; }
         .success { background: rgba(43, 166, 64, 0.1); color: #2BA640; border: 1px solid #2BA640; }
+        .debug { font-size: 10px; color: #888; margin-top: 20px; word-break: break-all; }
     </style>
 </head>
 <body>
@@ -66,6 +62,8 @@
             <button type="submit" id="submitBtn">Update Password</button>
             <button type="button" class="back-btn" onclick="window.location.href='/'">Back to Login</button>
         </form>
+        
+        <div id="debug" class="debug"></div>
     </div>
 
     <script>
@@ -76,14 +74,24 @@
         const form = document.getElementById('resetForm');
         const msg = document.getElementById('msg');
         const btn = document.getElementById('submitBtn');
+        const debug = document.getElementById('debug');
 
-        // Check if session exists (Supabase should catch the hash token automatically)
+        // Show the URL to help us debug
+        debug.textContent = "URL: " + window.location.href;
+
+        // Check session after 1 second
         setTimeout(async () => {
-            const { data: { session } } = await supabase.auth.getSession();
+            const { data: { session }, error } = await supabase.auth.getSession();
             if (!session) {
                 msg.style.display = 'block';
                 msg.className = 'msg error';
-                msg.textContent = 'Session expired or invalid link. Please request a new one.';
+                msg.textContent = 'Session missing! The link may be invalid or expired. Please request a new one.';
+                if (error) debug.textContent += " | Error: " + error.message;
+            } else {
+                msg.style.display = 'block';
+                msg.className = 'msg success';
+                msg.textContent = 'Secure session established. You can now update your password.';
+                setTimeout(() => msg.style.display = 'none', 3000);
             }
         }, 1000);
 
@@ -119,10 +127,10 @@
             } catch (err) {
                 msg.style.display = 'block';
                 msg.className = 'msg error';
-                msg.textContent = err.message || 'Error updating password. Check console.';
+                msg.textContent = err.message || 'Error updating password.';
                 btn.disabled = false;
                 btn.textContent = 'Update Password';
-                console.error("Password Update Error:", err);
+                debug.textContent += " | Update Error: " + (err.message || err);
             }
         });
     </script>
