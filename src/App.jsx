@@ -38,7 +38,12 @@ export default function App() {
 
   const [showResetPasswordScreen, setShowResetPasswordScreen] = useState(() => {
     const hash = window.location.hash;
-    return hash.includes('type=recovery') || hash.includes('access_token');
+    if (hash && (hash.includes('type=recovery') || hash.includes('access_token'))) {
+      localStorage.setItem('is_resetting_password', 'true');
+      window.history.replaceState(null, '', window.location.pathname);
+      return true;
+    }
+    return localStorage.getItem('is_resetting_password') === 'true';
   });
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
