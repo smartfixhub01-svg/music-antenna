@@ -649,12 +649,16 @@ useEffect(() => {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
       
-      setMessage("Password updated successfully! Redirecting...");
+      setMessage("Password updated successfully! Redirecting to login...");
+      
+      // Force sign out so they have to log in with the new password
+      await supabase.auth.signOut();
+      
       setTimeout(() => {
         setShowResetPasswordScreen(false);
         setNewPassword("");
         setConfirmNewPassword("");
-        window.location.href = "/"; // Go to home
+        window.location.href = "/"; // Reload the app (now on login screen)
       }, 2000);
     } catch (err) {
       setMessage("Error: " + (err.message || "Could not update password."));
@@ -2003,6 +2007,19 @@ if (showResetPasswordScreen) {
             </label>
             <button type="submit" className="auth-screen-submit" disabled={busy}>
               {busy ? "Updating..." : "Update Password"}
+            </button>
+            {submit_btn}
+            
+            <button 
+              type="button" 
+              onClick={async () => {
+                await supabase.auth.signOut();
+                setShowResetPasswordScreen(false);
+                window.location.href = "/";
+              }}
+              style={{ width: "100%", marginTop: "16px", padding: "14px", borderRadius: "8px", background: "transparent", color: "var(--ma-accent)", fontWeight: "bold", fontSize: "15px", border: "1px solid var(--ma-accent)", cursor: "pointer" }}
+            >
+              Cancel & Return to Login
             </button>
           </form>
         </section>
