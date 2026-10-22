@@ -4,10 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create New Password - Music Antenna</title>
-    <script 
-        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.0" 
-        onerror="document.getElementById('debugConsole').innerHTML = '🔴 CRITICAL: Supabase CDN failed to load. Check your internet or adblocker.';"
-    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -104,7 +101,7 @@
         const SUPABASE_URL = 'https://wcuqehdequrealcndkyw.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_-iD2D0ploxUh4w_PLKOirQ_ih4JcGKt';
         
-        // WE REMOVED  SO IT DOES NOT HANG
+        // Create Client WITHOUT auto-detect to prevent hanging
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const form = document.getElementById('resetForm');
@@ -136,21 +133,21 @@
         }
 
         async function initAuth() {
-            // Manually extract the token from the URL hash
+            // 1. Manually parse the hash for access_token (Implicit Flow)
             const hash = window.location.hash.substring(1);
             const hashParams = new URLSearchParams(hash);
             const access_token = hashParams.get('access_token');
             const refresh_token = hashParams.get('refresh_token');
 
             if (access_token && refresh_token) {
-                debugLog("Found access_token in URL. Setting session...");
+                debugLog("Found access_token. Setting session...");
                 const { error } = await supabase.auth.setSession({
                     access_token: access_token,
                     refresh_token: refresh_token
                 });
                 
                 if (!error) {
-                    debugLog("✅ Session established successfully.");
+                    debugLog("✅ Session established.");
                     unlockForm();
                     return;
                 } else {
@@ -158,7 +155,7 @@
                 }
             }
 
-            // Fallback for PKCE code
+            // 2. Fallback for PKCE code
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
             if (code) {
@@ -173,7 +170,7 @@
                 }
             }
 
-            // Fallback check
+            // 3. Fallback for existing session
             const { data } = await supabase.auth.getSession();
             if (data.session) {
                 debugLog("✅ Existing session found.");
