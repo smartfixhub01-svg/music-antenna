@@ -17,6 +17,7 @@ function timeAgo(dateString) {
 }
 import { supabase } from "./lib/supabase";
 import "./App.css";
+import ResetPassword from "./ResetPassword";
 
 const BUCKET = "music-antenna-media";
 
