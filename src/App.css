@@ -5234,29 +5234,44 @@ input::placeholder, textarea::placeholder {
 
 
 
-/* ===== OFFICIAL LOGO STYLING ===== */
 
-/* Top Navbar Logo */
-.ma-brand img {
-  height: 38px !important;
-  width: auto !important;
-  object-fit: contain !important;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)) !important;
-  transition: transform 0.2s ease !important;
-}
-.ma-brand img:hover {
-  transform: scale(1.05) !important;
-}
 
-/* Login Card Logo */
-.auth-screen-head img {
-  max-width: 240px !important;
-  height: auto !important;
-  object-fit: contain !important;
-  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15)) !important;
-}
+/* ===== CSS-ONLY LOGO REPLACEMENT ===== */
 
-/* Hide the old pink background box if it still exists */
-.auth-screen-head-icon, .ma-brand-icon {
+/* 1. Hide the old pink icon and text in the top navbar */
+.ma-brand-icon, 
+.material-symbols-outlined:contains("music_note"),
+.auth-screen-head-icon {
   display: none !important;
+}
+
+/* 2. Hide the old text "Music Antenna" next to it */
+.ma-brand span, 
+.auth-screen-head span {
+  display: none !important;
+}
+
+/* 3. Replace the container with the official logo */
+.ma-brand {
+  background-image: url('/music-antenna-logo.png') !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  width: 140px !important;
+  height: 36px !important;
+  display: block !important;
+  cursor: pointer !important;
+}
+
+/* 4. Replace the login card header with a large logo */
+.auth-screen-head {
+  background-image: url('/music-antenna-logo.png') !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  width: 100% !important;
+  max-width: 220px !important;
+  height: 60px !important;
+  margin: 0 auto 24px auto !important;
+  display: block !important;
 }
