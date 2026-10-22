@@ -5236,49 +5236,42 @@ input::placeholder, textarea::placeholder {
 
 
 
-/* ===== CSS-ONLY LOGO REPLACEMENT ===== */
 
-/* 1. Hide the old pink icon and text in the top navbar */
-.ma-brand-icon, 
-.material-symbols-outlined:contains("music_note"),
-.auth-screen-head-icon {
+
+/* ===== ULTIMATE CSS LOGO REPLACEMENT ===== */
+
+/* 1. HIDE THE OLD AUTH HEADER ICON AND TEXT */
+.auth-screen-head > * {
   display: none !important;
 }
 
-/* 2. Hide the old text "Music Antenna" next to it */
-.ma-brand span, 
-.auth-screen-head span {
-  display: none !important;
-}
-
-/* 3. Replace the container with the official logo */
-.ma-brand {
-  background-image: url('/music-antenna-logo.png') !important;
+/* 2. APPLY THE BIG LOGO TO THE AUTH HEADER CONTAINER */
+.auth-screen-head {
+  background-image: url('/logo.png') !important;
   background-size: contain !important;
   background-repeat: no-repeat !important;
   background-position: center !important;
+  background-color: transparent !important;
+  width: 100% !important;
+  max-width: 240px !important;
+  height: 64px !important;
+  margin: 0 auto 24px auto !important;
+  display: block !important;
+}
+
+/* 3. HIDE THE OLD NAVBAR ICON AND TEXT */
+.ma-brand > * {
+  display: none !important;
+}
+
+/* 4. APPLY THE SMALL LOGO TO THE NAVBAR CONTAINER */
+.ma-brand {
+  background-image: url('/logo.png') !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: left center !important;
   width: 140px !important;
   height: 36px !important;
   display: block !important;
   cursor: pointer !important;
-}
-
-/* 4. Replace the login card header with a large logo */
-
-
-
-/* ===== BIG AUTH LOGO FIX ===== */
-.auth-screen-head {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  width: 100% !important;
-  margin-bottom: 24px !important;
-  background: transparent !important; /* Remove the background trick */
-}
-.auth-screen-head img {
-  max-width: 240px !important;
-  height: auto !important;
-  object-fit: contain !important;
-  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.1)) !important;
 }
