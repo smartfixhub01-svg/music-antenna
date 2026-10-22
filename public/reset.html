@@ -56,6 +56,12 @@
         .msg { text-align: center; margin-bottom: 20px; font-size: 14px; padding: 12px; border-radius: 8px; display: none; font-weight: 500; }
         .msg.error { background: rgba(255, 78, 69, 0.1); color: #FF4E45; border: 1px solid #FF4E45; display: block; }
         .msg.success { background: rgba(43, 166, 64, 0.1); color: #2BA640; border: 1px solid #2BA640; display: block; }
+        
+        .debug-box {
+            margin-top: 24px; padding: 12px; background: #000; border: 1px solid #333; 
+            border-radius: 8px; font-family: monospace; font-size: 11px; color: #00ff00; 
+            max-height: 200px; overflow-y: auto; word-wrap: break-word;
+        }
     </style>
 </head>
 <body>
@@ -83,9 +89,19 @@
             <button type="submit" id="submitBtn" disabled>Verifying Link...</button>
             <button type="button" class="back-btn" onclick="window.location.href='/'">Back to Login</button>
         </form>
+        <div id="debugConsole" class="debug-box">Initializing...</div>
     </div>
 
     <script>
+        const debugLog = (msg) => {
+            const box = document.getElementById('debugConsole');
+            box.innerHTML += "<br>> " + msg;
+            console.log(msg);
+        };
+
+        debugLog("Page Loaded. URL Search: " + window.location.search);
+        debugLog("URL Hash: " + window.location.hash);
+
         const SUPABASE_URL = 'https://wcuqehdequrealcndkyw.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_-iD2D0ploxUh4w_PLKOirQ_ih4JcGKt';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -111,50 +127,44 @@
             btn.style.background = '#FF0033';
             subtitle.textContent = 'Your old password has been invalidated.';
             msg.style.display = 'none';
+            debugLog("✅ Form unlocked.");
         }
 
         async function initAuth() {
             const urlParams = new URLSearchParams(window.location.search);
             const tokenHash = urlParams.get('token_hash');
             const type = urlParams.get('type');
-            const code = urlParams.get('code');
 
-            // 1. THE OFFICIAL RECOMMENDED FIX: Use verifyOtp with token_hash
+            debugLog("token_hash from URL: " + (tokenHash ? "FOUND (length: " + tokenHash.length + ")" : "NOT FOUND"));
+            debugLog("type from URL: " + (type || "NOT FOUND"));
+
             if (tokenHash && type === 'recovery') {
+                debugLog("Attempting verifyOtp...");
                 const { data, error } = await supabase.auth.verifyOtp({
                     token_hash: tokenHash,
                     type: 'recovery'
                 });
-                if (!error && data.session) {
+                if (error) {
+                    debugLog("❌ verifyOtp error: " + error.message);
+                    msg.style.display = 'block';
+                    msg.className = 'msg error';
+                    msg.textContent = error.message;
+                    btn.textContent = 'Invalid Link';
+                } else if (data.session) {
+                    debugLog("✅ verifyOtp success. Session established.");
                     unlockForm();
                     return;
-                } else if (error) {
-                    console.error("verifyOtp error:", error.message);
                 }
             }
 
-            // 2. Fallback for PKCE code (if you requested it on the same device)
-            if (code) {
-                const { error } = await supabase.auth.exchangeCodeForSession(code);
-                if (!error) { unlockForm(); return; }
-            }
-
-            // 3. Fallback for Implicit flow (hash tokens)
-            if (window.location.hash.includes('access_token')) {
-                const hashParams = new URLSearchParams(window.location.hash.substring(1));
-                const access_token = hashParams.get('access_token');
-                const refresh_token = hashParams.get('refresh_token');
-                if (access_token && refresh_token) {
-                    const { error } = await supabase.auth.setSession({ access_token, refresh_token });
-                    if (!error) { unlockForm(); return; }
-                }
-            }
-
-            // 4. Check if a session already exists
+            // Fallback: Check if a session already exists
+            debugLog("Checking for existing session...");
             const { data } = await supabase.auth.getSession();
             if (data.session) {
+                debugLog("✅ Existing session found.");
                 unlockForm();
             } else {
+                debugLog("❌ No session found.");
                 msg.style.display = 'block';
                 msg.className = 'msg error';
                 msg.textContent = 'No secure session found. Please request a new link.';
@@ -177,6 +187,7 @@
             btn.disabled = true;
             btn.textContent = 'Updating...';
             msg.style.display = 'none';
+            debugLog("Attempting to update password...");
 
             try {
                 const { error } = await supabase.auth.updateUser({ password: p1Input.value });
@@ -185,6 +196,7 @@
                 msg.style.display = 'block';
                 msg.className = 'msg success';
                 msg.textContent = 'Password updated successfully! Redirecting...';
+                debugLog("✅ Password updated.");
                 
                 await supabase.auth.signOut();
                 setTimeout(() => window.location.href = '/', 2000);
@@ -194,6 +206,7 @@
                 msg.textContent = err.message || 'Error updating password.';
                 btn.disabled = false;
                 btn.textContent = 'Update Password';
+                debugLog("❌ Update error: " + err.message);
             }
         });
     </script>
