@@ -1986,6 +1986,30 @@ useEffect(() => {
           <h1></h1>
           <p>Connecting securely...</p>
         </section>
+      
+        {showCreatorResetModal && (
+        <div className="ma-modal-backdrop" onClick={() => setShowCreatorResetModal(false)}>
+          <div className="ma-modal-card" onClick={e => e.stopPropagation()}>
+            <h3 className="ma-modal-title">Reset Art ID & Password</h3>
+            <p className="ma-modal-desc">Enter your Creator email address. We will send you a link to recover your Art ID and reset your password.</p>
+            <form onSubmit={handleCreatorReset}>
+              <input
+                type="email"
+                className="ma-modal-input"
+                placeholder="Creator email address"
+                value={creatorResetEmail}
+                onChange={(e) => setCreatorResetEmail(e.target.value)}
+                autoFocus
+                required
+              />
+              <div className="ma-modal-actions">
+                <button type="button" className="ma-modal-btn cancel" onClick={() => setShowCreatorResetModal(false)}>Cancel</button>
+                <button type="submit" className="ma-modal-btn primary">Send Link</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       </main>
     );
   }
@@ -2222,29 +2246,7 @@ useEffect(() => {
       )}
 
     
-      {showCreatorResetModal && (
-        <div className="ma-modal-backdrop" onClick={() => setShowCreatorResetModal(false)}>
-          <div className="ma-modal-card" onClick={e => e.stopPropagation()}>
-            <h3 className="ma-modal-title">Reset Art ID & Password</h3>
-            <p className="ma-modal-desc">Enter your Creator email address. We will send you a link to recover your Art ID and reset your password.</p>
-            <form onSubmit={handleCreatorReset}>
-              <input
-                type="email"
-                className="ma-modal-input"
-                placeholder="Creator email address"
-                value={creatorResetEmail}
-                onChange={(e) => setCreatorResetEmail(e.target.value)}
-                autoFocus
-                required
-              />
-              <div className="ma-modal-actions">
-                <button type="button" className="ma-modal-btn cancel" onClick={() => setShowCreatorResetModal(false)}>Cancel</button>
-                <button type="submit" className="ma-modal-btn primary">Send Link</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      
 
     </>
                 ) : (
@@ -2403,7 +2405,7 @@ useEffect(() => {
                     <button  
                       type="button"
                       
-                      onClick={() => { alert('Button clicked!'); setShowCreatorResetModal(true); }}>Reset Art ID</button>
+                      onClick={() => setShowCreatorResetModal(true)}>Reset Art ID</button>
                   </>
                 ) : (
                   <button
