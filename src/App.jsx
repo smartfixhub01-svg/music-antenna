@@ -36,6 +36,17 @@ export default function App() {
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
   const [showResetModal, setShowResetModal] = useState(false);
+
+  // Fallback: Check if the URL contains a recovery token
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash && (hash.includes('type=recovery') || hash.includes('access_token'))) {
+      setShowResetPasswordScreen(true);
+      // Clean the URL so it doesn't stay there forever
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+  }, []);
+
   const [showResetPasswordScreen, setShowResetPasswordScreen] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
@@ -1923,7 +1934,9 @@ useEffect(() => {
   });
 
   
-  if (showResetPasswordScreen) {
+  
+
+if (showResetPasswordScreen) {
     return (
       <main className="auth-page">
         <section className="auth-screen-card" style={{ padding: "24px", maxWidth: "400px", margin: "40px auto" }}>
