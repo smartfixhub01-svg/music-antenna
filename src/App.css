@@ -5242,38 +5242,12 @@ input::placeholder, textarea::placeholder {
 
 
 
-/* ===== FINAL LOGO FIX ===== */
 
-/* 1. Hide the old pink icon and "Music Antenna" text */
-.auth-screen-head-icon, 
-.auth-screen-head h2, 
-.auth-screen-head span {
-  display: none !important;
-}
 
-/* 2. Style the new big logo */
-.ma-big-logo {
-  display: block !important;
-  width: auto !important;
-  height: 64px !important;
-  max-width: 100% !important;
-  object-fit: contain !important;
-  margin: 0 auto 20px auto !important;
-}
-
-/* 3. Ensure header layout is clean */
-.auth-screen-head {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 100% !important;
-  margin-bottom: 24px !important;
-}
-
-/* 4. Fix the Top Navbar logo (it's already in the JSX) */
+/* ===== FINAL NAVBAR LOGO ===== */
 .ma-brand img {
   height: 36px !important;
   width: auto !important;
   object-fit: contain !important;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
 }
