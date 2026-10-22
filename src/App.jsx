@@ -1938,8 +1938,8 @@ useEffect(() => {
 
 if (showResetPasswordScreen) {
     return (
-      <main className="auth-page">
-        <section className="auth-screen-card" style={{ padding: "24px", maxWidth: "400px", margin: "40px auto" }}>
+      <main style={{ position: "fixed", inset: 0, zIndex: 99999, background: "var(--ma-bg)", display: "flex", justifyContent: "center", alignItems: "center", overflowY: "auto", padding: "20px" }}>
+        <section className="auth-screen-card" style={{ width: "100%", maxWidth: "400px", padding: "24px" }}>
           <div className="auth-screen-brand">
             <img src="/music-antenna-logo.png" alt="Music Antenna" className="auth-logo-image" />
           </div>
