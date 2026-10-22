@@ -134,30 +134,50 @@
             const urlParams = new URLSearchParams(window.location.search);
             const tokenHash = urlParams.get('token_hash');
             const type = urlParams.get('type');
+            const code = urlParams.get('code');
 
-            debugLog("token_hash from URL: " + (tokenHash ? "FOUND (length: " + tokenHash.length + ")" : "NOT FOUND"));
-            debugLog("type from URL: " + (type || "NOT FOUND"));
+            debugLog("token_hash: " + (tokenHash ? "FOUND" : "NOT FOUND"));
+            debugLog("code: " + (code ? "FOUND" : "NOT FOUND"));
 
+            // 1. Token Hash Flow
             if (tokenHash && type === 'recovery') {
                 debugLog("Attempting verifyOtp...");
-                const { data, error } = await supabase.auth.verifyOtp({
-                    token_hash: tokenHash,
-                    type: 'recovery'
-                });
-                if (error) {
-                    debugLog("❌ verifyOtp error: " + error.message);
-                    msg.style.display = 'block';
-                    msg.className = 'msg error';
-                    msg.textContent = error.message;
-                    btn.textContent = 'Invalid Link';
-                } else if (data.session) {
-                    debugLog("✅ verifyOtp success. Session established.");
-                    unlockForm();
-                    return;
+                const { data, error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: 'recovery' });
+                if (!error && data.session) {
+                    debugLog("✅ verifyOtp success.");
+                    unlockForm(); return;
+                }
+                debugLog("❌ verifyOtp error: " + (error?.message || 'Unknown'));
+            }
+
+            // 2. PKCE Code Flow
+            if (code) {
+                debugLog("Attempting exchangeCodeForSession...");
+                const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+                if (!error && data.session) {
+                    debugLog("✅ exchangeCode success.");
+                    unlockForm(); return;
+                }
+                debugLog("❌ exchangeCode error: " + (error?.message || 'Unknown'));
+            }
+
+            // 3. Hash Token Flow
+            if (window.location.hash.includes('access_token')) {
+                debugLog("Attempting hash token parsing...");
+                const hashParams = new URLSearchParams(window.location.hash.substring(1));
+                const access_token = hashParams.get('access_token');
+                const refresh_token = hashParams.get('refresh_token');
+                if (access_token && refresh_token) {
+                    const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+                    if (!error) {
+                        debugLog("✅ setSession success.");
+                        unlockForm(); return;
+                    }
+                    debugLog("❌ setSession error: " + (error?.message || 'Unknown'));
                 }
             }
 
-            // Fallback: Check if a session already exists
+            // 4. Existing Session Fallback
             debugLog("Checking for existing session...");
             const { data } = await supabase.auth.getSession();
             if (data.session) {
