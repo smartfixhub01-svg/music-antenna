@@ -3787,6 +3787,7 @@ useEffect(() => {
     
       
       
+      
       {showSubscriptionsPage && (
         <section className="ma-subs-page">
           
@@ -3838,19 +3839,19 @@ useEffect(() => {
           <div className="ma-subs-content">
             {subsPageLoading ? (
               <div>
-                {[1, 2, 3, 4, 5].map(i => (
+                {[1, 2, 3, 4].map(i => (
                   <div key={i} className="ma-subs-skeleton">
                     <div className="ma-subs-skeleton-avatar"></div>
                     <div style={{ flex: 1 }}>
                       <div className="ma-subs-skeleton-text" style={{ width: "40%" }}></div>
-                      <div className="ma-subs-skeleton-text" style={{ width: "20%", marginTop: "6px", height: "10px" }}></div>
+                      <div className="ma-subs-skeleton-text" style={{ width: "20%", marginTop: "8px", height: "12px" }}></div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : subsPageError ? (
               <div className="ma-subs-empty">
-                <span className="material-symbols-outlined ma-subs-empty-icon" style={{ color: '#ff0050' }}>error</span>
+                <span className="material-symbols-outlined ma-subs-empty-icon" style={{ color: '#ff365f' }}>error</span>
                 <h3>Something went wrong</h3>
                 <p>{subsPageError}</p>
                 <button className="ma-subs-empty-btn" onClick={() => setSubsRefreshTrigger(prev => prev + 1)}>Retry</button>
