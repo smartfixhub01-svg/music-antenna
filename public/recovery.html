@@ -45,13 +45,10 @@
             width: 100%; padding: 14px; background: #FF0033; color: #fff;
             border-radius: 8px; font-weight: 700; border: none;
             cursor: pointer; margin-bottom: 12px; font-size: 16px;
-            transition: opacity 0.2s;
         }
         button:disabled { opacity: 0.6; cursor: not-allowed; }
-        button:hover:not(:disabled) { background: #e02e53; }
         
         .back-btn { background: transparent; border: 1px solid #303030; color: #AAAAAA; }
-        .back-btn:hover { background: #272727; color: #fff; }
         
         .msg { text-align: center; margin-bottom: 20px; font-size: 14px; padding: 12px; border-radius: 8px; display: none; font-weight: 500; }
         .msg.error { background: rgba(255, 78, 69, 0.1); color: #FF4E45; border: 1px solid #FF4E45; display: block; }
@@ -89,7 +86,7 @@
             <button type="submit" id="submitBtn" disabled>Verifying Link...</button>
             <button type="button" class="back-btn" onclick="window.location.href='/'">Back to Login</button>
         </form>
-        <div id="debugConsole" class="debug-box">Initializing...</div>
+        <div id="debugConsole" class="debug-box">Loading script...</div>
     </div>
 
     <script>
@@ -99,10 +96,12 @@
             console.log(msg);
         };
 
-        debugLog("Page Loaded.");
+        debugLog("Page Loaded. Parsing token...");
 
         const SUPABASE_URL = 'https://wcuqehdequrealcndkyw.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_-iD2D0ploxUh4w_PLKOirQ_ih4JcGKt';
+        
+        // CREATE CLIENT WITHOUT AUTO-DETECTING URL (we do it manually below)
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const form = document.getElementById('resetForm');
@@ -114,13 +113,8 @@
 
         function toggleVisibility(id, icon) {
             const input = document.getElementById(id);
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.style.color = '#FF0033';
-            } else {
-                input.type = 'password';
-                icon.style.color = '#888';
-            }
+            input.type = input.type === 'password' ? 'text' : 'password';
+            icon.style.color = input.type === 'text' ? '#FF0033' : '#888';
         }
 
         function unlockForm() {
@@ -128,58 +122,50 @@
             p2Input.disabled = false;
             btn.disabled = false;
             btn.textContent = 'Update Password';
-            btn.style.background = '#FF0033';
             subtitle.textContent = 'Your old password has been invalidated.';
             msg.style.display = 'none';
             debugLog("✅ Form unlocked.");
         }
 
         async function initAuth() {
+            // 1. Manually parse the hash for access_token (Implicit Flow)
+            const hash = window.location.hash.substring(1);
+            const hashParams = new URLSearchParams(hash);
+            const access_token = hashParams.get('access_token');
+            const refresh_token = hashParams.get('refresh_token');
+
+            if (access_token && refresh_token) {
+                debugLog("Found access_token in URL. Setting session...");
+                const { error } = await supabase.auth.setSession({
+                    access_token: access_token,
+                    refresh_token: refresh_token
+                });
+                
+                if (!error) {
+                    debugLog("✅ Session established successfully.");
+                    unlockForm();
+                    return;
+                } else {
+                    debugLog("❌ setSession Error: " + error.message);
+                }
+            }
+
+            // 2. Check for PKCE code (just in case)
             const urlParams = new URLSearchParams(window.location.search);
-            const tokenHash = urlParams.get('token_hash');
-            const type = urlParams.get('type');
             const code = urlParams.get('code');
-
-            // 1. Token Hash Flow
-            if (tokenHash && type === 'recovery') {
-                debugLog("Attempting verifyOtp...");
-                const { data, error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: 'recovery' });
-                if (!error && data.session) {
-                    debugLog("✅ verifyOtp success.");
-                    unlockForm(); return;
-                }
-                debugLog("❌ verifyOtp error: " + (error?.message || 'Unknown'));
-            }
-
-            // 2. PKCE Code Flow
             if (code) {
-                debugLog("Attempting exchangeCodeForSession...");
-                const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-                if (!error && data.session) {
-                    debugLog("✅ exchangeCode success.");
-                    unlockForm(); return;
-                }
-                debugLog("❌ exchangeCode error: " + (error?.message || 'Unknown'));
-            }
-
-            // 3. Hash Token Flow
-            if (window.location.hash.includes('access_token')) {
-                debugLog("Attempting hash token parsing...");
-                const hashParams = new URLSearchParams(window.location.hash.substring(1));
-                const access_token = hashParams.get('access_token');
-                const refresh_token = hashParams.get('refresh_token');
-                if (access_token && refresh_token) {
-                    const { error } = await supabase.auth.setSession({ access_token, refresh_token });
-                    if (!error) {
-                        debugLog("✅ setSession success.");
-                        unlockForm(); return;
-                    }
-                    debugLog("❌ setSession error: " + (error?.message || 'Unknown'));
+                debugLog("Found PKCE code. Exchanging...");
+                const { error } = await supabase.auth.exchangeCodeForSession(code);
+                if (!error) {
+                    debugLog("✅ PKCE session established.");
+                    unlockForm();
+                    return;
+                } else {
+                    debugLog("❌ PKCE Error: " + error.message);
                 }
             }
 
-            // 4. Existing Session Fallback
-            debugLog("Checking for existing session...");
+            // 3. Fallback: Check if session exists (page refresh)
             const { data } = await supabase.auth.getSession();
             if (data.session) {
                 debugLog("✅ Existing session found.");
@@ -194,7 +180,8 @@
             }
         }
 
-        initAuth();
+        // Run immediately
+        initAuth().catch(err => debugLog("CRITICAL: " + err.message));
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -208,7 +195,7 @@
             btn.disabled = true;
             btn.textContent = 'Updating...';
             msg.style.display = 'none';
-            debugLog("Attempting to update password...");
+            debugLog("Updating password...");
 
             try {
                 const { error } = await supabase.auth.updateUser({ password: p1Input.value });
