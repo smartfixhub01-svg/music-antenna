@@ -2739,7 +2739,7 @@ useEffect(() => {
                 <span className="material-symbols-outlined">search</span>
               </button>
               <button className="yt-icon-btn" aria-label="More">
-                <span className="material-symbols-outlined">more_vert</span>
+                <span className="material-symbols-outlined" style={{ cursor: "pointer" }} onClick={() => setMessage("More options coming soon!")}>more_vert</span>
               </button>
             </div>
           </div>
@@ -2783,7 +2783,7 @@ useEffect(() => {
             </p>
 
             <div className="yt-watch-actions">
-              <button className="yt-watch-action" onClick={() => handleToggleLike(activeMedia.id)}>
+              <button className="yt-watch-action" onClick={(e) => { e.stopPropagation(); handleToggleLike(activeMedia.id); }}>
                 <span className="material-symbols-outlined" style={{ fontVariationSettings: isLiked ? "'FILL' 1" : "'FILL' 0" }}>
                   thumb_up
                 </span>
@@ -2798,7 +2798,7 @@ useEffect(() => {
                 }}>
                 <span className="material-symbols-outlined">thumb_down</span>
               </button>
-              <button className="yt-watch-action" onClick={() => { setShowShareModal(true); }}>
+              <button className="yt-watch-action" onClick={(e) => { e.stopPropagation(); handleShare(activeMedia); }}>
                 <span className="material-symbols-outlined">share</span>
                 <span className="yt-watch-action-label">Share</span>
               </button>
@@ -2810,7 +2810,7 @@ useEffect(() => {
                 </a>
               )}
 
-              <button className="yt-watch-action" onClick={() => { fetchPlaylists(); setShowPlaylistModal(true); }}>
+              <button className="yt-watch-action" onClick={(e) => { e.stopPropagation(); fetchPlaylists(); setShowPlaylistModal(true); }}>
                 <span className="material-symbols-outlined">playlist_add</span>
                 <span className="yt-watch-action-label">Save</span>
               </button>
@@ -2821,7 +2821,7 @@ useEffect(() => {
                   setMessage("Link copied! Use Share to send to friends.");
                   setTimeout(() => setMessage(""), 2000);
                 }}>
-                <span className="material-symbols-outlined">more_vert</span>
+                <span className="material-symbols-outlined" style={{ cursor: "pointer" }} onClick={() => setMessage("More options coming soon!")}>more_vert</span>
               </button>
             </div>
 
@@ -2867,7 +2867,7 @@ useEffect(() => {
             </div>
 
             <div 
-              onClick={() => setShowCommentsModal(true)}
+              onClick={(e) => { e.stopPropagation(); setShowCommentsModal(true); }}
               style={{ width: "100%", padding: "12px 16px", background: "#212121", borderRadius: "12px", color: "#f1f1f1", marginTop: "16px", display: "flex", flexDirection: "column", gap: "12px", cursor: "pointer" }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -3060,7 +3060,7 @@ useEffect(() => {
                 <span className="material-symbols-outlined">search</span>
               </button>
               <button className="yt-icon-btn" aria-label="More">
-                <span className="material-symbols-outlined">more_vert</span>
+                <span className="material-symbols-outlined" style={{ cursor: "pointer" }} onClick={() => setMessage("More options coming soon!")}>more_vert</span>
               </button>
             </div>
           </div>
