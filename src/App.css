@@ -5105,3 +5105,60 @@ input::placeholder, textarea::placeholder {
 .auth-screen-head {
   margin-bottom: 20px !important;
 }
+
+
+/* ===== ZOOM OUT AUTH PAGE ===== */
+
+/* 1. Shrink the overall card and remove giant spacing */
+.auth-screen-card {
+  max-width: 290px !important; /* Much narrower */
+  padding: 16px !important;
+  border-radius: 12px !important;
+  margin: 20px auto !important;
+}
+
+/* 2. Tighten the form */
+.auth-screen-form {
+  gap: 8px !important; /* Tighter gap between fields */
+  margin-top: 12px !important;
+}
+
+/* 3. Shrink inputs */
+.auth-screen-form input {
+  height: 36px !important; /* Smaller height */
+  font-size: 12px !important;
+  padding: 0 10px !important;
+  border-radius: 6px !important;
+}
+
+/* 4. Shrink labels */
+.auth-screen-form label > span {
+  font-size: 11px !important;
+  margin-bottom: 2px !important;
+}
+
+/* 5. Shrink submit button */
+.auth-screen-submit {
+  height: 36px !important;
+  font-size: 13px !important;
+  border-radius: 6px !important;
+  margin-top: 4px !important;
+}
+
+/* 6. Tighten the bottom text area */
+.auth-screen-head {
+  margin-bottom: 12px !important;
+}
+.auth-screen-footnote {
+  margin-top: 16px !important;
+  font-size: 10px !important;
+  padding-bottom: 20px !important;
+}
+
+/* 7. Shrink the headings */
+.auth-screen h2 {
+  font-size: 20px !important;
+}
+.auth-screen h3 {
+  font-size: 16px !important;
+}

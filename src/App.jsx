@@ -2114,7 +2114,7 @@ useEffect(() => {
                     setJustTriedRegister(false);
                   }}
                 >
-                  Go to Creator sign in →
+                  <span style={{ color: "#FF365F", fontWeight: "700", textDecoration: "underline", fontSize: "14px" }}>Go to Creator sign in →</span>
                 </button>
               </div>
             </>
@@ -2276,7 +2276,7 @@ useEffect(() => {
                     setJustTriedRegister(false);
                   }}
                 >
-                  ← Go to Listener sign in
+                  <span style={{ color: "#FF365F", fontWeight: "700", textDecoration: "underline", fontSize: "14px" }}>← Go to Listener sign in</span>
                 </button>
               </div>
             </>
