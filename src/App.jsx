@@ -1952,17 +1952,15 @@ useEffect(() => {
                 </form>
               ) : (
                 <form onSubmit={handleAuth} className="auth-screen-form">
-                  <div className="clean-auth-logo" style={{ display: "flex", justifyContent: "center", width: "100%", marginBottom: "24px" }}>
+                  <div style={{ display: "flex", justifyContent: "center", width: "100%", marginBottom: "24px" }}>
                     <img src="/music-antenna-logo.png" alt="Music Antenna" style={{ width: "100%", maxWidth: "180px", height: "auto", objectFit: "contain" }} />
                   </div>
 
-                  <div style={{ display: "flex", justifyContent: "center", marginBottom: "24px" }}>
-                    <img src="/music-antenna-logo.png" alt="" style={{ width: "100%", maxWidth: "200px", height: "auto", objectFit: "contain" }} />
-                  </div>
+                  
 
-                  <div className="ma-auth-logo-wrapper">
-                    <img src="/music-antenna-logo.png" alt="" />
-                  </div>
+                  
+
+                  
                   
                   
                   
@@ -2171,13 +2169,13 @@ useEffect(() => {
                 </form>
               ) : (
                 <form onSubmit={handleAuth} className="auth-screen-form">
-                  <div className="clean-auth-logo" style={{ display: "flex", justifyContent: "center", width: "100%", marginBottom: "24px" }}>
+                  <div style={{ display: "flex", justifyContent: "center", width: "100%", marginBottom: "24px" }}>
                     <img src="/music-antenna-logo.png" alt="Music Antenna" style={{ width: "100%", maxWidth: "180px", height: "auto", objectFit: "contain" }} />
                   </div>
 
-                  <div style={{ display: "flex", justifyContent: "center", marginBottom: "24px" }}>
-                    <img src="/music-antenna-logo.png" alt="" style={{ width: "100%", maxWidth: "200px", height: "auto", objectFit: "contain" }} />
-                  </div>
+                  
+
+                  
 
                   <label>
                     <span>Artist name</span>

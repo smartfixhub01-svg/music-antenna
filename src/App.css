@@ -5259,3 +5259,5 @@ input::placeholder, textarea::placeholder {
   width: auto !important;
   object-fit: contain !important;
 }
+
+.auth-screen-head { display: none !important; }
