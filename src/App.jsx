@@ -43,6 +43,12 @@ export default function App() {
     }
   }, [message]);
 
+  // Clear message when navigating between pages
+  useEffect(() => {
+    setMessage("");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeMedia, showWatchPage, showAccountPage, showManagePage, showChannelPage, showUpload, showAnalytics]);
+
   const [media, setMedia] = useState([]);
   const [feedLoading, setFeedLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -3673,7 +3679,7 @@ useEffect(() => {
 
       {/* COMMENTS MODAL - BULLETPROOF VERSION */}
       {message && (
-        <div style={{ position: "fixed", top: "20px", left: "50%", transform: "translateX(-50%)", background: "#ff0050", color: "#fff", padding: "12px 24px", borderRadius: "8px", zIndex: 99999, boxShadow: "0 4px 12px rgba(0,0,0,0.5)", fontWeight: "bold", fontSize: "14px", textAlign: "center", whiteSpace: "nowrap" }}>
+        <div style={{ position: "fixed", bottom: "90px", left: "50%", transform: "translateX(-50%)", background: "#212121", color: "#fff", padding: "12px 24px", borderRadius: "24px", zIndex: 99999, boxShadow: "0 4px 12px rgba(0,0,0,0.8)", fontWeight: "500", fontSize: "14px", textAlign: "center", border: "1px solid #ff365f" }}>
           {message}
         </div>
       )}
@@ -3689,9 +3695,10 @@ useEffect(() => {
             <div style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
               {[1, 1.25, 1.5, 2].map(speed => (
                 <button key={speed} onClick={() => {
-                  if (videoRef.current) videoRef.current.playbackRate = speed;
-                  if (audioRef.current) audioRef.current.playbackRate = speed;
-                  setMessage(`Speed set to ${speed}x`);
+                  let applied = false;
+                  if (videoRef.current) { videoRef.current.playbackRate = speed; applied = true; }
+                  if (audioRef.current) { audioRef.current.playbackRate = speed; applied = true; }
+                  setMessage(applied ? `Speed set to ${speed}x` : "Player is not ready.");
                   setShowMoreMenu(false);
                 }} style={{ flex: 1, padding: "10px", background: "#333", color: "#fff", border: "none", borderRadius: "8px", fontSize: "14px", cursor: "pointer" }}>
                   {speed}x
