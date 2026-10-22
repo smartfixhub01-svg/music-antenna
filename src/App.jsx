@@ -160,6 +160,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [subsList, setSubsList] = useState([]);
   const [subsPageLoading, setSubsPageLoading] = useState(false);
   const [subsPageError, setSubsPageError] = useState("");
+  const [subsRefreshTrigger, setSubsRefreshTrigger] = useState(0);
   const [subsSearch, setSubsSearch] = useState("");
   const [subsSort, setSubsSort] = useState("newest");
   const [unsubscribingId, setUnsubscribingId] = useState(null);
@@ -230,7 +231,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
       }
     };
     fetchData();
-  }, [showSubscriptionsPage, session?.user?.id]);
+  }, [showSubscriptionsPage, session?.user?.id, subsRefreshTrigger]);
 
 
   const [subsTab, setSubsTab] = useState("feed");
