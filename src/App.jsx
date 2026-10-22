@@ -458,11 +458,33 @@ useEffect(() => {
   const handleShare = async (mediaItem) => {
     if (!mediaItem) { window.alert("No media loaded."); return; }
     const url = window.location.origin + "?track=" + mediaItem.id;
+    const shareData = {
+      title: mediaItem.title,
+      text: "Check out " + mediaItem.title + " on Music Antenna!",
+      url: url
+    };
+
+    // Try to attach the image file so Android shows the thumbnail
+    if (mediaItem.thumbnailUrl && navigator.canShare) {
+      try {
+        const response = await fetch(mediaItem.thumbnailUrl);
+        const blob = await response.blob();
+        const file = new File([blob], 'cover.jpg', { type: blob.type });
+        if (navigator.canShare({ files: [file] })) {
+          shareData.files = [file];
+        }
+      } catch (e) {
+        console.log("Could not fetch image for sharing", e);
+      }
+    }
+
     if (navigator.share) {
       try {
-        await navigator.share({ title: mediaItem.title, text: "Check out " + mediaItem.title + " on Music Antenna!", url: url });
+        await navigator.share(shareData);
       } catch (err) {
-        window.prompt("Copy this link to share:", url);
+        if (err.name !== "AbortError") {
+          window.prompt("Copy this link to share:", url);
+        }
       }
     } else {
       window.prompt("Copy this link to share:", url);
