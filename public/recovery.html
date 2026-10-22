@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create New Password - Music Antenna</title>
-    <!-- Use unpkg for a more reliable CDN and catch load errors -->
-    <script src="https://unpkg.com/@supabase/supabase-js@2.45.4" onerror="document.getElementById('debugConsole').innerHTML = '🔴 CRITICAL: Failed to load Supabase library. Check your internet/adblocker.';"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -97,162 +96,116 @@
             console.log(msg);
         };
 
-        try {
-            if (!window.supabase) {
-                throw new Error("Supabase library not found. It may have been blocked.");
+        debugLog("Page Loaded. Parsing token...");
+
+        const SUPABASE_URL = 'https://wcuqehdequrealcndkyw.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_-iD2D0ploxUh4w_PLKOirQ_ih4JcGKt';
+        
+        // NO detectSessionInUrl TO PREVENT HANGING
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const form = document.getElementById('resetForm');
+        const msg = document.getElementById('msg');
+        const btn = document.getElementById('submitBtn');
+        const p1Input = document.getElementById('newPassword');
+        const p2Input = document.getElementById('confirmPassword');
+        const subtitle = document.getElementById('subtitle');
+
+        function toggleVisibility(id, icon) {
+            const input = document.getElementById(id);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.style.color = '#FF0033';
+            } else {
+                input.type = 'password';
+                icon.style.color = '#888';
+            }
+        }
+
+        function unlockForm() {
+            p1Input.disabled = false;
+            p2Input.disabled = false;
+            btn.disabled = false;
+            btn.textContent = 'Update Password';
+            subtitle.textContent = 'Your old password has been invalidated.';
+            msg.style.display = 'none';
+            debugLog("✅ Form unlocked.");
+        }
+
+        async function initAuth() {
+            // 1. Manually parse hash for #access_token
+            const hash = window.location.hash.substring(1);
+            const hashParams = new URLSearchParams(hash);
+            const access_token = hashParams.get('access_token');
+            const refresh_token = hashParams.get('refresh_token');
+
+            if (access_token && refresh_token) {
+                debugLog("Found access_token. Setting session...");
+                const { error } = await supabase.auth.setSession({
+                    access_token: access_token,
+                    refresh_token: refresh_token
+                });
+                
+                if (!error) {
+                    debugLog("✅ Session established.");
+                    unlockForm();
+                    return;
+                } else {
+                    debugLog("❌ setSession Error: " + error.message);
+                }
             }
 
-            debugLog("✅ Supabase loaded.");
-            
-            const SUPABASE_URL = 'https://wcuqehdequrealcndkyw.supabase.co';
-            const SUPABASE_KEY = 'sb_publishable_-iD2D0ploxUh4w_PLKOirQ_ih4JcGKt';
-            
-            // No auto-detect to prevent hanging
-            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            // 2. Fallback for existing session
+            const { data } = await supabase.auth.getSession();
+            if (data.session) {
+                debugLog("✅ Existing session found.");
+                unlockForm();
+            } else {
+                debugLog("❌ No session found.");
+                msg.style.display = 'block';
+                msg.className = 'msg error';
+                msg.textContent = 'No secure session found. Please request a new link.';
+                btn.textContent = 'Invalid Link';
+                subtitle.textContent = 'No active session.';
+            }
+        }
 
-            const form = document.getElementById('resetForm');
-            const msg = document.getElementById('msg');
-            const btn = document.getElementById('submitBtn');
-            const p1Input = document.getElementById('newPassword');
-            const p2Input = document.getElementById('confirmPassword');
-            const subtitle = document.getElementById('subtitle');
+        initAuth().catch(err => debugLog("CRITICAL: " + err.message));
 
-            window.toggleVisibility = function(id, icon) {
-                const input = document.getElementById(id);
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    icon.style.color = '#FF0033';
-                } else {
-                    input.type = 'password';
-                    icon.style.color = '#888';
-                }
-            };
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (p1Input.value !== p2Input.value) {
+                msg.style.display = 'block';
+                msg.className = 'msg error';
+                msg.textContent = 'Passwords do not match.';
+                return;
+            }
 
-            function unlockForm() {
-                p1Input.disabled = false;
-                p2Input.disabled = false;
+            btn.disabled = true;
+            btn.textContent = 'Updating...';
+            msg.style.display = 'none';
+            debugLog("Updating password...");
+
+            try {
+                const { error } = await supabase.auth.updateUser({ password: p1Input.value });
+                if (error) throw error;
+
+                msg.style.display = 'block';
+                msg.className = 'msg success';
+                msg.textContent = 'Password updated successfully! Redirecting...';
+                debugLog("✅ Password updated.");
+                
+                await supabase.auth.signOut();
+                setTimeout(() => window.location.href = '/', 2000);
+            } catch (err) {
+                msg.style.display = 'block';
+                msg.className = 'msg error';
+                msg.textContent = err.message || 'Error updating password.';
                 btn.disabled = false;
                 btn.textContent = 'Update Password';
-                subtitle.textContent = 'Your old password has been invalidated.';
-                msg.style.display = 'none';
-                debugLog("✅ Form unlocked.");
+                debugLog("❌ Update error: " + err.message);
             }
-
-            async function initAuth() {
-                // 1. Manually parse hash for implicit flow (#access_token)
-                const hash = window.location.hash.substring(1);
-                const hashParams = new URLSearchParams(hash);
-                const access_token = hashParams.get('access_token');
-                const refresh_token = hashParams.get('refresh_token');
-
-                if (access_token && refresh_token) {
-                    debugLog("Found access_token. Setting session...");
-                    const { error } = await supabase.auth.setSession({
-                        access_token: access_token,
-                        refresh_token: refresh_token
-                    });
-                    
-                    if (!error) {
-                        debugLog("✅ Session established.");
-                        unlockForm();
-                        return;
-                    } else {
-                        debugLog("❌ setSession Error: " + error.message);
-                    }
-                }
-
-                // 2. Fallback for token_hash (PKCE flow)
-                const urlParams = new URLSearchParams(window.location.search);
-                const tokenHash = urlParams.get('token_hash');
-                const type = urlParams.get('type');
-
-                if (tokenHash && type === 'recovery') {
-                    debugLog("Found token_hash. Verifying OTP...");
-                    const { data, error } = await supabase.auth.verifyOtp({
-                        token_hash: tokenHash,
-                        type: 'recovery'
-                    });
-                    
-                    if (!error && data.session) {
-                        debugLog("✅ verifyOtp success.");
-                        unlockForm();
-                        return;
-                    } else {
-                        debugLog("❌ verifyOtp error: " + (error?.message || 'Unknown'));
-                    }
-                }
-
-                // 3. Fallback for PKCE code
-                const code = urlParams.get('code');
-                if (code) {
-                    debugLog("Found PKCE code. Exchanging...");
-                    const { error } = await supabase.auth.exchangeCodeForSession(code);
-                    if (!error) {
-                        debugLog("✅ PKCE session established.");
-                        unlockForm();
-                        return;
-                    } else {
-                        debugLog("❌ PKCE Error: " + error.message);
-                    }
-                }
-
-                // 4. Fallback for existing session
-                const { data } = await supabase.auth.getSession();
-                if (data.session) {
-                    debugLog("✅ Existing session found.");
-                    unlockForm();
-                } else {
-                    debugLog("❌ No session found.");
-                    msg.style.display = 'block';
-                    msg.className = 'msg error';
-                    msg.textContent = 'No secure session found. Please request a new link.';
-                    btn.textContent = 'Invalid Link';
-                    subtitle.textContent = 'No active session.';
-                }
-            }
-
-            // Run immediately
-            initAuth().catch(err => debugLog("CRITICAL: " + err.message));
-
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                if (p1Input.value !== p2Input.value) {
-                    msg.style.display = 'block';
-                    msg.className = 'msg error';
-                    msg.textContent = 'Passwords do not match.';
-                    return;
-                }
-
-                btn.disabled = true;
-                btn.textContent = 'Updating...';
-                msg.style.display = 'none';
-                debugLog("Updating password...");
-
-                try {
-                    const { error } = await supabase.auth.updateUser({ password: p1Input.value });
-                    if (error) throw error;
-
-                    msg.style.display = 'block';
-                    msg.className = 'msg success';
-                    msg.textContent = 'Password updated successfully! Redirecting...';
-                    debugLog("✅ Password updated.");
-                    
-                    await supabase.auth.signOut();
-                    setTimeout(() => window.location.href = '/', 2000);
-                } catch (err) {
-                    msg.style.display = 'block';
-                    msg.className = 'msg error';
-                    msg.textContent = err.message || 'Error updating password.';
-                    btn.disabled = false;
-                    btn.textContent = 'Update Password';
-                    debugLog("❌ Update error: " + err.message);
-                }
-            });
-
-        } catch (err) {
-            document.getElementById('debugConsole').innerHTML = '🔴 CRITICAL ERROR: ' + err.message;
-            document.getElementById('debugConsole').style.color = 'red';
-        }
+        });
     </script>
 </body>
 </html>
