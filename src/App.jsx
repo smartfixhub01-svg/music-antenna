@@ -43,12 +43,6 @@ export default function App() {
     }
   }, [message]);
 
-  // Clear message when navigating between pages
-  useEffect(() => {
-    setMessage("");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeMedia, showWatchPage, showAccountPage, showManagePage, showChannelPage, showUpload, showAnalytics]);
-
   const [media, setMedia] = useState([]);
   const [feedLoading, setFeedLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -3695,10 +3689,13 @@ useEffect(() => {
             <div style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
               {[1, 1.25, 1.5, 2].map(speed => (
                 <button key={speed} onClick={() => {
-                  let applied = false;
-                  if (videoRef.current) { videoRef.current.playbackRate = speed; applied = true; }
-                  if (audioRef.current) { audioRef.current.playbackRate = speed; applied = true; }
-                  setMessage(applied ? `Speed set to ${speed}x` : "Player is not ready.");
+                  const mediaEl = videoRef.current || audioRef.current;
+                  if (mediaEl) {
+                    mediaEl.playbackRate = speed;
+                    setMessage(`Speed set to ${speed}x`);
+                  } else {
+                    setMessage("Player is not ready.");
+                  }
                   setShowMoreMenu(false);
                 }} style={{ flex: 1, padding: "10px", background: "#333", color: "#fff", border: "none", borderRadius: "8px", fontSize: "14px", cursor: "pointer" }}>
                   {speed}x
