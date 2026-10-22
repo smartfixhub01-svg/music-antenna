@@ -61,6 +61,13 @@
       if (window.location.search && (window.location.search.includes('type=recovery') || window.location.search.includes('access_token'))) {
       }
     </script>
+
+    <script>
+      // Catch the recovery token and immediately forward to the standalone reset page
+      if (window.location.hash && (window.location.hash.includes('type=recovery') || window.location.hash.includes('access_token'))) {
+        window.location.replace('/reset.html' + window.location.hash);
+      }
+    </script>
 </head>
   <body>
     <div id="root"></div>
