@@ -3664,6 +3664,54 @@ useEffect(() => {
       )}
 
       {/* COMMENTS MODAL - BULLETPROOF VERSION */}
+
+      {showMoreMenu && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 10000, display: "flex", alignItems: "flex-end" }} onClick={() => setShowMoreMenu(false)}>
+          <div style={{ background: "#212121", width: "100%", borderTopLeftRadius: "16px", borderTopRightRadius: "16px", padding: "20px", paddingBottom: "40px", color: "white" }} onClick={e => e.stopPropagation()}>
+            
+            <div style={{ width: "40px", height: "4px", background: "#555", borderRadius: "2px", margin: "0 auto 20px" }}></div>
+            
+            <p style={{ color: "#aaa", fontSize: "14px", marginBottom: "12px", fontWeight: "bold" }}>Playback Speed</p>
+            <div style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
+              {[1, 1.25, 1.5, 2].map(speed => (
+                <button key={speed} onClick={() => {
+                  if (videoRef.current) videoRef.current.playbackRate = speed;
+                  if (audioRef.current) audioRef.current.playbackRate = speed;
+                  setMessage(`Speed set to ${speed}x`);
+                  setShowMoreMenu(false);
+                }} style={{ flex: 1, padding: "10px", background: "#333", color: "#fff", border: "none", borderRadius: "8px", fontSize: "14px", cursor: "pointer" }}>
+                  {speed}x
+                </button>
+              ))}
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              <button onClick={() => { fetchPlaylists(); setShowPlaylistModal(true); setShowMoreMenu(false); }} style={{ padding: "14px", background: "#333", color: "#fff", border: "none", borderRadius: "8px", fontSize: "15px", display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }}>
+                <span className="material-symbols-outlined">playlist_add</span> Save to playlist
+              </button>
+              
+              <button onClick={() => { handleShare(activeMedia); setShowMoreMenu(false); }} style={{ padding: "14px", background: "#333", color: "#fff", border: "none", borderRadius: "8px", fontSize: "15px", display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }}>
+                <span className="material-symbols-outlined">share</span> Share Link
+              </button>
+              
+              <button onClick={() => { setMessage("Video reported. Thank you."); setShowMoreMenu(false); }} style={{ padding: "14px", background: "#333", color: "#fff", border: "none", borderRadius: "8px", fontSize: "15px", display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }}>
+                <span className="material-symbols-outlined">flag</span> Report Video
+              </button>
+              
+              {session?.user?.id === activeMedia?.artist_id && (
+                <button onClick={() => { setEditingMedia(activeMedia); setShowWatchPage(false); setShowMoreMenu(false); }} style={{ padding: "14px", background: "#333", color: "#fff", border: "none", borderRadius: "8px", fontSize: "15px", display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }}>
+                  <span className="material-symbols-outlined">edit</span> Edit Video
+                </button>
+              )}
+            </div>
+            
+            <button onClick={() => setShowMoreMenu(false)} style={{ width: "100%", padding: "16px", background: "transparent", color: "#fff", border: "none", borderRadius: "8px", marginTop: "10px", fontSize: "15px", cursor: "pointer", fontWeight: "bold" }}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
       {showCommentsModal && (
         <div 
           style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.8)", zIndex: 9999, display: "flex", flexDirection: "column", justifyContent: "flex-end" }}
