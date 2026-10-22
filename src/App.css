@@ -5426,27 +5426,31 @@ input::placeholder, textarea::placeholder {
 
 
 /* ===== PROFESSIONAL AUTH MESSAGE ===== */
+
+
+
+/* Hide old inline dark styles if any are left */
+p
+
+/* ===== PROFESSIONAL AUTH MESSAGE ===== */
 .auth-screen-message {
-  background-color: #FFF0F3 !important;
-  color: #FF0033 !important;
-  border: 1px solid rgba(255, 0, 51, 0.2) !important;
-  padding: 10px 14px !important;
-  border-radius: 8px !important;
+  background-color: #272727 !important;
+  color: #FFFFFF !important;
+  border-left: 4px solid #FF365F !important;
+  padding: 12px 16px !important;
+  border-radius: 6px !important;
   font-weight: 600 !important;
-  font-size: 13px !important;
+  font-size: 14px !important;
   display: flex !important;
   align-items: center !important;
-  gap: 8px !important;
-  margin: 0 0 20px 0 !important;
+  gap: 10px !important;
+  margin: 16px 0 !important;
   text-align: left !important;
-  box-shadow: 0 4px 12px rgba(255, 0, 51, 0.08) !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
   width: 100% !important;
   box-sizing: border-box !important;
 }
 .auth-screen-message .material-symbols-outlined {
   font-size: 20px !important;
-  color: #FF0033 !important;
+  color: #FF365F !important;
 }
-
-/* Hide old inline dark styles if any are left */
-p.auth-screen-message { display: none !important; }
