@@ -37,9 +37,25 @@ export default function App() {
 
   const [media, setMedia] = useState([]);
   const [feedLoading, setFeedLoading] = useState(false);
+  const handleShare = async (mediaItem) => {
+    if (!mediaItem) return;
+    const url = `${window.location.origin}?track=${mediaItem.id}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: mediaItem.title,
+          text: `Check out ${mediaItem.title} on Music Antenna!`,
+          url: url,
+        });
+      } catch (err) { console.log("Error sharing:", err); }
+    } else {
+      navigator.clipboard.writeText(url);
+      setMessage("Link copied to clipboard!");
+    }
+  };
+
   const [search, setSearch] = useState("");
   const [searchLoading, setSearchLoading] = useState(false);
-  const searchRequestRef = useRef(0);
   const [navVisible, setNavVisible] = useState(true);
 
   useEffect(() => {
@@ -1847,7 +1863,12 @@ useEffect(() => {
                     >
                       Reset password
                     </button>
-                  </>
+                  
+      {activeMedia && (
+        <button onClick={() => handleShare(activeMedia)} style={{ position: "fixed", bottom: "90px", right: "20px", backgroundColor: "#ff0050", color: "#fff", border: "none", borderRadius: "50%", width: "56px", height: "56px", fontSize: "24px", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(0,0,0,0.5)", zIndex: 9999, cursor: "pointer" }} title="Share this track">🔗</button>
+      )}
+
+    </>
                 ) : (
                   <button
                     type="button"
@@ -2111,18 +2132,14 @@ useEffect(() => {
         <div className="ma-search">
           <div className="ma-search-box" style={{ display: "flex", alignItems: "center" }}>
             <input aria-label="Search" placeholder="Search" value={search}
-              onChange={(e) => {
-                  const val = e.target.value;
-                  setSearch(val);
-                  setSearchLoading(val.trim().length > 0);
-                }} style={{ flex: 1 }} />
+              onChange={(e) => setSearch(e.target.value)} style={{ flex: 1 }} />
             {searchLoading && (
               <span className="material-symbols-outlined" style={{ animation: "spin 1s linear infinite", fontSize: "18px", color: "#3ea6ff", marginRight: "12px", flexShrink: 0 }}>
                 sync
               </span>
             )}
             {search && (
-              <button className="ma-search-clear" onClick={() => { setSearch(""); setSearchLoading(false); }} aria-label="Clear">
+              <button className="ma-search-clear" onClick={() => setSearch("")} aria-label="Clear">
                 <span className="material-symbols-outlined">close</span>
               </button>
             )}
