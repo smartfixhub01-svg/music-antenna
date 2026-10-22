@@ -5299,25 +5299,29 @@ input::placeholder, textarea::placeholder {
   object-fit: contain !important;
 }
 
-/* Official Music Antenna authentication logo */
+
+
+/* ===== PREMIUM OFFICIAL LOGO ===== */
 .auth-screen-brand {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  margin: 0 auto 24px;
-  background: transparent;
-  border: none;
-  box-shadow: none;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: fit-content !important;
+  margin: 0 auto 24px !important;
+  background: #FFFFFF !important; /* White background makes the black text visible */
+  padding: 12px 24px !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important; /* Soft premium shadow */
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 .auth-logo-image {
-  display: block;
-  width: min(220px, 75%);
-  max-height: 150px;
-  height: auto;
-  object-fit: contain;
-  background: transparent;
-  border: none;
-  box-shadow: none;
+  display: block !important;
+  width: 180px !important;
+  height: auto !important;
+  max-height: 120px !important;
+  object-fit: contain !important;
+  filter: none !important; /* Removes the ugly dark glow */
+  background: transparent !important;
+  border: none !important;
 }
