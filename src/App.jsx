@@ -36,6 +36,9 @@ export default function App() {
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
   const [showResetModal, setShowResetModal] = useState(false);
+  const [showResetPasswordScreen, setShowResetPasswordScreen] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [resetEmail, setResetEmail] = useState("");
   const [theme, setTheme] = useState("device");
 
@@ -598,6 +601,34 @@ useEffect(() => {
   }
 
   
+  
+  async function handleUpdatePassword() {
+    if (newPassword !== confirmNewPassword) {
+      return setMessage("Passwords do not match.");
+    }
+    if (newPassword.length < 6) {
+      return setMessage("Password must be at least 6 characters.");
+    }
+    setBusy(true);
+    setMessage("Updating password...");
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      
+      setMessage("Password updated successfully! Redirecting...");
+      setTimeout(() => {
+        setShowResetPasswordScreen(false);
+        setNewPassword("");
+        setConfirmNewPassword("");
+        window.location.href = "/"; // Go to home
+      }, 2000);
+    } catch (err) {
+      setMessage("Error: " + (err.message || "Could not update password."));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function handleForgotPassword() {
     setShowResetModal(true);
   }
@@ -607,7 +638,7 @@ useEffect(() => {
     setMessage("Sending reset link...");
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: window.location.origin + '/update-password',
+        redirectTo: window.location.origin,
       });
       if (error) throw error;
       setMessage("Password reset link sent! Check your email inbox.");
@@ -1890,6 +1921,57 @@ useEffect(() => {
 
     return matchesSearch && matchesCategory;
   });
+
+  
+  if (showResetPasswordScreen) {
+    return (
+      <main className="auth-page">
+        <section className="auth-screen-card" style={{ padding: "24px", maxWidth: "400px", margin: "40px auto" }}>
+          <div className="auth-screen-brand">
+            <img src="/music-antenna-logo.png" alt="Music Antenna" className="auth-logo-image" />
+          </div>
+          <h2 style={{ textAlign: "center", marginBottom: "8px" }}>Create New Password</h2>
+          <p style={{ textAlign: "center", color: "var(--ma-text-secondary)", marginBottom: "24px" }}>
+            Please enter your new password below.
+          </p>
+
+          {message && (
+            <div className={`auth-message-box ${message.toLowerCase().includes("error") || message.toLowerCase().includes("match") ? "error" : "success"}`}>
+              {message}
+            </div>
+          )}
+
+          <form onSubmit={(e) => { e.preventDefault(); handleUpdatePassword(); }} className="auth-screen-form">
+            <label>
+              <span>New Password</span>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="At least 6 characters"
+                required
+                minLength={6}
+              />
+            </label>
+            <label>
+              <span>Confirm New Password</span>
+              <input
+                type="password"
+                value={confirmNewPassword}
+                onChange={(e) => setConfirmNewPassword(e.target.value)}
+                placeholder="Confirm your new password"
+                required
+                minLength={6}
+              />
+            </label>
+            <button type="submit" className="auth-screen-submit" disabled={busy}>
+              {busy ? "Updating..." : "Update Password"}
+            </button>
+          </form>
+        </section>
+      </main>
+    );
+  }
 
   if (loading) {
     return (
