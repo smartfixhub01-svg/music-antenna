@@ -2295,30 +2295,21 @@ useEffect(() => {
         <aside className="ma-sidebar">
           <button
             className="ma-nav-item selected"
-            onClick={() => {
-              setActiveMedia(null);
-              setCategory("All");
-            }}
+            onClick={() => setCategory("All")}
           >
             <span>⌂</span> Home
           </button>
 
           <button
             className="ma-nav-item"
-            onClick={() => {
-              setActiveMedia(null);
-              setCategory("Music");
-            }}
+            onClick={() => setCategory("Music")}
           >
             <span>♫</span> Music
           </button>
 
           <button
             className="ma-nav-item"
-            onClick={() => {
-              setActiveMedia(null);
-              setCategory("Videos");
-            }}
+            onClick={() => setCategory("Videos")}
           >
             <span>▶</span> Videos
           </button>
@@ -2709,7 +2700,7 @@ useEffect(() => {
                   className={"yt-chip" + (category === c ? " yt-chip-active" : "")}
                   onClick={() => {
                     setCategory(c);
-                    setActiveMedia(null);
+                    
                   }}
                 >
                   {c}
