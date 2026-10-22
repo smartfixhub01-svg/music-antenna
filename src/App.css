@@ -5238,40 +5238,50 @@ input::placeholder, textarea::placeholder {
 
 
 
-/* ===== ULTIMATE CSS LOGO REPLACEMENT ===== */
 
-/* 1. HIDE THE OLD AUTH HEADER ICON AND TEXT */
+
+/* ===== SAFE CSS LOGO REPLACEMENT ===== */
+
+/* --- 1. AUTH SCREEN LOGO --- */
+/* Hide the old icon and text */
 .auth-screen-head > * {
   display: none !important;
 }
-
-/* 2. APPLY THE BIG LOGO TO THE AUTH HEADER CONTAINER */
 .auth-screen-head {
-  background-image: url('/logo.png') !important;
-  background-size: contain !important;
-  background-repeat: no-repeat !important;
-  background-position: center !important;
-  background-color: transparent !important;
-  width: 100% !important;
-  max-width: 240px !important;
-  height: 64px !important;
-  margin: 0 auto 24px auto !important;
-  display: block !important;
+  font-size: 0 !important; /* Hides raw text nodes */
 }
 
-/* 3. HIDE THE OLD NAVBAR ICON AND TEXT */
+/* Inject the big logo */
+.auth-screen-head::before {
+  content: "";
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  height: 80px;
+  margin: 0 auto 24px auto;
+  background-image: url('/music-antenna-logo.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* --- 2. TOP NAVBAR LOGO --- */
+/* Hide the old icon and text */
 .ma-brand > * {
   display: none !important;
 }
-
-/* 4. APPLY THE SMALL LOGO TO THE NAVBAR CONTAINER */
 .ma-brand {
-  background-image: url('/logo.png') !important;
-  background-size: contain !important;
-  background-repeat: no-repeat !important;
-  background-position: left center !important;
-  width: 140px !important;
-  height: 36px !important;
-  display: block !important;
-  cursor: pointer !important;
+  font-size: 0 !important;
+}
+
+/* Inject the small logo */
+.ma-brand::before {
+  content: "";
+  display: block;
+  width: 140px;
+  height: 36px;
+  background-image: url('/music-antenna-logo.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: left center;
 }
