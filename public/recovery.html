@@ -101,7 +101,7 @@
         const SUPABASE_URL = 'https://wcuqehdequrealcndkyw.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_-iD2D0ploxUh4w_PLKOirQ_ih4JcGKt';
         
-        // CREATE CLIENT WITHOUT AUTO-DETECTING URL (we do it manually below)
+        // WE REMOVED detectSessionInUrl: true SO IT DOES NOT HANG
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const form = document.getElementById('resetForm');
@@ -113,8 +113,13 @@
 
         function toggleVisibility(id, icon) {
             const input = document.getElementById(id);
-            input.type = input.type === 'password' ? 'text' : 'password';
-            icon.style.color = input.type === 'text' ? '#FF0033' : '#888';
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.style.color = '#FF0033';
+            } else {
+                input.type = 'password';
+                icon.style.color = '#888';
+            }
         }
 
         function unlockForm() {
@@ -128,7 +133,7 @@
         }
 
         async function initAuth() {
-            // 1. Manually parse the hash for access_token (Implicit Flow)
+            // Manually extract the token from the URL hash
             const hash = window.location.hash.substring(1);
             const hashParams = new URLSearchParams(hash);
             const access_token = hashParams.get('access_token');
@@ -150,7 +155,7 @@
                 }
             }
 
-            // 2. Check for PKCE code (just in case)
+            // Fallback for PKCE code
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
             if (code) {
@@ -165,7 +170,7 @@
                 }
             }
 
-            // 3. Fallback: Check if session exists (page refresh)
+            // Fallback check
             const { data } = await supabase.auth.getSession();
             if (data.session) {
                 debugLog("✅ Existing session found.");
@@ -180,7 +185,6 @@
             }
         }
 
-        // Run immediately
         initAuth().catch(err => debugLog("CRITICAL: " + err.message));
 
         form.addEventListener('submit', async (e) => {
