@@ -5221,20 +5221,38 @@ input::placeholder, textarea::placeholder {
 }
 
 
-/* Ensure logo fits perfectly in headers */
-.ma-brand, .ma-logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 0 !important;
-  background: transparent !important;
-}
-.ma-brand img, .ma-logo img {
+
+
+/* ===== OFFICIAL LOGO STYLING ===== */
+.official-logo {
   height: 36px !important;
   width: auto !important;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  object-fit: contain !important;
+  border-radius: 6px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
 }
-.auth-screen-head img {
-  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.1));
+
+/* Make it slightly larger on the login card for premium feel */
+.auth-screen-head .official-logo,
+.auth-screen-head-icon + .official-logo {
+  height: 48px !important;
+}
+
+/* Remove the pink background box around the old icon */
+.auth-screen-head-icon, 
+.auth-screen-head > div:first-child:not(.official-logo),
+.ma-brand-icon, .ma-logo-icon {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin-right: 8px !important;
+}
+
+/* Ensure the header aligns nicely */
+.auth-screen-head {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  margin-bottom: 24px !important;
 }
