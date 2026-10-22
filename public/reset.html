@@ -93,6 +93,48 @@
     </div>
 
     <script>
+        // Report errors even if the authentication initialization fails.
+        window.addEventListener('error', function (event) {
+            const box = document.getElementById('debugConsole');
+            if (box) {
+                box.textContent +=
+                    '\n[GLOBAL ERROR] ' +
+                    (event.message || 'Unknown JavaScript error') +
+                    ' at ' + (event.filename || 'unknown file') +
+                    ':' + (event.lineno || '?');
+            }
+
+            const message = document.getElementById('msg');
+            if (message) {
+                message.className = 'msg error';
+                message.textContent =
+                    'Page error: ' +
+                    (event.message || 'A JavaScript error occurred.');
+                message.style.display = 'block';
+            }
+        });
+
+        window.addEventListener('unhandledrejection', function (event) {
+            const reason = event.reason;
+            const detail = reason && reason.message
+                ? reason.message
+                : String(reason || 'Unknown asynchronous error');
+
+            const box = document.getElementById('debugConsole');
+            if (box) {
+                box.textContent += '\n[ASYNC ERROR] ' + detail;
+            }
+
+            const message = document.getElementById('msg');
+            if (message) {
+                message.className = 'msg error';
+                message.textContent = 'Authentication error: ' + detail;
+                message.style.display = 'block';
+            }
+
+            console.error('Unhandled promise rejection:', reason);
+        });
+
         const debugLog = (msg) => {
             const box = document.getElementById('debugConsole');
             box.innerHTML += "<br>> " + msg;
