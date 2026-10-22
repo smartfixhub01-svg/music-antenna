@@ -4815,227 +4815,181 @@ button {
 .ma-subs-skeleton-text { height: 16px; background: #272727; border-radius: 6px; margin-left: 16px; }
 
 
-/* ===== PREMIUM THEME OVERRIDES ===== */
 
-/* 1. FORCE GLOBAL BACKGROUNDS AND TEXT */
-html, body, #root, .ma-app, .ma-layout, main, .yt-watch-page {
-  background-color: var(--ma-bg-primary) !important;
-  color: var(--ma-text-primary) !important;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
 
-/* 2. HEADERS AND NAVIGATION */
-header, .ma-header, .yt-watch-topbar, .ma-mobile-nav, .ma-sidebar {
-  background-color: var(--ma-bg-primary) !important;
-  border-color: var(--ma-border) !important;
-}
+/* ==========================================
+   MUSIC ANTENNA PROFESSIONAL DESIGN SYSTEM
+   ========================================== */
 
-/* 3. CARDS AND PANELS */
-.yt-video-card, .ma-subs-row, .yt-manage-item, .yt-channel-banner, .ma-avatar-menu, .yt-notif-dropdown, .yt-watch-actions, .yt-watch-body {
-  background-color: var(--ma-bg-secondary) !important;
-  border: 1px solid var(--ma-border) !important;
-  border-radius: 12px;
-}
-.yt-video-card:hover, .ma-subs-row:hover, .yt-manage-item:hover {
-  background-color: var(--ma-bg-hover) !important;
-  transform: translateY(-2px);
-  transition: all 0.2s ease;
+:root[data-theme="light"] {
+  --ma-bg: #FFFFFF;
+  --ma-text: #0F0F0F;
+  --ma-text-secondary: #606060;
+  --ma-surface: #FFFFFF;
+  --ma-surface-elevated: #F2F2F2;
+  --ma-border: #E5E5E5;
+  --ma-hover: #F2F2F2;
+  --ma-search-bg: #F1F1F1;
+  --ma-accent: #FF365F;
+  color-scheme: light;
 }
 
-/* 4. TEXT COLORS - CRITICAL FOR FIXING INVISIBLE TEXT */
-h1, h2, h3, h4, h5, h6, p, span, div, a {
-  color: var(--ma-text-primary) !important;
+:root[data-theme="dark"] {
+  --ma-bg: #0F0F0F;
+  --ma-text: #F1F1F1;
+  --ma-text-secondary: #AAAAAA;
+  --ma-surface: #181818;
+  --ma-surface-elevated: #212121;
+  --ma-border: #303030;
+  --ma-hover: #272727;
+  --ma-search-bg: #121212;
+  --ma-accent: #FF365F;
+  color-scheme: dark;
 }
-.yt-video-title, .yt-watch-title, .ma-subs-name, .yt-channel-name, .ma-avatar-menu button, .yt-notif-dropdown h3 {
-  color: var(--ma-text-primary) !important;
-  font-weight: 700 !important;
+
+/* 2. Global Resets */
+html, body, #root, .ma-app, .ma-layout {
+  background-color: var(--ma-bg) !important;
+  color: var(--ma-text) !important;
+  font-family: 'Roboto', Arial, sans-serif !important;
+  margin: 0;
+  padding: 0;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
-.yt-video-meta, .yt-watch-meta, .ma-subs-date, .yt-channel-sub, .yt-notif-dropdown p, .auth-screen-footnote {
+
+/* 3. Force Text Colors Everywhere (Fixes Invisible Text) */
+h1, h2, h3, h4, h5, h6, p, span, div, a, strong, label {
+  color: var(--ma-text);
+}
+.yt-video-meta, .yt-watch-meta, .ma-subs-date, .yt-channel-sub, .text-secondary {
   color: var(--ma-text-secondary) !important;
 }
 
-/* 5. INPUTS AND FORMS (Fix for login and upload) */
-input, textarea, select {
-  background-color: var(--ma-bg-secondary) !important;
-  color: var(--ma-text-primary) !important;
+/* 4. Header & Navigation */
+header, .ma-header, .yt-watch-topbar, .ma-mobile-nav {
+  background-color: var(--ma-bg) !important;
+  border-bottom: 1px solid var(--ma-border) !important;
+}
+.ma-icon-btn, .ma-avatar-btn, .material-symbols-outlined {
+  color: var(--ma-text) !important;
+}
+.ma-nav-item.selected { color: var(--ma-accent) !important; }
+
+/* 5. Profile Menu (Fixes giant white box) */
+.ma-avatar-menu {
+  width: 260px !important;
+  background-color: var(--ma-surface-elevated) !important;
   border: 1px solid var(--ma-border) !important;
-  border-radius: 8px !important;
-  padding: 12px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2) !important;
+  padding: 8px 0 !important;
 }
-input:focus, textarea:focus, select:focus {
-  border-color: var(--ma-accent) !important;
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(255, 0, 51, 0.2) !important;
+.ma-avatar-menu-header {
+  padding: 12px 16px !important;
+  border-bottom: 1px solid var(--ma-border) !important;
 }
-input::placeholder, textarea::placeholder {
-  color: var(--ma-text-secondary) !important;
-  opacity: 0.7;
+.ma-avatar-menu button {
+  color: var(--ma-text) !important;
+  padding: 10px 16px !important;
+  font-size: 14px !important;
 }
-
-/* 6. SPECIFIC FIXES FOR SCREENSHOTS */
-/* Fix Login/Signup Cards */
-.auth-screen-card, .auth-card {
-  background-color: var(--ma-bg-secondary) !important;
-  border: 1px solid var(--ma-border) !important;
-}
-/* Fix Creator Dashboard */
-.yt-manage-item h4, .yt-manage-item p {
-  color: var(--ma-text-primary) !important;
-}
-.yt-manage-edit-btn {
-  color: var(--ma-text-secondary) !important;
-}
-/* Fix Home Feed Text */
-.yt-video-card div {
-  color: var(--ma-text-primary) !important;
-}
-/* Fix Subscriptions Badges */
-.ma-subs-badge.listener {
-  background-color: var(--ma-bg-hover) !important;
-  color: var(--ma-text-primary) !important;
+.ma-avatar-menu button:hover {
+  background-color: var(--ma-hover) !important;
 }
 
-/* 7. BUTTONS */
-button {
-  font-family: inherit;
-}
-.yt-watch-action, .ma-upload-btn, .ma-subs-action, .ma-subs-empty-btn {
-  border-radius: 20px !important;
-  font-weight: 700 !important;
-  transition: all 0.2s ease !important;
-}
-.ma-upload-btn, .ma-subs-empty-btn {
-  background-color: var(--ma-accent) !important;
-  color: #FFFFFF !important;
-}
-.ma-upload-btn:hover, .ma-subs-empty-btn:hover {
-  background-color: #CC0029 !important;
-  transform: scale(1.02);
-}
-.yt-watch-action {
-  background-color: var(--ma-bg-secondary) !important;
-  color: var(--ma-text-primary) !important;
-}
-.yt-watch-action:hover {
-  background-color: var(--ma-bg-hover) !important;
-}
-
-/* 8. CATEGORY CHIPS (Home Page) */
-.yt-chip {
-  background-color: var(--ma-bg-secondary) !important;
-  color: var(--ma-text-primary) !important;
-  border: 1px solid var(--ma-border) !important;
-}
-.yt-chip-active {
-  background-color: var(--ma-text-primary) !important;
-  color: var(--ma-bg-primary) !important;
-  border-color: var(--ma-text-primary) !important;
-}
-
-
-/* ===== SIZING AND THEME FIXES ===== */
-
-/* 1. Force Theme Colors strictly */
-:root[data-theme="light"] { color-scheme: light; }
-:root[data-theme="dark"] { color-scheme: dark; }
-
-html, body, #root, .ma-app {
-  background-color: var(--ma-bg-primary) !important;
-  color: var(--ma-text-primary) !important;
-}
-
-/* 2. Fix Login Page Sizes */
+/* 6. Login / Auth Pages (Fixes huge form) */
 .auth-screen-card, .auth-card, form[class*="auth"] {
   max-width: 380px !important;
   margin: 40px auto !important;
   padding: 24px !important;
-  background-color: var(--ma-bg-secondary) !important;
-  border-radius: 16px !important;
+  background-color: var(--ma-surface) !important;
   border: 1px solid var(--ma-border) !important;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.2) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1) !important;
 }
 .auth-screen-card input, .auth-card input {
   height: 44px !important;
   font-size: 14px !important;
   margin-bottom: 12px !important;
+  background-color: var(--ma-search-bg) !important;
+  color: var(--ma-text) !important;
+  border: 1px solid var(--ma-border) !important;
 }
 .auth-screen-card button, .auth-card button {
   height: 44px !important;
   font-size: 14px !important;
 }
 
-/* 3. Fix Profile Menu (Make it smaller and dark/light) */
-.ma-avatar-menu {
-  width: 260px !important;
-  padding: 8px 0 !important;
-  background-color: var(--ma-bg-elevated) !important;
+/* 7. Inputs & Forms */
+input, textarea, select {
+  background-color: var(--ma-search-bg) !important;
+  color: var(--ma-text) !important;
   border: 1px solid var(--ma-border) !important;
-  border-radius: 12px !important;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
 }
-.ma-avatar-menu-header {
-  padding: 12px 16px !important;
-}
-.ma-avatar-menu-header img {
-  width: 40px !important;
-  height: 40px !important;
-}
-.ma-avatar-menu button {
-  padding: 10px 16px !important;
-  font-size: 14px !important;
-  color: var(--ma-text-primary) !important;
-}
-.ma-avatar-menu button:hover {
-  background-color: var(--ma-bg-hover) !important;
-}
-
-/* 4. Fix "You" Page Manage Cards (Compact rows) */
-.yt-manage-item {
-  padding: 12px !important;
-  margin-bottom: 8px !important;
-  border-radius: 8px !important;
-  background-color: var(--ma-bg-secondary) !important;
-  border: 1px solid var(--ma-border) !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 12px !important;
-}
-.yt-manage-thumb {
-  width: 80px !important;
-  height: 45px !important;
-  border-radius: 6px !important;
-}
-.yt-manage-item h4 {
-  font-size: 14px !important;
-  margin: 0 0 4px 0 !important;
-  color: var(--ma-text-primary) !important;
-}
-.yt-manage-item p {
-  font-size: 12px !important;
+input::placeholder, textarea::placeholder {
   color: var(--ma-text-secondary) !important;
 }
 
-/* 5. Global Typography Reduction for Mobile */
-h1 { font-size: 22px !important; }
-h2 { font-size: 18px !important; }
-h3 { font-size: 16px !important; }
-p { font-size: 13px !important; }
-.yt-video-title { font-size: 14px !important; }
-.yt-watch-action { font-size: 12px !important; padding: 6px 12px !important; }
-
-/* 6. Theme Toggle Switch in Menu */
-.ma-theme-switcher {
-  display: flex; gap: 6px; padding: 8px 12px;
+/* 8. Cards & Media Items */
+.yt-video-card, .ma-subs-row, .yt-manage-item {
+  background-color: transparent !important;
+  border: none !important;
 }
+.yt-manage-item {
+  background-color: var(--ma-surface) !important;
+  border: 1px solid var(--ma-border) !important;
+  border-radius: 12px !important;
+  padding: 12px !important;
+  margin-bottom: 8px !important;
+}
+.yt-manage-thumb {
+  width: 100px !important;
+  height: 60px !important;
+  border-radius: 8px !important;
+}
+.yt-manage-item h4 {
+  font-size: 15px !important;
+  color: var(--ma-text) !important;
+}
+.yt-manage-item p {
+  font-size: 13px !important;
+  color: var(--ma-text-secondary) !important;
+}
+
+/* 9. Chips & Tabs */
+.yt-chip {
+  background-color: var(--ma-surface-elevated) !important;
+  color: var(--ma-text) !important;
+  border: 1px solid var(--ma-border) !important;
+}
+.yt-chip-active {
+  background-color: var(--ma-text) !important;
+  color: var(--ma-bg) !important;
+}
+
+/* 10. Buttons */
+.ma-upload-btn, .ma-subs-empty-btn {
+  background-color: var(--ma-accent) !important;
+  color: #FFFFFF !important;
+}
+.yt-watch-action {
+  background-color: var(--ma-surface-elevated) !important;
+  color: var(--ma-text) !important;
+}
+
+/* 11. Theme Switcher UI */
+.ma-theme-switcher { display: flex; gap: 6px; padding: 8px 12px; }
 .ma-theme-btn {
-  flex: 1; padding: 6px; border-radius: 6px;
-  border: 1px solid var(--ma-border);
-  background: var(--ma-bg-secondary);
-  color: var(--ma-text-primary);
-  cursor: pointer; font-weight: bold; font-size: 12px;
+  flex: 1; padding: 6px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;
+  background: var(--ma-surface); color: var(--ma-text); border: 1px solid var(--ma-border);
 }
 .ma-theme-btn.active {
-  background: var(--ma-accent) !important;
-  color: #fff !important;
-  border-color: var(--ma-accent) !important;
+  background: var(--ma-accent) !important; color: #fff !important; border-color: var(--ma-accent) !important;
 }
+
+/* 12. Subscriptions Page Specific Fixes */
+.ma-subs-page { background-color: var(--ma-bg) !important; }
+.ma-subs-header, .ma-subs-tabs, .ma-subs-toolbar { border-color: var(--ma-border) !important; background-color: var(--ma-bg) !important; }
+.ma-subs-search-wrap { background-color: var(--ma-search-bg) !important; border-color: var(--ma-border) !important; }
+.ma-subs-search { background-color: transparent !important; border: none !important; }
+.ma-subs-sort { background-color: var(--ma-search-bg) !important; color: var(--ma-text) !important; border-color: var(--ma-border) !important; }
