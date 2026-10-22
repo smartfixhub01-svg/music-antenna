@@ -1,25 +1,80 @@
 
-/* ===== MUSIC ANTENNA GLOBAL DESIGN SYSTEM ===== */
-:root {
+/* ===== MUSIC ANTENNA THEME SYSTEM ===== */
+:root, :root[data-theme="light"] {
+  --ma-bg-primary: #FFFFFF;
+  --ma-bg-secondary: #F2F2F2;
+  --ma-bg-elevated: #FFFFFF;
+  --ma-bg-hover: #EAEAEA;
+  --ma-text-primary: #0F0F0F;
+  --ma-text-secondary: #606060;
+  --ma-border: #E5E5E5;
+  --ma-search-bg: #F8F8F8;
+  --ma-accent: #FF0033;
+}
+
+:root[data-theme="dark"] {
   --ma-bg-primary: #0F0F0F;
-  --ma-bg-secondary: #1C1C1C;
+  --ma-bg-secondary: #181818;
   --ma-bg-elevated: #272727;
   --ma-bg-hover: #303030;
-  
   --ma-text-primary: #F1F1F1;
   --ma-text-secondary: #AAAAAA;
-  --ma-text-muted: #717171;
-  
   --ma-border: #303030;
+  --ma-search-bg: #121212;
   --ma-accent: #FF0033;
-  --ma-accent-hover: #CC0029;
-  
-  --ma-success: #2BA640;
-  --ma-warning: #F5A623;
-  --ma-error: #FF4E45;
 }
 
 /* Global Overrides */
+body, #root, .ma-app, .ma-layout, main {
+  background-color: var(--ma-bg-primary) !important;
+  color: var(--ma-text-primary) !important;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+header, .ma-header, .ma-mobile-nav, .yt-watch-topbar, .ma-sidebar {
+  background-color: var(--ma-bg-primary) !important;
+  border-color: var(--ma-border) !important;
+}
+.ma-nav-item.selected, .yt-chip-active {
+  color: var(--ma-accent) !important;
+  font-weight: 700;
+}
+.yt-chip {
+  background: var(--ma-bg-secondary) !important;
+  color: var(--ma-text-primary) !important;
+  border: 1px solid var(--ma-border) !important;
+}
+.yt-chip-active {
+  background: var(--ma-text-primary) !important;
+  color: var(--ma-bg-primary) !important;
+}
+
+/* Cards & Surfaces */
+.yt-video-card, .ma-subs-row, .yt-manage-item {
+  background: var(--ma-bg-secondary) !important;
+  border: 1px solid var(--ma-border) !important;
+}
+.yt-video-card:hover, .ma-subs-row:hover {
+  background: var(--ma-bg-hover) !important;
+}
+
+/* Text Colors */
+.yt-video-title, .ma-subs-name, h1, h2, h3, span, p, a {
+  color: var(--ma-text-primary) !important;
+}
+.yt-video-meta, .ma-subs-date, .yt-watch-meta, small {
+  color: var(--ma-text-secondary) !important;
+}
+
+/* Modals & Dropdowns */
+.ma-avatar-menu, .yt-notif-dropdown, .ma-subs-search-wrap, .ma-subs-sort {
+  background: var(--ma-bg-elevated) !important;
+  border-color: var(--ma-border) !important;
+  color: var(--ma-text-primary) !important;
+}
+
+
+
 body, #root, .ma-app, .ma-layout, main {
   background-color: var(--ma-bg-primary) !important;
   color: var(--ma-text-primary);

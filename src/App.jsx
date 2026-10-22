@@ -34,6 +34,26 @@ export default function App() {
   const [authTab, setAuthTab] = useState("listener");
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
+  const [theme, setTheme] = useState(() => localStorage.getItem("ma_theme") || "device");
+
+  useEffect(() => {
+    const applyTheme = () => {
+      let activeTheme = theme;
+      if (theme === 'device') {
+        activeTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', activeTheme);
+    };
+    
+    applyTheme();
+    localStorage.setItem('ma_theme', theme);
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = () => { if (theme === 'device') applyTheme(); };
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, [theme]);
+
   const messageTimeoutRef = useRef(null);
 
   useEffect(() => {
@@ -2402,10 +2422,21 @@ useEffect(() => {
                   <button onClick={() => { setShowAnalytics(false);  setMenuOpen(false); setProfileName(profile?.username || profile?.display_name || ""); setProfileBio(profile?.bio || ""); setShowAccountPage(true); setShowProfileEditor(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
                     <span className="material-symbols-outlined">edit</span> Edit profile
                   </button>
+                  
+                  <div className="ma-avatar-menu-line" />
+                  <div style={{ padding: "8px 16px" }}>
+                    <div style={{ fontSize: "12px", color: "var(--ma-text-secondary)", marginBottom: "8px", fontWeight: "bold" }}>APPEARANCE</div>
+                    <div style={{ display: "flex", gap: "6px" }}>
+                      <button onClick={() => setTheme('light')} style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "1px solid var(--ma-border)", background: theme === 'light' ? 'var(--ma-accent)' : 'var(--ma-bg-hover)', color: theme === 'light' ? '#fff' : 'var(--ma-text-primary)', cursor: "pointer", fontWeight: "bold" }}>Light</button>
+                      <button onClick={() => setTheme('dark')} style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "1px solid var(--ma-border)", background: theme === 'dark' ? 'var(--ma-accent)' : 'var(--ma-bg-hover)', color: theme === 'dark' ? '#fff' : 'var(--ma-text-primary)', cursor: "pointer", fontWeight: "bold" }}>Dark</button>
+                      <button onClick={() => setTheme('device')} style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "1px solid var(--ma-border)", background: theme === 'device' ? 'var(--ma-accent)' : 'var(--ma-bg-hover)', color: theme === 'device' ? '#fff' : 'var(--ma-text-primary)', cursor: "pointer", fontWeight: "bold" }}>Auto</button>
+                    </div>
+                  </div>
                   <div className="ma-avatar-menu-line" />
                   <button onClick={() => { setShowAnalytics(false);  setMenuOpen(false); handleLogout(); }}>
                     <span className="material-symbols-outlined">logout</span> Sign out
                   </button>
+
                 </div>
               </>
             )}
@@ -3790,45 +3821,45 @@ useEffect(() => {
       
       
       {showSubscriptionsPage && (
-        <section style={{ position: "fixed", inset: 0, zIndex: 9999, background: "#0F0F0F", overflowY: "auto", paddingBottom: "80px", color: "#F1F1F1", fontFamily: "Roboto, sans-serif" }}>
+        <section style={{ position: "fixed", inset: 0, zIndex: 9999, background: "var(--ma-bg-primary)", overflowY: "auto", paddingBottom: "80px", color: "var(--ma-text-primary)", fontFamily: "Roboto, sans-serif" }}>
           
           {/* HEADER */}
-          <div style={{ display: "flex", alignItems: "center", padding: "16px 20px", background: "#0F0F0F", position: "sticky", top: 0, zIndex: 10, borderBottom: "1px solid #303030" }}>
+          <div style={{ display: "flex", alignItems: "center", padding: "16px 20px", background: "var(--ma-bg-primary)", position: "sticky", top: 0, zIndex: 10, borderBottom: "1px solid var(--ma-border)" }}>
             <button onClick={() => setShowSubscriptionsPage(false)} style={{ background: "transparent", border: 0, color: "#fff", cursor: "pointer", display: "flex", padding: "8px", marginRight: "8px" }}>
               <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>arrow_back</span>
             </button>
-            <h2 style={{ margin: 0, fontSize: "20px", fontWeight: 700, color: "#F1F1F1", flex: 1, textAlign: "center" }}>Subscriptions</h2>
-            <button onClick={() => setSubsRefreshTrigger(prev => prev + 1)} style={{ background: "transparent", border: 0, color: "#AAAAAA", cursor: "pointer", display: "flex", padding: "8px" }}>
+            <h2 style={{ margin: 0, fontSize: "20px", fontWeight: 700, color: "var(--ma-text-primary)", flex: 1, textAlign: "center" }}>Subscriptions</h2>
+            <button onClick={() => setSubsRefreshTrigger(prev => prev + 1)} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary)", cursor: "pointer", display: "flex", padding: "8px" }}>
               <span className="material-symbols-outlined" style={{ opacity: subsPageLoading ? 0.5 : 1, fontSize: "24px" }}>refresh</span>
             </button>
           </div>
 
           {/* TABS */}
-          <div style={{ display: "flex", borderBottom: "1px solid #303030", padding: "0 16px" }}>
-            <button onClick={() => setSubsPageTab('subbers')} style={{ flex: 1, padding: "16px 0", background: "transparent", border: "none", borderBottom: subsPageTab === 'subbers' ? "2px solid #FF0033" : "2px solid transparent", color: subsPageTab === 'subbers' ? "#F1F1F1" : "#AAAAAA", fontWeight: 700, fontSize: "14px", cursor: "pointer", transition: "all 0.2s" }}>
+          <div style={{ display: "flex", borderBottom: "1px solid var(--ma-border)", padding: "0 16px" }}>
+            <button onClick={() => setSubsPageTab('subbers')} style={{ flex: 1, padding: "16px 0", background: "transparent", border: "none", borderBottom: subsPageTab === 'subbers' ? "2px solid #FF0033" : "2px solid transparent", color: subsPageTab === 'subbers' ? "var(--ma-text-primary)" : "var(--ma-text-secondary)", fontWeight: 700, fontSize: "14px", cursor: "pointer", transition: "all 0.2s" }}>
               Subscribers ({subbersList.length})
             </button>
-            <button onClick={() => setSubsPageTab('subs')} style={{ flex: 1, padding: "16px 0", background: "transparent", border: "none", borderBottom: subsPageTab === 'subs' ? "2px solid #FF0033" : "2px solid transparent", color: subsPageTab === 'subs' ? "#F1F1F1" : "#AAAAAA", fontWeight: 700, fontSize: "14px", cursor: "pointer", transition: "all 0.2s" }}>
+            <button onClick={() => setSubsPageTab('subs')} style={{ flex: 1, padding: "16px 0", background: "transparent", border: "none", borderBottom: subsPageTab === 'subs' ? "2px solid #FF0033" : "2px solid transparent", color: subsPageTab === 'subs' ? "var(--ma-text-primary)" : "var(--ma-text-secondary)", fontWeight: 700, fontSize: "14px", cursor: "pointer", transition: "all 0.2s" }}>
               Following ({subsList.length})
             </button>
           </div>
 
           {/* TOOLBAR */}
           <div style={{ display: "flex", gap: "8px", padding: "16px", alignItems: "center", width: "100%", boxSizing: "border-box" }}>
-            <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", background: "#1C1C1C", border: "1px solid #303030", borderRadius: "12px", padding: "0 12px", height: "44px" }}>
-              <span className="material-symbols-outlined" style={{ color: "#AAAAAA", fontSize: "20px", marginRight: "8px" }}>search</span>
+            <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", background: "var(--ma-bg-secondary)", border: "1px solid var(--ma-border)", borderRadius: "12px", padding: "0 12px", height: "44px" }}>
+              <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary)", fontSize: "20px", marginRight: "8px" }}>search</span>
               <input 
                 type="text" 
                 placeholder="Search..." 
                 value={subsSearch}
                 onChange={(e) => setSubsSearch(e.target.value)}
-                style={{ flex: 1, minWidth: 0, background: "transparent", border: "none", color: "#F1F1F1", outline: "none", fontSize: "14px" }}
+                style={{ flex: 1, minWidth: 0, background: "transparent", border: "none", color: "var(--ma-text-primary)", outline: "none", fontSize: "14px" }}
               />
             </div>
             <select 
               value={subsSort} 
               onChange={(e) => setSubsSort(e.target.value)}
-              style={{ flexShrink: 0, height: "44px", padding: "0 12px", borderRadius: "12px", background: "#1C1C1C", border: "1px solid #303030", color: "#F1F1F1", outline: "none", fontSize: "14px", appearance: "none" }}
+              style={{ flexShrink: 0, height: "44px", padding: "0 12px", borderRadius: "12px", background: "var(--ma-bg-secondary)", border: "1px solid var(--ma-border)", color: "var(--ma-text-primary)", outline: "none", fontSize: "14px", appearance: "none" }}
             >
               <option value="newest">Newest</option>
               <option value="oldest">Oldest</option>
@@ -3839,7 +3870,7 @@ useEffect(() => {
           {/* CONTENT */}
           <div style={{ padding: "0 16px", maxWidth: "800px", margin: "0 auto" }}>
             {subsPageLoading ? (
-              <div style={{ textAlign: "center", marginTop: "40px", color: "#AAAAAA" }}>Loading...</div>
+              <div style={{ textAlign: "center", marginTop: "40px", color: "var(--ma-text-secondary)" }}>Loading...</div>
             ) : subsPageError ? (
               <div style={{ textAlign: "center", marginTop: "40px", color: "#FF0033" }}>{subsPageError}</div>
             ) : (
@@ -3867,11 +3898,11 @@ useEffect(() => {
                 if (sorted.length === 0) {
                   return (
                     <div style={{ textAlign: "center", padding: "60px 20px" }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: "56px", color: "#303030", marginBottom: "16px" }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: "56px", color: "var(--ma-border)", marginBottom: "16px" }}>
                         {subsPageTab === 'subbers' ? 'group' : 'music_note'}
                       </span>
-                      <h3 style={{ color: "#F1F1F1", fontSize: "18px", margin: "0 0 8px 0" }}>{subsPageTab === 'subbers' ? 'No subscribers yet' : 'Your next favourite creator is waiting.'}</h3>
-                      <p style={{ fontSize: "14px", color: "#AAAAAA", margin: "0 0 20px 0" }}>{subsPageTab === 'subbers' ? 'When people subscribe to your channel, they will appear here.' : 'Discover music and videos from creators on Music Antenna.'}</p>
+                      <h3 style={{ color: "var(--ma-text-primary)", fontSize: "18px", margin: "0 0 8px 0" }}>{subsPageTab === 'subbers' ? 'No subscribers yet' : 'Your next favourite creator is waiting.'}</h3>
+                      <p style={{ fontSize: "14px", color: "var(--ma-text-secondary)", margin: "0 0 20px 0" }}>{subsPageTab === 'subbers' ? 'When people subscribe to your channel, they will appear here.' : 'Discover music and videos from creators on Music Antenna.'}</p>
                       {subsPageTab === 'subs' && (
                         <button onClick={() => { setShowSubscriptionsPage(false); setCategory("All"); }} style={{ background: "#FF0033", color: "#fff", border: "none", borderRadius: "8px", padding: "12px 24px", fontWeight: 700, cursor: "pointer" }}>
                           Discover Creators
@@ -3886,23 +3917,23 @@ useEffect(() => {
                   if (!p) return null;
                   
                   return (
-                    <div key={idx} onClick={() => { setShowSubscriptionsPage(false); openChannel(p.id); }} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "#1C1C1C", border: "1px solid #303030", borderRadius: "12px", padding: "16px", marginBottom: "12px", cursor: "pointer" }}>
+                    <div key={idx} onClick={() => { setShowSubscriptionsPage(false); openChannel(p.id); }} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--ma-bg-secondary)", border: "1px solid var(--ma-border)", borderRadius: "12px", padding: "16px", marginBottom: "12px", cursor: "pointer" }}>
                       <div style={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
                         {p.avatar_url ? (
                           <img src={p.avatar_url} style={{ width: "48px", height: "48px", borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} alt="" />
                         ) : (
-                          <div style={{ width: "48px", height: "48px", borderRadius: "50%", background: "#303030", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px", fontWeight: 700, color: "#AAAAAA", flexShrink: 0 }}>
+                          <div style={{ width: "48px", height: "48px", borderRadius: "50%", background: "var(--ma-border)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px", fontWeight: 700, color: "var(--ma-text-secondary)", flexShrink: 0 }}>
                             {(p.display_name || "U")[0].toUpperCase()}
                           </div>
                         )}
                         <div style={{ display: "flex", flexDirection: "column", marginLeft: "12px", overflow: "hidden", flex: 1 }}>
                           <div style={{ display: "flex", alignItems: "center" }}>
-                            <span style={{ fontWeight: 700, fontSize: "15px", color: "#F1F1F1", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.username || p.display_name}</span>
-                            <span style={{ fontSize: "10px", padding: "2px 6px", borderRadius: "4px", background: p.role === 'artist' ? '#FF0033' : '#303030', color: "#F1F1F1", textTransform: "uppercase", fontWeight: 700, marginLeft: "8px", flexShrink: 0 }}>
+                            <span style={{ fontWeight: 700, fontSize: "15px", color: "var(--ma-text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.username || p.display_name}</span>
+                            <span style={{ fontSize: "10px", padding: "2px 6px", borderRadius: "4px", background: p.role === 'artist' ? '#FF0033' : 'var(--ma-border)', color: "var(--ma-text-primary)", textTransform: "uppercase", fontWeight: 700, marginLeft: "8px", flexShrink: 0 }}>
                               {p.role === 'artist' ? 'Creator' : 'Listener'}
                             </span>
                           </div>
-                          <span style={{ fontSize: "12px", color: "#AAAAAA", marginTop: "4px" }}>
+                          <span style={{ fontSize: "12px", color: "var(--ma-text-secondary)", marginTop: "4px" }}>
                             {subsPageTab === 'subbers' ? 'Subscribed' : 'Following since'} {new Date(item.created_at).toLocaleDateString()}
                           </span>
                         </div>
