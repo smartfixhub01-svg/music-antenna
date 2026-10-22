@@ -2352,7 +2352,7 @@ useEffect(() => {
             <input aria-label="Search" placeholder="Search" value={search}
               onChange={(e) => setSearch(e.target.value)} style={{ flex: 1 }} />
             {searchLoading && (
-              <span className="material-symbols-outlined" style={{ animation: "spin 1s linear infinite", fontSize: "18px", color: "#3ea6ff", marginRight: "12px", flexShrink: 0 }}>
+              <span className="material-symbols-outlined" style={{ animation: "spin 1s linear infinite", fontSize: "18px", color: "var(--ma-accent)", marginRight: "12px", flexShrink: 0 }}>
                 sync
               </span>
             )}
@@ -3204,7 +3204,7 @@ useEffect(() => {
               <div style={{ paddingBottom: "4px" }}>
                 <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "700", color: "#f1f1f1", display: "flex", alignItems: "center", gap: "4px" }}>
                   {profile?.display_name || displayUser || "Music listener"}
-                  <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "#3ea6ff", fontVariationSettings: "'FILL' 1" }}>verified</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "var(--ma-accent)", fontVariationSettings: "'FILL' 1" }}>verified</span>
                 </h2>
                 <p style={{ margin: "2px 0", fontSize: "13px", color: "#aaa" }}>@{profile?.username || profile?.display_name || "music-antenna-user"}</p>
                 <p style={{ margin: "2px 0", fontSize: "13px", color: "#aaa" }}>{profile?.bio || "Shadow Boss"}</p>
@@ -3469,7 +3469,7 @@ useEffect(() => {
                         setChannelTab(t);
                       }
                     }}
-                    style={t === "Manage" ? { color: "#3ea6ff", fontWeight: "bold" } : {}}
+                    style={t === "Manage" ? { color: "var(--ma-accent)", fontWeight: "bold" } : {}}
                   >
                     {t}
                   </button>
@@ -3652,7 +3652,7 @@ useEffect(() => {
                 <h3 style={{ margin: "0 0 16px", fontSize: "16px", color: "#f1f1f1" }}>Overview</h3>
                 <div style={{ display: "flex", justifyContent: "space-between", textAlign: "center" }}>
                   <div style={{ flex: 1 }}>
-                    <h2 style={{ margin: 0, color: "#3ea6ff", fontSize: "24px" }}>{analyticsData.totalViews}</h2>
+                    <h2 style={{ margin: 0, color: "var(--ma-accent)", fontSize: "24px" }}>{analyticsData.totalViews}</h2>
                     <p style={{ margin: 0, fontSize: "12px", color: "#aaa" }}>Views</p>
                   </div>
                   <div style={{ flex: 1 }}>
@@ -3670,7 +3670,7 @@ useEffect(() => {
                 <h3 style={{ margin: "0 0 16px", fontSize: "16px", color: "#f1f1f1" }}>Last 7 Days</h3>
                 <div style={{ display: "flex", justifyContent: "space-around", textAlign: "center" }}>
                   <div>
-                    <h2 style={{ margin: 0, color: "#3ea6ff", fontSize: "24px" }}>+{analyticsData.weeklyViews}</h2>
+                    <h2 style={{ margin: 0, color: "var(--ma-accent)", fontSize: "24px" }}>+{analyticsData.weeklyViews}</h2>
                     <p style={{ margin: 0, fontSize: "12px", color: "#aaa" }}>New Views</p>
                   </div>
                   <div>
@@ -4145,7 +4145,7 @@ useEffect(() => {
                           {timeAgo(c.created_at)}
                         </span>
                         {c.is_pinned && (
-                          <span style={{ fontSize: "10px", color: "#3ea6ff", display: "flex", alignItems: "center", gap: "2px" }}>
+                          <span style={{ fontSize: "10px", color: "var(--ma-accent)", display: "flex", alignItems: "center", gap: "2px" }}>
                             <span className="material-symbols-outlined" style={{ fontSize: "12px" }}>push_pin</span>
                           </span>
                         )}
@@ -4281,7 +4281,7 @@ useEffect(() => {
               {replyTarget && (
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px", fontSize: "12px", color: "#aaa" }}>
                   <span>Replying to <strong>@{replyingToName}</strong></span>
-                  <button onClick={() => { setReplyTarget(null); setReplyingToName(""); }} style={{ background: "transparent", border: 0, color: "#3ea6ff", cursor: "pointer" }}>Cancel</button>
+                  <button onClick={() => { setReplyTarget(null); setReplyingToName(""); }} style={{ background: "transparent", border: 0, color: "var(--ma-accent)", cursor: "pointer" }}>Cancel</button>
                 </div>
               )}
 

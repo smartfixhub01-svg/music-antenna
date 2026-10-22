@@ -5054,3 +5054,54 @@ input::placeholder, textarea::placeholder {
 }
 .auth-message-box.error { background: rgba(255, 78, 69, 0.1); border: 1px solid var(--ma-error); color: var(--ma-error); }
 .auth-message-box.success { background: rgba(43, 166, 64, 0.1); border: 1px solid var(--ma-success); color: var(--ma-success); }
+
+
+/* ===== COMPACT AUTH SIZING ===== */
+
+/* 1. Shrink the overall container */
+.auth-screen, .auth-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 20px !important;
+}
+
+/* 2. Tighten the form */
+.auth-screen-form {
+  max-width: 320px !important; /* Smaller max width */
+  margin: 0 auto !important;
+  display: flex;
+  flex-direction: column;
+  gap: 12px !important; /* Tighter gap */
+}
+
+/* 3. Compact Inputs and Labels */
+.auth-screen-form label {
+  gap: 4px !important;
+}
+.auth-screen-form label > span {
+  font-size: 13px !important;
+}
+.auth-screen-form input[type="text"],
+.auth-screen-form input[type="email"],
+.auth-screen-form input[type="password"] {
+  height: 42px !important; /* Smaller height */
+  font-size: 14px !important;
+  padding: 0 12px !important;
+}
+
+/* 4. Compact Submit Button */
+.auth-screen-submit {
+  height: 42px !important; /* Smaller height */
+  font-size: 14px !important;
+  margin-top: 4px !important;
+}
+
+/* 5. Tighten the bottom text area */
+.auth-screen-footnote {
+  margin-top: 24px !important;
+  font-size: 12px !important;
+}
+.auth-screen-head {
+  margin-bottom: 20px !important;
+}
