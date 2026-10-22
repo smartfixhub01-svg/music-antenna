@@ -129,6 +129,15 @@
         const strengthBar = document.getElementById('strengthBar');
         const matchMsg = document.getElementById('matchMsg');
 
+        // Helper to unlock the form UI
+        function unlockForm() {
+            p1Input.disabled = false;
+            p2Input.disabled = false;
+            btn.disabled = false;
+            btn.textContent = 'Update Password';
+            btn.style.background = '#FF0033';
+        }
+
         // Eye Toggle Logic
         function toggleVisibility(id, icon) {
             const input = document.getElementById(id);
@@ -181,29 +190,24 @@
             }
         });
 
-        // Auth Listener
-        supabase.auth.onAuthStateChange((event, session) => {
-            if (event === 'PASSWORD_RECOVERY') {
-                p1Input.disabled = false;
-                p2Input.disabled = false;
-                btn.disabled = false;
-                btn.textContent = 'Update Password';
-            }
-        });
-
-        // Fallback Check
-        setTimeout(async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                p1Input.disabled = false;
-                p2Input.disabled = false;
-                btn.disabled = false;
-                btn.textContent = 'Update Password';
-            } else {
+        // 1. INSTANT CHECK: If the URL contains a token, unlock the form immediately!
+        if (window.location.hash.includes('access_token') || window.location.hash.includes('type=recovery')) {
+            unlockForm();
+            btn.textContent = 'Update Password';
+        } else {
+            // 2. FALLBACK: If no token in URL, try to fetch session safely (for page refreshes)
+            supabase.auth.getSession().then(res => {
+                if (res && res.data && res.data.session) {
+                    unlockForm();
+                } else {
+                    formContainer.style.display = 'none';
+                    invalidContainer.style.display = 'block';
+                }
+            }).catch(err => {
                 formContainer.style.display = 'none';
                 invalidContainer.style.display = 'block';
-            }
-        }, 1500);
+            });
+        }
 
         // Submit Logic
         form.addEventListener('submit', async (e) => {
