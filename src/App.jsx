@@ -3039,7 +3039,7 @@ useEffect(() => {
                     {activeMedia.thumbnailUrl ? (
                       <img src={activeMedia.thumbnailUrl} alt="" />
                     ) : (
-                      <span className="material-symbols-outlined">music_note</span>
+                      <img src="/logo.png" alt="Music Antenna" style={{ height: "36px", width: "auto", objectFit: "contain", borderRadius: "6px" }} />
                     )}
                   </div>
                   <audio src={activeMedia.playbackUrl} controls autoPlay onPlay={handleFirstPlay} />
