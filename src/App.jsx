@@ -154,6 +154,81 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [editSaving, setEditSaving] = useState(false);
 
   const [showSubscriptionsFeed, setShowSubscriptionsFeed] = useState(false);
+  const [showSubscriptionsPage, setShowSubscriptionsPage] = useState(false);
+  const [subsPageTab, setSubsPageTab] = useState("subbers");
+  const [subbersList, setSubbersList] = useState([]);
+  const [subsList, setSubsList] = useState([]);
+  const [subsPageLoading, setSubsPageLoading] = useState(false);
+  const [subsPageError, setSubsPageError] = useState("");
+
+  useEffect(() => {
+    if (!showSubscriptionsPage || !session?.user?.id) return;
+    setSubsPageLoading(true);
+    setSubsPageError("");
+    
+    const fetchData = async () => {
+      try {
+        const { data: subbersData, error: subbersErr } = await supabase.from("subscriptions")
+          .select("subscriber_id, created_at")
+          .eq("channel_id", session.user.id)
+          .order("created_at", { ascending: false });
+
+        if (subbersErr) throw subbersErr;
+
+        if (subbersData && subbersData.length > 0) {
+          const subberIds = subbersData.map(d => d.subscriber_id);
+          const { data: profiles, error: pErr } = await supabase.from("profiles")
+            .select("id, username, display_name, avatar_url, role")
+            .in("id", subberIds);
+          
+          if (pErr) throw pErr;
+          
+          const profileMap = {};
+          (profiles || []).forEach(p => { profileMap[p.id] = p; });
+          
+          setSubbersList(subbersData.map(d => ({
+            created_at: d.created_at,
+            profile: profileMap[d.subscriber_id] || null
+          })).filter(x => x.profile));
+        } else {
+          setSubbersList([]);
+        }
+
+        const { data: subsData, error: subsErr } = await supabase.from("subscriptions")
+          .select("channel_id, created_at")
+          .eq("subscriber_id", session.user.id)
+          .order("created_at", { ascending: false });
+
+        if (subsErr) throw subsErr;
+
+        if (subsData && subsData.length > 0) {
+          const channelIds = subsData.map(d => d.channel_id);
+          const { data: profiles, error: pErr } = await supabase.from("profiles")
+            .select("id, username, display_name, avatar_url, role")
+            .in("id", channelIds);
+          
+          if (pErr) throw pErr;
+          
+          const profileMap = {};
+          (profiles || []).forEach(p => { profileMap[p.id] = p; });
+          
+          setSubsList(subsData.map(d => ({
+            created_at: d.created_at,
+            profile: profileMap[d.channel_id] || null
+          })).filter(x => x.profile));
+        } else {
+          setSubsList([]);
+        }
+      } catch (err) {
+        setSubsPageError(err.message || "Failed to load subscriptions.");
+      } finally {
+        setSubsPageLoading(false);
+      }
+    };
+    fetchData();
+  }, [showSubscriptionsPage, session?.user?.id]);
+
+
   const [subsTab, setSubsTab] = useState("feed");
   const [mySubscribers, setMySubscribers] = useState([]);
 
@@ -308,6 +383,7 @@ useEffect(() => {
     setShowShareModal(false);
     setShowCommentsModal(false);
     setShowSubscriptionsFeed(false);
+    setShowSubscriptionsPage(false);
     setSubsTab("feed");
     
     // CRITICAL FIX: Only hide the watch page, DO NOT delete the video from memory!
@@ -1964,6 +2040,121 @@ useEffect(() => {
         </div>
       )}
 
+    
+      {showSubscriptionsPage && (
+        <section style={{ position: "fixed", inset: 0, zIndex: 9999, background: "#0f0f0f", overflowY: "auto", paddingBottom: "80px" }}>
+          <div style={{ display: "flex", alignItems: "center", padding: "16px 20px", background: "#0f0f0f", position: "sticky", top: 0, zIndex: 10, borderBottom: "1px solid #222" }}>
+            <button onClick={() => setShowSubscriptionsPage(false)} style={{ background: "transparent", border: 0, color: "#fff", cursor: "pointer", display: "flex", marginRight: "16px" }}>
+              <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>arrow_back</span>
+            </button>
+            <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "bold", color: "#fff" }}>Subscriptions</h2>
+          </div>
+
+          <div style={{ display: "flex", gap: "10px", padding: "16px 20px", borderBottom: "1px solid #222" }}>
+            <button onClick={() => setSubsPageTab('subbers')} style={{ flex: 1, padding: "12px", background: subsPageTab === 'subbers' ? '#ff365f' : '#212121', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer', transition: "0.2s" }}>
+              My Subscribers ({subbersList.length})
+            </button>
+            <button onClick={() => setSubsPageTab('subs')} style={{ flex: 1, padding: "12px", background: subsPageTab === 'subs' ? '#ff365f' : '#212121', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer', transition: "0.2s" }}>
+              Channels I Follow ({subsList.length})
+            </button>
+          </div>
+
+          <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
+            {subsPageLoading ? (
+              <p style={{ color: "#aaa", textAlign: "center", marginTop: "40px" }}>Loading...</p>
+            ) : subsPageError ? (
+              <p style={{ color: "#ff365f", textAlign: "center", marginTop: "40px" }}>{subsPageError}</p>
+            ) : subsPageTab === 'subbers' ? (
+              subbersList.length === 0 ? (
+                <div style={{ textAlign: "center", color: "#aaa", marginTop: "40px" }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: "48px", color: "#ff365f", marginBottom: "16px" }}>group</span>
+                  <h3>No subscribers yet</h3>
+                  <p>When people subscribe to your channel, they will appear here.</p>
+                </div>
+              ) : (
+                subbersList.map((item, idx) => {
+                  const p = item.profile;
+                  if (!p) return null;
+                  return (
+                    <div key={idx} style={{ display: "flex", alignItems: "center", padding: "16px", background: "#1c1c1c", borderRadius: "12px", marginBottom: "10px" }}>
+                      {p.avatar_url ? (
+                        <img src={p.avatar_url} style={{ width: "48px", height: "48px", borderRadius: "50%", objectFit: "cover", marginRight: "12px" }} alt="" />
+                      ) : (
+                        <div style={{ width: "48px", height: "48px", borderRadius: "50%", background: "#333", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px", fontWeight: "bold", marginRight: "12px" }}>
+                          {(p.display_name || "U")[0].toUpperCase()}
+                        </div>
+                      )}
+                      <div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <span style={{ fontWeight: "bold", fontSize: "16px", color: "#fff" }}>{p.username || p.display_name}</span>
+                          <span style={{ fontSize: "10px", padding: "2px 6px", borderRadius: "4px", background: p.role === 'artist' ? '#ff365f' : '#444', color: '#fff', textTransform: "uppercase", fontWeight: "bold" }}>
+                            {p.role === 'artist' ? 'Creator' : 'Listener'}
+                          </span>
+                        </div>
+                        <p style={{ margin: "4px 0 0 0", fontSize: "13px", color: "#aaa" }}>
+                          Subscribed {new Date(item.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })
+              )
+            ) : (
+              subsList.length === 0 ? (
+                <div style={{ textAlign: "center", color: "#aaa", marginTop: "40px" }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: "48px", color: "#ff365f", marginBottom: "16px" }}>subscriptions</span>
+                  <h3>You haven't subscribed to anyone</h3>
+                  <p>Channels you follow will appear here.</p>
+                </div>
+              ) : (
+                subsList.map((item, idx) => {
+                  const p = item.profile;
+                  if (!p) return null;
+                  return (
+                    <div key={idx} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px", background: "#1c1c1c", borderRadius: "12px", marginBottom: "10px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                        {p.avatar_url ? (
+                          <img src={p.avatar_url} style={{ width: "48px", height: "48px", borderRadius: "50%", objectFit: "cover" }} alt="" />
+                        ) : (
+                          <div style={{ width: "48px", height: "48px", borderRadius: "50%", background: "#333", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px", fontWeight: "bold" }}>
+                            {(p.display_name || "U")[0].toUpperCase()}
+                          </div>
+                        )}
+                        <div>
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                            <span style={{ fontWeight: "bold", fontSize: "16px", color: "#fff" }}>{p.username || p.display_name}</span>
+                            <span style={{ fontSize: "10px", padding: "2px 6px", borderRadius: "4px", background: p.role === 'artist' ? '#ff365f' : '#444', color: '#fff', textTransform: "uppercase", fontWeight: "bold" }}>
+                              {p.role === 'artist' ? 'Creator' : 'Listener'}
+                            </span>
+                          </div>
+                          <p style={{ margin: "4px 0 0 0", fontSize: "13px", color: "#aaa" }}>
+                            Followed since {new Date(item.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <div style={{ display: "flex", gap: "8px" }}>
+                        <button onClick={() => { setShowSubscriptionsPage(false); openChannel(p.id); }} style={{ background: "#333", border: "none", color: "#fff", borderRadius: "8px", padding: "8px 16px", cursor: "pointer", fontSize: "13px", fontWeight: "bold" }}>
+                          View
+                        </button>
+                        <button onClick={async () => {
+                          if(window.confirm("Unsubscribe from this channel?")) {
+                            await supabase.from("subscriptions").delete().eq("channel_id", p.id).eq("subscriber_id", session.user.id);
+                            setSubsList(prev => prev.filter(x => x.profile.id !== p.id));
+                            setMessage("Unsubscribed successfully.");
+                          }
+                        }} style={{ background: "rgba(255, 54, 95, 0.1)", border: "1px solid #ff365f", color: "#ff365f", borderRadius: "8px", padding: "8px 12px", cursor: "pointer", fontSize: "13px", fontWeight: "bold" }}>
+                          Unsubscribe
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )
+            )}
+          </div>
+        </section>
+      )}
+
     </>
                 ) : (
                   <button
@@ -2329,7 +2520,7 @@ useEffect(() => {
         </div>
       </header>
 
-      <div className={"ma-layout" + (sidebarCollapsed ? " ma-layout-collapsed" : "") + ((showAccountPage || showChannelPage || showBecomeArtistForm || (activeMedia && showWatchPage) || showManagePage || showHistoryPage || showLikedPage || showAllPlaylists || selectedPlaylist || showAnalytics) ? " ma-layout-hidden" : "")}>
+      <div className={"ma-layout" + (sidebarCollapsed ? " ma-layout-collapsed" : "") + ((showAccountPage || showChannelPage || showBecomeArtistForm || (activeMedia && showWatchPage) || showManagePage || showHistoryPage || showLikedPage || showAllPlaylists || selectedPlaylist || showAnalytics || showSubscriptionsPage) ? " ma-layout-hidden" : "")}>
         <aside className="ma-sidebar">
           <button
             className="ma-nav-item selected"
@@ -3710,7 +3901,7 @@ useEffect(() => {
         <button className="ma-create-nav" aria-label="Create" onClick={() => { if (profile?.role === "artist") { closeAllOverlays(); setShowUpload(true); window.scrollTo({ top: 0, behavior: "smooth" }); } else { setMessage("Become an Artist before uploading."); } }}>
           <span className="material-symbols-outlined">add</span>
         </button>
-        <button aria-label="Subscriptions" onClick={() => { closeAllOverlays(); setCategory("All"); setShowSubscriptionsFeed(true); setSubsTab("feed"); setMessage("Loading subscriptions..."); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+        <button aria-label="Subscriptions" onClick={() => { closeAllOverlays(); setShowSubscriptionsPage(true); setSubsPageTab("subbers"); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
           <span className="material-symbols-outlined">subscriptions</span><small>Subscriptions</small>
         </button>
         <button aria-label="You" onClick={() => { closeAllOverlays(); setShowAccountPage(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
