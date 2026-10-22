@@ -109,6 +109,7 @@
         const SUPABASE_URL = 'https://wcuqehdequrealcndkyw.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_-iD2D0ploxUh4w_PLKOirQ_ih4JcGKt';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        localStorage.setItem('is_resetting', 'true');
 
         const form = document.getElementById('resetForm');
         const msg = document.getElementById('msg');
@@ -185,6 +186,12 @@
         }
 
         initAuth();
+        
+        // Warn the user if they try to close the tab
+        window.addEventListener('beforeunload', (e) => {
+            e.preventDefault();
+            e.returnValue = 'You must finish changing your password. Are you sure you want to leave?';
+        });
 
         // 4. SUBMIT LOGIC
         form.addEventListener('submit', async (e) => {
@@ -209,6 +216,7 @@
                 msg.textContent = 'Password updated successfully! Redirecting...';
                 
                 await supabase.auth.signOut();
+                localStorage.removeItem('is_resetting');
                 setTimeout(() => window.location.href = '/', 2000);
             } catch (err) {
                 msg.style.display = 'block';
