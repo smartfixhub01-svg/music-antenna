@@ -5162,3 +5162,18 @@ input::placeholder, textarea::placeholder {
 .auth-screen h3 {
   font-size: 16px !important;
 }
+
+
+/* ===== FIX MIC ICON ===== */
+.auth-screen-head-icon {
+  color: var(--ma-accent) !important; /* Forces it to be pink */
+  background-color: rgba(255, 54, 95, 0.15) !important; /* Subtle pink glow background */
+  border-radius: 50% !important;
+  width: 44px !important;
+  height: 44px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 24px !important;
+  margin: 0 auto 12px auto !important;
+}
