@@ -126,36 +126,47 @@
             }
         }
 
-        function unlockForm() {
-            debugLog("✅ Form unlocked!");
-            p1Input.disabled = false;
-            p2Input.disabled = false;
-            btn.disabled = false;
-            btn.textContent = 'Update Password';
-            msg.style.display = 'none';
-        }
+        // --- THE EXACT WORKING LOGIC ---
+        async function initAuth() {
+            const hash = window.location.hash;
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get('code');
+            const tokenHash = params.get('token_hash');
+            
+            let sessionFound = false;
+            debugLog("Checking tokens...");
 
-        // --- THE MAGIC FIX: Listen for the auth event automatically ---
-        supabase.auth.onAuthStateChange((event, session) => {
-            debugLog("Auth Event: " + event);
-            if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
-                unlockForm();
+            if (hash && hash.includes('access_token')) {
+                debugLog("Found hash token.");
+                const { data } = await supabase.auth.getSession();
+                if (data.session) sessionFound = true;
+            } else if (code) {
+                debugLog("Found PKCE code.");
+                const { data } = await supabase.auth.exchangeCodeForSession(code);
+                if (data.session) sessionFound = true;
+            } else if (tokenHash) {
+                debugLog("Found Token Hash.");
+                const { data } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: 'recovery' });
+                if (data.session) sessionFound = true;
             }
-        });
 
-        // Fallback check after 2 seconds
-        setTimeout(async () => {
-            const { data } = await supabase.auth.getSession();
-            if (data.session) {
-                unlockForm();
+            if (sessionFound) {
+                debugLog("✅ Session verified!");
+                p1Input.disabled = false;
+                p2Input.disabled = false;
+                btn.disabled = false;
+                btn.textContent = 'Update Password';
+                msg.style.display = 'none';
             } else {
-                debugLog("❌ No session found after 2 seconds.");
-                btn.textContent = 'Invalid Link';
+                debugLog("❌ No session found.");
                 msg.style.display = 'block';
                 msg.className = 'msg error';
                 msg.textContent = 'Invalid or expired link. Please request a new one.';
+                btn.textContent = 'Invalid Link';
             }
-        }, 2000);
+        }
+
+        initAuth();
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
