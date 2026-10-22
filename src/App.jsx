@@ -2593,10 +2593,7 @@ useEffect(() => {
               </p>
 
               <div className="ma-player-actions">
-                <button
-                  className="ma-secondary"
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleShare(activeMedia); }}
-                >
+                <button className="ma-secondary" onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleShare(activeMedia); }}>
                   ↗ Share page
                 </button>
               </div>
