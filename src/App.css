@@ -5205,3 +5205,8 @@ input::placeholder, textarea::placeholder {
 .yt-video-info, .yt-video-details {
   color: var(--ma-text-primary) !important;
 }
+
+/* Hide old auth header */
+.auth-screen-head {
+  display: none !important;
+}
