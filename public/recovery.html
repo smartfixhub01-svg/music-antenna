@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Password - Music Antenna</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; padding: 0; font-family: 'Roboto', -apple-system, sans-serif;
+            background-color: #0F0F0F; color: #F1F1F1;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; padding: 20px 0;
+        }
+        .container {
+            width: 100%; max-width: 420px; padding: 32px 24px;
+            background: #1C1C1C; border-radius: 16px; border: 1px solid #303030;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin: 20px;
+        }
+        .logo { display: flex; justify-content: center; margin-bottom: 24px; }
+        .logo img { width: 100%; max-width: 180px; background: #fff; padding: 12px; border-radius: 12px; }
+        h2 { text-align: center; margin: 0 0 8px 0; font-size: 24px; font-weight: 700; }
+        
+        .input-group { position: relative; margin-bottom: 16px; }
+        .input-group input {
+            width: 100%; padding: 14px;
+            border-radius: 8px; background: #272727;
+            color: #FFFFFF !important;
+            -webkit-text-fill-color: #FFFFFF !important;
+            border: 1px solid #303030;
+            font-size: 15px;
+        }
+        .input-group input:focus { border-color: #FF0033; outline: none; }
+        
+        button {
+            width: 100%; padding: 14px; background: #FF0033; color: #fff;
+            border-radius: 8px; font-weight: 700; border: none;
+            cursor: pointer; margin-bottom: 12px; font-size: 16px;
+        }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        
+        .msg { text-align: center; margin-bottom: 20px; font-size: 14px; padding: 12px; border-radius: 8px; display: none; font-weight: 500; }
+        .msg.error { background: rgba(255, 78, 69, 0.1); color: #FF4E45; border: 1px solid #FF4E45; display: block; }
+        .msg.success { background: rgba(43, 166, 64, 0.1); color: #2BA640; border: 1px solid #2BA640; display: block; }
+        
+        .debug-box {
+            margin-top: 24px; padding: 12px; background: #000; border: 1px solid #333; 
+            border-radius: 8px; font-family: monospace; font-size: 11px; color: #00ff00; 
+            max-height: 200px; overflow-y: auto; word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="/music-antenna-logo.png" alt="Music Antenna">
+        </div>
+        <h2>Create New Password</h2>
+        <div id="msg" class="msg"></div>
+        
+        <form id="resetForm" style="display: none;">
+            <div class="input-group">
+                <input type="password" id="newPassword" placeholder="New Password" required minlength="6">
+            </div>
+            <div class="input-group">
+                <input type="password" id="confirmPassword" placeholder="Confirm New Password" required minlength="6">
+            </div>
+            <button type="submit" id="submitBtn">Update Password</button>
+        </form>
+        
+        <div id="debugConsole" class="debug-box">Loading script...</div>
+    </div>
+
+    <script>
+        const debugLog = (msg) => {
+            const box = document.getElementById('debugConsole');
+            box.innerHTML += "<br>> " + msg;
+            console.log(msg);
+        };
+        
+        window.onerror = function(msg) {
+            debugLog("🔴 ERROR: " + msg);
+        };
+
+        debugLog("Page loaded.");
+        debugLog("URL: " + window.location.href);
+
+        // Dynamically load Supabase so it doesn't block the page
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+        script.onload = init;
+        script.onerror = () => debugLog("🔴 FAILED TO LOAD SUPABASE CDN.");
+        document.head.appendChild(script);
+
+        async function init() {
+            debugLog("Supabase loaded.");
+            try {
+                const supabase = window.supabase.createClient(
+                    'https://wcuqehdequrealcndkyw.supabase.co',
+                    'sb_publishable_-iD2D0ploxUh4w_PLKOirQ_ih4JcGKt'
+                );
+                
+                const hash = window.location.hash;
+                const params = new URLSearchParams(window.location.search);
+                const code = params.get('code');
+                const tokenHash = params.get('token_hash');
+                
+                let sessionFound = false;
+
+                if (hash && hash.includes('access_token')) {
+                    debugLog("Found hash token.");
+                    const { data, error } = await supabase.auth.getSession();
+                    if (data.session) sessionFound = true;
+                } else if (code) {
+                    debugLog("Found PKCE code.");
+                    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+                    if (data.session) sessionFound = true;
+                } else if (tokenHash) {
+                    debugLog("Found Token Hash.");
+                    const { data, error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: 'recovery' });
+                    if (data.session) sessionFound = true;
+                }
+
+                if (sessionFound) {
+                    debugLog("✅ Session verified!");
+                    document.getElementById('msg').innerText = "Link verified. Please enter a new password.";
+                    document.getElementById('msg').className = "msg success";
+                    document.getElementById('resetForm').style.display = "block";
+                } else {
+                    debugLog("❌ No session found.");
+                    document.getElementById('msg').innerText = "Invalid or expired link. Request a new one.";
+                    document.getElementById('msg').className = "msg error";
+                }
+
+                document.getElementById('resetForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const p1 = document.getElementById('newPassword').value;
+                    const p2 = document.getElementById('confirmPassword').value;
+                    
+                    if (p1 !== p2) {
+                        document.getElementById('msg').innerText = "Passwords do not match.";
+                        document.getElementById('msg').className = "msg error";
+                        return;
+                    }
+                    
+                    const btn = document.getElementById('submitBtn');
+                    btn.disabled = true;
+                    btn.innerText = "Updating...";
+                    
+                    const { error } = await supabase.auth.updateUser({ password: p1 });
+                    if (error) {
+                        debugLog("Update Error: " + error.message);
+                        document.getElementById('msg').innerText = error.message;
+                        document.getElementById('msg').className = "msg error";
+                        btn.disabled = false;
+                        btn.innerText = "Update Password";
+                    } else {
+                        debugLog("✅ Password updated.");
+                        document.getElementById('msg').innerText = "Success! Redirecting...";
+                        await supabase.auth.signOut();
+                        setTimeout(() => window.location.href = '/', 2000);
+                    }
+                });
+
+            } catch (err) {
+                debugLog("🔴 CRASH: " + err.message);
+            }
+        }
+    </script>
+</body>
+</html>

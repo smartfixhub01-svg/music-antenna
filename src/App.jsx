@@ -658,7 +658,7 @@ useEffect(() => {
     setMessage("Sending reset link...");
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: window.location.origin + '/reset.html',
+        redirectTo: window.location.origin + '/recovery.html',
       });
       if (error) throw error;
       setMessage("Password reset link sent! Check your email inbox.");
