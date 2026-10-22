@@ -2319,17 +2319,9 @@ useEffect(() => {
         {/* PERMANENT AUDIO PLAYER (Never stops on tab change) */}
         
       <header className="ma-header">
-        <div className="ma-header-left">
-          <button className="ma-icon-btn" aria-label="Guide"
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}>
-            <span className="material-symbols-outlined">menu</span>
-          </button>
-          <a className="ma-brand" href="#home"
-            onClick={() => { setShowAnalytics(false);  setActiveMedia(null); setShowAccountPage(false); }}>
-            <span className="ma-brand-icon">♫</span>
-            <span className="ma-brand-text">Music <b>Antenna</b></span>
-          </a>
-        </div>
+        <div className="ma-brand" style={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => { closeAllOverlays(); setCategory("All"); setSearch(""); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+              <img src="/logo.png" alt="Music Antenna" style={{ height: "36px", width: "auto", objectFit: "contain" }} />
+            </div>
 
         <div className="ma-search">
           <div className="ma-search-box" style={{ display: "flex", alignItems: "center" }}>

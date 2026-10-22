@@ -2767,14 +2767,7 @@ body, .ma-app {
 }
 .auth-screen-brand b { font-weight: 900; }
 
-.auth-screen-head {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 6px;
-  margin-bottom: 20px;
-}
+
 .auth-screen-head-icon {
   display: grid;
   place-items: center;
@@ -5102,9 +5095,7 @@ input::placeholder, textarea::placeholder {
   margin-top: 24px !important;
   font-size: 12px !important;
 }
-.auth-screen-head {
-  margin-bottom: 20px !important;
-}
+
 
 
 /* ===== ZOOM OUT AUTH PAGE ===== */
@@ -5146,9 +5137,7 @@ input::placeholder, textarea::placeholder {
 }
 
 /* 6. Tighten the bottom text area */
-.auth-screen-head {
-  margin-bottom: 12px !important;
-}
+
 .auth-screen-footnote {
   margin-top: 16px !important;
   font-size: 10px !important;
@@ -5223,14 +5212,7 @@ input::placeholder, textarea::placeholder {
 
 
 
-/* ===== OFFICIAL LOGO STYLING ===== */
-.official-logo {
-  height: 36px !important;
-  width: auto !important;
-  object-fit: contain !important;
-  border-radius: 6px !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
-}
+
 
 /* Make it slightly larger on the login card for premium feel */
 .auth-screen-head .official-logo,
@@ -5249,10 +5231,4 @@ input::placeholder, textarea::placeholder {
 }
 
 /* Ensure the header aligns nicely */
-.auth-screen-head {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 12px !important;
-  margin-bottom: 24px !important;
-}
+
