@@ -3786,43 +3786,47 @@ useEffect(() => {
 
     
       
+      
       {showSubscriptionsPage && (
-        <section style={{ position: "fixed", inset: 0, zIndex: 9999, background: "#0f0f0f", overflowY: "auto", paddingBottom: "80px", fontFamily: "Roboto, sans-serif" }}>
+        <section className="ma-subs-page">
           
           {/* HEADER */}
-          <div style={{ display: "flex", alignItems: "center", padding: "16px 20px", background: "#0f0f0f", position: "sticky", top: 0, zIndex: 10, borderBottom: "1px solid #222" }}>
-            <button onClick={() => setShowSubscriptionsPage(false)} style={{ background: "transparent", border: 0, color: "#fff", cursor: "pointer", display: "flex", marginRight: "16px", padding: 0 }}>
-              <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>arrow_back</span>
+          <div className="ma-subs-header">
+            <button className="ma-subs-icon-btn" onClick={() => setShowSubscriptionsPage(false)} aria-label="Back">
+              <span className="material-symbols-outlined">arrow_back</span>
             </button>
-            <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "bold", color: "#fff", flex: 1 }}>Subscriptions</h2>
-            <button onClick={() => { setSubsPageLoading(true); setTimeout(() => setSubsPageLoading(false), 800); setMessage("Refreshed successfully."); }} style={{ background: "transparent", border: 0, color: "#aaa", cursor: "pointer", display: "flex", padding: 0 }}>
-              <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>refresh</span>
+            <h2 className="ma-subs-title">Subscriptions</h2>
+            <button className="ma-subs-icon-btn" onClick={() => setSubsRefreshTrigger(prev => prev + 1)} aria-label="Refresh" disabled={subsPageLoading}>
+              <span className="material-symbols-outlined" style={{ opacity: subsPageLoading ? 0.5 : 1 }}>refresh</span>
             </button>
           </div>
 
           {/* TABS */}
-          <div style={{ display: "flex", borderBottom: "1px solid #222" }}>
-            <button onClick={() => setSubsPageTab('subbers')} style={{ flex: 1, padding: "14px 0", background: "transparent", color: subsPageTab === 'subbers' ? '#fff' : '#aaa', border: 'none', borderBottom: subsPageTab === 'subbers' ? '2px solid #ff365f' : '2px solid transparent', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer', transition: "0.2s", whiteSpace: "nowrap" }}>
+          <div className="ma-subs-tabs">
+            <button className={"ma-subs-tab " + (subsPageTab === 'subbers' ? 'active' : '')} onClick={() => setSubsPageTab('subbers')}>
               Subscribers ({subbersList.length})
             </button>
-            <button onClick={() => setSubsPageTab('subs')} style={{ flex: 1, padding: "14px 0", background: "transparent", color: subsPageTab === 'subs' ? '#fff' : '#aaa', border: 'none', borderBottom: subsPageTab === 'subs' ? '2px solid #ff365f' : '2px solid transparent', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer', transition: "0.2s", whiteSpace: "nowrap" }}>
+            <button className={"ma-subs-tab " + (subsPageTab === 'subs' ? 'active' : '')} onClick={() => setSubsPageTab('subs')}>
               Following ({subsList.length})
             </button>
           </div>
 
-          {/* TOOLBAR (Search & Sort) */}
-          <div style={{ display: "flex", gap: "10px", padding: "16px 20px", background: "#0f0f0f" }}>
-            <input 
-              type="text" 
-              placeholder="Search by name or username..." 
-              value={subsSearch}
-              onChange={(e) => setSubsSearch(e.target.value)}
-              style={{ flex: 1, padding: "10px 16px", borderRadius: "8px", border: "1px solid #333", background: "#1c1c1c", color: "#fff", outline: "none" }}
-            />
+          {/* TOOLBAR */}
+          <div className="ma-subs-toolbar">
+            <div className="ma-subs-search-wrap">
+              <span className="material-symbols-outlined">search</span>
+              <input 
+                type="text" 
+                className="ma-subs-search"
+                placeholder="Search subscribers or channels..." 
+                value={subsSearch}
+                onChange={(e) => setSubsSearch(e.target.value)}
+              />
+            </div>
             <select 
+              className="ma-subs-sort"
               value={subsSort} 
               onChange={(e) => setSubsSort(e.target.value)}
-              style={{ padding: "10px", borderRadius: "8px", border: "1px solid #333", background: "#1c1c1c", color: "#fff", outline: "none", cursor: "pointer" }}
             >
               <option value="newest">Newest</option>
               <option value="oldest">Oldest</option>
@@ -3830,22 +3834,29 @@ useEffect(() => {
             </select>
           </div>
 
-          {/* CONTENT LIST */}
-          <div style={{ padding: "0 20px", maxWidth: "800px", margin: "0 auto" }}>
+          {/* CONTENT */}
+          <div className="ma-subs-content">
             {subsPageLoading ? (
-              <div style={{ textAlign: "center", marginTop: "40px", color: "#aaa" }}>
-                <span className="ma-spinner" style={{ display: "inline-block", marginBottom: "16px", fontSize: "32px" }}>♫</span>
-                <p>Loading...</p>
+              <div>
+                {[1, 2, 3, 4, 5].map(i => (
+                  <div key={i} className="ma-subs-skeleton">
+                    <div className="ma-subs-skeleton-avatar"></div>
+                    <div style={{ flex: 1 }}>
+                      <div className="ma-subs-skeleton-text" style={{ width: "40%" }}></div>
+                      <div className="ma-subs-skeleton-text" style={{ width: "20%", marginTop: "6px", height: "10px" }}></div>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : subsPageError ? (
-              <div style={{ textAlign: "center", marginTop: "40px", color: "#ff365f" }}>
-                <span className="material-symbols-outlined" style={{ fontSize: "48px", marginBottom: "16px" }}>error</span>
+              <div className="ma-subs-empty">
+                <span className="material-symbols-outlined ma-subs-empty-icon" style={{ color: '#ff0050' }}>error</span>
+                <h3>Something went wrong</h3>
                 <p>{subsPageError}</p>
-                <button onClick={() => window.location.reload()} style={{ marginTop: "16px", padding: "8px 16px", background: "#333", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer" }}>Try Again</button>
+                <button className="ma-subs-empty-btn" onClick={() => setSubsRefreshTrigger(prev => prev + 1)}>Retry</button>
               </div>
             ) : (
               (() => {
-                // Logic to filter and sort the current tab's list
                 const currentList = subsPageTab === 'subbers' ? subbersList : subsList;
                 
                 const filtered = currentList.filter(item => {
@@ -3868,15 +3879,15 @@ useEffect(() => {
 
                 if (sorted.length === 0) {
                   return (
-                    <div style={{ textAlign: "center", color: "#aaa", marginTop: "40px" }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: "48px", color: "#ff365f", marginBottom: "16px" }}>
-                        {subsPageTab === 'subbers' ? 'group' : 'subscriptions'}
+                    <div className="ma-subs-empty">
+                      <span className="material-symbols-outlined ma-subs-empty-icon">
+                        {subsPageTab === 'subbers' ? 'group' : 'music_note'}
                       </span>
-                      <h3 style={{ color: "#fff" }}>{subsPageTab === 'subbers' ? 'No subscribers yet' : 'You haven\'t subscribed to anyone'}</h3>
-                      <p>{subsPageTab === 'subbers' ? 'When people subscribe to your channel, they will appear here.' : 'Discover artists and creators to find music and videos you enjoy.'}</p>
+                      <h3>{subsPageTab === 'subbers' ? 'No subscribers yet' : 'Your next favourite creator is waiting.'}</h3>
+                      <p>{subsPageTab === 'subbers' ? 'When people subscribe to your channel, they will appear here.' : 'Discover music and videos from creators on Music Antenna.'}</p>
                       {subsPageTab === 'subs' && (
-                        <button onClick={() => { setShowSubscriptionsPage(false); setCategory("All"); }} style={{ marginTop: "16px", padding: "10px 20px", background: "#ff365f", color: "#fff", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}>
-                          Discover Channels
+                        <button className="ma-subs-empty-btn" onClick={() => { setShowSubscriptionsPage(false); setCategory("All"); }}>
+                          Discover Creators
                         </button>
                       )}
                     </div>
@@ -3890,37 +3901,36 @@ useEffect(() => {
                   return (
                     <div 
                       key={idx} 
+                      className="ma-subs-row"
                       onClick={() => { setShowSubscriptionsPage(false); openChannel(p.id); }}
-                      style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px", background: "#1c1c1c", borderRadius: "12px", marginBottom: "10px", cursor: "pointer", transition: "background 0.2s" }}
                     >
-                      <div style={{ display: "flex", alignItems: "center", gap: "12px", overflow: "hidden" }}>
+                      <div className="ma-subs-row-left">
                         {p.avatar_url ? (
-                          <img src={p.avatar_url} style={{ width: "48px", height: "48px", borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} alt="" />
+                          <img src={p.avatar_url} className="ma-subs-avatar" alt="" />
                         ) : (
-                          <div style={{ width: "48px", height: "48px", borderRadius: "50%", background: "#333", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px", fontWeight: "bold", flexShrink: 0 }}>
+                          <div className="ma-subs-avatar-fallback">
                             {(p.display_name || "U")[0].toUpperCase()}
                           </div>
                         )}
-                        <div style={{ overflow: "hidden" }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                            <span style={{ fontWeight: "bold", fontSize: "16px", color: "#fff", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                              {p.username || p.display_name || "Unknown User"}
-                            </span>
-                            <span style={{ fontSize: "10px", padding: "2px 6px", borderRadius: "4px", background: p.role === 'artist' ? '#ff365f' : '#444', color: '#fff', textTransform: "uppercase", fontWeight: "bold", flexShrink: 0 }}>
+                        <div className="ma-subs-info">
+                          <div style={{ display: "flex", alignItems: "center" }}>
+                            <span className="ma-subs-name">{p.username || p.display_name || "Unknown User"}</span>
+                            <span className={`ma-subs-badge ${p.role === 'artist' ? 'creator' : 'listener'}`}>
                               {p.role === 'artist' ? 'Creator' : 'Listener'}
                             </span>
                           </div>
-                          <p style={{ margin: "4px 0 0 0", fontSize: "13px", color: "#aaa" }}>
+                          <span className="ma-subs-date">
                             {subsPageTab === 'subbers' ? 'Subscribed' : 'Following since'} {new Date(item.created_at).toLocaleDateString()}
-                          </p>
+                          </span>
                         </div>
                       </div>
                       
                       {subsPageTab === 'subs' && (
                         <button 
+                          className="ma-subs-action"
                           onClick={async (e) => {
-                            e.stopPropagation(); // Prevent opening the profile
-                            if(window.confirm("Unsubscribe from this channel?")) {
+                            e.stopPropagation();
+                            if(window.confirm(`Unsubscribe from ${p.display_name || p.username}?`)) {
                               setUnsubscribingId(p.id);
                               try {
                                 const { error } = await supabase.from("subscriptions").delete().eq("channel_id", p.id).eq("subscriber_id", session.user.id);
@@ -3935,7 +3945,6 @@ useEffect(() => {
                             }
                           }} 
                           disabled={unsubscribingId === p.id}
-                          style={{ background: "rgba(255, 54, 95, 0.1)", border: "1px solid #ff365f", color: "#ff365f", borderRadius: "8px", padding: "8px 12px", cursor: "pointer", fontSize: "13px", fontWeight: "bold", flexShrink: 0, opacity: unsubscribingId === p.id ? 0.5 : 1 }}
                         >
                           {unsubscribingId === p.id ? "..." : "Unsubscribe"}
                         </button>
