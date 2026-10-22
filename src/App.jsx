@@ -106,6 +106,7 @@ export default function App() {
   };
 
 const [showCommentsModal, setShowCommentsModal] = useState(false);
+  const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editCommentText, setEditCommentText] = useState("");
@@ -1882,7 +1883,50 @@ useEffect(() => {
                     >
                       Reset password
                     </button>
-                  </>
+                  
+      {showMoreOptions && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 10000, display: "flex", alignItems: "flex-end" }} onClick={() => setShowMoreOptions(false)}>
+          <div style={{ background: "#212121", width: "100%", borderTopLeftRadius: "16px", borderTopRightRadius: "16px", padding: "20px", paddingBottom: "40px" }} onClick={e => e.stopPropagation()}>
+            
+            <div style={{ width: "40px", height: "4px", background: "#555", borderRadius: "2px", margin: "0 auto 20px" }}></div>
+            
+            <h3 style={{ color: "#fff", margin: "0 0 20px 0", fontSize: "18px" }}>Video Options</h3>
+            
+            {/* Playback Speed */}
+            <div style={{ marginBottom: "24px" }}>
+              <p style={{ color: "#aaa", fontSize: "14px", marginBottom: "8px" }}>Playback Speed</p>
+              <div style={{ display: "flex", gap: "10px" }}>
+                {[1, 1.5, 2].map(speed => (
+                  <button key={speed} onClick={() => {
+                    if (videoRef.current) videoRef.current.playbackRate = speed;
+                    if (audioRef.current) audioRef.current.playbackRate = speed;
+                    setMessage(`Speed set to ${speed}x`);
+                    setShowMoreOptions(false);
+                  }} style={{ flex: 1, padding: "12px", background: "#333", color: "#fff", border: "none", borderRadius: "8px", fontSize: "16px", cursor: "pointer", fontWeight: "bold" }}>
+                    {speed}x
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <button onClick={() => { handleShare(activeMedia); setShowMoreOptions(false); }} style={{ width: "100%", padding: "16px", background: "#333", color: "#fff", border: "none", borderRadius: "8px", marginBottom: "10px", textAlign: "left", fontSize: "16px", display: "flex", alignItems: "center", gap: "12px" }}>
+              🔗 Copy / Share Link
+            </button>
+            
+            <button onClick={() => { setMessage("Video reported. Thank you."); setShowMoreOptions(false); }} style={{ width: "100%", padding: "16px", background: "#333", color: "#fff", border: "none", borderRadius: "8px", marginBottom: "10px", textAlign: "left", fontSize: "16px", display: "flex", alignItems: "center", gap: "12px" }}>
+              ⚠️ Report Video
+            </button>
+            
+            <button onClick={() => setShowMoreOptions(false)} style={{ width: "100%", padding: "16px", background: "transparent", color: "#ff365f", border: "1px solid #ff365f", borderRadius: "8px", marginTop: "10px", fontSize: "16px", cursor: "pointer", fontWeight: "bold" }}>
+              Cancel
+            </button>
+            
+          </div>
+        </div>
+      )}
+
+    </>
                 ) : (
                   <button
                     type="button"
