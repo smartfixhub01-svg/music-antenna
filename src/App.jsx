@@ -644,31 +644,22 @@ useEffect(() => {
 
   
   
-      async function handleUpdatePassword() {
-    if (newPassword !== confirmNewPassword) {
-      return setMessage("Passwords do not match.");
-    }
-    if (newPassword.length < 6) {
-      return setMessage("Password must be at least 6 characters.");
-    }
+      async function handleUpdatePassword(e) {
+    e.preventDefault();
+    if (newPassword !== confirmNewPassword) return setMessage("Passwords do not match.");
+    if (newPassword.length < 6) return setMessage("Password must be at least 6 characters.");
+    
     setBusy(true);
-    setMessage("Overwriting old password with new one...");
+    setMessage("Updating...");
     try {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
       
-      setMessage("Password updated successfully! Redirecting to login...");
-      // This forcibly deletes the current session (including the auto-login from the email link)
+      setMessage("Success! Redirecting...");
       await supabase.auth.signOut();
-      
-      setTimeout(() => {
-        setShowResetPasswordScreen(false);
-        setNewPassword("");
-        setConfirmNewPassword("");
-        window.location.href = "/";
-      }, 2000);
+      setTimeout(() => window.location.href = "/", 1500);
     } catch (err) {
-      setMessage("Error: " + (err.message || "Could not update password."));
+      setMessage("Error: " + err.message);
     } finally {
       setBusy(false);
     }
