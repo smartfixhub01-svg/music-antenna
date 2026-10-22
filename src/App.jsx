@@ -645,9 +645,23 @@ useEffect(() => {
 
 
 
+  
   async function handleForgotPassword() {
-    setShowResetModal(true);
+    const email = window.prompt("Please enter your email address to reset your password:");
+    if (!email) return;
+    
+    setMessage("Sending reset link...");
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/recovery.html',
+      });
+      if (error) throw error;
+      setMessage("Password reset link sent! Check your email.");
+    } catch (err) {
+      setMessage("Error: " + err.message);
+    }
   }
+
 
   async function submitPasswordReset() {
     if (!resetEmail) return setMessage("Please enter an email address.");
@@ -2341,12 +2355,10 @@ useEffect(() => {
                     >
                       New creator? Sign up
                     </button>
-                    <button onClick={handleForgotPassword} 
+                    <button  
                       type="button"
-                      onClick={handleForgotPassword}
-                    >
-                      Reset Art ID
-                    </button>
+                      
+                     onClick={handleForgotPassword}>Reset Art ID</button>
                   </>
                 ) : (
                   <button
