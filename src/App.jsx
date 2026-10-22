@@ -106,6 +106,7 @@ export default function App() {
   };
 
 const [showCommentsModal, setShowCommentsModal] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState(null);
@@ -2804,8 +2805,8 @@ useEffect(() => {
                 onClick={() => { setActiveMedia(null); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
                 <span className="material-symbols-outlined">search</span>
               </button>
-              <button className="yt-icon-btn" aria-label="More">
-                <span className="material-symbols-outlined" style={{ cursor: "pointer" }} onClick={() => setMessage("More options coming soon!")}>more_vert</span>
+              <button className="yt-icon-btn" aria-label="More" onClick={() => setShowMoreMenu(true)}>
+                <span className="material-symbols-outlined">more_vert</span>
               </button>
             </div>
           </div>
@@ -2881,13 +2882,8 @@ useEffect(() => {
                 <span className="yt-watch-action-label">Save</span>
               </button>
               
-              <button className="yt-watch-action" onClick={() => {
-                  const url = window.location.href;
-                  navigator.clipboard.writeText(url);
-                  setMessage("Link copied! Use Share to send to friends.");
-                  setTimeout(() => setMessage(""), 2000);
-                }}>
-                <span className="material-symbols-outlined" style={{ cursor: "pointer" }} onClick={() => setMessage("More options coming soon!")}>more_vert</span>
+              <button className="yt-watch-action" onClick={() => setShowMoreMenu(true)}>
+                <span className="material-symbols-outlined">more_vert</span>
               </button>
             </div>
 
