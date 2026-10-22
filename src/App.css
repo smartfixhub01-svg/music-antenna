@@ -4997,107 +4997,74 @@ input::placeholder, textarea::placeholder {
 
 
 
-/* ===== TRUE PREMIUM AUTH OVERRIDES ===== */
 
-/* 1. Force Auth Screen to be compact */
-.auth-screen, .auth-page, form[class*="auth"] {
-  max-width: 360px !important;
-  margin: 20px auto !important;
-  padding: 0 16px !important;
-}
 
-/* 2. Remove the ugly floating card */
-.auth-screen-card, .auth-card {
-  background-color: transparent !important;
-  box-shadow: none !important;
-  border: none !important;
-  padding: 0 !important;
-}
+/* ===== FINAL FIXED AUTH UI ===== */
 
-/* 3. Force Inputs to be visible, standard size, and have correct backgrounds */
-.auth-screen-card input, .auth-card input, input[type="email"], input[type="password"], input[type="text"] {
-  width: 100% !important;
-  height: 44px !important;
+/* 1. Force Inputs to be visible, standard size, and have correct backgrounds */
+form input[type="email"], form input[type="password"],
+.auth-screen-card input[type="email"], .auth-screen-card input[type="password"] {
   background-color: var(--ma-search-bg) !important;
-  border: 1px solid var(--ma-border) !important;
-  border-radius: 8px !important;
-  padding: 0 14px !important;
-  font-size: 14px !important;
   color: var(--ma-text) !important;
-  margin-bottom: 12px !important;
+  border: 1px solid var(--ma-border) !important;
+  height: 48px !important;
+  border-radius: 8px !important;
+  width: 100% !important;
+  padding: 0 16px !important;
+  margin-bottom: 16px !important;
   box-sizing: border-box !important;
+  font-size: 15px !important;
   transition: border-color 0.2s !important;
 }
 
-/* Fix the wrapper for the password input (removes the pink background) */
-.auth-screen-card div:has(> input[type="password"]),
-.auth-card div:has(> input[type="password"]) {
-  background: transparent !important;
-  border: none !important;
-  padding: 0 !important;
-  display: block !important;
-}
-
-/* Fix focus state */
-.auth-screen-card input:focus, .auth-card input:focus {
+form input:focus {
   border-color: var(--ma-accent) !important;
   outline: none !important;
-  box-shadow: 0 0 0 2px rgba(255, 54, 95, 0.2) !important;
 }
 
-/* 4. Force the Submit Button to be a standard size and pink */
-.auth-screen-card button[type="submit"], 
-.auth-card button[type="submit"],
-.auth-screen-card form button {
-  width: 100% !important;
-  height: 44px !important;
+/* 2. Force the Submit Button to be pink and standard size */
+form button[type="submit"] {
   background-color: var(--ma-accent) !important;
   color: #FFFFFF !important;
+  height: 48px !important;
+  width: 100% !important;
   border: none !important;
   border-radius: 8px !important;
-  padding: 0 14px !important;
-  font-size: 15px !important;
   font-weight: 700 !important;
+  font-size: 16px !important;
   margin-top: 8px !important;
   margin-bottom: 16px !important;
   cursor: pointer !important;
-  transition: background-color 0.2s !important;
 }
 
-.auth-screen-card button[type="submit"]:hover {
-  background-color: #e02e53 !important;
+/* 3. CRITICAL FIX: Stop the Eye icon from becoming a giant pink box */
+form button:not([type="submit"]) {
+  background: transparent !important;
+  border: none !important;
+  width: auto !important;
+  height: auto !important;
+  padding: 0 12px !important;
+  color: var(--ma-text-secondary) !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
-/* 5. Fix the Blue Links (Change to brand pink) */
-.auth-screen-card a, 
-.auth-screen-card span[role="button"], 
-.auth-card a,
-.auth-screen-card div > span:not([class]) {
+/* 4. Reduce the overall size of the form */
+.auth-screen-card, form[class*="auth"], .auth-card {
+  max-width: 360px !important;
+  margin: 20px auto !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* 5. Fix the Blue Links */
+.auth-screen-card a, .auth-card a, .auth-screen-card span[role="button"] {
   color: var(--ma-accent) !important;
   font-weight: 600 !important;
-  font-size: 13px !important;
-  cursor: pointer !important;
-}
-
-/* 6. Headings and Text sizes */
-.auth-screen-card h2, .auth-card h2 {
-  font-size: 22px !important;
-  font-weight: 800 !important;
-  margin-bottom: 6px !important;
-  color: var(--ma-text) !important;
-  text-align: center !important;
-}
-.auth-screen-card p, .auth-card p {
-  font-size: 13px !important;
-  color: var(--ma-text-secondary) !important;
-  text-align: center !important;
-  margin-bottom: 16px !important;
-}
-
-/* 7. Fix the Eye Icon inside Password field */
-.auth-screen-card span.material-symbols-outlined,
-.auth-card span.material-symbols-outlined {
-  color: var(--ma-text-secondary) !important;
-  font-size: 20px !important;
-  cursor: pointer !important;
+  font-size: 14px !important;
 }
