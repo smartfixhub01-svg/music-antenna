@@ -25,7 +25,7 @@
 }
 
 /* Global Overrides */
-body, #root, .ma-app, .ma-layout, main {
+html, body, #root, .ma-app, .ma-layout, main {
   background-color: var(--ma-bg-primary) !important;
   color: var(--ma-text-primary) !important;
   transition: background-color 0.3s, color 0.3s;
