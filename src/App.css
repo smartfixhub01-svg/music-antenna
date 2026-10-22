@@ -5325,3 +5325,107 @@ input::placeholder, textarea::placeholder {
   background: transparent !important;
   border: none !important;
 }
+
+
+/* ===== PREMIUM MODAL ===== */
+.ma-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  padding: 20px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.ma-modal-card {
+  background: var(--ma-bg-elevated);
+  border: 1px solid var(--ma-border);
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 340px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.ma-modal-title {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ma-text);
+}
+
+.ma-modal-desc {
+  margin: 0 0 20px 0;
+  font-size: 14px;
+  color: var(--ma-text-secondary);
+  line-height: 1.5;
+}
+
+.ma-modal-input {
+  width: 100%;
+  height: 48px;
+  background: var(--ma-search-bg);
+  border: 1px solid var(--ma-border);
+  border-radius: 8px;
+  padding: 0 16px;
+  color: var(--ma-text);
+  font-size: 15px;
+  margin-bottom: 20px;
+  box-sizing: border-box;
+}
+
+.ma-modal-input:focus {
+  border-color: var(--ma-accent);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 54, 95, 0.2);
+}
+
+.ma-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.ma-modal-btn {
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.ma-modal-btn.cancel {
+  background: transparent;
+  color: var(--ma-text-secondary);
+}
+
+.ma-modal-btn.cancel:hover {
+  color: var(--ma-text);
+  background: var(--ma-hover);
+}
+
+.ma-modal-btn.primary {
+  background: var(--ma-accent);
+  color: #FFFFFF;
+}
+
+.ma-modal-btn.primary:hover {
+  background: #e02e53;
+}

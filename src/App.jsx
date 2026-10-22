@@ -35,6 +35,8 @@ export default function App() {
   const [authTab, setAuthTab] = useState("listener");
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
   const [theme, setTheme] = useState("device");
 
   useEffect(() => {
@@ -597,22 +599,25 @@ useEffect(() => {
 
   
   async function handleForgotPassword() {
-    const emailPrompt = window.prompt("Please enter your email address to reset your password:");
-    if (!emailPrompt) return;
+    setShowResetModal(true);
+  }
 
+  async function submitPasswordReset() {
+    if (!resetEmail) return setMessage("Please enter an email address.");
+    setMessage("Sending reset link...");
     try {
-      setMessage("Sending reset link...");
-      const { error } = await supabase.auth.resetPasswordForEmail(emailPrompt, {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
         redirectTo: window.location.origin + '/update-password',
       });
-      
       if (error) throw error;
-      
       setMessage("Password reset link sent! Check your email inbox.");
+      setShowResetModal(false);
+      setResetEmail("");
     } catch (error) {
       setMessage("Error: " + (error.message || "Could not send reset link."));
     }
   }
+
 
   const handleShare = async (mediaItem) => {
     if (!mediaItem) { window.alert("No media loaded."); return; }
@@ -2106,6 +2111,28 @@ useEffect(() => {
 
     
       
+
+    
+      {showResetModal && (
+        <div className="ma-modal-backdrop" onClick={() => setShowResetModal(false)}>
+          <div className="ma-modal-card" onClick={e => e.stopPropagation()}>
+            <h3 className="ma-modal-title">Reset Password</h3>
+            <p className="ma-modal-desc">Enter your email address and we will send you a link to reset your password.</p>
+            <input
+              type="email"
+              className="ma-modal-input"
+              placeholder="you@example.com"
+              value={resetEmail}
+              onChange={(e) => setResetEmail(e.target.value)}
+              autoFocus
+            />
+            <div className="ma-modal-actions">
+              <button className="ma-modal-btn cancel" onClick={() => setShowResetModal(false)}>Cancel</button>
+              <button className="ma-modal-btn primary" onClick={submitPasswordReset}>Send Link</button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </>
                 ) : (
