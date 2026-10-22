@@ -1864,9 +1864,7 @@ useEffect(() => {
                       Reset password
                     </button>
                   
-      {activeMedia && (
-        <button onClick={() => handleShare(activeMedia)} style={{ position: "fixed", bottom: "90px", right: "20px", backgroundColor: "#ff0050", color: "#fff", border: "none", borderRadius: "50%", width: "56px", height: "56px", fontSize: "24px", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(0,0,0,0.5)", zIndex: 9999, cursor: "pointer" }} title="Share this track">🔗</button>
-      )}
+
 
     </>
                 ) : (
