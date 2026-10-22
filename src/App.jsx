@@ -158,7 +158,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   useEffect(() => {
     loadMedia();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showSubscriptionsFeed]);
+  }, [showSubscriptionsFeed, category]);
 
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -3618,16 +3618,16 @@ useEffect(() => {
       )}
 
     <nav className={"ma-mobile-nav ma-nav-yt" + (navVisible ? "" : " ma-mobile-nav-hidden")} aria-label="Main navigation">
-        <button aria-label="Home" onClick={() => { closeAllOverlays(); setCategory("All"); setSearch(""); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+        <button aria-label="Home" onClick={() => { closeAllOverlays(); setCategory("All"); setShowSubscriptionsFeed(false); setSearch(""); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
           <span className="material-symbols-outlined">home</span><small>Home</small>
         </button>
-        <button aria-label="Shorts" onClick={() => { closeAllOverlays(); setCategory("Videos"); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+        <button aria-label="Shorts" onClick={() => { closeAllOverlays(); setCategory("Videos"); setShowSubscriptionsFeed(false); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
           <span className="material-symbols-outlined">video_library</span><small>Shorts</small>
         </button>
         <button className="ma-create-nav" aria-label="Create" onClick={() => { if (profile?.role === "artist") { closeAllOverlays(); setShowUpload(true); window.scrollTo({ top: 0, behavior: "smooth" }); } else { setMessage("Become an Artist before uploading."); } }}>
           <span className="material-symbols-outlined">add</span>
         </button>
-        <button aria-label="Subscriptions" onClick={() => { closeAllOverlays(); setShowSubscriptionsFeed(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+        <button aria-label="Subscriptions" onClick={() => { closeAllOverlays(); setCategory("All"); setShowSubscriptionsFeed(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
           <span className="material-symbols-outlined">subscriptions</span><small>Subscriptions</small>
         </button>
         <button aria-label="You" onClick={() => { closeAllOverlays(); setShowAccountPage(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
