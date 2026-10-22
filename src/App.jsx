@@ -37,19 +37,25 @@ export default function App() {
   const [message, setMessage] = useState("");
   const [showResetModal, setShowResetModal] = useState(false);
 
-  // Fallback: Check if the URL contains a recovery token
-  useEffect(() => {
+  const [showResetPasswordScreen, setShowResetPasswordScreen] = useState(() => {
     const hash = window.location.hash;
-    if (hash && (hash.includes('type=recovery') || hash.includes('access_token'))) {
-      setShowResetPasswordScreen(true);
-      // Clean the URL so it doesn't stay there forever
-      window.history.replaceState(null, '', window.location.pathname);
-    }
-  }, []);
-
-  const [showResetPasswordScreen, setShowResetPasswordScreen] = useState(false);
+    return hash.includes('type=recovery') || hash.includes('access_token');
+  });
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
+
+  useEffect(() => {
+    if (showResetPasswordScreen) {
+      // Clean the URL
+      window.history.replaceState(null, '', window.location.pathname);
+      
+      // Force stop any media that might have slipped through
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ""; }
+      if (videoRef.current) { videoRef.current.pause(); videoRef.current.src = ""; }
+      setActiveMedia(null);
+    }
+  }, [showResetPasswordScreen]);
+
 
   // Force stop all media when the password reset screen is active
   useEffect(() => {
