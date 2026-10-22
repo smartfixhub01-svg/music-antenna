@@ -5264,14 +5264,21 @@ input::placeholder, textarea::placeholder {
 }
 
 /* 4. Replace the login card header with a large logo */
+
+
+
+/* ===== BIG AUTH LOGO FIX ===== */
 .auth-screen-head {
-  background-image: url('/music-antenna-logo.png') !important;
-  background-size: contain !important;
-  background-repeat: no-repeat !important;
-  background-position: center !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
   width: 100% !important;
-  max-width: 220px !important;
-  height: 60px !important;
-  margin: 0 auto 24px auto !important;
-  display: block !important;
+  margin-bottom: 24px !important;
+  background: transparent !important; /* Remove the background trick */
+}
+.auth-screen-head img {
+  max-width: 240px !important;
+  height: auto !important;
+  object-fit: contain !important;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.1)) !important;
 }
