@@ -37,24 +37,7 @@ export default function App() {
 
   const [media, setMedia] = useState([]);
   const [feedLoading, setFeedLoading] = useState(false);
-    const handleShare = async (mediaItem) => {
-    if (!mediaItem) { setMessage("No media loaded."); return; }
-    const url = window.location.origin + "?track=" + mediaItem.id;
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: mediaItem.title, text: "Check out " + mediaItem.title + " on Music Antenna!", url: url });
-        setMessage("Shared successfully!");
-      } catch (err) {
-        await navigator.clipboard.writeText(url);
-        setMessage("Link copied to clipboard!");
-      }
-    } else {
-      await navigator.clipboard.writeText(url);
-      setMessage("Link copied to clipboard!");
-    }
-  };
-
-const [search, setSearch] = useState("");
+  const [search, setSearch] = useState("");
   const [searchLoading, setSearchLoading] = useState(false);
   const [navVisible, setNavVisible] = useState(true);
 
@@ -471,6 +454,20 @@ useEffect(() => {
       media_id: mediaId
     });
   }
+
+  const handleShare = async (mediaItem) => {
+    if (!mediaItem) { window.alert("No media loaded."); return; }
+    const url = window.location.origin + "?track=" + mediaItem.id;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: mediaItem.title, text: "Check out " + mediaItem.title + " on Music Antenna!", url: url });
+      } catch (err) {
+        window.prompt("Copy this link to share:", url);
+      }
+    } else {
+      window.prompt("Copy this link to share:", url);
+    }
+  };
 
   async function loadMedia() {
     setFeedLoading(true);
@@ -2593,7 +2590,18 @@ useEffect(() => {
               </p>
 
               <div className="ma-player-actions">
-                <button className="ma-secondary" onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleShare(activeMedia); }}>
+                <button
+                  className="ma-secondary"
+                  onClick={async () => {
+                    const shareUrl = window.location.href.split("#")[0];
+                    try {
+                      await navigator.clipboard.writeText(shareUrl);
+                      setMessage("Page link copied. Share it with your friends.");
+                    } catch {
+                      setMessage("Copy this page address to share it.");
+                    }
+                  }}
+                >
                   ↗ Share page
                 </button>
               </div>
@@ -2952,7 +2960,7 @@ useEffect(() => {
               <button onClick={() => { setProfileName(profile?.username || ""); setProfileBio(profile?.bio || ""); setShowProfileEditor(!showProfileEditor); }} style={{ flex: 1, background: "#212121", color: "#f1f1f1", padding: "10px", borderRadius: "8px", fontWeight: "500", fontSize: "14px", border: 0, cursor: "pointer" }}>
                 {showProfileEditor ? "Close Editor" : "Edit profile"}
               </button>
-              <button onClick={() => setShowShareModal(true)} style={{ background: "#212121", color: "#f1f1f1", width: "40px", height: "40px", borderRadius: "8px", display: "grid", placeItems: "center", border: 0, cursor: "pointer" }}>
+              <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleShare(activeMedia); }} style={{ background: "#212121", color: "#f1f1f1", width: "40px", height: "40px", borderRadius: "8px", display: "grid", placeItems: "center", border: 0, cursor: "pointer" }}>
                 <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>share</span>
               </button>
             </div>
