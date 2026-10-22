@@ -45,21 +45,17 @@
             width: 100%; padding: 14px; background: #FF0033; color: #fff;
             border-radius: 8px; font-weight: 700; border: none;
             cursor: pointer; margin-bottom: 12px; font-size: 16px;
+            transition: opacity 0.2s;
         }
         button:disabled { opacity: 0.6; cursor: not-allowed; }
+        button:hover:not(:disabled) { background: #e02e53; }
         
         .back-btn { background: transparent; border: 1px solid #303030; color: #AAAAAA; }
+        .back-btn:hover { background: #272727; color: #fff; }
         
         .msg { text-align: center; margin-bottom: 20px; font-size: 14px; padding: 12px; border-radius: 8px; display: none; font-weight: 500; }
         .msg.error { background: rgba(255, 78, 69, 0.1); color: #FF4E45; border: 1px solid #FF4E45; display: block; }
         .msg.success { background: rgba(43, 166, 64, 0.1); color: #2BA640; border: 1px solid #2BA640; display: block; }
-        
-        /* DEBUG CONSOLE */
-        .debug-box {
-            margin-top: 24px; padding: 12px; background: #000; border: 1px solid #333; 
-            border-radius: 8px; font-family: monospace; font-size: 11px; color: #00ff00; 
-            max-height: 150px; overflow-y: auto; word-wrap: break-word;
-        }
     </style>
 </head>
 <body>
@@ -67,63 +63,41 @@
         <div class="logo">
             <img src="/music-antenna-logo.png" alt="Music Antenna">
         </div>
-        
         <h2>Create New Password</h2>
+        <p class="subtitle" id="subtitle">Verifying secure link...</p>
         <div id="msg" class="msg"></div>
         
         <form id="resetForm">
             <div class="input-group">
-                <input type="password" id="newPassword" placeholder="New Password" required minlength="6">
+                <input type="password" id="newPassword" placeholder="New Password" required minlength="6" disabled>
                 <div class="toggle-eye" onclick="toggleVisibility('newPassword', this)">
                     <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
                 </div>
             </div>
-            
             <div class="input-group">
-                <input type="password" id="confirmPassword" placeholder="Confirm New Password" required minlength="6">
+                <input type="password" id="confirmPassword" placeholder="Confirm New Password" required minlength="6" disabled>
                 <div class="toggle-eye" onclick="toggleVisibility('confirmPassword', this)">
                     <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
                 </div>
             </div>
-
-            <button type="submit" id="submitBtn">Update Password</button>
+            <button type="submit" id="submitBtn" disabled>Verifying Link...</button>
             <button type="button" class="back-btn" onclick="window.location.href='/'">Back to Login</button>
         </form>
-
-        <!-- This will show us EXACTLY what is going wrong -->
-        <div id="debugConsole" class="debug-box">Initializing...</div>
     </div>
 
     <script>
-        const debugLog = (msg) => {
-            const box = document.getElementById('debugConsole');
-            box.innerHTML += "<br>> " + msg;
-            console.log(msg);
-        };
-
-        debugLog("Page Loaded. URL Hash: " + (window.location.hash ? window.location.hash.substring(0, 30) + '...' : 'EMPTY'));
-
         const SUPABASE_URL = 'https://wcuqehdequrealcndkyw.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_-iD2D0ploxUh4w_PLKOirQ_ih4JcGKt';
-        
-        debugLog("Supabase URL: " + SUPABASE_URL);
-        debugLog("Supabase Key starts with: " + SUPABASE_KEY.substring(0, 15) + "...");
-
-        let supabase;
-        try {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-                auth: { detectSessionInUrl: true, flowType: 'implicit' }
-            });
-            debugLog("Client created successfully.");
-        } catch (e) {
-            debugLog("CLIENT CREATION ERROR: " + e.message);
-        }
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+            auth: { detectSessionInUrl: true }
+        });
 
         const form = document.getElementById('resetForm');
         const msg = document.getElementById('msg');
         const btn = document.getElementById('submitBtn');
         const p1Input = document.getElementById('newPassword');
         const p2Input = document.getElementById('confirmPassword');
+        const subtitle = document.getElementById('subtitle');
 
         function toggleVisibility(id, icon) {
             const input = document.getElementById(id);
@@ -131,30 +105,60 @@
             icon.style.color = input.type === 'text' ? '#FF0033' : '#888';
         }
 
-        // Listen to auth changes
-        supabase.auth.onAuthStateChange((event, session) => {
-            debugLog("Auth Event Fired: " + event);
-            if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
-                debugLog("Session found! User: " + (session?.user?.email || 'Unknown'));
-            }
-        });
+        // Helper to unlock the form UI
+        function unlockForm() {
+            p1Input.disabled = false;
+            p2Input.disabled = false;
+            btn.disabled = false;
+            btn.textContent = 'Update Password';
+            btn.style.background = '#FF0033';
+            subtitle.textContent = 'Your old password has been invalidated.';
+            msg.style.display = 'none';
+        }
 
-        // Check session after a short delay
-        setTimeout(async () => {
-            const { data, error } = await supabase.auth.getSession();
-            if (error) {
-                debugLog("getSession ERROR: " + error.message);
-            } else if (data.session) {
-                debugLog("Active Session Found.");
+        // 1. THE PKCE FLOW FIX: Extract the 'code' from the URL and exchange it
+        async function initAuth() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+
+            if (code) {
+                // PKCE Flow
+                const { error } = await supabase.auth.exchangeCodeForSession(code);
+                if (error) {
+                    msg.style.display = 'block';
+                    msg.className = 'msg error';
+                    msg.textContent = 'Link expired or invalid. Please request a new one.';
+                    btn.textContent = 'Invalid Link';
+                    subtitle.textContent = 'Verification failed.';
+                } else {
+                    unlockForm();
+                }
+            } else if (window.location.hash.includes('access_token')) {
+                // Implicit Flow (Supabase handles this automatically)
+                unlockForm();
             } else {
-                debugLog("NO SESSION FOUND. Link may be expired.");
+                // Check if a session already exists (e.g., page refresh)
+                const { data } = await supabase.auth.getSession();
+                if (data.session) {
+                    unlockForm();
+                } else {
+                    msg.style.display = 'block';
+                    msg.className = 'msg error';
+                    msg.textContent = 'No secure session found. Please request a new link.';
+                    btn.textContent = 'Invalid Link';
+                    subtitle.textContent = 'No active session.';
+                }
             }
-        }, 2000);
+        }
 
-        // Submit
+        // Run the auth check on load
+        initAuth();
+
+        // Submit Logic
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (p1Input.value !== p2Input.value) {
+                msg.style.display = 'block';
                 msg.className = 'msg error';
                 msg.textContent = 'Passwords do not match.';
                 return;
@@ -162,29 +166,24 @@
 
             btn.disabled = true;
             btn.textContent = 'Updating...';
-            msg.className = 'msg';
-            debugLog("Attempting to update password...");
+            msg.style.display = 'none';
 
             try {
-                const { data, error } = await supabase.auth.updateUser({ password: p1Input.value });
-                
-                if (error) {
-                    debugLog("SUPABASE ERROR: " + error.message);
-                    throw error;
-                }
+                const { error } = await supabase.auth.updateUser({ password: p1Input.value });
+                if (error) throw error;
 
-                debugLog("SUCCESS! User data: " + JSON.stringify(data.user?.email));
+                msg.style.display = 'block';
                 msg.className = 'msg success';
                 msg.textContent = 'Password updated successfully! Redirecting...';
                 
                 await supabase.auth.signOut();
                 setTimeout(() => window.location.href = '/', 2000);
             } catch (err) {
+                msg.style.display = 'block';
                 msg.className = 'msg error';
                 msg.textContent = err.message || 'Error updating password.';
                 btn.disabled = false;
                 btn.textContent = 'Update Password';
-                debugLog("CATCH BLOCK: " + err.message);
             }
         });
     </script>
