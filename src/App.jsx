@@ -664,7 +664,8 @@ useEffect(() => {
 
   
   
-      async function handleUpdatePassword(e) {
+      
+  async function handleUpdatePassword(e) {
     e.preventDefault();
     if (newPassword !== confirmNewPassword) return setResetError("Passwords do not match.");
     if (newPassword.length < 6) return setResetError("Password must be at least 6 characters.");
@@ -677,6 +678,7 @@ useEffect(() => {
       
       setResetError("Success! Redirecting...");
       await supabase.auth.signOut();
+      setShowResetPasswordScreen(false);
       setTimeout(() => window.location.href = "/", 1500);
     } catch (err) {
       setResetError(err.message || "Error updating password.");
@@ -684,6 +686,7 @@ useEffect(() => {
       setResetBusy(false);
     }
   }
+
 
   async function handleForgotPassword() {
     setShowResetModal(true);
@@ -2532,6 +2535,33 @@ if (showResetPasswordScreen) {
 
   return (
     <div className="ma-app">
+
+      {showResetPasswordScreen && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 9999999, background: "#0F0F0F", display: "flex", justifyContent: "center", alignItems: "center", padding: "20px" }}>
+          <div style={{ width: "100%", maxWidth: "400px", padding: "24px", background: "#1C1C1C", borderRadius: "16px", border: "1px solid #303030" }}>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: "24px" }}>
+              <img src="/music-antenna-logo.png" alt="Music Antenna" style={{ width: "100%", maxWidth: "180px", height: "auto", objectFit: "contain", background: "#fff", padding: "12px", borderRadius: "12px" }} />
+            </div>
+            <h2 style={{ textAlign: "center", color: "#F1F1F1", marginBottom: "24px" }}>Create New Password</h2>
+
+            {resetError && <div style={{ color: "#FF4E45", textAlign: "center", marginBottom: "16px", fontSize: "14px" }}>{resetError}</div>}
+
+            <form onSubmit={handleUpdatePassword}>
+              <input type="password" placeholder="New Password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={6} style={{ width: "100%", padding: "12px", marginBottom: "16px", borderRadius: "8px", background: "#272727", color: "#fff", border: "1px solid #303030", boxSizing: "border-box" }} />
+              <input type="password" placeholder="Confirm Password" value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} required minLength={6} style={{ width: "100%", padding: "12px", marginBottom: "24px", borderRadius: "8px", background: "#272727", color: "#fff", border: "1px solid #303030", boxSizing: "border-box" }} />
+
+              <button type="submit" disabled={resetBusy} style={{ width: "100%", padding: "14px", background: "#FF0033", color: "#fff", borderRadius: "8px", fontWeight: "bold", border: "none", cursor: resetBusy ? "not-allowed" : "pointer", marginBottom: "16px", opacity: resetBusy ? 0.7 : 1 }}>
+                {resetBusy ? "Updating..." : "Update Password"}
+              </button>
+
+              <button type="button" onClick={async () => { await supabase.auth.signOut(); setShowResetPasswordScreen(false); window.location.href = "/"; }} style={{ width: "100%", padding: "14px", background: "transparent", color: "#FF0033", borderRadius: "8px", fontWeight: "bold", border: "1px solid #FF0033", cursor: "pointer" }}>
+                Cancel
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
         {/* PERMANENT AUDIO PLAYER (Never stops on tab change) */}
         
       <header className="ma-header">
