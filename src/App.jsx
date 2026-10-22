@@ -595,6 +595,25 @@ useEffect(() => {
     });
   }
 
+  
+  async function handleForgotPassword() {
+    const emailPrompt = window.prompt("Please enter your email address to reset your password:");
+    if (!emailPrompt) return;
+
+    try {
+      setMessage("Sending reset link...");
+      const { error } = await supabase.auth.resetPasswordForEmail(emailPrompt, {
+        redirectTo: window.location.origin + '/update-password',
+      });
+      
+      if (error) throw error;
+      
+      setMessage("Password reset link sent! Check your email inbox.");
+    } catch (error) {
+      setMessage("Error: " + (error.message || "Could not send reset link."));
+    }
+  }
+
   const handleShare = async (mediaItem) => {
     if (!mediaItem) { window.alert("No media loaded."); return; }
     const url = window.location.origin + "?track=" + mediaItem.id;
@@ -2038,7 +2057,7 @@ useEffect(() => {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setMessage("Password reset coming soon.")}
+                      onClick={handleForgotPassword}
                     >
                       Reset password
                     </button>
@@ -2244,7 +2263,7 @@ useEffect(() => {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setMessage("Art ID reset coming soon.")}
+                      onClick={handleForgotPassword}
                     >
                       Reset Art ID
                     </button>
