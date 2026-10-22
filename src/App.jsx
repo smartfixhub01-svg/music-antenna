@@ -2422,6 +2422,8 @@ useEffect(() => {
 
 
           {showUpload && (
+<div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, background: "#0f0f0f", overflowY: "auto" }}>
+
             <section className="yt-upload">
               <div className="yt-upload-topbar">
                 <button
@@ -2621,7 +2623,9 @@ useEffect(() => {
                 </div>
               </form>
             </section>
-          )}
+          
+</div>
+)}
 
           {false && (
             <section className="ma-player-panel">
