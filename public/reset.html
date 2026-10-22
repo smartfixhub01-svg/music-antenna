@@ -6,46 +6,70 @@
     <title>Reset Password - Music Antenna</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        * { box-sizing: border-box; }
         body {
-            margin: 0; padding: 0; font-family: 'Roboto', sans-serif;
+            margin: 0; padding: 0; font-family: 'Roboto', -apple-system, sans-serif;
             background-color: #0F0F0F; color: #F1F1F1;
             display: flex; justify-content: center; align-items: center;
             min-height: 100vh;
         }
         .container {
-            width: 100%; max-width: 400px; padding: 24px;
+            width: 100%; max-width: 420px; padding: 32px 24px;
             background: #1C1C1C; border-radius: 16px; border: 1px solid #303030;
-            box-sizing: border-box;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin: 20px;
         }
         .logo { display: flex; justify-content: center; margin-bottom: 24px; }
         .logo img { width: 100%; max-width: 180px; background: #fff; padding: 12px; border-radius: 12px; }
-        h2 { text-align: center; margin-bottom: 24px; }
+        h2 { text-align: center; margin: 0 0 8px 0; font-size: 24px; font-weight: 700; }
+        p.subtitle { text-align: center; color: #AAAAAA; font-size: 14px; margin: 0 0 24px 0; }
         
-        input {
-            width: 100%; padding: 14px; margin-bottom: 16px;
+        .input-group { position: relative; margin-bottom: 16px; }
+        .input-group input {
+            width: 100%; padding: 14px 40px 14px 14px;
             border-radius: 8px; background: #272727; 
             color: #FFFFFF !important; 
             -webkit-text-fill-color: #FFFFFF !important;
-            border: 1px solid #303030; box-sizing: border-box;
-            font-size: 16px;
+            border: 1px solid #303030; 
+            font-size: 15px;
+            transition: border-color 0.2s;
         }
+        .input-group input:focus { border-color: #FF0033; outline: none; }
+        .input-group input.error-border { border-color: #FF4E45; }
         
+        .toggle-eye {
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+            cursor: pointer; color: #888; display: flex; align-items: center; justify-content: center;
+        }
+        .toggle-eye svg { width: 20px; height: 20px; fill: currentColor; }
+
+        .strength-meter { height: 4px; border-radius: 2px; background: #303030; margin: -8px 0 16px 0; overflow: hidden; }
+        .strength-bar { height: 100%; width: 0%; transition: all 0.3s; }
+        
+        .match-msg { font-size: 12px; margin: -8px 0 16px 0; display: none; font-weight: 500; }
+        .match-msg.error { color: #FF4E45; display: block; }
+        .match-msg.success { color: #2BA640; display: block; }
+
         button {
             width: 100%; padding: 14px; background: #FF0033; color: #fff;
-            border-radius: 8px; font-weight: bold; border: none;
+            border-radius: 8px; font-weight: 700; border: none;
             cursor: pointer; margin-bottom: 12px; font-size: 16px;
+            transition: opacity 0.2s;
         }
-        button:disabled { opacity: 0.7; cursor: not-allowed; }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        button:hover:not(:disabled) { background: #e02e53; }
         
         .back-btn {
-            background: transparent; border: 1px solid #FF0033;
-            color: #FF0033;
+            background: transparent; border: 1px solid #303030;
+            color: #AAAAAA;
         }
+        .back-btn:hover { background: #272727; color: #fff; }
         
-        .msg { text-align: center; margin-bottom: 16px; font-size: 14px; padding: 10px; border-radius: 8px; word-break: break-all; }
-        .error { background: rgba(255, 78, 69, 0.1); color: #FF4E45; border: 1px solid #FF4E45; }
-        .success { background: rgba(43, 166, 64, 0.1); color: #2BA640; border: 1px solid #2BA640; }
-        .debug { font-size: 10px; color: #888; margin-top: 20px; word-break: break-all; }
+        .msg { text-align: center; margin-bottom: 20px; font-size: 14px; padding: 12px; border-radius: 8px; display: none; font-weight: 500; }
+        .msg.error { background: rgba(255, 78, 69, 0.1); color: #FF4E45; border: 1px solid #FF4E45; display: block; }
+        .msg.success { background: rgba(43, 166, 64, 0.1); color: #2BA640; border: 1px solid #2BA640; display: block; }
+        
+        .invalid-link-box { display: none; text-align: center; }
     </style>
 </head>
 <body>
@@ -53,84 +77,156 @@
         <div class="logo">
             <img src="/music-antenna-logo.png" alt="Music Antenna">
         </div>
-        <h2>Create New Password</h2>
-        <div id="msg" class="msg" style="display:none;"></div>
         
-        <form id="resetForm">
-            <input type="password" id="newPassword" placeholder="New Password" required minlength="6" autocomplete="new-password">
-            <input type="password" id="confirmPassword" placeholder="Confirm Password" required minlength="6" autocomplete="new-password">
-            <button type="submit" id="submitBtn">Update Password</button>
-            <button type="button" class="back-btn" onclick="window.location.href='/'">Back to Login</button>
-        </form>
-        
-        <div id="debug" class="debug"></div>
+        <div id="formContainer">
+            <h2>Create New Password</h2>
+            <p class="subtitle">Your old password has been invalidated.</p>
+            <div id="msg" class="msg"></div>
+            
+            <form id="resetForm">
+                <div class="input-group">
+                    <input type="password" id="newPassword" placeholder="New Password" required minlength="6" disabled>
+                    <div class="toggle-eye" onclick="toggleVisibility('newPassword', this)">
+                        <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                    </div>
+                </div>
+                <div class="strength-meter"><div id="strengthBar" class="strength-bar"></div></div>
+                
+                <div class="input-group">
+                    <input type="password" id="confirmPassword" placeholder="Confirm New Password" required minlength="6" disabled>
+                    <div class="toggle-eye" onclick="toggleVisibility('confirmPassword', this)">
+                        <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                    </div>
+                </div>
+                <div id="matchMsg" class="match-msg"></div>
+
+                <button type="submit" id="submitBtn" disabled>Checking link...</button>
+                <button type="button" class="back-btn" onclick="window.location.href='/'">Back to Login</button>
+            </form>
+        </div>
+
+        <div id="invalidContainer" class="invalid-link-box">
+            <h2 style="color: #FF4E45;">Link Expired</h2>
+            <p class="subtitle">This password reset link is invalid, expired, or has already been used.</p>
+            <button onclick="window.location.href='/'">Return to App to Request a New Link</button>
+        </div>
     </div>
 
     <script>
         const SUPABASE_URL = 'https://wcuqehdequrealcndkyw.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_-iD2D0ploxUh4w_PLKOirQ_ih4JcGKt';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+            auth: { detectSessionInUrl: true, flowType: 'implicit' }
+        });
 
         const form = document.getElementById('resetForm');
+        const formContainer = document.getElementById('formContainer');
+        const invalidContainer = document.getElementById('invalidContainer');
         const msg = document.getElementById('msg');
         const btn = document.getElementById('submitBtn');
-        const debug = document.getElementById('debug');
+        const p1Input = document.getElementById('newPassword');
+        const p2Input = document.getElementById('confirmPassword');
+        const strengthBar = document.getElementById('strengthBar');
+        const matchMsg = document.getElementById('matchMsg');
 
-        // Show the URL to help us debug
-        debug.textContent = "URL: " + window.location.href;
-
-        // Check session after 1 second
-        setTimeout(async () => {
-            const { data: { session }, error } = await supabase.auth.getSession();
-            if (!session) {
-                msg.style.display = 'block';
-                msg.className = 'msg error';
-                msg.textContent = 'Session missing! The link may be invalid or expired. Please request a new one.';
-                if (error) debug.textContent += " | Error: " + error.message;
+        // Eye Toggle Logic
+        function toggleVisibility(id, icon) {
+            const input = document.getElementById(id);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.style.color = '#FF0033';
             } else {
-                msg.style.display = 'block';
-                msg.className = 'msg success';
-                msg.textContent = 'Secure session established. You can now update your password.';
-                setTimeout(() => msg.style.display = 'none', 3000);
+                input.type = 'password';
+                icon.style.color = '#888';
             }
-        }, 1000);
+        }
 
+        // Password Strength Logic
+        p1Input.addEventListener('input', () => {
+            const val = p1Input.value;
+            let score = 0;
+            if (val.length >= 6) score++;
+            if (val.length >= 10) score++;
+            if (/[A-Z]/.test(val)) score++;
+            if (/[0-9]/.test(val)) score++;
+            if (/[^A-Za-z0-9]/.test(val)) score++;
+
+            if (val.length === 0) {
+                strengthBar.style.width = '0%';
+            } else if (score <= 2) {
+                strengthBar.style.width = '33%';
+                strengthBar.style.background = '#FF4E45';
+            } else if (score <= 4) {
+                strengthBar.style.width = '66%';
+                strengthBar.style.background = '#F5A623';
+            } else {
+                strengthBar.style.width = '100%';
+                strengthBar.style.background = '#2BA640';
+            }
+        });
+
+        // Real-time Match Logic
+        p2Input.addEventListener('input', () => {
+            if (p2Input.value === '') {
+                matchMsg.className = 'match-msg';
+                p2Input.classList.remove('error-border');
+            } else if (p1Input.value !== p2Input.value) {
+                matchMsg.className = 'match-msg error';
+                matchMsg.textContent = 'Passwords do not match.';
+                p2Input.classList.add('error-border');
+            } else {
+                matchMsg.className = 'match-msg success';
+                matchMsg.textContent = 'Passwords match!';
+                p2Input.classList.remove('error-border');
+            }
+        });
+
+        // Auth Listener
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'PASSWORD_RECOVERY') {
+                p1Input.disabled = false;
+                p2Input.disabled = false;
+                btn.disabled = false;
+                btn.textContent = 'Update Password';
+            }
+        });
+
+        // Fallback Check
+        setTimeout(async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                p1Input.disabled = false;
+                p2Input.disabled = false;
+                btn.disabled = false;
+                btn.textContent = 'Update Password';
+            } else {
+                formContainer.style.display = 'none';
+                invalidContainer.style.display = 'block';
+            }
+        }, 1500);
+
+        // Submit Logic
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const p1 = document.getElementById('newPassword').value;
-            const p2 = document.getElementById('confirmPassword').value;
-
-            msg.style.display = 'none';
-
-            if (p1 !== p2) {
-                msg.style.display = 'block';
-                msg.className = 'msg error';
-                msg.textContent = 'Passwords do not match.';
-                return;
-            }
+            if (p1Input.value !== p2Input.value) return;
 
             btn.disabled = true;
             btn.textContent = 'Updating...';
+            msg.className = 'msg';
 
             try {
-                const { error } = await supabase.auth.updateUser({ password: p1 });
+                const { error } = await supabase.auth.updateUser({ password: p1Input.value });
                 if (error) throw error;
 
-                msg.style.display = 'block';
                 msg.className = 'msg success';
-                msg.textContent = 'Password updated successfully! Redirecting to login...';
-                
+                msg.textContent = 'Password updated successfully! Redirecting...';
                 await supabase.auth.signOut();
-                setTimeout(() => {
-                    window.location.href = '/';
-                }, 2000);
+                setTimeout(() => window.location.href = '/', 2000);
             } catch (err) {
-                msg.style.display = 'block';
                 msg.className = 'msg error';
                 msg.textContent = err.message || 'Error updating password.';
                 btn.disabled = false;
                 btn.textContent = 'Update Password';
-                debug.textContent += " | Update Error: " + (err.message || err);
             }
         });
     </script>
