@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create New Password - Music Antenna</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script 
+        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.0" 
+        onerror="document.getElementById('debugConsole').innerHTML = '🔴 CRITICAL: Supabase CDN failed to load. Check your internet or adblocker.';"
+    ></script>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -101,7 +104,7 @@
         const SUPABASE_URL = 'https://wcuqehdequrealcndkyw.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_-iD2D0ploxUh4w_PLKOirQ_ih4JcGKt';
         
-        // WE REMOVED detectSessionInUrl: true SO IT DOES NOT HANG
+        // WE REMOVED  SO IT DOES NOT HANG
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const form = document.getElementById('resetForm');
