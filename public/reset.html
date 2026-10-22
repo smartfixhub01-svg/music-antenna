@@ -11,7 +11,7 @@
             margin: 0; padding: 0; font-family: 'Roboto', -apple-system, sans-serif;
             background-color: #0F0F0F; color: #F1F1F1;
             display: flex; justify-content: center; align-items: center;
-            min-height: 100vh;
+            min-height: 100vh; padding: 20px 0;
         }
         .container {
             width: 100%; max-width: 420px; padding: 32px 24px;
@@ -32,44 +32,34 @@
             -webkit-text-fill-color: #FFFFFF !important;
             border: 1px solid #303030; 
             font-size: 15px;
-            transition: border-color 0.2s;
         }
         .input-group input:focus { border-color: #FF0033; outline: none; }
-        .input-group input.error-border { border-color: #FF4E45; }
         
         .toggle-eye {
             position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-            cursor: pointer; color: #888; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: #888; display: flex; align-items: center;
         }
         .toggle-eye svg { width: 20px; height: 20px; fill: currentColor; }
-
-        .strength-meter { height: 4px; border-radius: 2px; background: #303030; margin: -8px 0 16px 0; overflow: hidden; }
-        .strength-bar { height: 100%; width: 0%; transition: all 0.3s; }
-        
-        .match-msg { font-size: 12px; margin: -8px 0 16px 0; display: none; font-weight: 500; }
-        .match-msg.error { color: #FF4E45; display: block; }
-        .match-msg.success { color: #2BA640; display: block; }
 
         button {
             width: 100%; padding: 14px; background: #FF0033; color: #fff;
             border-radius: 8px; font-weight: 700; border: none;
             cursor: pointer; margin-bottom: 12px; font-size: 16px;
-            transition: opacity 0.2s;
         }
         button:disabled { opacity: 0.6; cursor: not-allowed; }
-        button:hover:not(:disabled) { background: #e02e53; }
         
-        .back-btn {
-            background: transparent; border: 1px solid #303030;
-            color: #AAAAAA;
-        }
-        .back-btn:hover { background: #272727; color: #fff; }
+        .back-btn { background: transparent; border: 1px solid #303030; color: #AAAAAA; }
         
         .msg { text-align: center; margin-bottom: 20px; font-size: 14px; padding: 12px; border-radius: 8px; display: none; font-weight: 500; }
         .msg.error { background: rgba(255, 78, 69, 0.1); color: #FF4E45; border: 1px solid #FF4E45; display: block; }
         .msg.success { background: rgba(43, 166, 64, 0.1); color: #2BA640; border: 1px solid #2BA640; display: block; }
         
-        .invalid-link-box { display: none; text-align: center; }
+        /* DEBUG CONSOLE */
+        .debug-box {
+            margin-top: 24px; padding: 12px; background: #000; border: 1px solid #333; 
+            border-radius: 8px; font-family: monospace; font-size: 11px; color: #00ff00; 
+            max-height: 150px; overflow-y: auto; word-wrap: break-word;
+        }
     </style>
 </head>
 <body>
@@ -78,152 +68,115 @@
             <img src="/music-antenna-logo.png" alt="Music Antenna">
         </div>
         
-        <div id="formContainer">
-            <h2>Create New Password</h2>
-            <p class="subtitle">Your old password has been invalidated.</p>
-            <div id="msg" class="msg"></div>
+        <h2>Create New Password</h2>
+        <div id="msg" class="msg"></div>
+        
+        <form id="resetForm">
+            <div class="input-group">
+                <input type="password" id="newPassword" placeholder="New Password" required minlength="6">
+                <div class="toggle-eye" onclick="toggleVisibility('newPassword', this)">
+                    <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                </div>
+            </div>
             
-            <form id="resetForm">
-                <div class="input-group">
-                    <input type="password" id="newPassword" placeholder="New Password" required minlength="6" disabled>
-                    <div class="toggle-eye" onclick="toggleVisibility('newPassword', this)">
-                        <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-                    </div>
+            <div class="input-group">
+                <input type="password" id="confirmPassword" placeholder="Confirm New Password" required minlength="6">
+                <div class="toggle-eye" onclick="toggleVisibility('confirmPassword', this)">
+                    <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
                 </div>
-                <div class="strength-meter"><div id="strengthBar" class="strength-bar"></div></div>
-                
-                <div class="input-group">
-                    <input type="password" id="confirmPassword" placeholder="Confirm New Password" required minlength="6" disabled>
-                    <div class="toggle-eye" onclick="toggleVisibility('confirmPassword', this)">
-                        <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-                    </div>
-                </div>
-                <div id="matchMsg" class="match-msg"></div>
+            </div>
 
-                <button type="submit" id="submitBtn" disabled>Checking link...</button>
-                <button type="button" class="back-btn" onclick="window.location.href='/'">Back to Login</button>
-            </form>
-        </div>
+            <button type="submit" id="submitBtn">Update Password</button>
+            <button type="button" class="back-btn" onclick="window.location.href='/'">Back to Login</button>
+        </form>
 
-        <div id="invalidContainer" class="invalid-link-box">
-            <h2 style="color: #FF4E45;">Link Expired</h2>
-            <p class="subtitle">This password reset link is invalid, expired, or has already been used.</p>
-            <button onclick="window.location.href='/'">Return to App to Request a New Link</button>
-        </div>
+        <!-- This will show us EXACTLY what is going wrong -->
+        <div id="debugConsole" class="debug-box">Initializing...</div>
     </div>
 
     <script>
+        const debugLog = (msg) => {
+            const box = document.getElementById('debugConsole');
+            box.innerHTML += "<br>> " + msg;
+            console.log(msg);
+        };
+
+        debugLog("Page Loaded. URL Hash: " + (window.location.hash ? window.location.hash.substring(0, 30) + '...' : 'EMPTY'));
+
         const SUPABASE_URL = 'https://wcuqehdequrealcndkyw.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_-iD2D0ploxUh4w_PLKOirQ_ih4JcGKt';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-            auth: { detectSessionInUrl: true, flowType: 'implicit' }
-        });
+        
+        debugLog("Supabase URL: " + SUPABASE_URL);
+        debugLog("Supabase Key starts with: " + SUPABASE_KEY.substring(0, 15) + "...");
+
+        let supabase;
+        try {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+                auth: { detectSessionInUrl: true, flowType: 'implicit' }
+            });
+            debugLog("Client created successfully.");
+        } catch (e) {
+            debugLog("CLIENT CREATION ERROR: " + e.message);
+        }
 
         const form = document.getElementById('resetForm');
-        const formContainer = document.getElementById('formContainer');
-        const invalidContainer = document.getElementById('invalidContainer');
         const msg = document.getElementById('msg');
         const btn = document.getElementById('submitBtn');
         const p1Input = document.getElementById('newPassword');
         const p2Input = document.getElementById('confirmPassword');
-        const strengthBar = document.getElementById('strengthBar');
-        const matchMsg = document.getElementById('matchMsg');
 
-        // Helper to unlock the form UI
-        function unlockForm() {
-            p1Input.disabled = false;
-            p2Input.disabled = false;
-            btn.disabled = false;
-            btn.textContent = 'Update Password';
-            btn.style.background = '#FF0033';
-        }
-
-        // Eye Toggle Logic
         function toggleVisibility(id, icon) {
             const input = document.getElementById(id);
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.style.color = '#FF0033';
-            } else {
-                input.type = 'password';
-                icon.style.color = '#888';
-            }
+            input.type = input.type === 'password' ? 'text' : 'password';
+            icon.style.color = input.type === 'text' ? '#FF0033' : '#888';
         }
 
-        // Password Strength Logic
-        p1Input.addEventListener('input', () => {
-            const val = p1Input.value;
-            let score = 0;
-            if (val.length >= 6) score++;
-            if (val.length >= 10) score++;
-            if (/[A-Z]/.test(val)) score++;
-            if (/[0-9]/.test(val)) score++;
-            if (/[^A-Za-z0-9]/.test(val)) score++;
-
-            if (val.length === 0) {
-                strengthBar.style.width = '0%';
-            } else if (score <= 2) {
-                strengthBar.style.width = '33%';
-                strengthBar.style.background = '#FF4E45';
-            } else if (score <= 4) {
-                strengthBar.style.width = '66%';
-                strengthBar.style.background = '#F5A623';
-            } else {
-                strengthBar.style.width = '100%';
-                strengthBar.style.background = '#2BA640';
+        // Listen to auth changes
+        supabase.auth.onAuthStateChange((event, session) => {
+            debugLog("Auth Event Fired: " + event);
+            if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
+                debugLog("Session found! User: " + (session?.user?.email || 'Unknown'));
             }
         });
 
-        // Real-time Match Logic
-        p2Input.addEventListener('input', () => {
-            if (p2Input.value === '') {
-                matchMsg.className = 'match-msg';
-                p2Input.classList.remove('error-border');
-            } else if (p1Input.value !== p2Input.value) {
-                matchMsg.className = 'match-msg error';
-                matchMsg.textContent = 'Passwords do not match.';
-                p2Input.classList.add('error-border');
+        // Check session after a short delay
+        setTimeout(async () => {
+            const { data, error } = await supabase.auth.getSession();
+            if (error) {
+                debugLog("getSession ERROR: " + error.message);
+            } else if (data.session) {
+                debugLog("Active Session Found.");
             } else {
-                matchMsg.className = 'match-msg success';
-                matchMsg.textContent = 'Passwords match!';
-                p2Input.classList.remove('error-border');
+                debugLog("NO SESSION FOUND. Link may be expired.");
             }
-        });
+        }, 2000);
 
-        // 1. INSTANT CHECK: If the URL contains a token, unlock the form immediately!
-        if (window.location.hash.includes('access_token') || window.location.hash.includes('type=recovery')) {
-            unlockForm();
-            btn.textContent = 'Update Password';
-        } else {
-            // 2. FALLBACK: If no token in URL, try to fetch session safely (for page refreshes)
-            supabase.auth.getSession().then(res => {
-                if (res && res.data && res.data.session) {
-                    unlockForm();
-                } else {
-                    formContainer.style.display = 'none';
-                    invalidContainer.style.display = 'block';
-                }
-            }).catch(err => {
-                formContainer.style.display = 'none';
-                invalidContainer.style.display = 'block';
-            });
-        }
-
-        // Submit Logic
+        // Submit
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (p1Input.value !== p2Input.value) return;
+            if (p1Input.value !== p2Input.value) {
+                msg.className = 'msg error';
+                msg.textContent = 'Passwords do not match.';
+                return;
+            }
 
             btn.disabled = true;
             btn.textContent = 'Updating...';
             msg.className = 'msg';
+            debugLog("Attempting to update password...");
 
             try {
-                const { error } = await supabase.auth.updateUser({ password: p1Input.value });
-                if (error) throw error;
+                const { data, error } = await supabase.auth.updateUser({ password: p1Input.value });
+                
+                if (error) {
+                    debugLog("SUPABASE ERROR: " + error.message);
+                    throw error;
+                }
 
+                debugLog("SUCCESS! User data: " + JSON.stringify(data.user?.email));
                 msg.className = 'msg success';
                 msg.textContent = 'Password updated successfully! Redirecting...';
+                
                 await supabase.auth.signOut();
                 setTimeout(() => window.location.href = '/', 2000);
             } catch (err) {
@@ -231,6 +184,7 @@
                 msg.textContent = err.message || 'Error updating password.';
                 btn.disabled = false;
                 btn.textContent = 'Update Password';
+                debugLog("CATCH BLOCK: " + err.message);
             }
         });
     </script>
