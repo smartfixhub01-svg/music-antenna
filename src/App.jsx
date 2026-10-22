@@ -37,24 +37,24 @@ export default function App() {
 
   const [media, setMedia] = useState([]);
   const [feedLoading, setFeedLoading] = useState(false);
-  const handleShare = async (mediaItem) => {
-    if (!mediaItem) return;
-    const url = `${window.location.origin}?track=${mediaItem.id}`;
+    const handleShare = async (mediaItem) => {
+    if (!mediaItem) { setMessage("No media loaded."); return; }
+    const url = window.location.origin + "?track=" + mediaItem.id;
     if (navigator.share) {
       try {
-        await navigator.share({
-          title: mediaItem.title,
-          text: `Check out ${mediaItem.title} on Music Antenna!`,
-          url: url,
-        });
-      } catch (err) { console.log("Error sharing:", err); }
+        await navigator.share({ title: mediaItem.title, text: "Check out " + mediaItem.title + " on Music Antenna!", url: url });
+        setMessage("Shared successfully!");
+      } catch (err) {
+        await navigator.clipboard.writeText(url);
+        setMessage("Link copied to clipboard!");
+      }
     } else {
-      navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(url);
       setMessage("Link copied to clipboard!");
     }
   };
 
-  const [search, setSearch] = useState("");
+const [search, setSearch] = useState("");
   const [searchLoading, setSearchLoading] = useState(false);
   const [navVisible, setNavVisible] = useState(true);
 
@@ -1863,10 +1863,7 @@ useEffect(() => {
                     >
                       Reset password
                     </button>
-                  
-
-
-    </>
+                  </>
                 ) : (
                   <button
                     type="button"
@@ -2598,15 +2595,7 @@ useEffect(() => {
               <div className="ma-player-actions">
                 <button
                   className="ma-secondary"
-                  onClick={async () => {
-                    const shareUrl = window.location.href.split("#")[0];
-                    try {
-                      await navigator.clipboard.writeText(shareUrl);
-                      setMessage("Page link copied. Share it with your friends.");
-                    } catch {
-                      setMessage("Copy this page address to share it.");
-                    }
-                  }}
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleShare(activeMedia); }}
                 >
                   ↗ Share page
                 </button>
