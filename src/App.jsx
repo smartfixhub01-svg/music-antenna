@@ -34,6 +34,14 @@ export default function App() {
   const [authTab, setAuthTab] = useState("listener");
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
+  const messageTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    if (message) {
+      if (messageTimeoutRef.current) clearTimeout(messageTimeoutRef.current);
+      messageTimeoutRef.current = setTimeout(() => setMessage(""), 3000);
+    }
+  }, [message]);
 
   const [media, setMedia] = useState([]);
   const [feedLoading, setFeedLoading] = useState(false);
@@ -2816,7 +2824,6 @@ useEffect(() => {
             {activeMedia.playbackUrl ? (
               activeMedia.media_type === "video" ? (
                 <video
-                  ref={videoRef}
                   onPlay={handleFirstPlay}
                   className="yt-watch-video"
                   src={activeMedia.playbackUrl}
@@ -2834,7 +2841,7 @@ useEffect(() => {
                       <span className="material-symbols-outlined">music_note</span>
                     )}
                   </div>
-                  <audio ref={audioRef} src={activeMedia.playbackUrl} controls autoPlay onPlay={handleFirstPlay} />
+                  <audio src={activeMedia.playbackUrl} controls autoPlay onPlay={handleFirstPlay} />
                 </div>
               )
             ) : (
@@ -3122,8 +3129,8 @@ useEffect(() => {
                 onClick={() => { setShowChannelPage(false); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
                 <span className="material-symbols-outlined">search</span>
               </button>
-              <button className="yt-icon-btn" aria-label="More" onClick={() => setShowMoreMenu(true)}>
-                <span className="material-symbols-outlined">more_vert</span>
+              <button className="yt-icon-btn" aria-label="More">
+                <span className="material-symbols-outlined" style={{ cursor: "pointer" }} onClick={() => setMessage("More options coming soon!")}>more_vert</span>
               </button>
             </div>
           </div>
@@ -3665,54 +3672,6 @@ useEffect(() => {
       )}
 
       {/* COMMENTS MODAL - BULLETPROOF VERSION */}
-
-      {showMoreMenu && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 10000, display: "flex", alignItems: "flex-end" }} onClick={() => setShowMoreMenu(false)}>
-          <div style={{ background: "#212121", width: "100%", borderTopLeftRadius: "16px", borderTopRightRadius: "16px", padding: "20px", paddingBottom: "40px", color: "white" }} onClick={e => e.stopPropagation()}>
-            
-            <div style={{ width: "40px", height: "4px", background: "#555", borderRadius: "2px", margin: "0 auto 20px" }}></div>
-            
-            <p style={{ color: "#aaa", fontSize: "14px", marginBottom: "12px", fontWeight: "bold" }}>Playback Speed</p>
-            <div style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
-              {[1, 1.25, 1.5, 2].map(speed => (
-                <button key={speed} onClick={() => {
-                  if (videoRef.current) videoRef.current.playbackRate = speed;
-                  if (audioRef.current) audioRef.current.playbackRate = speed;
-                  setMessage(`Speed set to ${speed}x`);
-                  setShowMoreMenu(false);
-                }} style={{ flex: 1, padding: "10px", background: "#333", color: "#fff", border: "none", borderRadius: "8px", fontSize: "14px", cursor: "pointer" }}>
-                  {speed}x
-                </button>
-              ))}
-            </div>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              <button onClick={() => { fetchPlaylists(); setShowPlaylistModal(true); setShowMoreMenu(false); }} style={{ padding: "14px", background: "#333", color: "#fff", border: "none", borderRadius: "8px", fontSize: "15px", display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }}>
-                <span className="material-symbols-outlined">playlist_add</span> Save to playlist
-              </button>
-              
-              <button onClick={() => { handleShare(activeMedia); setShowMoreMenu(false); }} style={{ padding: "14px", background: "#333", color: "#fff", border: "none", borderRadius: "8px", fontSize: "15px", display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }}>
-                <span className="material-symbols-outlined">share</span> Share Link
-              </button>
-              
-              <button onClick={() => { setMessage("Video reported. Thank you."); setShowMoreMenu(false); }} style={{ padding: "14px", background: "#333", color: "#fff", border: "none", borderRadius: "8px", fontSize: "15px", display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }}>
-                <span className="material-symbols-outlined">flag</span> Report Video
-              </button>
-              
-              {session?.user?.id === activeMedia?.artist_id && (
-                <button onClick={() => { setEditingMedia(activeMedia); setShowWatchPage(false); setShowMoreMenu(false); }} style={{ padding: "14px", background: "#333", color: "#fff", border: "none", borderRadius: "8px", fontSize: "15px", display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }}>
-                  <span className="material-symbols-outlined">edit</span> Edit Video
-                </button>
-              )}
-            </div>
-            
-            <button onClick={() => setShowMoreMenu(false)} style={{ width: "100%", padding: "16px", background: "transparent", color: "#fff", border: "none", borderRadius: "8px", marginTop: "10px", fontSize: "15px", cursor: "pointer", fontWeight: "bold" }}>
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-
       {message && (
         <div style={{ position: "fixed", top: "20px", left: "50%", transform: "translateX(-50%)", background: "#ff0050", color: "#fff", padding: "12px 24px", borderRadius: "8px", zIndex: 99999, boxShadow: "0 4px 12px rgba(0,0,0,0.5)", fontWeight: "bold", fontSize: "14px", textAlign: "center", whiteSpace: "nowrap" }}>
           {message}
