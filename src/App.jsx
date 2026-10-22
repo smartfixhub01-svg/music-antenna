@@ -667,19 +667,7 @@ useEffect(() => {
   }
 
   async function handleForgotPassword() {
-    const email = window.prompt("Please enter your email address to reset your password:");
-    if (!email) return;
-    
-    setMessage("Sending reset link...");
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + '/recovery.html',
-      });
-      if (error) throw error;
-      setMessage("Password reset link sent! Check your email.");
-    } catch (err) {
-      setMessage("Error: " + err.message);
-    }
+    setShowResetModal(true);
   }
 
 
@@ -2151,7 +2139,7 @@ useEffect(() => {
                     </button>
                     <button
                       type="button"
-                      onClick={handleForgotPassword}
+                      onClick={() => setShowResetModal(true)}
                     >
                       Reset password
                     </button>
@@ -2202,6 +2190,29 @@ useEffect(() => {
       
 
     
+      
+
+      {showResetModal && (
+        <div className="ma-modal-backdrop" onClick={() => setShowResetModal(false)}>
+          <div className="ma-modal-card" onClick={e => e.stopPropagation()}>
+            <h3 className="ma-modal-title">Reset Password</h3>
+            <p className="ma-modal-desc">Enter your email address and we will send you a link to reset your password.</p>
+            <input
+              type="email"
+              className="ma-modal-input"
+              placeholder="you@example.com"
+              value={resetEmail}
+              onChange={(e) => setResetEmail(e.target.value)}
+              autoFocus
+            />
+            <div className="ma-modal-actions">
+              <button className="ma-modal-btn cancel" onClick={() => setShowResetModal(false)}>Cancel</button>
+              <button className="ma-modal-btn primary" onClick={submitPasswordReset}>Send Link</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showCreatorResetModal && (
         <div className="ma-modal-backdrop" onClick={() => setShowCreatorResetModal(false)}>
           <div className="ma-modal-card" onClick={e => e.stopPropagation()}>
@@ -2222,27 +2233,6 @@ useEffect(() => {
                 <button type="submit" className="ma-modal-btn primary">Send Link</button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
-
-      {showResetModal && (
-        <div className="ma-modal-backdrop" onClick={() => setShowResetModal(false)}>
-          <div className="ma-modal-card" onClick={e => e.stopPropagation()}>
-            <h3 className="ma-modal-title">Reset Password</h3>
-            <p className="ma-modal-desc">Enter your email address and we will send you a link to reset your password.</p>
-            <input
-              type="email"
-              className="ma-modal-input"
-              placeholder="you@example.com"
-              value={resetEmail}
-              onChange={(e) => setResetEmail(e.target.value)}
-              autoFocus
-            />
-            <div className="ma-modal-actions">
-              <button className="ma-modal-btn cancel" onClick={() => setShowResetModal(false)}>Cancel</button>
-              <button className="ma-modal-btn primary" onClick={submitPasswordReset}>Send Link</button>
-            </div>
           </div>
         </div>
       )}
