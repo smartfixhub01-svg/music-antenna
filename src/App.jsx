@@ -2341,7 +2341,7 @@ useEffect(() => {
                     >
                       New creator? Sign up
                     </button>
-                    <button
+                    <button onClick={handleForgotPassword} 
                       type="button"
                       onClick={handleForgotPassword}
                     >
