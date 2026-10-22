@@ -529,6 +529,7 @@ useEffect(() => {
           setMedia([]);
           setFeedLoading(false);
           setSearchLoading(false);
+          setMessage("You haven't subscribed to any channels yet.");
           return;
         }
       }
@@ -3627,7 +3628,7 @@ useEffect(() => {
         <button className="ma-create-nav" aria-label="Create" onClick={() => { if (profile?.role === "artist") { closeAllOverlays(); setShowUpload(true); window.scrollTo({ top: 0, behavior: "smooth" }); } else { setMessage("Become an Artist before uploading."); } }}>
           <span className="material-symbols-outlined">add</span>
         </button>
-        <button aria-label="Subscriptions" onClick={() => { closeAllOverlays(); setCategory("All"); setShowSubscriptionsFeed(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+        <button aria-label="Subscriptions" onClick={() => { closeAllOverlays(); setCategory("All"); setShowSubscriptionsFeed(true); setMessage("Loading subscriptions..."); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
           <span className="material-symbols-outlined">subscriptions</span><small>Subscriptions</small>
         </button>
         <button aria-label="You" onClick={() => { closeAllOverlays(); setShowAccountPage(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
