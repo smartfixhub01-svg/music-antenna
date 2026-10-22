@@ -5251,3 +5251,11 @@ input::placeholder, textarea::placeholder {
   object-fit: contain !important;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
 }
+
+
+/* ===== FINAL NAVBAR LOGO ===== */
+.ma-brand img {
+  height: 36px !important;
+  width: auto !important;
+  object-fit: contain !important;
+}
