@@ -4993,3 +4993,102 @@ input::placeholder, textarea::placeholder {
 .ma-subs-search-wrap { background-color: var(--ma-search-bg) !important; border-color: var(--ma-border) !important; }
 .ma-subs-search { background-color: transparent !important; border: none !important; }
 .ma-subs-sort { background-color: var(--ma-search-bg) !important; color: var(--ma-text) !important; border-color: var(--ma-border) !important; }
+
+
+/* ===== PREMIUM AUTH OVERRIDES ===== */
+
+/* 1. Fix the outer page background */
+.auth-screen, .auth-page {
+  background-color: var(--ma-bg) !important;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* 2. Remove the ugly floating white card. Make it a clean, bordered form */
+.auth-screen-card, .auth-card, form[class*="auth"] {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  max-width: 400px !important;
+  margin: 0 auto !important;
+  padding: 24px !important;
+}
+
+/* 3. Fix Inputs */
+.auth-screen-card input, .auth-card input {
+  width: 100% !important;
+  background-color: var(--ma-search-bg) !important;
+  border: 1px solid transparent !important;
+  border-radius: 10px !important;
+  padding: 14px 16px !important;
+  font-size: 15px !important;
+  color: var(--ma-text) !important;
+  margin-bottom: 16px !important;
+  box-sizing: border-box !important;
+  transition: all 0.2s ease !important;
+}
+.auth-screen-card input:focus, .auth-card input:focus {
+  border-color: var(--ma-accent) !important;
+  background-color: var(--ma-surface) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(255, 54, 95, 0.15) !important;
+}
+
+/* 4. Fix the invisible Submit Button */
+.auth-screen-card button[type="submit"], 
+.auth-card button[type="submit"],
+.auth-screen-card form button {
+  width: 100% !important;
+  background-color: var(--ma-accent) !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  border-radius: 10px !important;
+  padding: 14px !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  margin-top: 8px !important;
+  cursor: pointer !important;
+  transition: background-color 0.2s ease, transform 0.1s ease !important;
+}
+.auth-screen-card button[type="submit"]:hover {
+  background-color: #e02e53 !important;
+}
+.auth-screen-card button[type="submit"]:active {
+  transform: scale(0.98) !important;
+}
+
+/* 5. Fix the Blue Links (Change to brand colors) */
+.auth-screen-card a, 
+.auth-screen-card span[role="button"], 
+.auth-card a {
+  color: var(--ma-accent) !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  font-size: 14px !important;
+  cursor: pointer !important;
+}
+.auth-screen-card a:hover {
+  text-decoration: underline !important;
+}
+
+/* 6. Toggle text (Are you a creator?) */
+.auth-screen-card p, .auth-card p {
+  color: var(--ma-text-secondary) !important;
+  font-size: 14px !important;
+}
+
+/* 7. Headings */
+.auth-screen-card h2, .auth-card h2 {
+  font-size: 24px !important;
+  font-weight: 800 !important;
+  margin-bottom: 8px !important;
+  color: var(--ma-text) !important;
+  text-align: center !important;
+}
+.auth-screen-card p.subtitle {
+  text-align: center !important;
+  color: var(--ma-text-secondary) !important;
+  margin-bottom: 24px !important;
+}
