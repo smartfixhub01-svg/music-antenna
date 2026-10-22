@@ -551,7 +551,7 @@ useEffect(() => {
           setMedia([]);
           setFeedLoading(false);
           setSearchLoading(false);
-          if (subsTab !== "subscribers") setMessage("You haven't subscribed to any channels yet.");
+          
           return;
         }
       }
