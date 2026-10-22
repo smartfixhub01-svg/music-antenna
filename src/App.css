@@ -5261,3 +5261,21 @@ input::placeholder, textarea::placeholder {
 }
 
 .auth-screen-head { display: none !important; }
+
+/* ===== FINAL AUTH LOGO FIX ===== */
+.auth-logo {
+  display: block !important;
+  width: min(220px, 75%) !important;
+  height: auto !important;
+  max-height: 150px !important;
+  object-fit: contain !important;
+  margin: 0 auto !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+.ma-brand img {
+  height: 36px !important;
+  width: auto !important;
+  object-fit: contain !important;
+}

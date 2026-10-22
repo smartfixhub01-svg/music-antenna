@@ -1,20 +1,10 @@
-const CACHE_NAME = 'music-antenna-v160';
-self.addEventListener('install', (e) => {
-  self.skipWaiting();
+const CACHE_NAME = 'music-antenna-v999';
+self.addEventListener('install', function(e) { self.skipWaiting(); });
+self.addEventListener('activate', function(e) {
+  e.waitUntil(caches.keys().then(function(cacheNames) {
+    return Promise.all(cacheNames.map(function(cacheName) { return caches.delete(cacheName); }));
+  }));
 });
-self.addEventListener('activate', (e) => {
-  e.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName); // Delete old caches!
-          }
-        })
-      );
-    }).then(() => self.clients.claim())
-  );
-});
-self.addEventListener('fetch', (e) => {
-  e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+self.addEventListener('fetch', function(e) {
+  e.respondWith(fetch(e.request).catch(function() { return caches.match(e.request); }));
 });
