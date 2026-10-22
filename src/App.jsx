@@ -23,12 +23,7 @@ const BUCKET = "music-antenna-media";
 
 export default function App() {
 
-  // Check if the user is in the middle of a password reset
-  useEffect(() => {
-    if (localStorage.getItem('is_resetting') === 'true' && window.location.pathname !== '/recovery.html') {
-      window.location.href = '/recovery.html';
-    }
-  }, []);
+
 
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);

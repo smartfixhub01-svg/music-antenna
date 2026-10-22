@@ -43,15 +43,19 @@
             z-index: 10;
         }
         .toggle-eye svg { width: 20px; height: 20px; fill: currentColor; }
+        .toggle-eye:hover { color: #FFF; }
 
         button {
             width: 100%; padding: 14px; background: #FF0033; color: #fff;
             border-radius: 8px; font-weight: 700; border: none;
             cursor: pointer; margin-bottom: 12px; font-size: 16px;
+            transition: opacity 0.2s;
         }
         button:disabled { opacity: 0.6; cursor: not-allowed; }
+        button:hover:not(:disabled) { background: #e02e53; }
         
         .back-btn { background: transparent; border: 1px solid #303030; color: #AAAAAA; }
+        .back-btn:hover { background: #272727; color: #fff; }
         
         .msg { text-align: center; margin-bottom: 20px; font-size: 14px; padding: 12px; border-radius: 8px; display: none; font-weight: 500; }
         .msg.error { background: rgba(255, 78, 69, 0.1); color: #FF4E45; border: 1px solid #FF4E45; display: block; }
@@ -107,12 +111,6 @@
             console.log(msg);
         };
 
-        // 1. Check for token and save lock flag
-        if (window.location.hash.includes('access_token') || window.location.search.includes('type=recovery')) {
-            localStorage.setItem('is_resetting', 'true');
-            debugLog("🔒 Reset mode locked.");
-        }
-
         const SUPABASE_URL = 'https://wcuqehdequrealcndkyw.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_-iD2D0ploxUh4w_PLKOirQ_ih4JcGKt';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -158,27 +156,19 @@
             const tokenHash = params.get('token_hash');
             
             let sessionFound = false;
-            debugLog("Checking tokens...");
 
             if (hash && hash.includes('access_token')) {
-                debugLog("Found #access_token in URL.");
-                const { data, error } = await supabase.auth.getSession();
+                debugLog("Found hash token.");
+                const { data } = await supabase.auth.getSession();
                 if (data.session) sessionFound = true;
-                if (error) debugLog("Session Error: " + error.message);
-            } 
-            
-            if (!sessionFound && code) {
-                debugLog("Found ?code= (PKCE)");
-                const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+            } else if (code) {
+                debugLog("Found PKCE code.");
+                const { data } = await supabase.auth.exchangeCodeForSession(code);
                 if (data.session) sessionFound = true;
-                if (error) debugLog("PKCE Error: " + error.message);
-            } 
-            
-            if (!sessionFound && tokenHash) {
-                debugLog("Found ?token_hash=");
-                const { data, error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: 'recovery' });
+            } else if (tokenHash) {
+                debugLog("Found Token Hash.");
+                const { data } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: 'recovery' });
                 if (data.session) sessionFound = true;
-                if (error) debugLog("OTP Error: " + error.message);
             }
 
             if (sessionFound) {
@@ -222,7 +212,6 @@
                 msg.textContent = 'Password updated successfully! Redirecting...';
                 
                 await supabase.auth.signOut();
-                localStorage.removeItem('is_resetting'); // UNLOCK THE APP
                 setTimeout(() => window.location.href = '/', 2000);
             } catch (err) {
                 debugLog("❌ Error: " + err.message);
