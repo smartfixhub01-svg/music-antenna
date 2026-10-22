@@ -50,6 +50,23 @@ export default function App() {
   const [showResetPasswordScreen, setShowResetPasswordScreen] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
+
+  // Force stop all media when the password reset screen is active
+  useEffect(() => {
+    if (showResetPasswordScreen) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+      }
+      if (videoRef.current) {
+        videoRef.current.pause();
+        videoRef.current.src = "";
+      }
+      setActiveMedia(null);
+      setShowWatchPage(false);
+    }
+  }, [showResetPasswordScreen]);
+
   const [resetEmail, setResetEmail] = useState("");
   const [theme, setTheme] = useState("device");
 
@@ -698,6 +715,7 @@ useEffect(() => {
   };
 
   async function loadMedia() {
+    if (showResetPasswordScreen) return; // Don't load feed while resetting
     setFeedLoading(true);
     if (search.trim()) setSearchLoading(true);
     setMessage("");
