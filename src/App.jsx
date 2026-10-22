@@ -42,6 +42,8 @@ export default function App() {
   });
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [resetBusy, setResetBusy] = useState(false);
+  const [resetError, setResetError] = useState("");
 
   useEffect(() => {
     if (showResetPasswordScreen) {
