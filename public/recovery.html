@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create New Password - Music Antenna</title>
-    <!-- Use unpkg for a more reliable CDN -->
-    <script src="https://unpkg.com/@supabase/supabase-js@2.45.4"></script>
+    <!-- Use unpkg for a more reliable CDN and catch load errors -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2.45.4" onerror="document.getElementById('debugConsole').innerHTML = '🔴 CRITICAL: Failed to load Supabase library. Check your internet/adblocker.';"></script>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -91,26 +91,23 @@
     </div>
 
     <script>
-        // Wait for the DOM and the Supabase library to load
-        window.addEventListener('load', async () => {
-            const debugLog = (msg) => {
-                const box = document.getElementById('debugConsole');
-                box.innerHTML += "<br>> " + msg;
-                console.log(msg);
-            };
+        const debugLog = (msg) => {
+            const box = document.getElementById('debugConsole');
+            box.innerHTML += "<br>> " + msg;
+            console.log(msg);
+        };
 
+        try {
             if (!window.supabase) {
-                debugLog("🔴 CRITICAL ERROR: Supabase library failed to load.");
-                document.getElementById('debugConsole').style.color = 'red';
-                return;
+                throw new Error("Supabase library not found. It may have been blocked.");
             }
 
-            debugLog("✅ Supabase loaded. Parsing token...");
-
+            debugLog("✅ Supabase loaded.");
+            
             const SUPABASE_URL = 'https://wcuqehdequrealcndkyw.supabase.co';
             const SUPABASE_KEY = 'sb_publishable_-iD2D0ploxUh4w_PLKOirQ_ih4JcGKt';
             
-            // Create client WITHOUT auto-detect to prevent hanging
+            // No auto-detect to prevent hanging
             const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
             const form = document.getElementById('resetForm');
@@ -141,7 +138,7 @@
                 debugLog("✅ Form unlocked.");
             }
 
-            try {
+            async function initAuth() {
                 // 1. Manually parse hash for implicit flow (#access_token)
                 const hash = window.location.hash.substring(1);
                 const hashParams = new URLSearchParams(hash);
@@ -212,9 +209,10 @@
                     btn.textContent = 'Invalid Link';
                     subtitle.textContent = 'No active session.';
                 }
-            } catch (err) {
-                debugLog("CRITICAL: " + err.message);
             }
+
+            // Run immediately
+            initAuth().catch(err => debugLog("CRITICAL: " + err.message));
 
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -250,7 +248,11 @@
                     debugLog("❌ Update error: " + err.message);
                 }
             });
-        });
+
+        } catch (err) {
+            document.getElementById('debugConsole').innerHTML = '🔴 CRITICAL ERROR: ' + err.message;
+            document.getElementById('debugConsole').style.color = 'red';
+        }
     </script>
 </body>
 </html>
