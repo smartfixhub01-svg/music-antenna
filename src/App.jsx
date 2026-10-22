@@ -39,11 +39,10 @@ export default function App() {
   const [showResetPasswordScreen, setShowResetPasswordScreen] = useState(() => {
     const hash = window.location.hash;
     if (hash && (hash.includes('type=recovery') || hash.includes('access_token'))) {
-      
       window.history.replaceState(null, '', window.location.pathname);
       return true;
     }
-    
+    return false;
   });
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
@@ -535,7 +534,10 @@ useEffect(() => {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, newSession) => {
+    } = supabase.auth.onAuthStateChange((event, newSession) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setShowResetPasswordScreen(true);
+      }
       setSession(newSession);
     });
 
