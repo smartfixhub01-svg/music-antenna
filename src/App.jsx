@@ -1952,9 +1952,11 @@ useEffect(() => {
                 </form>
               ) : (
                 <form onSubmit={handleAuth} className="auth-screen-form">
-                  <div className="auth-logo-container">
+                  <div className="ma-auth-logo-wrapper">
                     <img src="/music-antenna-logo.png" alt="Music Antenna" />
                   </div>
+                  
+                  
                   
                   {message && (
                     <div className={`auth-message-box ${message.toLowerCase().includes("error") || message.toLowerCase().includes("invalid") ? "error" : "success"}`}>
