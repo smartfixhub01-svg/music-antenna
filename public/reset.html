@@ -88,9 +88,7 @@
     <script>
         const SUPABASE_URL = 'https://wcuqehdequrealcndkyw.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_-iD2D0ploxUh4w_PLKOirQ_ih4JcGKt';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-            auth: { detectSessionInUrl: true }
-        });
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const form = document.getElementById('resetForm');
         const msg = document.getElementById('msg');
@@ -105,7 +103,6 @@
             icon.style.color = input.type === 'text' ? '#FF0033' : '#888';
         }
 
-        // Helper to unlock the form UI
         function unlockForm() {
             p1Input.disabled = false;
             p2Input.disabled = false;
@@ -116,45 +113,58 @@
             msg.style.display = 'none';
         }
 
-        // 1. THE PKCE FLOW FIX: Extract the 'code' from the URL and exchange it
         async function initAuth() {
             const urlParams = new URLSearchParams(window.location.search);
+            const tokenHash = urlParams.get('token_hash');
+            const type = urlParams.get('type');
             const code = urlParams.get('code');
 
-            if (code) {
-                // PKCE Flow
-                const { error } = await supabase.auth.exchangeCodeForSession(code);
-                if (error) {
-                    msg.style.display = 'block';
-                    msg.className = 'msg error';
-                    msg.textContent = 'Link expired or invalid. Please request a new one.';
-                    btn.textContent = 'Invalid Link';
-                    subtitle.textContent = 'Verification failed.';
-                } else {
+            // 1. THE OFFICIAL RECOMMENDED FIX: Use verifyOtp with token_hash
+            if (tokenHash && type === 'recovery') {
+                const { data, error } = await supabase.auth.verifyOtp({
+                    token_hash: tokenHash,
+                    type: 'recovery'
+                });
+                if (!error && data.session) {
                     unlockForm();
+                    return;
+                } else if (error) {
+                    console.error("verifyOtp error:", error.message);
                 }
-            } else if (window.location.hash.includes('access_token')) {
-                // Implicit Flow (Supabase handles this automatically)
+            }
+
+            // 2. Fallback for PKCE code (if you requested it on the same device)
+            if (code) {
+                const { error } = await supabase.auth.exchangeCodeForSession(code);
+                if (!error) { unlockForm(); return; }
+            }
+
+            // 3. Fallback for Implicit flow (hash tokens)
+            if (window.location.hash.includes('access_token')) {
+                const hashParams = new URLSearchParams(window.location.hash.substring(1));
+                const access_token = hashParams.get('access_token');
+                const refresh_token = hashParams.get('refresh_token');
+                if (access_token && refresh_token) {
+                    const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+                    if (!error) { unlockForm(); return; }
+                }
+            }
+
+            // 4. Check if a session already exists
+            const { data } = await supabase.auth.getSession();
+            if (data.session) {
                 unlockForm();
             } else {
-                // Check if a session already exists (e.g., page refresh)
-                const { data } = await supabase.auth.getSession();
-                if (data.session) {
-                    unlockForm();
-                } else {
-                    msg.style.display = 'block';
-                    msg.className = 'msg error';
-                    msg.textContent = 'No secure session found. Please request a new link.';
-                    btn.textContent = 'Invalid Link';
-                    subtitle.textContent = 'No active session.';
-                }
+                msg.style.display = 'block';
+                msg.className = 'msg error';
+                msg.textContent = 'No secure session found. Please request a new link.';
+                btn.textContent = 'Invalid Link';
+                subtitle.textContent = 'No active session.';
             }
         }
 
-        // Run the auth check on load
         initAuth();
 
-        // Submit Logic
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (p1Input.value !== p2Input.value) {
