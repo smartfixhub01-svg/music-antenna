@@ -5232,3 +5232,31 @@ input::placeholder, textarea::placeholder {
 
 /* Ensure the header aligns nicely */
 
+
+
+/* ===== OFFICIAL LOGO STYLING ===== */
+
+/* Top Navbar Logo */
+.ma-brand img {
+  height: 38px !important;
+  width: auto !important;
+  object-fit: contain !important;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)) !important;
+  transition: transform 0.2s ease !important;
+}
+.ma-brand img:hover {
+  transform: scale(1.05) !important;
+}
+
+/* Login Card Logo */
+.auth-screen-head img {
+  max-width: 240px !important;
+  height: auto !important;
+  object-fit: contain !important;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15)) !important;
+}
+
+/* Hide the old pink background box if it still exists */
+.auth-screen-head-icon, .ma-brand-icon {
+  display: none !important;
+}

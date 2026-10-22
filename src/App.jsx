@@ -2319,8 +2319,8 @@ useEffect(() => {
         {/* PERMANENT AUDIO PLAYER (Never stops on tab change) */}
         
       <header className="ma-header">
-        <div className="ma-brand" style={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => { closeAllOverlays(); setCategory("All"); setSearch(""); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
-              <img src="/logo.png" alt="Music Antenna" style={{ height: "36px", width: "auto", objectFit: "contain" }} />
+        <div className="ma-brand" style={{ display: "flex", alignItems: "center", cursor: "pointer", padding: "4px" }} onClick={() => { closeAllOverlays(); setCategory("All"); setSearch(""); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+              <img src="/music-antenna-logo.png" alt="Music Antenna" style={{ height: "36px", width: "auto", objectFit: "contain" }} />
             </div>
 
         <div className="ma-search">

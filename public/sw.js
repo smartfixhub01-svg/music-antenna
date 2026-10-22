@@ -1,4 +1,4 @@
-const CACHE_NAME = 'music-antenna-v70';
+const CACHE_NAME = 'music-antenna-v81';
 self.addEventListener('install', (e) => {
   self.skipWaiting();
 });
