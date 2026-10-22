@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Password - Music Antenna</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            margin: 0; padding: 0; font-family: 'Roboto', sans-serif;
+            background-color: #0F0F0F; color: #F1F1F1;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%; max-width: 400px; padding: 24px;
+            background: #1C1C1C; border-radius: 16px; border: 1px solid #303030;
+            box-sizing: border-box;
+        }
+        .logo { display: flex; justify-content: center; margin-bottom: 24px; }
+        .logo img { width: 100%; max-width: 180px; background: #fff; padding: 12px; border-radius: 12px; }
+        h2 { text-align: center; margin-bottom: 24px; }
+        input {
+            width: 100%; padding: 12px; margin-bottom: 16px;
+            border-radius: 8px; background: #272727; color: #fff;
+            border: 1px solid #303030; box-sizing: border-box;
+        }
+        button {
+            width: 100%; padding: 14px; background: #FF0033; color: #fff;
+            border-radius: 8px; font-weight: bold; border: none;
+            cursor: pointer; margin-bottom: 16px;
+        }
+        button:disabled { opacity: 0.7; cursor: not-allowed; }
+        .msg { text-align: center; margin-bottom: 16px; font-size: 14px; }
+        .error { color: #FF4E45; }
+        .success { color: #2BA640; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="/music-antenna-logo.png" alt="Music Antenna">
+        </div>
+        <h2>Create New Password</h2>
+        <div id="msg" class="msg"></div>
+        <form id="resetForm">
+            <input type="password" id="newPassword" placeholder="New Password" required minlength="6">
+            <input type="password" id="confirmPassword" placeholder="Confirm Password" required minlength="6">
+            <button type="submit" id="submitBtn">Update Password</button>
+        </form>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://wcuqehdequrealcndkyw.supabase.co';
+        const SUPABASE_KEY = 'YOUR_ANON_KEY';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const form = document.getElementById('resetForm');
+        const msg = document.getElementById('msg');
+        const btn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const p1 = document.getElementById('newPassword').value;
+            const p2 = document.getElementById('confirmPassword').value;
+
+            if (p1 !== p2) {
+                msg.className = 'msg error';
+                msg.textContent = 'Passwords do not match.';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Updating...';
+            msg.className = 'msg';
+            msg.textContent = '';
+
+            try {
+                const { error } = await supabase.auth.updateUser({ password: p1 });
+                if (error) throw error;
+
+                msg.className = 'msg success';
+                msg.textContent = 'Password updated successfully! Redirecting to login...';
+                
+                await supabase.auth.signOut();
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+            } catch (err) {
+                msg.className = 'msg error';
+                msg.textContent = err.message || 'Error updating password.';
+                btn.disabled = false;
+                btn.textContent = 'Update Password';
+            }
+        });
+    </script>
+</body>
+</html>

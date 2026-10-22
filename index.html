@@ -57,10 +57,8 @@
     <script>
       // Catch the recovery token before Supabase clears it
       if (window.location.hash && (window.location.hash.includes('type=recovery') || window.location.hash.includes('access_token'))) {
-        localStorage.setItem('ma_is_resetting_password', 'true');
       }
       if (window.location.search && (window.location.search.includes('type=recovery') || window.location.search.includes('access_token'))) {
-        localStorage.setItem('ma_is_resetting_password', 'true');
       }
     </script>
 </head>
