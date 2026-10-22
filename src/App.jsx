@@ -635,7 +635,7 @@ useEffect(() => {
 
   
   
-    async function handleUpdatePassword() {
+      async function handleUpdatePassword() {
     if (newPassword !== confirmNewPassword) {
       return setMessage("Passwords do not match.");
     }
@@ -643,13 +643,13 @@ useEffect(() => {
       return setMessage("Password must be at least 6 characters.");
     }
     setBusy(true);
-    setMessage("Updating password...");
+    setMessage("Overwriting old password with new one...");
     try {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
       
       setMessage("Password updated successfully! Redirecting to login...");
-      // Force sign out so the user is redirected to the login page
+      // This forcibly deletes the current session (including the auto-login from the email link)
       await supabase.auth.signOut();
       
       setTimeout(() => {
@@ -1971,7 +1971,7 @@ if (showResetPasswordScreen) {
           </div>
           <h2 style={{ textAlign: "center", marginBottom: "8px" }}>Create New Password</h2>
           <p style={{ textAlign: "center", color: "var(--ma-text-secondary)", marginBottom: "24px" }}>
-            Please enter your new password below.
+            Your old password has been securely invalidated. Please create a new password below.
           </p>
 
           {message && (
