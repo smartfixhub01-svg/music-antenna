@@ -5421,7 +5421,7 @@ input::placeholder, textarea::placeholder {
   background: var(--ma-hover);
 }
 
-.ma-modal-btn.primary {
+.ma-modal-btn.primary { display: block !important; opacity: 1 !important;
   background: var(--ma-accent);
   color: #FFFFFF;
 }

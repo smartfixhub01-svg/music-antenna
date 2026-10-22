@@ -1977,6 +1977,58 @@ useEffect(() => {
         </section>
       
         
+      
+        
+      {showResetModal && createPortal(
+        <div className="ma-modal-backdrop" onClick={() => setShowResetModal(false)}>
+          <div className="ma-modal-card" onClick={e => e.stopPropagation()}>
+            <h3 className="ma-modal-title">Reset Password</h3>
+            <p className="ma-modal-desc">Enter your email address and we will send you a link to reset your password.</p>
+            <form onSubmit={submitPasswordReset}>
+              <input
+                type="email"
+                className="ma-modal-input"
+                placeholder="you@example.com"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                autoFocus
+                required
+              />
+              <div className="ma-modal-actions">
+                <button type="button" className="ma-modal-btn cancel" onClick={() => setShowResetModal(false)}>Cancel</button>
+                <button type="submit" className="ma-modal-btn primary" style={{ display: "block" }}>Send Link</button>
+              </div>
+            </form>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {showCreatorResetModal && createPortal(
+        <div className="ma-modal-backdrop" onClick={() => setShowCreatorResetModal(false)}>
+          <div className="ma-modal-card" onClick={e => e.stopPropagation()}>
+            <h3 className="ma-modal-title">Reset Art ID & Password</h3>
+            <p className="ma-modal-desc">Enter your Creator email address to recover your Art ID and reset your password.</p>
+            <form onSubmit={handleCreatorReset}>
+              <input
+                type="email"
+                className="ma-modal-input"
+                placeholder="Creator email address"
+                value={creatorResetEmail}
+                onChange={(e) => setCreatorResetEmail(e.target.value)}
+                autoFocus
+                required
+              />
+              <div className="ma-modal-actions">
+                <button type="button" className="ma-modal-btn cancel" onClick={() => setShowCreatorResetModal(false)}>Cancel</button>
+                <button type="submit" className="ma-modal-btn primary" style={{ display: "block" }}>Send Link</button>
+              </div>
+            </form>
+          </div>
+        </div>,
+        document.body
+      )}
+
       </main>
     );
   }
