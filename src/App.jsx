@@ -2601,6 +2601,9 @@ document.body
 
         
 
+
+        
+
                   </>
                 ) : (
                   <button
@@ -4398,7 +4401,24 @@ document.body
 
       {/* COMMENTS MODAL - BULLETPROOF VERSION */}
       {message && (
-        <div style={{ position: "fixed", bottom: "90px", left: "50%", transform: "translateX(-50%)", background: "#212121", color: "#fff", padding: "12px 24px", borderRadius: "24px", zIndex: 99999, boxShadow: "0 4px 12px rgba(0,0,0,0.8)", fontWeight: "500", fontSize: "14px", textAlign: "center", border: "1px solid #ff365f" }}>
+        <div style={{ 
+          position: "fixed", 
+          bottom: "90px", 
+          left: "50%", 
+          transform: "translateX(-50%)", 
+          background: "#212121", 
+          color: "#FFFFFF", 
+          padding: "14px 24px", 
+          borderRadius: "8px", 
+          zIndex: 999999, 
+          boxShadow: "0 8px 24px rgba(0,0,0,0.5)", 
+          fontWeight: "600", 
+          fontSize: "14px", 
+          textAlign: "center", 
+          borderLeft: "4px solid #FF0033",
+          maxWidth: "90%",
+          width: "max-content"
+        }}>
           {message}
         </div>
       )}
