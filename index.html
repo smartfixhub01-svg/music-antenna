@@ -58,18 +58,7 @@
 
     
 
-    <script>
-      // Catch ANY recovery token or PKCE code and forward it to the standalone reset page
-      const urlParams = window.location.href;
-      if (
-        urlParams.includes('type=recovery') || 
-        urlParams.includes('access_token') || 
-        urlParams.includes('code=')
-      ) {
-        // Pass the entire URL (hash and search) to reset.html
-        window.location.replace('/reset.html' + window.location.search + window.location.hash);
-      }
-    </script>
+    
 </head>
   <body>
     <div id="root"></div>

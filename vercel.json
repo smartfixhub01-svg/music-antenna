@@ -1,8 +1,5 @@
 {
   "rewrites": [
-    {
-      "source": "/((?!recovery\\.html|reset\\.html|assets|favicon.ico).*)",
-      "destination": "/index.html"
-    }
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
