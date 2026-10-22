@@ -3819,7 +3819,7 @@ useEffect(() => {
               <input 
                 type="text" 
                 className="ma-subs-search"
-                placeholder="Search subscribers or channels..." 
+                placeholder="Search creators..." 
                 value={subsSearch}
                 onChange={(e) => setSubsSearch(e.target.value)}
               />
