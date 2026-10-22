@@ -53,18 +53,7 @@ export default function App() {
 
   // Force stop all media when the password reset screen is active
   useEffect(() => {
-    if (showResetPasswordScreen) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = "";
-      }
-      if (videoRef.current) {
-        videoRef.current.pause();
-        videoRef.current.src = "";
-      }
-      setActiveMedia(null);
-      setShowWatchPage(false);
-    }
+    
   }, [showResetPasswordScreen]);
 
   const [resetEmail, setResetEmail] = useState("");
