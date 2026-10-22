@@ -1896,15 +1896,15 @@ useEffect(() => {
           {authTab === "listener" ? (
             <>
               {/* ===================== LISTENER SCREEN ===================== */}
-              <div className="auth-screen-head">
-                <span className="material-symbols-outlined auth-screen-head-icon">
-                  headphones
-                </span>
-                <h1 className="auth-screen-title">Listener sign in</h1>
-                <p className="auth-screen-sub">
-                  Discover and listen to music and videos
-                </p>
-              </div>
+              <div className="auth-screen-head" style={{ display: "flex", justifyContent: "center", marginBottom: "24px", width: "100%" }}>
+      <div style={{ background: "#ffffff", padding: "12px", borderRadius: "16px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+        <img 
+          src="/logo.png" 
+          alt="Music Antenna Logo" 
+          style={{ width: "100%", maxWidth: "220px", height: "auto", objectFit: "contain", display: "block" }} 
+        />
+      </div>
+    </div>
 
               {mode === "login" ? (
                 <form onSubmit={handleListenerLogin} className="auth-screen-form">
@@ -2121,15 +2121,15 @@ useEffect(() => {
           ) : (
             <>
               {/* ===================== CREATOR SCREEN ===================== */}
-              <div className="auth-screen-head">
-                <span className="material-symbols-outlined auth-screen-head-icon">
-                  mic
-                </span>
-                <h1 className="auth-screen-title">Creator sign in</h1>
-                <p className="auth-screen-sub">
-                  Upload songs and videos, build your channel
-                </p>
-              </div>
+              <div className="auth-screen-head" style={{ display: "flex", justifyContent: "center", marginBottom: "24px", width: "100%" }}>
+      <div style={{ background: "#ffffff", padding: "12px", borderRadius: "16px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+        <img 
+          src="/logo.png" 
+          alt="Music Antenna Logo" 
+          style={{ width: "100%", maxWidth: "220px", height: "auto", objectFit: "contain", display: "block" }} 
+        />
+      </div>
+    </div>
 
               {mode === "login" ? (
                 <form onSubmit={handleCreatorLogin} className="auth-screen-form">
