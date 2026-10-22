@@ -5177,3 +5177,31 @@ input::placeholder, textarea::placeholder {
   font-size: 24px !important;
   margin: 0 auto 12px auto !important;
 }
+
+
+/* ===== HOME FEED TEXT FIX ===== */
+
+/* Force video titles and meta text to use theme variables */
+.yt-video-title, 
+.yt-video-card h3, 
+.yt-video-card h4,
+.ma-subs-name {
+  color: var(--ma-text-primary) !important;
+  font-weight: 700 !important;
+}
+
+.yt-video-meta, 
+.yt-video-card p, 
+.yt-watch-meta {
+  color: var(--ma-text-secondary) !important;
+}
+
+/* Fix the general text color in the main app layout */
+.ma-layout, .ma-layout * {
+  color: inherit;
+}
+
+/* Ensure the specific video title container uses the right color */
+.yt-video-info, .yt-video-details {
+  color: var(--ma-text-primary) !important;
+}
