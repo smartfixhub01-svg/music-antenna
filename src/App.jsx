@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { useEffect, useRef, useState } from "react";
 
 function timeAgo(dateString) {
@@ -2192,7 +2193,8 @@ useEffect(() => {
     
       
 
-      {showResetModal && (
+      {showResetModal && createPortal(
+
         <div className="ma-modal-backdrop" onClick={() => setShowResetModal(false)}>
           <div className="ma-modal-card" onClick={e => e.stopPropagation()}>
             <h3 className="ma-modal-title">Reset Password</h3>
@@ -2211,9 +2213,12 @@ useEffect(() => {
             </div>
           </div>
         </div>
-      )}
+      ,
+document.body
+)}
 
-      {showCreatorResetModal && (
+      {showCreatorResetModal && createPortal(
+
         <div className="ma-modal-backdrop" onClick={() => setShowCreatorResetModal(false)}>
           <div className="ma-modal-card" onClick={e => e.stopPropagation()}>
             <h3 className="ma-modal-title">Reset Art ID & Password</h3>
@@ -2235,7 +2240,9 @@ useEffect(() => {
             </form>
           </div>
         </div>
-      )}
+      ,
+document.body
+)}
 
     
       
