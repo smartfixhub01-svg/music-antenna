@@ -4813,3 +4813,121 @@ button {
 @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
 .ma-subs-skeleton-avatar { width: 52px; height: 52px; border-radius: 50%; background: #272727; flex-shrink: 0; }
 .ma-subs-skeleton-text { height: 16px; background: #272727; border-radius: 6px; margin-left: 16px; }
+
+
+/* ===== PREMIUM THEME OVERRIDES ===== */
+
+/* 1. FORCE GLOBAL BACKGROUNDS AND TEXT */
+html, body, #root, .ma-app, .ma-layout, main, .yt-watch-page {
+  background-color: var(--ma-bg-primary) !important;
+  color: var(--ma-text-primary) !important;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* 2. HEADERS AND NAVIGATION */
+header, .ma-header, .yt-watch-topbar, .ma-mobile-nav, .ma-sidebar {
+  background-color: var(--ma-bg-primary) !important;
+  border-color: var(--ma-border) !important;
+}
+
+/* 3. CARDS AND PANELS */
+.yt-video-card, .ma-subs-row, .yt-manage-item, .yt-channel-banner, .ma-avatar-menu, .yt-notif-dropdown, .yt-watch-actions, .yt-watch-body {
+  background-color: var(--ma-bg-secondary) !important;
+  border: 1px solid var(--ma-border) !important;
+  border-radius: 12px;
+}
+.yt-video-card:hover, .ma-subs-row:hover, .yt-manage-item:hover {
+  background-color: var(--ma-bg-hover) !important;
+  transform: translateY(-2px);
+  transition: all 0.2s ease;
+}
+
+/* 4. TEXT COLORS - CRITICAL FOR FIXING INVISIBLE TEXT */
+h1, h2, h3, h4, h5, h6, p, span, div, a {
+  color: var(--ma-text-primary) !important;
+}
+.yt-video-title, .yt-watch-title, .ma-subs-name, .yt-channel-name, .ma-avatar-menu button, .yt-notif-dropdown h3 {
+  color: var(--ma-text-primary) !important;
+  font-weight: 700 !important;
+}
+.yt-video-meta, .yt-watch-meta, .ma-subs-date, .yt-channel-sub, .yt-notif-dropdown p, .auth-screen-footnote {
+  color: var(--ma-text-secondary) !important;
+}
+
+/* 5. INPUTS AND FORMS (Fix for login and upload) */
+input, textarea, select {
+  background-color: var(--ma-bg-secondary) !important;
+  color: var(--ma-text-primary) !important;
+  border: 1px solid var(--ma-border) !important;
+  border-radius: 8px !important;
+  padding: 12px !important;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--ma-accent) !important;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 0, 51, 0.2) !important;
+}
+input::placeholder, textarea::placeholder {
+  color: var(--ma-text-secondary) !important;
+  opacity: 0.7;
+}
+
+/* 6. SPECIFIC FIXES FOR SCREENSHOTS */
+/* Fix Login/Signup Cards */
+.auth-screen-card, .auth-card {
+  background-color: var(--ma-bg-secondary) !important;
+  border: 1px solid var(--ma-border) !important;
+}
+/* Fix Creator Dashboard */
+.yt-manage-item h4, .yt-manage-item p {
+  color: var(--ma-text-primary) !important;
+}
+.yt-manage-edit-btn {
+  color: var(--ma-text-secondary) !important;
+}
+/* Fix Home Feed Text */
+.yt-video-card div {
+  color: var(--ma-text-primary) !important;
+}
+/* Fix Subscriptions Badges */
+.ma-subs-badge.listener {
+  background-color: var(--ma-bg-hover) !important;
+  color: var(--ma-text-primary) !important;
+}
+
+/* 7. BUTTONS */
+button {
+  font-family: inherit;
+}
+.yt-watch-action, .ma-upload-btn, .ma-subs-action, .ma-subs-empty-btn {
+  border-radius: 20px !important;
+  font-weight: 700 !important;
+  transition: all 0.2s ease !important;
+}
+.ma-upload-btn, .ma-subs-empty-btn {
+  background-color: var(--ma-accent) !important;
+  color: #FFFFFF !important;
+}
+.ma-upload-btn:hover, .ma-subs-empty-btn:hover {
+  background-color: #CC0029 !important;
+  transform: scale(1.02);
+}
+.yt-watch-action {
+  background-color: var(--ma-bg-secondary) !important;
+  color: var(--ma-text-primary) !important;
+}
+.yt-watch-action:hover {
+  background-color: var(--ma-bg-hover) !important;
+}
+
+/* 8. CATEGORY CHIPS (Home Page) */
+.yt-chip {
+  background-color: var(--ma-bg-secondary) !important;
+  color: var(--ma-text-primary) !important;
+  border: 1px solid var(--ma-border) !important;
+}
+.yt-chip-active {
+  background-color: var(--ma-text-primary) !important;
+  color: var(--ma-bg-primary) !important;
+  border-color: var(--ma-text-primary) !important;
+}
