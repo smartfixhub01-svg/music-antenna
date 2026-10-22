@@ -53,6 +53,16 @@
     <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/3844/3844724.png" />
     <meta property="og:url" content="https://music-antenna.vercel.app/" />
     <meta name="twitter:card" content="summary_large_image" />
+
+    <script>
+      // Catch the recovery token before Supabase clears it
+      if (window.location.hash && (window.location.hash.includes('type=recovery') || window.location.hash.includes('access_token'))) {
+        localStorage.setItem('ma_is_resetting_password', 'true');
+      }
+      if (window.location.search && (window.location.search.includes('type=recovery') || window.location.search.includes('access_token'))) {
+        localStorage.setItem('ma_is_resetting_password', 'true');
+      }
+    </script>
 </head>
   <body>
     <div id="root"></div>

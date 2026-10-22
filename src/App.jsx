@@ -37,12 +37,7 @@ export default function App() {
   const [showResetModal, setShowResetModal] = useState(false);
 
   const [showResetPasswordScreen, setShowResetPasswordScreen] = useState(() => {
-    const hash = window.location.hash;
-    if (hash && (hash.includes('type=recovery') || hash.includes('access_token'))) {
-      window.history.replaceState(null, '', window.location.pathname);
-      return true;
-    }
-    return false;
+    return localStorage.getItem('ma_is_resetting_password') === 'true';
   });
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
@@ -668,23 +663,24 @@ useEffect(() => {
   
   async function handleUpdatePassword(e) {
     e.preventDefault();
-    if (newPassword !== confirmNewPassword) return setResetError("Passwords do not match.");
-    if (newPassword.length < 6) return setResetError("Password must be at least 6 characters.");
+    if (newPassword !== confirmNewPassword) return setMessage("Passwords do not match.");
+    if (newPassword.length < 6) return setMessage("Password must be at least 6 characters.");
     
-    setResetBusy(true);
-    setResetError("");
+    setBusy(true);
+    setMessage("Updating...");
     try {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
       
-      setResetError("Success! Redirecting...");
+      setMessage("Success! Redirecting...");
       await supabase.auth.signOut();
+      localStorage.removeItem('ma_is_resetting_password');
       setShowResetPasswordScreen(false);
       setTimeout(() => window.location.href = "/", 1500);
     } catch (err) {
-      setResetError(err.message || "Error updating password.");
+      setMessage("Error: " + err.message);
     } finally {
-      setResetBusy(false);
+      setBusy(false);
     }
   }
 
