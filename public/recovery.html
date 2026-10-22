@@ -37,26 +37,21 @@
         .input-group input.error-border { border-color: #FF4E45; }
         .input-group input.success-border { border-color: #2BA640; }
         
-        /* THE EYE ICON CSS */
         .toggle-eye {
             position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
             cursor: pointer; color: #888; display: flex; align-items: center;
             z-index: 10;
         }
         .toggle-eye svg { width: 20px; height: 20px; fill: currentColor; }
-        .toggle-eye:hover { color: #FFF; }
 
         button {
             width: 100%; padding: 14px; background: #FF0033; color: #fff;
             border-radius: 8px; font-weight: 700; border: none;
             cursor: pointer; margin-bottom: 12px; font-size: 16px;
-            transition: opacity 0.2s;
         }
         button:disabled { opacity: 0.6; cursor: not-allowed; }
-        button:hover:not(:disabled) { background: #e02e53; }
         
         .back-btn { background: transparent; border: 1px solid #303030; color: #AAAAAA; }
-        .back-btn:hover { background: #272727; color: #fff; }
         
         .msg { text-align: center; margin-bottom: 20px; font-size: 14px; padding: 12px; border-radius: 8px; display: none; font-weight: 500; }
         .msg.error { background: rgba(255, 78, 69, 0.1); color: #FF4E45; border: 1px solid #FF4E45; display: block; }
@@ -65,6 +60,12 @@
         .match-msg { font-size: 12px; margin: -8px 0 12px 0; display: none; font-weight: 500; }
         .match-msg.error { color: #FF4E45; display: block; }
         .match-msg.success { color: #2BA640; display: block; }
+        
+        .debug-box {
+            margin-top: 24px; padding: 12px; background: #000; border: 1px solid #333; 
+            border-radius: 8px; font-family: monospace; font-size: 11px; color: #00ff00; 
+            max-height: 150px; overflow-y: auto; word-wrap: break-word;
+        }
     </style>
 </head>
 <body>
@@ -96,7 +97,7 @@
             <button type="button" class="back-btn" onclick="window.location.href='/'">Back to Login</button>
         </form>
         
-        <div id="debugConsole" style="margin-top: 20px; font-size: 10px; color: #555; display: none;"></div>
+        <div id="debugConsole" class="debug-box">Initializing...</div>
     </div>
 
     <script>
@@ -106,10 +107,15 @@
             console.log(msg);
         };
 
+        // 1. Check for token and save lock flag
+        if (window.location.hash.includes('access_token') || window.location.search.includes('type=recovery')) {
+            localStorage.setItem('is_resetting', 'true');
+            debugLog("🔒 Reset mode locked.");
+        }
+
         const SUPABASE_URL = 'https://wcuqehdequrealcndkyw.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_-iD2D0ploxUh4w_PLKOirQ_ih4JcGKt';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        localStorage.setItem('is_resetting', 'true');
 
         const form = document.getElementById('resetForm');
         const msg = document.getElementById('msg');
@@ -118,7 +124,6 @@
         const p2Input = document.getElementById('confirmPassword');
         const matchMsg = document.getElementById('matchMsg');
 
-        // 1. EYE TOGGLE LOGIC
         function toggleVisibility(id, icon) {
             const input = document.getElementById(id);
             if (input.type === 'password') {
@@ -130,7 +135,6 @@
             }
         }
 
-        // 2. REAL-TIME MATCH VALIDATION
         p2Input.addEventListener('input', () => {
             if (p2Input.value === '') {
                 matchMsg.className = 'match-msg';
@@ -139,7 +143,6 @@
                 matchMsg.className = 'match-msg error';
                 matchMsg.textContent = 'Passwords do not match.';
                 p2Input.classList.add('error-border');
-                p2Input.classList.remove('success-border');
             } else {
                 matchMsg.className = 'match-msg success';
                 matchMsg.textContent = 'Passwords match!';
@@ -148,7 +151,6 @@
             }
         });
 
-        // 3. AUTH VERIFICATION (Keeps your working logic)
         async function initAuth() {
             const hash = window.location.hash;
             const params = new URLSearchParams(window.location.search);
@@ -156,28 +158,38 @@
             const tokenHash = params.get('token_hash');
             
             let sessionFound = false;
+            debugLog("Checking tokens...");
 
             if (hash && hash.includes('access_token')) {
-                debugLog("Found hash token.");
-                const { data } = await supabase.auth.getSession();
+                debugLog("Found #access_token in URL.");
+                const { data, error } = await supabase.auth.getSession();
                 if (data.session) sessionFound = true;
-            } else if (code) {
-                debugLog("Found PKCE code.");
-                const { data } = await supabase.auth.exchangeCodeForSession(code);
+                if (error) debugLog("Session Error: " + error.message);
+            } 
+            
+            if (!sessionFound && code) {
+                debugLog("Found ?code= (PKCE)");
+                const { data, error } = await supabase.auth.exchangeCodeForSession(code);
                 if (data.session) sessionFound = true;
-            } else if (tokenHash) {
-                debugLog("Found Token Hash.");
-                const { data } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: 'recovery' });
+                if (error) debugLog("PKCE Error: " + error.message);
+            } 
+            
+            if (!sessionFound && tokenHash) {
+                debugLog("Found ?token_hash=");
+                const { data, error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: 'recovery' });
                 if (data.session) sessionFound = true;
+                if (error) debugLog("OTP Error: " + error.message);
             }
 
             if (sessionFound) {
+                debugLog("✅ Session verified!");
                 p1Input.disabled = false;
                 p2Input.disabled = false;
                 btn.disabled = false;
                 btn.textContent = 'Update Password';
                 msg.style.display = 'none';
             } else {
+                debugLog("❌ No session found.");
                 msg.style.display = 'block';
                 msg.className = 'msg error';
                 msg.textContent = 'Invalid or expired link. Please request a new one.';
@@ -186,14 +198,7 @@
         }
 
         initAuth();
-        
-        // Warn the user if they try to close the tab
-        window.addEventListener('beforeunload', (e) => {
-            e.preventDefault();
-            e.returnValue = 'You must finish changing your password. Are you sure you want to leave?';
-        });
 
-        // 4. SUBMIT LOGIC
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (p1Input.value !== p2Input.value) {
@@ -211,14 +216,16 @@
                 const { error } = await supabase.auth.updateUser({ password: p1Input.value });
                 if (error) throw error;
 
+                debugLog("✅ Password updated.");
                 msg.style.display = 'block';
                 msg.className = 'msg success';
                 msg.textContent = 'Password updated successfully! Redirecting...';
                 
                 await supabase.auth.signOut();
-                localStorage.removeItem('is_resetting');
+                localStorage.removeItem('is_resetting'); // UNLOCK THE APP
                 setTimeout(() => window.location.href = '/', 2000);
             } catch (err) {
+                debugLog("❌ Error: " + err.message);
                 msg.style.display = 'block';
                 msg.className = 'msg error';
                 msg.textContent = err.message || 'Error updating password.';
