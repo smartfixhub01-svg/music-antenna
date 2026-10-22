@@ -163,7 +163,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
       supabase.from("subscriptions").select("subscriber_id").eq("channel_id", session.user.id).then(({ data }) => {
         if (data && data.length > 0) {
           const ids = data.map(d => d.subscriber_id);
-          supabase.from("profiles").select("id, display_name, avatar_url").in("id", ids).then(({ data: profiles }) => {
+          supabase.from("profiles").select("id, display_name, username, avatar_url, role").in("id", ids).then(({ data: profiles }) => {
             setMySubscribers(profiles || []);
             setFeedLoading(false);
           });
@@ -2256,7 +2256,16 @@ useEffect(() => {
             </button>
             {showNotifications && (
               <div className="yt-notif-dropdown" style={{ position: "absolute", top: "100%", right: 0, width: "300px", background: "#212121", borderRadius: "12px", padding: "16px", zIndex: 100, boxShadow: "0 10px 30px rgba(0,0,0,0.5)", color: "white" }}>
-                <h3 style={{ margin: "0 0 12px 0", fontSize: "16px" }}>Notifications</h3>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                  <h3 style={{ margin: 0, fontSize: "16px" }}>Notifications</h3>
+                  {notifications.length > 0 && (
+                    <button onClick={async () => {
+                      await supabase.from("notifications").delete().eq("user_id", session.user.id);
+                      setNotifications([]);
+                      setUnreadCount(0);
+                    }} style={{ background: "transparent", border: "none", color: "#ff365f", fontSize: "12px", cursor: "pointer" }}>Clear All</button>
+                  )}
+                </div>
                 {notifications.length === 0 ? (
                   <p style={{ fontSize: "13px", color: "#aaa", margin: 0 }}>You're all caught up.</p>
                 ) : (
@@ -2757,15 +2766,34 @@ useEffect(() => {
               </div>
             ) : (
               mySubscribers.map(sub => (
-                <div key={sub.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', borderBottom: '1px solid #222' }}>
-                  {sub.avatar_url ? (
-                    <img src={sub.avatar_url} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} alt="" />
-                  ) : (
-                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-                      {(sub.display_name || "U")[0].toUpperCase()}
+                <div key={sub.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #222' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    {sub.avatar_url ? (
+                      <img src={sub.avatar_url} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} alt="" />
+                    ) : (
+                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                        {(sub.display_name || "U")[0].toUpperCase()}
+                      </div>
+                    )}
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontWeight: 'bold', fontSize: '15px' }}>{sub.username || sub.display_name || "User"}</span>
+                        <span style={{ fontSize: '10px', padding: '2px 6px', borderRadius: '4px', background: sub.role === 'artist' ? '#ff365f' : '#333', color: 'white', textTransform: 'uppercase', fontWeight: 'bold' }}>
+                          {sub.role === 'artist' ? 'Creator' : 'Listener'}
+                        </span>
+                      </div>
+                      <p style={{ margin: 0, fontSize: '12px', color: '#aaa' }}>Subscribed to you</p>
                     </div>
-                  )}
-                  <span style={{ fontWeight: 'bold' }}>{sub.display_name || "User"}</span>
+                  </div>
+                  <button onClick={async () => {
+                    if(window.confirm("Remove this subscriber? (They will be unsubscribed)")) {
+                      await supabase.from("subscriptions").delete().eq("channel_id", session.user.id).eq("subscriber_id", sub.id);
+                      setMySubscribers(prev => prev.filter(x => x.id !== sub.id));
+                      setMessage("Subscriber removed.");
+                    }
+                  }} style={{ background: "transparent", border: "none", color: "#ff365f", cursor: "pointer", padding: "8px" }}>
+                    <span className="material-symbols-outlined">person_remove</span>
+                  </button>
                 </div>
               ))
             )}
