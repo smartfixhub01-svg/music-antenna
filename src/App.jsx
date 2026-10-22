@@ -34,7 +34,7 @@ export default function App() {
   const [authTab, setAuthTab] = useState("listener");
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
-  const [theme, setTheme] = useState(() => localStorage.getItem("ma_theme") || "device");
+  const [theme, setTheme] = useState("device");
 
   useEffect(() => {
     const applyTheme = () => {

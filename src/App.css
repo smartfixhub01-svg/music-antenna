@@ -4931,3 +4931,111 @@ button {
   color: var(--ma-bg-primary) !important;
   border-color: var(--ma-text-primary) !important;
 }
+
+
+/* ===== SIZING AND THEME FIXES ===== */
+
+/* 1. Force Theme Colors strictly */
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+
+html, body, #root, .ma-app {
+  background-color: var(--ma-bg-primary) !important;
+  color: var(--ma-text-primary) !important;
+}
+
+/* 2. Fix Login Page Sizes */
+.auth-screen-card, .auth-card, form[class*="auth"] {
+  max-width: 380px !important;
+  margin: 40px auto !important;
+  padding: 24px !important;
+  background-color: var(--ma-bg-secondary) !important;
+  border-radius: 16px !important;
+  border: 1px solid var(--ma-border) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2) !important;
+}
+.auth-screen-card input, .auth-card input {
+  height: 44px !important;
+  font-size: 14px !important;
+  margin-bottom: 12px !important;
+}
+.auth-screen-card button, .auth-card button {
+  height: 44px !important;
+  font-size: 14px !important;
+}
+
+/* 3. Fix Profile Menu (Make it smaller and dark/light) */
+.ma-avatar-menu {
+  width: 260px !important;
+  padding: 8px 0 !important;
+  background-color: var(--ma-bg-elevated) !important;
+  border: 1px solid var(--ma-border) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+}
+.ma-avatar-menu-header {
+  padding: 12px 16px !important;
+}
+.ma-avatar-menu-header img {
+  width: 40px !important;
+  height: 40px !important;
+}
+.ma-avatar-menu button {
+  padding: 10px 16px !important;
+  font-size: 14px !important;
+  color: var(--ma-text-primary) !important;
+}
+.ma-avatar-menu button:hover {
+  background-color: var(--ma-bg-hover) !important;
+}
+
+/* 4. Fix "You" Page Manage Cards (Compact rows) */
+.yt-manage-item {
+  padding: 12px !important;
+  margin-bottom: 8px !important;
+  border-radius: 8px !important;
+  background-color: var(--ma-bg-secondary) !important;
+  border: 1px solid var(--ma-border) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+.yt-manage-thumb {
+  width: 80px !important;
+  height: 45px !important;
+  border-radius: 6px !important;
+}
+.yt-manage-item h4 {
+  font-size: 14px !important;
+  margin: 0 0 4px 0 !important;
+  color: var(--ma-text-primary) !important;
+}
+.yt-manage-item p {
+  font-size: 12px !important;
+  color: var(--ma-text-secondary) !important;
+}
+
+/* 5. Global Typography Reduction for Mobile */
+h1 { font-size: 22px !important; }
+h2 { font-size: 18px !important; }
+h3 { font-size: 16px !important; }
+p { font-size: 13px !important; }
+.yt-video-title { font-size: 14px !important; }
+.yt-watch-action { font-size: 12px !important; padding: 6px 12px !important; }
+
+/* 6. Theme Toggle Switch in Menu */
+.ma-theme-switcher {
+  display: flex; gap: 6px; padding: 8px 12px;
+}
+.ma-theme-btn {
+  flex: 1; padding: 6px; border-radius: 6px;
+  border: 1px solid var(--ma-border);
+  background: var(--ma-bg-secondary);
+  color: var(--ma-text-primary);
+  cursor: pointer; font-weight: bold; font-size: 12px;
+}
+.ma-theme-btn.active {
+  background: var(--ma-accent) !important;
+  color: #fff !important;
+  border-color: var(--ma-accent) !important;
+}
