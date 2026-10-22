@@ -5429,3 +5429,22 @@ input::placeholder, textarea::placeholder {
 .ma-modal-btn.primary:hover {
   background: #e02e53;
 }
+
+/* ===== COMPACT PROFESSIONAL AUTH MESSAGE ===== */
+.auth-screen-message {
+  background-color: rgba(255, 54, 95, 0.1) !important;
+  color: #FF365F !important;
+  border: 1px solid rgba(255, 54, 95, 0.3) !important;
+  padding: 10px 14px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  text-align: center !important;
+  margin-bottom: 20px !important;
+  line-height: 1.4 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}

@@ -2112,7 +2112,15 @@ useEffect(() => {
             
           </div>
 
-          {authTab === "listener" ? (
+          
+          {message && (
+            <div className="auth-screen-message" role="alert">
+              <span className="material-symbols-outlined" style={{ fontSize: "18px", marginRight: "8px" }}>info</span>
+              {message}
+            </div>
+          )}
+
+{authTab === "listener" ? (
             <>
               {/* ===================== LISTENER SCREEN ===================== */}
               
@@ -2638,9 +2646,7 @@ document.body
             </>
           )}
 
-          {message && (
-            <p className="auth-screen-message" role="status">{message}</p>
-          )}
+          
 
           <p className="auth-screen-footnote">Secure accounts powered by Supabase.</p>
         </section>
