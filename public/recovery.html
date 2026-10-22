@@ -101,7 +101,7 @@
         const SUPABASE_URL = 'https://wcuqehdequrealcndkyw.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_-iD2D0ploxUh4w_PLKOirQ_ih4JcGKt';
         
-        // Create Client WITHOUT auto-detect to prevent hanging
+        // Create Client WITHOUT auto-detect
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const form = document.getElementById('resetForm');
@@ -133,30 +133,27 @@
         }
 
         async function initAuth() {
-            // 1. Manually parse the hash for access_token (Implicit Flow)
-            const hash = window.location.hash.substring(1);
-            const hashParams = new URLSearchParams(hash);
-            const access_token = hashParams.get('access_token');
-            const refresh_token = hashParams.get('refresh_token');
+            const urlParams = new URLSearchParams(window.location.search);
+            const tokenHash = urlParams.get('token_hash');
+            const type = urlParams.get('type');
 
-            if (access_token && refresh_token) {
-                debugLog("Found access_token. Setting session...");
-                const { error } = await supabase.auth.setSession({
-                    access_token: access_token,
-                    refresh_token: refresh_token
+            if (tokenHash && type === 'recovery') {
+                debugLog("Found token_hash. Attempting verifyOtp...");
+                const { data, error } = await supabase.auth.verifyOtp({
+                    token_hash: tokenHash,
+                    type: 'recovery'
                 });
                 
-                if (!error) {
-                    debugLog("✅ Session established.");
+                if (!error && data.session) {
+                    debugLog("✅ verifyOtp success.");
                     unlockForm();
                     return;
                 } else {
-                    debugLog("❌ setSession Error: " + error.message);
+                    debugLog("❌ verifyOtp error: " + (error?.message || 'Unknown'));
                 }
             }
 
-            // 2. Fallback for PKCE code
-            const urlParams = new URLSearchParams(window.location.search);
+            // Fallback for PKCE code (if you ever switch back)
             const code = urlParams.get('code');
             if (code) {
                 debugLog("Found PKCE code. Exchanging...");
@@ -170,7 +167,7 @@
                 }
             }
 
-            // 3. Fallback for existing session
+            // Fallback check
             const { data } = await supabase.auth.getSession();
             if (data.session) {
                 debugLog("✅ Existing session found.");
