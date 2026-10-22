@@ -2403,7 +2403,7 @@ useEffect(() => {
                     <button  
                       type="button"
                       
-                      onClick={() => setShowCreatorResetModal(true)}>Reset Art ID</button>
+                      onClick={() => { alert('Button clicked!'); setShowCreatorResetModal(true); }}>Reset Art ID</button>
                   </>
                 ) : (
                   <button
