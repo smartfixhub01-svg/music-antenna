@@ -2111,6 +2111,13 @@ useEffect(() => {
             <img src="/music-antenna-logo.png" alt="Music Antenna" style={{ width: "100%", maxWidth: "180px", height: "auto", objectFit: "contain", margin: "0 auto 16px" }} />
             
           </div>
+          {message && (
+            <div className="auth-screen-message" role="alert">
+              <span className="material-symbols-outlined">info</span>
+              <span>{message}</span>
+            </div>
+          )}
+
 
           
           {message && (

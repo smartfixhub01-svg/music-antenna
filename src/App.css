@@ -2892,15 +2892,7 @@ body, .ma-app {
   border-color: #444;
 }
 
-.auth-screen-message {
-  margin: 18px 0 0;
-  padding: 10px 12px;
-  border-radius: 8px;
-  background: #1c2130;
-  color: #c9d1e1;
-  font-size: 12px;
-  line-height: 1.45;
-}
+
 
 .auth-screen-footnote {
   margin: 20px 0 0;
@@ -5431,20 +5423,30 @@ input::placeholder, textarea::placeholder {
 }
 
 /* ===== COMPACT PROFESSIONAL AUTH MESSAGE ===== */
+
+
+/* ===== PROFESSIONAL AUTH MESSAGE ===== */
 .auth-screen-message {
-  background-color: rgba(255, 54, 95, 0.1) !important;
-  color: #FF365F !important;
-  border: 1px solid rgba(255, 54, 95, 0.3) !important;
+  background-color: #FFF0F3 !important;
+  color: #FF0033 !important;
+  border: 1px solid rgba(255, 0, 51, 0.2) !important;
   padding: 10px 14px !important;
   border-radius: 8px !important;
   font-weight: 600 !important;
   font-size: 13px !important;
-  text-align: center !important;
-  margin-bottom: 20px !important;
-  line-height: 1.4 !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
   display: flex !important;
   align-items: center !important;
-  justify-content: center !important;
+  gap: 8px !important;
+  margin: 0 0 20px 0 !important;
+  text-align: left !important;
+  box-shadow: 0 4px 12px rgba(255, 0, 51, 0.08) !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
+.auth-screen-message .material-symbols-outlined {
+  font-size: 20px !important;
+  color: #FF0033 !important;
+}
+
+/* Hide old inline dark styles if any are left */
+p.auth-screen-message { display: none !important; }
