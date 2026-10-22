@@ -3121,8 +3121,8 @@ useEffect(() => {
                 onClick={() => { setShowChannelPage(false); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
                 <span className="material-symbols-outlined">search</span>
               </button>
-              <button className="yt-icon-btn" aria-label="More">
-                <span className="material-symbols-outlined" style={{ cursor: "pointer" }} onClick={() => setMessage("More options coming soon!")}>more_vert</span>
+              <button className="yt-icon-btn" aria-label="More" onClick={() => setShowMoreMenu(true)}>
+                <span className="material-symbols-outlined">more_vert</span>
               </button>
             </div>
           </div>
