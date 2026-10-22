@@ -4999,72 +4999,85 @@ input::placeholder, textarea::placeholder {
 
 
 
-/* ===== FINAL FIXED AUTH UI ===== */
+/* ===== SURGICAL AUTH UI FIX ===== */
 
 /* 1. Force Inputs to be visible, standard size, and have correct backgrounds */
-form input[type="email"], form input[type="password"],
-.auth-screen-card input[type="email"], .auth-screen-card input[type="password"] {
+.auth-screen-card input, 
+.auth-card input, 
+input[type="email"], 
+input[type="text"], 
+input[type="password"] {
+  width: 100% !important;
+  height: 48px !important;
   background-color: var(--ma-search-bg) !important;
   color: var(--ma-text) !important;
   border: 1px solid var(--ma-border) !important;
-  height: 48px !important;
   border-radius: 8px !important;
-  width: 100% !important;
   padding: 0 16px !important;
   margin-bottom: 16px !important;
   box-sizing: border-box !important;
   font-size: 15px !important;
-  transition: border-color 0.2s !important;
 }
 
-form input:focus {
+.auth-screen-card input:focus, 
+.auth-card input:focus {
   border-color: var(--ma-accent) !important;
   outline: none !important;
+  box-shadow: 0 0 0 2px rgba(255, 54, 95, 0.2) !important;
 }
 
-/* 2. Force the Submit Button to be pink and standard size */
-form button[type="submit"] {
+/* 2. Force ONLY the Submit Button to be a standard size and pink */
+.auth-screen-card button[type="submit"], 
+.auth-card button[type="submit"], 
+button.ma-auth-submit {
+  width: 100% !important;
+  height: 48px !important;
   background-color: var(--ma-accent) !important;
   color: #FFFFFF !important;
-  height: 48px !important;
-  width: 100% !important;
   border: none !important;
   border-radius: 8px !important;
-  font-weight: 700 !important;
   font-size: 16px !important;
+  font-weight: 700 !important;
   margin-top: 8px !important;
   margin-bottom: 16px !important;
   cursor: pointer !important;
 }
 
-/* 3. CRITICAL FIX: Stop the Eye icon from becoming a giant pink box */
-form button:not([type="submit"]) {
+.auth-screen-card button[type="submit"]:hover, 
+.auth-card button[type="submit"]:hover {
+  background-color: #e02e53 !important;
+}
+
+/* 3. Make sure the EYE icon stays small and transparent */
+.auth-screen-card button:not([type="submit"]), 
+.auth-card button:not([type="submit"]) {
   background: transparent !important;
   border: none !important;
+  color: var(--ma-text-secondary) !important;
   width: auto !important;
   height: auto !important;
-  padding: 0 12px !important;
-  color: var(--ma-text-secondary) !important;
-  box-shadow: none !important;
-  margin: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-/* 4. Reduce the overall size of the form */
-.auth-screen-card, form[class*="auth"], .auth-card {
-  max-width: 360px !important;
-  margin: 20px auto !important;
   padding: 0 !important;
-  background: transparent !important;
+  margin: 0 !important;
   box-shadow: none !important;
-  border: none !important;
 }
 
-/* 5. Fix the Blue Links */
-.auth-screen-card a, .auth-card a, .auth-screen-card span[role="button"] {
+/* 4. Make sure "Go to Creator" link is visible and pink */
+.auth-screen-card a, 
+.auth-card a, 
+.auth-screen-card span[role="button"], 
+.auth-screen-card button:not([type="submit"]):not([aria-label="Toggle password"]) {
   color: var(--ma-accent) !important;
   font-weight: 600 !important;
   font-size: 14px !important;
+  text-decoration: none !important;
+}
+
+/* 5. Ensure the form container itself is clean and doesn't have floating boxes */
+.auth-screen-card, .auth-card, form[class*="auth"] {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  max-width: 360px !important;
+  margin: 20px auto !important;
+  padding: 0 !important;
 }
