@@ -154,6 +154,27 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [editSaving, setEditSaving] = useState(false);
 
   const [showSubscriptionsFeed, setShowSubscriptionsFeed] = useState(false);
+  const [subsTab, setSubsTab] = useState("feed");
+  const [mySubscribers, setMySubscribers] = useState([]);
+
+  useEffect(() => {
+    if (showSubscriptionsFeed && subsTab === "subscribers" && session?.user?.id) {
+      setFeedLoading(true);
+      supabase.from("subscriptions").select("subscriber_id").eq("channel_id", session.user.id).then(({ data }) => {
+        if (data && data.length > 0) {
+          const ids = data.map(d => d.subscriber_id);
+          supabase.from("profiles").select("id, display_name, avatar_url").in("id", ids).then(({ data: profiles }) => {
+            setMySubscribers(profiles || []);
+            setFeedLoading(false);
+          });
+        } else {
+          setMySubscribers([]);
+          setFeedLoading(false);
+        }
+      });
+    }
+  }, [showSubscriptionsFeed, subsTab, session?.user?.id]);
+
   // Reload feed when Subscriptions is toggled
   useEffect(() => {
     loadMedia();
@@ -287,6 +308,7 @@ useEffect(() => {
     setShowShareModal(false);
     setShowCommentsModal(false);
     setShowSubscriptionsFeed(false);
+    setSubsTab("feed");
     
     // CRITICAL FIX: Only hide the watch page, DO NOT delete the video from memory!
     // This allows the Mini Player to keep playing in the background.
@@ -529,7 +551,7 @@ useEffect(() => {
           setMedia([]);
           setFeedLoading(false);
           setSearchLoading(false);
-          setMessage("You haven't subscribed to any channels yet.");
+          if (subsTab !== "subscribers") setMessage("You haven't subscribed to any channels yet.");
           return;
         }
       }
@@ -2700,7 +2722,15 @@ useEffect(() => {
               </button>
             </div>
 
-            <div className="yt-chips">
+            
+        {showSubscriptionsFeed && profile?.role === 'artist' && (
+          <div style={{ display: 'flex', gap: '10px', margin: '10px 20px', paddingBottom: '10px', borderBottom: '1px solid #333' }}>
+            <button onClick={() => setSubsTab('feed')} style={{ flex: 1, padding: '10px', background: subsTab === 'feed' ? '#ff365f' : '#212121', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>My Feed</button>
+            <button onClick={() => setSubsTab('subscribers')} style={{ flex: 1, padding: '10px', background: subsTab === 'subscribers' ? '#ff365f' : '#212121', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>My Subscribers</button>
+          </div>
+        )}
+
+        <div className="yt-chips">
               {["All", "Music", "Videos", "Shorts"].map((c) => (
                 <button
                   key={c}
@@ -2717,7 +2747,31 @@ useEffect(() => {
 
             
 
-            {feedLoading ? (
+            
+        {showSubscriptionsFeed && subsTab === 'subscribers' ? (
+          <div style={{ padding: '20px', paddingBottom: '100px' }}>
+            {mySubscribers.length === 0 ? (
+              <div className="ma-empty">
+                <h3>No subscribers yet</h3>
+                <p>When people subscribe to your channel, they will appear here.</p>
+              </div>
+            ) : (
+              mySubscribers.map(sub => (
+                <div key={sub.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', borderBottom: '1px solid #222' }}>
+                  {sub.avatar_url ? (
+                    <img src={sub.avatar_url} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} alt="" />
+                  ) : (
+                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                      {(sub.display_name || "U")[0].toUpperCase()}
+                    </div>
+                  )}
+                  <span style={{ fontWeight: 'bold' }}>{sub.display_name || "User"}</span>
+                </div>
+              ))
+            )}
+          </div>
+        ) : feedLoading ? (
+
               <div className="ma-empty">
                 <span className="ma-spinner">♫</span>
                 <h3>Loading your feed...</h3>
@@ -3628,7 +3682,7 @@ useEffect(() => {
         <button className="ma-create-nav" aria-label="Create" onClick={() => { if (profile?.role === "artist") { closeAllOverlays(); setShowUpload(true); window.scrollTo({ top: 0, behavior: "smooth" }); } else { setMessage("Become an Artist before uploading."); } }}>
           <span className="material-symbols-outlined">add</span>
         </button>
-        <button aria-label="Subscriptions" onClick={() => { closeAllOverlays(); setCategory("All"); setShowSubscriptionsFeed(true); setMessage("Loading subscriptions..."); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+        <button aria-label="Subscriptions" onClick={() => { closeAllOverlays(); setCategory("All"); setShowSubscriptionsFeed(true); setSubsTab("feed"); setMessage("Loading subscriptions..."); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
           <span className="material-symbols-outlined">subscriptions</span><small>Subscriptions</small>
         </button>
         <button aria-label="You" onClick={() => { closeAllOverlays(); setShowAccountPage(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
