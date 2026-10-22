@@ -2570,6 +2570,31 @@ document.body
                       type="button"
                       
                       onClick={() => setShowCreatorResetModal(true)}>Reset Art ID</button>
+
+        {showCreatorResetModal && (
+          <div style={{ position: "fixed", inset: 0, zIndex: 9999999, background: "rgba(15, 15, 15, 0.95)", display: "flex", justifyContent: "center", alignItems: "center", padding: "20px" }}>
+            <div style={{ width: "100%", maxWidth: "400px", padding: "24px", background: "#1C1C1C", borderRadius: "16px", border: "1px solid #303030", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>
+              <h3 style={{ textAlign: "center", color: "#F1F1F1", marginBottom: "8px", fontSize: "20px" }}>Reset Art ID & Password</h3>
+              <p style={{ textAlign: "center", color: "#AAAAAA", marginBottom: "24px", fontSize: "14px" }}>Enter your Creator email to recover your Art ID and reset your password.</p>
+              
+              <form onSubmit={handleCreatorReset}>
+                <input
+                  type="email"
+                  style={{ width: "100%", padding: "14px", borderRadius: "8px", background: "#272727", color: "#fff", border: "1px solid #303030", marginBottom: "20px", boxSizing: "border-box" }}
+                  placeholder="Creator email address"
+                  value={creatorResetEmail}
+                  onChange={(e) => setCreatorResetEmail(e.target.value)}
+                  required
+                />
+                <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
+                  <button type="button" onClick={() => setShowCreatorResetModal(false)} style={{ padding: "10px 16px", background: "transparent", color: "#AAAAAA", border: "none", fontWeight: "bold", cursor: "pointer" }}>Cancel</button>
+                  <button type="submit" style={{ padding: "10px 16px", background: "#FF0033", color: "#FFF", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}>Send Link</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
                   </>
                 ) : (
                   <button
