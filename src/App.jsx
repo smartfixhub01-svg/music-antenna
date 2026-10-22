@@ -28,6 +28,7 @@ export default function App() {
   const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [accountType, setAccountType] = useState("listener");
   const [justTriedRegister, setJustTriedRegister] = useState(false);
@@ -1941,12 +1942,29 @@ useEffect(() => {
                       </button>
                     </div>
                   </label>
+                  {mode === "register" && (
+                    <label style={{ marginTop: "16px", display: "block" }}>
+                      <span>Confirm Password</span>
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="Confirm your password"
+                        required
+                      />
+                    </label>
+                  )}
                   <button type="submit" className="auth-screen-submit" disabled={busy}>
                     {busy ? "Please wait..." : "Sign in as Listener"}
                   </button>
                 </form>
               ) : (
                 <form onSubmit={handleAuth} className="auth-screen-form">
+                  {message && (
+                    <div className={`auth-message-box ${message.toLowerCase().includes("error") || message.toLowerCase().includes("invalid") ? "error" : "success"}`}>
+                      {message}
+                    </div>
+                  )}
                   <label>
                     <span>Username</span>
                     <input
