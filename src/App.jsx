@@ -2004,6 +2004,10 @@ useEffect(() => {
         document.body
       )}
 
+      
+
+      
+        
       {showCreatorResetModal && createPortal(
         <div className="ma-modal-backdrop" onClick={() => setShowCreatorResetModal(false)}>
           <div className="ma-modal-card" onClick={e => e.stopPropagation()}>
@@ -2048,7 +2052,7 @@ useEffect(() => {
               />
               <div className="ma-modal-actions">
                 <button type="button" className="ma-modal-btn cancel" onClick={() => setShowCreatorResetModal(false)}>Cancel</button>
-                <button type="submit" className="ma-modal-btn primary" style={{ display: "block" }}>Send Link</button>
+                <button type="submit" className="ma-modal-btn primary">Send Link</button>
               </div>
             </form>
           </div>
