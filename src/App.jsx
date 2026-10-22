@@ -520,7 +520,7 @@ useEffect(() => {
         const name =
           user.user_metadata?.display_name ||
           user.email?.split("@")[0] ||
-          "Music Antenna User";
+          " User";
 
         let { data, error } = await supabase
           .from("profiles")
@@ -600,7 +600,7 @@ useEffect(() => {
     const url = window.location.origin + "?track=" + mediaItem.id;
     const shareData = {
       title: mediaItem.title,
-      text: "Check out " + mediaItem.title + " on Music Antenna!",
+      text: "Check out " + mediaItem.title + " on !",
       url: url
     };
 
@@ -907,7 +907,7 @@ useEffect(() => {
           throw new Error(`This is a ${prof?.role || 'Listener'} account. Please go back and use the correct sign-in page.`);
         }
 
-        setMessage("Welcome back to Music Antenna!");
+        setMessage("Welcome back to !");
       }
     } catch (error) {
       const raw = (error.message || "Authentication failed.").toLowerCase();
@@ -1872,7 +1872,7 @@ useEffect(() => {
       <main className="auth-page">
         <section className="auth-card">
           <div className="auth-logo">♫</div>
-          <h1>Music Antenna</h1>
+          <h1></h1>
           <p>Connecting securely...</p>
         </section>
       </main>
@@ -1953,11 +1953,11 @@ useEffect(() => {
               ) : (
                 <form onSubmit={handleAuth} className="auth-screen-form">
                   <div style={{ display: "flex", justifyContent: "center", marginBottom: "24px" }}>
-                    <img src="/music-antenna-logo.png" alt="Music Antenna" style={{ width: "100%", maxWidth: "200px", height: "auto", objectFit: "contain" }} />
+                    <img src="/music-antenna-logo.png" alt="" style={{ width: "100%", maxWidth: "200px", height: "auto", objectFit: "contain" }} />
                   </div>
 
                   <div className="ma-auth-logo-wrapper">
-                    <img src="/music-antenna-logo.png" alt="Music Antenna" />
+                    <img src="/music-antenna-logo.png" alt="" />
                   </div>
                   
                   
@@ -2168,7 +2168,7 @@ useEffect(() => {
               ) : (
                 <form onSubmit={handleAuth} className="auth-screen-form">
                   <div style={{ display: "flex", justifyContent: "center", marginBottom: "24px" }}>
-                    <img src="/music-antenna-logo.png" alt="Music Antenna" style={{ width: "100%", maxWidth: "200px", height: "auto", objectFit: "contain" }} />
+                    <img src="/music-antenna-logo.png" alt="" style={{ width: "100%", maxWidth: "200px", height: "auto", objectFit: "contain" }} />
                   </div>
 
                   <label>
@@ -2334,7 +2334,7 @@ useEffect(() => {
         
       <header className="ma-header">
         <div className="ma-brand" style={{ display: "flex", alignItems: "center", cursor: "pointer", padding: "4px" }} onClick={() => { closeAllOverlays(); setCategory("All"); setSearch(""); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
-              <img src="/music-antenna-logo.png" alt="Music Antenna" style={{ height: "36px", width: "auto", objectFit: "contain" }} />
+              <img src="/music-antenna-logo.png" alt="" style={{ height: "36px", width: "auto", objectFit: "contain" }} />
             </div>
 
         <div className="ma-search">
@@ -2509,7 +2509,7 @@ useEffect(() => {
 
           <div className="ma-sidebar-bottom">
             <span className="ma-brand-icon">♫</span>
-            <p>Music Antenna</p>
+            <p></p>
             <small>Your sound. Your world.</small>
           </div>
         </aside>
@@ -2533,7 +2533,7 @@ useEffect(() => {
 
               <p className="ma-muted">
                 Your artist profile is active. Upload your music or videos
-                and share your work with Music Antenna listeners.
+                and share your work with  listeners.
               </p>
 
               <button
@@ -3001,7 +3001,7 @@ useEffect(() => {
           </section>
 
           <footer className="ma-footer">
-            <span>♫ Music Antenna</span>
+            <span>♫ </span>
             <span>Your sound. Your world.</span>
           </footer>
         </main>
@@ -3045,7 +3045,7 @@ useEffect(() => {
                     {activeMedia.thumbnailUrl ? (
                       <img src={activeMedia.thumbnailUrl} alt="" />
                     ) : (
-                      <img src="/logo.png" alt="Music Antenna" style={{ height: "36px", width: "auto", objectFit: "contain", borderRadius: "6px" }} />
+                      <img src="/logo.png" alt="" style={{ height: "36px", width: "auto", objectFit: "contain", borderRadius: "6px" }} />
                     )}
                   </div>
                   <audio src={activeMedia.playbackUrl} controls autoPlay onPlay={handleFirstPlay} />
@@ -3376,7 +3376,7 @@ useEffect(() => {
                   </p>
                   <p className="yt-channel-subscribers">{subscriberCount} subscribers</p>
                   <p className="yt-channel-bio">
-                    {channelProfile.bio || "Welcome to my Music Antenna channel."}
+                    {channelProfile.bio || "Welcome to my  channel."}
                   </p>
                 </div>
               </div>
@@ -3910,7 +3910,7 @@ useEffect(() => {
                         {subsPageTab === 'subbers' ? 'group' : 'music_note'}
                       </span>
                       <h3 style={{ color: "var(--ma-text-primary)", fontSize: "18px", margin: "0 0 8px 0" }}>{subsPageTab === 'subbers' ? 'No subscribers yet' : 'Your next favourite creator is waiting.'}</h3>
-                      <p style={{ fontSize: "14px", color: "var(--ma-text-secondary)", margin: "0 0 20px 0" }}>{subsPageTab === 'subbers' ? 'When people subscribe to your channel, they will appear here.' : 'Discover music and videos from creators on Music Antenna.'}</p>
+                      <p style={{ fontSize: "14px", color: "var(--ma-text-secondary)", margin: "0 0 20px 0" }}>{subsPageTab === 'subbers' ? 'When people subscribe to your channel, they will appear here.' : 'Discover music and videos from creators on .'}</p>
                       {subsPageTab === 'subs' && (
                         <button onClick={() => { setShowSubscriptionsPage(false); setCategory("All"); }} style={{ background: "#FF0033", color: "#fff", border: "none", borderRadius: "8px", padding: "12px 24px", fontWeight: 700, cursor: "pointer" }}>
                           Discover Creators
