@@ -5240,75 +5240,40 @@ input::placeholder, textarea::placeholder {
 
 
 
-/* ===== SAFE CSS LOGO REPLACEMENT ===== */
 
-/* --- 1. AUTH SCREEN LOGO --- */
-/* Hide the old icon and text */
-.auth-screen-head > * {
+
+/* ===== FINAL LOGO FIX ===== */
+
+/* 1. Hide the old pink icon and "Music Antenna" text */
+.auth-screen-head-icon, 
+.auth-screen-head h2, 
+.auth-screen-head span {
   display: none !important;
 }
+
+/* 2. Style the new big logo */
+.ma-big-logo {
+  display: block !important;
+  width: auto !important;
+  height: 64px !important;
+  max-width: 100% !important;
+  object-fit: contain !important;
+  margin: 0 auto 20px auto !important;
+}
+
+/* 3. Ensure header layout is clean */
 .auth-screen-head {
-  font-size: 0 !important; /* Hides raw text nodes */
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  margin-bottom: 24px !important;
 }
 
-/* Inject the big logo */
-.auth-screen-head::before {
-  content: "";
-  display: block;
-  width: 100%;
-  max-width: 260px;
-  height: 80px;
-  margin: 0 auto 24px auto;
-  background-image: url('/music-antenna-logo.png');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-/* --- 2. TOP NAVBAR LOGO --- */
-/* Hide the old icon and text */
-.ma-brand > * {
-  display: none !important;
-}
-.ma-brand {
-  font-size: 0 !important;
-}
-
-/* Inject the small logo */
-.ma-brand::before {
-  content: "";
-  display: block;
-  width: 140px;
-  height: 36px;
-  background-image: url('/music-antenna-logo.png');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: left center;
-}
-
-
-/* ===== FINAL CLEAN LOGO STYLING ===== */
-
-/* 1. Login Card Logo */
-.ma-auth-logo-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  margin-bottom: 24px;
-}
-.ma-auth-logo-wrapper img {
-  width: 100%;
-  max-width: 220px;
-  height: auto;
-  object-fit: contain;
-  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15));
-}
-
-/* 2. Top Navbar Logo */
+/* 4. Fix the Top Navbar logo (it's already in the JSX) */
 .ma-brand img {
   height: 36px !important;
   width: auto !important;
   object-fit: contain !important;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
 }
