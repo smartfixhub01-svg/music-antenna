@@ -580,7 +580,7 @@ useEffect(() => {
       if (error) setMessage(error.message);
       setSession(data?.session ?? null);
           setTimeout(() => {
-            setTimeout(() => { if (alive) setLoading(false); }, 5000);
+            setTimeout(() => { if (alive) setLoading(false); }, 3000);
           }, 500);
     });
 
