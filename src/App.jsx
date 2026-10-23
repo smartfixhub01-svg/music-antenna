@@ -4753,6 +4753,69 @@ document.body
       )}
 
 
+      {showMoreMenu && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 10000, display: "flex", alignItems: "flex-end", backdropFilter: "blur(4px)" }} onClick={() => setShowMoreMenu(false)}>
+          <div style={{ 
+            background: "var(--ma-bg, #ffffff)", 
+            color: "var(--ma-text, #0f0f0f)", 
+            width: "100%", 
+            borderTopLeftRadius: "20px", 
+            borderTopRightRadius: "20px", 
+            padding: "20px", 
+            paddingBottom: "40px",
+            boxShadow: "0 -4px 20px rgba(0,0,0,0.15)"
+          }} onClick={e => e.stopPropagation()}>
+
+            <div style={{ width: "40px", height: "4px", background: "var(--ma-border, #ccc)", borderRadius: "2px", margin: "0 auto 20px" }}></div>
+
+            <p style={{ color: "var(--ma-text-secondary, #606060)", fontSize: "14px", marginBottom: "12px", fontWeight: "bold" }}>Playback Speed</p>
+            <div style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
+              {[1, 1.25, 1.5, 2].map(speed => (
+                <button key={speed} onClick={() => {
+                  const mediaEl = videoRef.current || audioRef.current;
+                  if (mediaEl) {
+                    mediaEl.playbackRate = speed;
+                    setMessage(`Speed set to ${speed}x`);
+                  } else {
+                    setMessage("Player is not ready.");
+                  }
+                  setShowMoreMenu(false);
+                }} style={{ flex: 1, padding: "10px", background: "var(--ma-surface, #f2f2f2)", color: "var(--ma-text, #0f0f0f)", border: "1px solid var(--ma-border, #e5e5e5)", borderRadius: "10px", fontSize: "14px", fontWeight: "600", cursor: "pointer", transition: "all 0.2s" }}>
+                  {speed}x
+                </button>
+              ))}
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              <button onClick={() => { fetchPlaylists(); setShowPlaylistModal(true); setShowMoreMenu(false); }} style={{ padding: "16px", background: "transparent", color: "var(--ma-text, #0f0f0f)", border: "none", borderRadius: "10px", fontSize: "15px", display: "flex", alignItems: "center", gap: "16px", cursor: "pointer", textAlign: "left" }}>
+                <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary, #606060)" }}>playlist_add</span> Save to playlist
+              </button>
+
+              <a href={activeMedia?.url || activeMedia?.media_url} download target="_blank" rel="noopener noreferrer" onClick={() => setShowMoreMenu(false)} style={{ textDecoration: "none", padding: "16px", background: "transparent", color: "var(--ma-text, #0f0f0f)", border: "none", borderRadius: "10px", fontSize: "15px", display: "flex", alignItems: "center", gap: "16px", cursor: "pointer" }}>
+                <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary, #606060)" }}>download</span> Download Media
+              </a>
+
+              <button onClick={() => { handleShare(activeMedia); setShowMoreMenu(false); }} style={{ padding: "16px", background: "transparent", color: "var(--ma-text, #0f0f0f)", border: "none", borderRadius: "10px", fontSize: "15px", display: "flex", alignItems: "center", gap: "16px", cursor: "pointer", textAlign: "left" }}>
+                <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary, #606060)" }}>share</span> Share Link
+              </button>
+
+              <button onClick={() => { setMessage("Video reported. Thank you."); setShowMoreMenu(false); }} style={{ padding: "16px", background: "transparent", color: "var(--ma-text, #0f0f0f)", border: "none", borderRadius: "10px", fontSize: "15px", display: "flex", alignItems: "center", gap: "16px", cursor: "pointer", textAlign: "left" }}>
+                <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary, #606060)" }}>flag</span> Report Video
+              </button>
+
+              {session?.user?.id === activeMedia?.artist_id && (
+                <button onClick={() => { setEditingMedia(activeMedia); setShowWatchPage(false); setShowMoreMenu(false); }} style={{ padding: "16px", background: "transparent", color: "var(--ma-text, #0f0f0f)", border: "none", borderRadius: "10px", fontSize: "15px", display: "flex", alignItems: "center", gap: "16px", cursor: "pointer", textAlign: "left" }}>
+                  <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary, #606060)" }}>edit</span> Edit Video
+                </button>
+              )}
+            </div>
+
+            <button onClick={() => setShowMoreMenu(false)} style={{ width: "100%", padding: "16px", background: "var(--ma-surface, #f2f2f2)", color: "var(--ma-text, #0f0f0f)", border: "1px solid var(--ma-border, #e5e5e5)", borderRadius: "10px", marginTop: "16px", fontSize: "15px", cursor: "pointer", fontWeight: "bold" }}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
       {showCommentsModal && (
         <div 
           style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.8)", zIndex: 9999, display: "flex", flexDirection: "column", justifyContent: "flex-end" }}
