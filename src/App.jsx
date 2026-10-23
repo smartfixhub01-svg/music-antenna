@@ -3622,18 +3622,18 @@ document.body
             )}
           </div>
         ) : feedLoading ? (
-              <div style={{ padding: "16px" }}>
+              <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "20px" }}>
                 {[1, 2, 3].map((i) => (
-                  <div key={i} style={{ marginBottom: "24px", animation: "pulse 1.5s infinite" }}>
+                  <div key={i} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                     {/* Thumbnail Skeleton */}
-                    <div style={{ width: "100%", height: "200px", background: "var(--ma-bg-secondary)", borderRadius: "12px", marginBottom: "12px" }}></div>
+                    <div style={{ width: "100%", height: "220px", background: "var(--ma-bg-secondary)", borderRadius: "12px", animation: "pulse 1.5s infinite" }}></div>
                     
                     {/* Info Skeleton */}
                     <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-                      <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "var(--ma-bg-secondary)", flexShrink: 0 }}></div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ width: "60%", height: "14px", background: "var(--ma-bg-secondary)", borderRadius: "4px", marginBottom: "8px" }}></div>
-                        <div style={{ width: "40%", height: "12px", background: "var(--ma-bg-secondary)", borderRadius: "4px" }}></div>
+                      <div style={{ width: "48px", height: "48px", borderRadius: "50%", background: "var(--ma-bg-secondary)", animation: "pulse 1.5s infinite", flexShrink: 0 }}></div>
+                      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "8px" }}>
+                        <div style={{ width: "60%", height: "16px", background: "var(--ma-bg-secondary)", borderRadius: "4px", animation: "pulse 1.5s infinite" }}></div>
+                        <div style={{ width: "40%", height: "12px", background: "var(--ma-bg-secondary)", borderRadius: "4px", animation: "pulse 1.5s infinite" }}></div>
                       </div>
                     </div>
                   </div>
