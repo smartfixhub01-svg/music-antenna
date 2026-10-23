@@ -3016,7 +3016,7 @@ document.body
             {menuOpen && (
               <>
                 <div className="ma-menu-backdrop" onClick={() => setMenuOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 99999, backdropFilter: "blur(2px)" }} />
-                <div className="ma-avatar-menu" role="menu" style={{ position: "fixed", top: 0, right: 0, height: "100dvh", width: "220px", background: "var(--ma-bg, #ffffff)", display: "block", overflowY: "auto", zIndex: 100000, boxShadow: "-8px 0 30px rgba(0,0,0,0.2)", padding: "16px 0", paddingBottom: "40px", borderLeft: "1px solid var(--ma-border, #e5e5e5)" }}>
+                <div className="ma-avatar-menu" role="menu" style={{ position: "fixed", top: "70px", right: "12px", height: "auto", maxHeight: "calc(100dvh - 100px)", width: "200px", background: "var(--ma-bg, #ffffff)", display: "flex", flexDirection: "column", overflowY: "auto", zIndex: 100000, boxShadow: "0 4px 20px rgba(0,0,0,0.2)", borderRadius: "12px", padding: "16px 0", border: "1px solid var(--ma-border, #e5e5e5)" }}>
                   <div className="ma-avatar-menu-header">
                     {profile?.avatar_url ? (
                       <img className="ma-avatar-menu-img" src={profile.avatar_url} alt="" />
