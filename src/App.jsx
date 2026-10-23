@@ -742,6 +742,36 @@ useEffect(() => {
     }
   };
 
+  
+  function handleVoiceSearch() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setMessage("Voice search is not supported in this browser.");
+      return;
+    }
+    
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      setMessage("🎤 Listening... Speak now.");
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setSearch(transcript);
+      setMessage(`Searching for: "${transcript}"`);
+    };
+
+    recognition.onerror = (event) => {
+      setMessage("Voice search error: " + event.error);
+    };
+
+    recognition.start();
+  }
+
   async function loadMedia() {
     
     setFeedLoading(true);
@@ -2760,15 +2790,20 @@ document.body
             </div>
 
         <div className="ma-search">
-          <div className="ma-search-box" style={{ display: "flex", alignItems: "center" }}>
-            <input aria-label="Search" placeholder="Search" value={search}
-              onChange={(e) => setSearch(e.target.value)} style={{ flex: 1 }} />
+          <div className="ma-search-box">
+            <span className="material-symbols-outlined ma-search-icon">search</span>
+            <input aria-label="Search" placeholder="Search Music Antenna" value={search}
+              onChange={(e) => setSearch(e.target.value)} />
+            
+            {/* THE ROLLING SPINNER */}
             {searchLoading && (
-              <span className="material-symbols-outlined" style={{ animation: "spin 1s linear infinite", fontSize: "18px", color: "var(--ma-accent)", marginRight: "12px", flexShrink: 0 }}>
+              <span className="material-symbols-outlined ma-search-spinner" style={{ animation: "spin 1s linear infinite" }}>
                 sync
               </span>
             )}
-            {search && (
+            
+            {/* CLEAR BUTTON */}
+            {search && !searchLoading && (
               <button className="ma-search-clear" onClick={() => setSearch("")} aria-label="Clear">
                 <span className="material-symbols-outlined">close</span>
               </button>
@@ -2777,7 +2812,7 @@ document.body
           <button className="ma-search-btn" aria-label="Search">
             <span className="material-symbols-outlined">search</span>
           </button>
-          <button className="ma-mic-btn" aria-label="Voice search">
+          <button className="ma-mic-btn" aria-label="Voice search" onClick={handleVoiceSearch}>
             <span className="material-symbols-outlined">mic</span>
           </button>
         </div>
