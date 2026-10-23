@@ -1116,7 +1116,7 @@ useEffect(() => {
           throw new Error(`This is a ${prof?.role || 'Listener'} account. Please go back and use the correct sign-in page.`);
         }
 
-        setMessage("Welcome back to !");
+        setMessage("Welcome back to Music Antenna!");
       }
     } catch (error) {
       const raw = (error.message || "Authentication failed.").toLowerCase();
@@ -3510,7 +3510,7 @@ document.body
             </div>
           )}
           
-          <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 px-4 mt-2 mb-2">Welcome back, <span className="text-black dark:text-white font-bold">Fikie</span>!</p>
+          {message && message.includes("Welcome back") && <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 px-4 mt-2 mb-2">{message}</p>}
           <div className="yt-chips">
               {["All", "Music", "Videos", "Shorts"].map((c) => (
                 <button
@@ -4729,7 +4729,7 @@ document.body
       )}
 
       {/* COMMENTS MODAL - BULLETPROOF VERSION */}
-      {message && (
+      {message && !message.includes("Welcome back") && (
         <div style={{ 
           position: "fixed", 
           bottom: "90px", 
