@@ -163,14 +163,20 @@ export default function App() {
     const dx = e.clientX - dragRef.current.startX;
     const dy = e.clientY - dragRef.current.startY;
 
-    const newLeft = dragRef.current.initialLeft + dx;
-    const newTop = dragRef.current.initialTop + dy;
+    let newLeft = dragRef.current.initialLeft + dx;
+    let newTop = dragRef.current.initialTop + dy;
 
+    // SMART BOUNDARIES: Keep the player on screen
     const el = e.currentTarget;
     if (el) {
-      el.style.left = `${newLeft}px`;
-      el.style.top = `${newTop}px`;
-      el.style.bottom = 'auto';
+      const maxLeft = window.innerWidth - el.offsetWidth - 4;
+      const maxTop = window.innerHeight - el.offsetHeight - 4;
+      
+      newLeft = Math.max(4, Math.min(maxLeft, newLeft));
+      newTop = Math.max(4, Math.min(maxTop, newTop));
+
+      // Move smoothly using transform relative to the initial position
+      el.style.transform = `translate3d(${newLeft - dragRef.current.initialLeft}px, ${newTop - dragRef.current.initialTop}px, 0)`;
     }
   };
 
