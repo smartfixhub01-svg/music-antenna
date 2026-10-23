@@ -2809,9 +2809,7 @@ document.body
               </button>
             )}
           </div>
-          <button className="ma-search-btn" aria-label="Search">
-            <span className="material-symbols-outlined">search</span>
-          </button>
+          
           <button className="ma-mic-btn" aria-label="Voice search" onClick={handleVoiceSearch}>
             <span className="material-symbols-outlined">mic</span>
           </button>
@@ -3338,7 +3336,15 @@ document.body
           </div>
         )}
 
-        <div className="yt-chips">
+        
+          {message && (
+            <div className="ma-inline-message">
+              <span className="material-symbols-outlined">info</span>
+              {message}
+            </div>
+          )}
+          
+          <div className="yt-chips">
               {["All", "Music", "Videos", "Shorts"].map((c) => (
                 <button
                   key={c}
