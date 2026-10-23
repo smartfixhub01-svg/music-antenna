@@ -93,6 +93,7 @@ export default function App() {
   const [media, setMedia] = useState([]);
   const [feedLoading, setFeedLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const [searchSummary, setSearchSummary] = useState("");
   const [searchLoading, setSearchLoading] = useState(false);
   const [navVisible, setNavVisible] = useState(true);
 
@@ -299,8 +300,20 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
           setMySubscribers([]);
           setFeedLoading(false);
         }
-      });
-    }
+        });
+        const audioCount = items.filter(i => i.media_type === "audio").length;
+        const videoCount = items.filter(i => i.media_type === "video").length;
+        if (items.length > 0) {
+          let parts = [];
+          if (audioCount > 0) parts.push(`${audioCount} audio`);
+          if (videoCount > 0) parts.push(`${videoCount} video${videoCount > 1 ? "s" : ""}`);
+          setSearchSummary(`Found ${parts.join(" and ")} for "${search}"`);
+        } else {
+          setSearchSummary(`No results found for "${search}"`);
+        }
+      } else {
+        setSearchSummary("");
+      }
   }, [showSubscriptionsFeed, subsTab, session?.user?.id]);
 
   // Reload feed when Subscriptions is toggled
@@ -3337,10 +3350,13 @@ document.body
         )}
 
         
-          {message && (
-            <div className="ma-inline-message">
-              <span className="material-symbols-outlined">info</span>
-              {message}
+          
+          
+          
+          {searchSummary && (
+            <div className="ma-inline-message" style={{ marginBottom: "12px", marginTop: "0" }}>
+              <span className="material-symbols-outlined">search</span>
+              {searchSummary}
             </div>
           )}
           

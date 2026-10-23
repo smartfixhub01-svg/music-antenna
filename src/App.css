@@ -5578,27 +5578,9 @@ p
 }
 
 /* ===== PERFECTLY ALIGNED HOME SEARCH BAR ===== */
-.ma-search {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex: 1;
-  min-width: 0; /* Forces the container to shrink properly */
-  margin: 0 8px;
-}
 
-.ma-search-box {
-  display: flex;
-  align-items: center;
-  flex: 1;
-  min-width: 0; /* CRITICAL: Allows the input to shrink inside the flex container */
-  background-color: var(--ma-bg-secondary) !important;
-  border: 1px solid var(--ma-border) !important;
-  border-radius: 20px;
-  height: 36px; /* Shrunk to match mobile header height */
-  padding: 0 10px;
-  transition: all 0.2s ease;
-}
+
+
 
 .ma-search-box:focus-within {
   border-color: var(--ma-accent) !important;
@@ -5674,25 +5656,8 @@ p
 }
 
 /* ===== OPTIMIZED SEARCH BAR (No extra button) ===== */
-.ma-search {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-  min-width: 0;
-  margin: 0 8px;
-}
-.ma-search-box {
-  display: flex;
-  align-items: center;
-  flex: 1;
-  min-width: 0;
-  background-color: var(--ma-bg-secondary) !important;
-  border: 1px solid var(--ma-border) !important;
-  border-radius: 20px;
-  height: 38px;
-  padding: 0 12px;
-}
+
+
 .ma-search-box:focus-within {
   border-color: var(--ma-accent) !important;
   box-shadow: 0 0 0 2px rgba(255, 54, 95, 0.2) !important;
@@ -5728,4 +5693,62 @@ p
 }
 .ma-inline-message .material-symbols-outlined {
   font-size: 20px;
+}
+
+/* ===== FIXED SEARCH BAR (No Black Background) ===== */
+.ma-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  margin: 0 8px;
+  background: transparent !important; /* KILLS THE BLACK SHAPE */
+}
+.ma-search-box {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  background-color: var(--ma-bg-secondary) !important;
+  border: 1px solid var(--ma-border) !important;
+  border-radius: 20px;
+  height: 38px;
+  padding: 0 12px;
+}
+.ma-search-box:focus-within {
+  border-color: var(--ma-accent) !important;
+  box-shadow: 0 0 0 2px rgba(255, 54, 95, 0.2) !important;
+}
+.ma-mic-btn {
+  background-color: var(--ma-bg-secondary) !important;
+  border: 1px solid var(--ma-border) !important;
+  color: var(--ma-text-primary) !important;
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* ===== SEARCH SUMMARY MESSAGE ===== */
+.ma-inline-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 16px 12px;
+  padding: 10px 14px;
+  background-color: rgba(255, 54, 95, 0.1);
+  color: var(--ma-accent);
+  border: 1px solid rgba(255, 54, 95, 0.3);
+  border-radius: 8px;
+  font-size: 13px; /* Resized words */
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.ma-inline-message .material-symbols-outlined {
+  font-size: 18px;
 }
