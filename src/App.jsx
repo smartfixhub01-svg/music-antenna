@@ -642,6 +642,12 @@ useEffect(() => {
   }
 
   async function createNotification(targetUserId, type, mediaId = null) {
+    // 🛑 SECURITY LOCK: Password changes must NEVER trigger a notification
+    if (type === "password_change" || type === "password_reset") {
+      console.log("Silent action: Password change notification blocked.");
+      return;
+    }
+    
     if (!session?.user?.id || session.user.id === targetUserId) return;
     await supabase.from("notifications").insert({
       user_id: targetUserId,
@@ -2861,7 +2867,6 @@ document.body
                 <button className="ma-icon-btn" style={{ color: "var(--ma-accent)" }} onClick={async () => {
                   await supabase.from("notifications").delete().in("id", selectedNotifs);
                   setNotifications(prev => prev.filter(n => !selectedNotifs.includes(n.id)));
-                  setUnreadCount(prev => Math.max(0, prev - selectedNotifs.filter(id => !notifications.find(n => n.id === id)?.is_read).length));
                   setSelectedNotifs([]);
                 }}>
                   <span className="material-symbols-outlined">delete</span>
@@ -2874,22 +2879,29 @@ document.body
             {notifications.length === 0 ? (
               <div className="ma-empty-state" style={{ marginTop: "40px" }}>
                 <span className="material-symbols-outlined">notifications_off</span>
-                <h3>You're all caught up</h3>
-                <p>New likes, comments, and subscribers will appear here.</p>
+                <h3>No evidence found</h3>
+                <p>New likes, comments, and subscribers will be logged here.</p>
               </div>
             ) : (
               notifications.map(n => {
                 const isSelected = selectedNotifs.includes(n.id);
                 const actorName = n.actor?.display_name || "Someone";
-                const date = new Date(n.created_at);
-                const dateStr = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} at ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
                 
+                // Precise Date & Time (Evidence)
+                const date = new Date(n.created_at);
+                const dateStr = date.toLocaleString('en-US', { 
+                  month: 'short', day: 'numeric', year: 'numeric', 
+                  hour: 'numeric', minute: '2-digit', hour12: true 
+                });
+
+                // Detective Icons
+                let icon = "notifications";
                 let message = "";
-                if (n.type === "like") message = `${actorName} liked your video.`;
-                else if (n.type === "comment") message = `${actorName} commented on your video.`;
-                else if (n.type === "subscribe") message = `${actorName} subscribed to your channel.`;
-                else if (n.type === "new_video") message = `${actorName} released a new video. Tap to watch.`;
-                else message = `${actorName} interacted with your content.`;
+                if (n.type === "like") { icon = "thumb_up"; message = `${actorName} liked your video.`; }
+                else if (n.type === "comment") { icon = "comment"; message = `${actorName} commented on your video.`; }
+                else if (n.type === "subscribe") { icon = "person_add"; message = `${actorName} subscribed to your channel.`; }
+                else if (n.type === "new_video") { icon = "video_library"; message = `${actorName} released a new video. Tap to watch.`; }
+                else { message = `${actorName} interacted with your content.`; }
 
                 return (
                   <div key={n.id} className={`ma-notif-card ${!n.is_read ? 'unread' : ''} ${isSelected ? 'selected' : ''}`}>
@@ -2918,7 +2930,10 @@ document.body
                         {n.actor?.avatar_url ? <img src={n.actor.avatar_url} alt="" /> : <span className="material-symbols-outlined">person</span>}
                       </div>
                       <div className="ma-notif-text">
-                        <p>{message}</p>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
+                          <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "var(--ma-accent)" }}>{icon}</span>
+                          <p style={{ margin: 0 }}>{message}</p>
+                        </div>
                         <span>{dateStr}</span>
                       </div>
                     </div>
