@@ -4673,6 +4673,7 @@ document.body
       )}
 
 
+      <style>{`.ma-nav-yt button small, .ma-nav-yt button .material-symbols-outlined { color: var(--ma-text, #0f0f0f) !important; }`}</style>
     <nav className={"ma-mobile-nav ma-nav-yt" + (navVisible ? "" : " ma-mobile-nav-hidden")} aria-label="Main navigation">
         <button aria-label="Home" onClick={() => { closeAllOverlays(); setCategory("All"); setShowSubscriptionsFeed(false); setSearch(""); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
           <span className="material-symbols-outlined">home</span><small>Home</small>
