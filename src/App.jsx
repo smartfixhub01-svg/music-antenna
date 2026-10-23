@@ -2988,7 +2988,7 @@ document.body
                 <div className="yt-upload-topbar-right" />
               </div>
 
-              <form className="yt-upload-form" onSubmit={handleUpload}>
+              <form className="yt-upload-form theme-aware-form" onSubmit={handleUpload}>
                 <div className="yt-upload-dropzone">
                   <span className="material-symbols-outlined">upload</span>
                   <p>Drag and drop video or audio files</p>
@@ -4077,13 +4077,18 @@ document.body
       {showManagePage && (
         <section className="yt-manage-page">
           <div className="yt-manage-topbar">
-            <button className="yt-icon-btn" onClick={() => { setShowManagePage(false); setEditingMedia(null); setShowAccountPage(true); }}>
+            <button className="yt-icon-btn" onClick={() => { 
+              if (editingMedia) {
+                setEditingMedia(null); 
+              } else {
+                setShowManagePage(false); 
+                setShowAccountPage(true); 
+              }
+            }}>
               <span className="material-symbols-outlined">arrow_back</span>
             </button>
-            <h2 style={{ fontSize: "18px", margin: 0, fontWeight: "700" }}>Manage Content</h2>
-            <button className="yt-icon-btn" onClick={() => { setShowManagePage(false); setShowUpload(true); }}>
-              <span className="material-symbols-outlined">add</span>
-            </button>
+            <h2 style={{ fontSize: "18px", margin: 0, fontWeight: "700" }}>{editingMedia ? "Edit Video" : "Manage Content"}</h2>
+            <div style={{ width: "40px" }}></div>
           </div>
 
           {editingMedia ? (
@@ -4155,47 +4160,46 @@ document.body
                     <span className="material-symbols-outlined">video_library</span>
                     <h3>No uploads yet</h3>
                     <p>Your published tracks and videos will appear here.</p>
-                    <button className="ma-btn-primary" onClick={() => { setShowManagePage(false); setShowUpload(true); }} style={{ width: "auto", padding: "12px 24px", marginTop: "16px" }}>
-                      Upload Media
-                    </button>
                   </div>
                 ) : (
                   manageMedia
                     .filter(item => item.title.toLowerCase().includes(manageSearch.toLowerCase()))
                     .map(item => (
                     <div key={item.id} className="ma-manage-card">
-                      <div className="ma-manage-thumb">
-                        {item.thumbnail_path ? (
-                          <img src={supabase.storage.from("track-covers").getPublicUrl(item.thumbnail_path).data.publicUrl} alt="" />
-                        ) : (
-                          <div className="ma-manage-thumb-fallback">
-                            <span className="material-symbols-outlined">movie</span>
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div className="ma-manage-info">
-                        <h4>{item.title}</h4>
-                        <div className="ma-manage-meta">
-                          <span>{item.views || 0} views</span>
-                          <span>•</span>
-                          <span>{new Date(item.created_at).toLocaleDateString()}</span>
+                      <div className="ma-manage-top-row">
+                        <div className="ma-manage-thumb">
+                          {item.thumbnail_path ? (
+                            <img src={supabase.storage.from("track-covers").getPublicUrl(item.thumbnail_path).data.publicUrl} alt="" />
+                          ) : (
+                            <div className="ma-manage-thumb-fallback">
+                              <span className="material-symbols-outlined">movie</span>
+                            </div>
+                          )}
                         </div>
-                        <div className="ma-manage-badges">
-                          <span className={`ma-badge ${item.visibility || 'public'}`}>{item.visibility || 'Public'}</span>
-                          <span className={`ma-badge ${item.media_type}`}>{item.media_type}</span>
+                        
+                        <div className="ma-manage-info">
+                          <h4>{item.title}</h4>
+                          <div className="ma-manage-meta">
+                            <span>{item.views || 0} views</span>
+                            <span>•</span>
+                            <span>{new Date(item.created_at).toLocaleDateString()}</span>
+                          </div>
+                          <div className="ma-manage-badges">
+                            <span className={`ma-badge ${item.visibility || 'public'}`}>{item.visibility || 'Public'}</span>
+                            <span className={`ma-badge ${item.media_type}`}>{item.media_type}</span>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="ma-manage-actions">
+                      <div className="ma-manage-bottom-row">
                         <button className="ma-action-btn play" onClick={() => { setShowManagePage(false); openPlayer(item); }} title="Play">
-                          <span className="material-symbols-outlined">play_arrow</span>
+                          <span className="material-symbols-outlined">play_arrow</span> Play
                         </button>
                         <button className="ma-action-btn edit" onClick={() => startEditingVideo(item)} title="Edit">
-                          <span className="material-symbols-outlined">edit</span>
+                          <span className="material-symbols-outlined">edit</span> Edit
                         </button>
                         <button className="ma-action-btn delete" onClick={() => { if(window.confirm("Delete this upload permanently?")) handleDeleteVideo(item.id, item.storage_path, item.thumbnail_path); }} title="Delete">
-                          <span className="material-symbols-outlined">delete</span>
+                          <span className="material-symbols-outlined">delete</span> Delete
                         </button>
                       </div>
                     </div>
