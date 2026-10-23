@@ -3680,7 +3680,7 @@ document.body
                 onClick={() => { setActiveMedia(null); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
                 <span className="material-symbols-outlined">search</span>
               </button>
-              <button className="yt-icon-btn" aria-label="More" onClick={() => setShowMoreMenu(true)}>
+              <button className="yt-icon-btn" aria-label="More" onClick={(e) => { e.stopPropagation(); setShowMoreMenu(true); }}>
                 <span className="material-symbols-outlined">more_vert</span>
               </button>
             </div>
@@ -3757,7 +3757,7 @@ document.body
                 <span className="yt-watch-action-label">Save</span>
               </button>
               
-              <button className="yt-watch-action" onClick={() => setShowMoreMenu(true)}>
+              <button className="yt-watch-action" onClick={(e) => { e.stopPropagation(); setShowMoreMenu(true); }}>
                 <span className="material-symbols-outlined">more_vert</span>
               </button>
             </div>
