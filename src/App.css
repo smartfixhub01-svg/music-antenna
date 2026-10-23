@@ -3134,21 +3134,7 @@ body, .ma-app {
 }
 
 /* Mini Player */
-.yt-mini-player {
-  position: fixed;
-  bottom: 56px;
-  left: 0;
-  right: 0;
-  height: 56px;
-  background: #212121;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  z-index: 90;
-  border-top: 1px solid #303030;
-  box-shadow: 0 -4px 10px rgba(0,0,0,0.3);
-}
+
 .yt-mini-info {
   display: flex;
   align-items: center;
@@ -3195,21 +3181,7 @@ body, .ma-app {
 }
 
 /* Mini Player */
-.yt-mini-player {
-  position: fixed;
-  bottom: 56px;
-  left: 0;
-  right: 0;
-  height: 56px;
-  background: #212121;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  z-index: 90;
-  border-top: 1px solid #303030;
-  box-shadow: 0 -4px 10px rgba(0,0,0,0.3);
-}
+
 .yt-mini-info {
   display: flex;
   align-items: center;
@@ -3264,21 +3236,7 @@ body, .ma-app {
 }
 
 /* Mini Player */
-.yt-mini-player {
-  position: fixed;
-  bottom: 56px;
-  left: 0;
-  right: 0;
-  height: 56px;
-  background: #212121;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  z-index: 90;
-  border-top: 1px solid #303030;
-  box-shadow: 0 -4px 10px rgba(0,0,0,0.3);
-}
+
 .yt-mini-info {
   display: flex;
   align-items: center;
@@ -3314,22 +3272,7 @@ body, .ma-app {
 }
 
 /* Professional YouTube Music Mini Player */
-.yt-mini-player {
-  position: fixed;
-  bottom: 56px;
-  left: 0;
-  right: 0;
-  height: 60px;
-  background: #212121;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  z-index: 90;
-  border-top: 1px solid #333;
-  box-shadow: 0 -4px 10px rgba(0,0,0,0.5);
-  overflow: hidden;
-}
+
 
 /* Analytics Page */
 .yt-analytics-page {
@@ -4253,26 +4196,7 @@ button {
    COMPACT FLOATING MINI PLAYER (NO TEXT)
    ===================================================== */
 
-.yt-mini-player {
-  position: fixed !important;
-  bottom: 72px !important; /* Perfectly above the nav */
-  left: 50% !important;
-  transform: translateX(-50%) !important; /* Centers it */
-  height: 48px !important;
-  width: max-content !important; /* Shrinks to fit content */
-  background: rgba(18, 18, 18, 0.9) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 24px !important;
-  display: flex !important;
-  align-items: center !important;
-  padding: 0 6px !important;
-  z-index: 90 !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 54, 95, 0.2) !important;
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease !important;
-  gap: 8px !important;
-}
+
 
 /* Auto-hide logic tied to the bottom nav */
 .yt-mini-hidden {
@@ -4317,17 +4241,7 @@ button {
 }
 
 .yt-mini-play-btn, 
-.yt-mini-close-btn {
-  background: transparent !important;
-  border: none !important;
-  display: grid !important;
-  place-items: center !important;
-  cursor: pointer !important;
-  border-radius: 50% !important;
-  width: 32px !important;
-  height: 32px !important;
-  transition: background 0.2s, transform 0.2s !important;
-}
+
 
 .yt-mini-play-btn {
   background: rgba(255, 54, 95, 0.15) !important;
@@ -4339,9 +4253,7 @@ button {
   transform: scale(1.05) !important;
 }
 
-.yt-mini-close-btn {
-  color: #aaaaaa !important;
-}
+
 
 .yt-mini-close-btn:hover {
   background: rgba(255, 255, 255, 0.1) !important;
@@ -4352,27 +4264,7 @@ button {
    FINAL OVERRIDE: LEFT-ALIGNED COMPACT MINI PLAYER
    ===================================================== */
 
-.yt-mini-player {
-  position: fixed !important;
-  bottom: 72px !important; /* Perfectly above the nav */
-  left: 16px !important; /* Down left side */
-  right: auto !important; /* Prevents it from stretching */
-  height: 48px !important;
-  width: max-content !important; /* Shrinks to fit content */
-  background: rgba(18, 18, 18, 0.9) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 24px !important;
-  display: flex !important;
-  align-items: center !important;
-  padding: 0 6px !important;
-  z-index: 90 !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 54, 95, 0.2) !important;
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease !important;
-  gap: 8px !important;
-  margin: 0 !important;
-}
+
 
 /* Auto-hide: Slides down and fades out */
 .yt-mini-hidden {
@@ -4417,17 +4309,7 @@ button {
 }
 
 .yt-mini-play-btn, 
-.yt-mini-close-btn {
-  background: transparent !important;
-  border: none !important;
-  display: grid !important;
-  place-items: center !important;
-  cursor: pointer !important;
-  border-radius: 50% !important;
-  width: 32px !important;
-  height: 32px !important;
-  transition: background 0.2s, transform 0.2s !important;
-}
+
 
 .yt-mini-play-btn {
   background: rgba(255, 54, 95, 0.15) !important;
@@ -4439,9 +4321,7 @@ button {
   transform: scale(1.05) !important;
 }
 
-.yt-mini-close-btn {
-  color: #aaaaaa !important;
-}
+
 
 .yt-mini-close-btn:hover {
   background: rgba(255, 255, 255, 0.1) !important;
@@ -4452,25 +4332,7 @@ button {
    DRAGGABLE GLOBAL MINI PLAYER (z-index 999999)
    ===================================================== */
 
-.yt-mini-player {
-  position: fixed !important;
-  z-index: 999999 !important; /* Floats above EVERYTHING (modals, overlays, nav) */
-  height: 48px !important;
-  width: max-content !important;
-  background: rgba(18, 18, 18, 0.95) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  border-radius: 24px !important;
-  display: flex !important;
-  align-items: center !important;
-  padding: 0 6px !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 54, 95, 0.2) !important;
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease !important;
-  gap: 8px !important;
-  touch-action: none !important; /* Prevents page scroll while dragging */
-  cursor: grab;
-}
+
 
 .yt-mini-dragging {
   cursor: grabbing !important;
@@ -4521,25 +4383,14 @@ button {
 }
 
 .yt-mini-play-btn, 
-.yt-mini-close-btn {
-  background: transparent !important;
-  border: none !important;
-  display: grid !important;
-  place-items: center !important;
-  cursor: pointer !important;
-  border-radius: 50% !important;
-  width: 32px !important;
-  height: 32px !important;
-}
+
 
 .yt-mini-play-btn {
   background: rgba(255, 54, 95, 0.15) !important;
   color: #ff365f !important;
 }
 
-.yt-mini-close-btn {
-  color: #aaaaaa !important;
-}
+
 
 /* FIX UPLOAD FORM SCROLLING & BUTTON VISIBILITY */
 .yt-upload {
@@ -5871,3 +5722,83 @@ p
   transition: color 0.2s;
 }
 .ma-notif-delete:hover { color: #FF4E45; }
+
+/* ===== PREMIUM COMPACT MINI PLAYER ===== */
+.yt-mini-player {
+  position: fixed;
+  z-index: 9999;
+  width: 170px !important;
+  height: 48px !important;
+  display: flex;
+  align-items: center;
+  background: var(--ma-bg-elevated) !important;
+  border: 1px solid var(--ma-border) !important;
+  border-radius: 24px !important; /* Pill shape */
+  padding: 4px 8px 4px 4px !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2) !important;
+  cursor: grab;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.yt-mini-player:active {
+  cursor: grabbing;
+  transform: scale(0.98);
+}
+
+/* Thumbnail / Cover */
+.yt-mini-player .yt-mini-cover {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--ma-bg-hover);
+}
+
+.yt-mini-player .yt-mini-cover img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+}
+
+/* Hide the text/title if it exists to keep it compact */
+.yt-mini-player .yt-mini-title,
+.yt-mini-player .yt-mini-artist {
+  display: none !important;
+}
+
+/* Buttons inside the player */
+.yt-mini-player button {
+  background: transparent !important;
+  border: none !important;
+  color: var(--ma-text-primary) !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  margin: 0 2px !important;
+}
+
+.yt-mini-player button:hover {
+  background: var(--ma-bg-hover) !important;
+}
+
+.yt-mini-player button .material-symbols-outlined {
+  font-size: 20px !important;
+  color: var(--ma-text-primary) !important;
+}
+
+/* Close button specifically */
+.yt-mini-close-btn {
+  margin-left: auto !important;
+}
+.yt-mini-close-btn .material-symbols-outlined {
+  color: var(--ma-text-secondary) !important;
+}
+.yt-mini-close-btn:hover .material-symbols-outlined {
+  color: #FF4E45 !important;
+}
