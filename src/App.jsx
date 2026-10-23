@@ -3652,7 +3652,7 @@ document.body
                           {item.views || 0} views • {timeAgo(item.created_at)}
                         </p>
                       </div>
-                      <button className="yt-video-menu" aria-label="More" onClick={(e) => { e.stopPropagation(); setActiveMedia(item); setShowMoreMenu(true); }}>⋮</button>
+                      <button className="yt-video-menu" aria-label="More" onClick={(e) => { e.stopPropagation(); setShowMoreMenu(item); }}>⋮</button>
                     </div>
                   </article>
                 ))}
@@ -3680,7 +3680,7 @@ document.body
                 onClick={() => { setActiveMedia(null); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
                 <span className="material-symbols-outlined">search</span>
               </button>
-              <button className="yt-icon-btn" aria-label="More" onClick={(e) => { e.stopPropagation(); setShowMoreMenu(true); }}>
+              <button className="yt-icon-btn" aria-label="More" onClick={(e) => { e.stopPropagation(); setShowMoreMenu(activeMedia); }}>
                 <span className="material-symbols-outlined">more_vert</span>
               </button>
             </div>
@@ -3757,7 +3757,7 @@ document.body
                 <span className="yt-watch-action-label">Save</span>
               </button>
               
-              <button className="yt-watch-action" onClick={(e) => { e.stopPropagation(); setShowMoreMenu(true); }}>
+              <button className="yt-watch-action" onClick={(e) => { e.stopPropagation(); setShowMoreMenu(activeMedia); }}>
                 <span className="material-symbols-outlined">more_vert</span>
               </button>
             </div>
@@ -3997,7 +3997,7 @@ document.body
                 <span className="material-symbols-outlined">search</span>
               </button>
               <button className="yt-icon-btn" aria-label="More">
-                <span className="material-symbols-outlined" style={{ cursor: "pointer" }} onClick={(e) => { e.stopPropagation(); setShowMoreMenu(true); }}>more_vert</span>
+                <span className="material-symbols-outlined" style={{ cursor: "pointer" }} onClick={(e) => { e.stopPropagation(); setShowMoreMenu(activeMedia); }}>more_vert</span>
               </button>
             </div>
           </div>
@@ -4791,7 +4791,7 @@ document.body
                 <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary, #606060)" }}>playlist_add</span> Save to playlist
               </button>
 
-              <a href={activeMedia?.url || activeMedia?.media_url} download target="_blank" rel="noopener noreferrer" onClick={() => setShowMoreMenu(false)} style={{ textDecoration: "none", padding: "16px", background: "transparent", color: "var(--ma-text, #0f0f0f)", border: "none", borderRadius: "10px", fontSize: "15px", display: "flex", alignItems: "center", gap: "16px", cursor: "pointer" }}>
+              <a href={showMoreMenu?.url || showMoreMenu?.media_url} download target="_blank" rel="noopener noreferrer" onClick={() => setShowMoreMenu(false)} style={{ textDecoration: "none", padding: "16px", background: "transparent", color: "var(--ma-text, #0f0f0f)", border: "none", borderRadius: "10px", fontSize: "15px", display: "flex", alignItems: "center", gap: "16px", cursor: "pointer" }}>
                 <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary, #606060)" }}>download</span> Download Media
               </a>
 
@@ -4803,7 +4803,7 @@ document.body
                 <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary, #606060)" }}>flag</span> Report Video
               </button>
 
-              {session?.user?.id === activeMedia?.artist_id && (
+              {session?.user?.id === showMoreMenu?.artist_id && (
                 <button onClick={() => { setEditingMedia(activeMedia); setShowWatchPage(false); setShowMoreMenu(false); }} style={{ padding: "16px", background: "transparent", color: "var(--ma-text, #0f0f0f)", border: "none", borderRadius: "10px", fontSize: "15px", display: "flex", alignItems: "center", gap: "16px", cursor: "pointer", textAlign: "left" }}>
                   <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary, #606060)" }}>edit</span> Edit Video
                 </button>
