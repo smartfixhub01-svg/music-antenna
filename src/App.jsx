@@ -1237,23 +1237,38 @@ useEffect(() => {
   }
 
   async function openManagePage() {
-    if (!session?.user?.id) return;
+    if (!session?.user?.id) {
+      setMessage("Please sign in to manage content.");
+      return;
+    }
+    
     setShowManagePage(true);
     setShowAccountPage(false);
     setShowChannelPage(false);
     setActiveMedia(null);
     setManageLoading(true);
-    
-    const localMedia = media.filter(m => m.artist_id === session.user.id);
-    if (localMedia.length > 0) setManageMedia(localMedia);
+    setManageMedia([]); // Clear old data first
 
     try {
-      const { data, error } = await supabase.from("media").select("*").eq("artist_id", session.user.id).order("created_at", { ascending: false });
-      if (!error && data && data.length > 0) {
+      // Fetch everything for this artist, regardless of status
+      const { data, error } = await supabase
+        .from("media")
+        .select("*")
+        .eq("artist_id", session.user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Supabase Error:", error);
+        setMessage("Failed to load content: " + error.message);
+        return;
+      }
+
+      if (data) {
         setManageMedia(data);
       }
     } catch (err) {
-      console.error("Manage page error:", err);
+      console.error("Manage page crash:", err);
+      setMessage("An unexpected error occurred.");
     } finally {
       setManageLoading(false);
     }
