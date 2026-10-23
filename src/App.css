@@ -5887,8 +5887,7 @@ p
 }
 
 .yt-mini-player.is-hidden {
-  opacity: 0.8 !important; /* Lightly fades, but stays visible */
-  /* NO transform, NO sliding! */
+  opacity: 0.8 !important; /* Stays visible */
 }
 
 /* Micro Cover */

@@ -168,7 +168,7 @@ export default function App() {
 
     const el = e.currentTarget;
     if (el) {
-      // 16px boundary so it never touches the extreme edge
+      // 16px hard boundary prevents going off-screen
       const maxLeft = window.innerWidth - el.offsetWidth - 16;
       const maxTop = window.innerHeight - el.offsetHeight - 16;
       
@@ -196,7 +196,7 @@ export default function App() {
       newLeft = Math.max(16, Math.min(maxLeft, newLeft));
       newTop = Math.max(16, Math.min(maxTop, newTop));
       
-      el.style.transform = '';
+      el.style.transform = ''; // Reset transform before saving state
       setMiniPlayerPos({ left: newLeft, top: newTop });
     }
   };
