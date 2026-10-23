@@ -5428,12 +5428,7 @@ p
 
 /* ACTIONS */
 
-.ma-action-btn {
-  width: 40px; height: 40px; border-radius: 50%;
-  border: none; display: grid; place-items: center; cursor: pointer;
-  background: var(--ma-bg-hover); color: var(--ma-text-primary);
-  transition: all 0.2s;
-}
+
 .ma-action-btn:hover { transform: scale(1.1); }
 .ma-action-btn.play:hover { background: var(--ma-accent); color: #fff; }
 .ma-action-btn.delete:hover { background: #FF4E45; color: #fff; }
@@ -5454,14 +5449,8 @@ p
   cursor: pointer;
 }
 .ma-edit-file input { display: none; }
-.ma-btn-primary {
-  flex: 1; padding: 14px; background: var(--ma-accent); color: #fff;
-  border: none; border-radius: 8px; font-weight: 700; cursor: pointer;
-}
-.ma-btn-cancel {
-  flex: 1; padding: 14px; background: transparent; color: var(--ma-text-primary);
-  border: 1px solid var(--ma-border); border-radius: 8px; font-weight: 700; cursor: pointer;
-}
+
+
 .ma-empty-state { text-align: center; padding: 40px 20px; color: var(--ma-text-secondary); }
 .ma-empty-state .material-symbols-outlined { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
 .ma-empty-state h3 { color: var(--ma-text-primary); margin: 0 0 8px 0; }
@@ -5527,11 +5516,7 @@ p
   display: flex; gap: 8px; justify-content: flex-end; width: 100%;
   border-top: 1px solid var(--ma-border); padding-top: 12px;
 }
-.ma-action-btn {
-  display: flex; align-items: center; gap: 4px; padding: 8px 12px;
-  border-radius: 6px; border: none; font-size: 13px; font-weight: 600; cursor: pointer;
-  background: var(--ma-bg-hover); color: var(--ma-text-primary);
-}
+
 .ma-action-btn.play:hover { background: var(--ma-accent); color: #fff; }
 .ma-action-btn.delete:hover { background: #FF4E45; color: #fff; }
 
@@ -5572,4 +5557,63 @@ p
   font-size: 14px;
   display: block;
   margin-bottom: 8px;
+}
+
+/* ===== THEME-AWARE BUTTONS FOR MANAGE PAGE & UPLOAD FORM ===== */
+
+/* 1. Top Bar Icon Buttons (Back, Add) */
+.yt-manage-page .yt-icon-btn {
+  color: var(--ma-text-primary) !important;
+  background: transparent !important;
+}
+.yt-manage-page .yt-icon-btn .material-symbols-outlined {
+  color: var(--ma-text-primary) !important;
+}
+
+/* 2. Action Buttons (Play, Edit, Delete) */
+.ma-action-btn {
+  background: var(--ma-bg-hover) !important;
+  color: var(--ma-text-primary) !important;
+  border: 1px solid var(--ma-border) !important;
+  display: flex; align-items: center; gap: 4px; padding: 8px 12px;
+  border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.ma-action-btn .material-symbols-outlined {
+  color: var(--ma-text-primary) !important;
+}
+.ma-action-btn.play:hover { background: var(--ma-accent) !important; color: #fff !important; border-color: var(--ma-accent) !important; }
+.ma-action-btn.delete:hover { background: #FF4E45 !important; color: #fff !important; border-color: #FF4E45 !important; }
+
+/* 3. Primary & Cancel Buttons (Upload, Save, Cancel) */
+.ma-btn-primary {
+  background: var(--ma-accent) !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  border-radius: 8px; font-weight: 700; cursor: pointer;
+}
+.ma-btn-cancel {
+  background: transparent !important;
+  color: var(--ma-text-primary) !important;
+  border: 1px solid var(--ma-border) !important;
+  border-radius: 8px; font-weight: 700; cursor: pointer;
+}
+
+/* 4. Upload Form specific buttons (Select Files, etc) */
+.yt-upload-form button {
+  background: var(--ma-bg-secondary) !important;
+  color: var(--ma-text-primary) !important;
+  border: 1px solid var(--ma-border) !important;
+}
+.yt-upload-form button[type="submit"] {
+  background: var(--ma-accent) !important;
+  color: #FFFFFF !important;
+  border: none !important;
+}
+
+/* 5. Ensure all text in Manage Page is readable */
+.yt-manage-page h2, .yt-manage-page h3, .yt-manage-page h4, .yt-manage-page span, .yt-manage-page p {
+  color: var(--ma-text-primary) !important;
+}
+.yt-manage-page .ma-manage-meta span {
+  color: var(--ma-text-secondary) !important;
 }
