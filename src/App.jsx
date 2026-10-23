@@ -2116,7 +2116,7 @@ useEffect(() => {
     return (
       <main style={{ 
         position: "fixed", inset: 0, zIndex: 99999, 
-        background: "var(--ma-bg-primary)", 
+        background: "var(--ma-bg-primary)", // Automatically dark/light
         display: "flex", flexDirection: "column", 
         justifyContent: "center", alignItems: "center", 
         padding: "20px" 
@@ -2127,45 +2127,56 @@ useEffect(() => {
           animation: "fadeIn 0.5s ease-out", textAlign: "center" 
         }}>
           
-          {/* OFFICIAL LOGO */}
-          <img 
-            src="/music-antenna-logo.png" 
-            alt="Music Antenna" 
-            style={{ 
-              width: "220px", maxWidth: "80vw", height: "auto", 
-              background: "#ffffff", padding: "16px", borderRadius: "20px", 
-              boxShadow: "0 10px 30px rgba(0,0,0,0.15)", marginBottom: "28px" 
-            }} 
-          />
+          {/* OFFICIAL LOGO CARD */}
+          <div style={{
+            background: "#ffffff", // Always white so black text in logo is visible
+            padding: "16px", 
+            borderRadius: "20px", 
+            boxShadow: "0 10px 30px rgba(0,0,0,0.2)", // Stronger shadow for dark mode
+            marginBottom: "32px",
+            border: "1px solid var(--ma-border)" // Subtle border in light mode
+          }}>
+            <img 
+              src="/music-antenna-logo.png" 
+              alt="Music Antenna" 
+              style={{ width: "200px", maxWidth: "75vw", height: "auto", display: "block" }} 
+            />
+          </div>
 
           {/* WELCOME MESSAGE */}
           <h1 style={{ 
-            color: "var(--ma-text-primary)", fontSize: "28px", 
-            fontWeight: "800", margin: "0 0 12px 0", letterSpacing: "-0.5px" 
+            color: "var(--ma-text-primary)", // Black in Light, White in Dark
+            fontSize: "28px", 
+            fontWeight: "800", 
+            margin: "0 0 8px 0", 
+            letterSpacing: "-0.5px" 
           }}>
             Welcome to Music Antenna
           </h1>
           
           <p style={{ 
-            color: "var(--ma-text-secondary)", fontSize: "16px", 
+            color: "var(--ma-text-secondary)", // Grey in both modes
+            fontSize: "15px", 
             margin: "0 0 40px 0" 
           }}>
             Your sound. Your world.
           </p>
 
-          {/* PREMIUM SPINNER */}
+          {/* PREMIUM SPINNER (High contrast in both modes) */}
           <div style={{ 
             width: "36px", height: "36px", 
-            border: "3px solid var(--ma-border)", 
-            borderTop: "3px solid var(--ma-accent)", 
+            border: "3px solid rgba(150, 150, 150, 0.2)", // Visible grey track
+            borderTop: "3px solid var(--ma-accent)", // Your pink brand color
             borderRadius: "50%", 
             animation: "spin 1s linear infinite",
             marginBottom: "16px"
           }}></div>
           
           <p style={{ 
-            color: "var(--ma-text-secondary)", fontSize: "14px", 
-            margin: 0, fontWeight: "500" 
+            color: "var(--ma-text-secondary)", 
+            fontSize: "13px", 
+            margin: 0, 
+            fontWeight: "600" 
           }}>
             Connecting securely...
           </p>
