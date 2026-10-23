@@ -5865,6 +5865,7 @@ p
 
 /* ===== MICRO BALL MINI PLAYER (32px Height) ===== */
 .yt-mini-player {
+  transition: opacity 0.3s ease, transform 0.3s ease;
   position: fixed;
   z-index: 9999;
   width: fit-content !important;
@@ -5886,9 +5887,7 @@ p
   cursor: grabbing;
 }
 
-.yt-mini-player.is-hidden {
-  opacity: 0.8 !important; /* Stays visible */
-}
+
 
 /* Micro Cover */
 .yt-mini-player .yt-mini-cover {
@@ -5943,4 +5942,19 @@ p
 .yt-mini-player {
   border: 2px solid #FF365F !important;
   box-shadow: 0 0 12px rgba(255, 54, 95, 0.3) !important;
+}
+
+/* ===== 3-LEVEL MINI PLAYER OPACITY ===== */
+.yt-mini-player.is-idle {
+  opacity: 0.5 !important; /* Fades to 50% when doing nothing */
+}
+
+.yt-mini-player.is-scrolling {
+  opacity: 0.35 !important; /* Fades deeper to 35% while scrolling */
+}
+
+/* Back to 100% when tapped or dragging */
+.yt-mini-player:active, 
+.yt-mini-player.is-dragging {
+  opacity: 1 !important; 
 }
