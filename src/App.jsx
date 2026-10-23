@@ -159,13 +159,19 @@ export default function App() {
   const handlePointerMove = (e) => {
     if (!isDragging) return;
     if (e.cancelable) e.preventDefault();
+
     const dx = e.clientX - dragRef.current.startX;
     const dy = e.clientY - dragRef.current.startY;
-    
-    let newLeft = dragRef.current.initialLeft + dx;
-    let newTop = dragRef.current.initialTop + dy;
-    
-    setMiniPlayerPos({ left: newLeft, top: newTop });
+
+    const newLeft = dragRef.current.initialLeft + dx;
+    const newTop = dragRef.current.initialTop + dy;
+
+    const el = e.currentTarget;
+    if (el) {
+      el.style.left = `${newLeft}px`;
+      el.style.top = `${newTop}px`;
+      el.style.bottom = 'auto';
+    }
   };
 
   const handlePointerUp = (e) => {
