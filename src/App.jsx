@@ -2874,7 +2874,7 @@ document.body
             </div>
           </div>
 
-          {/* COMPACT LIST (Added bottom padding to avoid overlap with mini player) */}
+          {/* COMPACT LIST */}
           <div style={{ flex: 1, overflowY: "auto", padding: "12px", paddingBottom: "160px" }}>
             {notifications.length === 0 ? (
               <div style={{ textAlign: "center", padding: "40px 20px" }}>
@@ -2899,15 +2899,15 @@ document.body
                   case "like": icon = "thumb_up"; message = `liked your video.`; actionColor = "#3EA6FF"; break;
                   case "comment": icon = "comment"; message = `commented on your video.`; actionColor = "#2BA640"; break;
                   case "subscribe": icon = "person_add"; message = `subscribed to your channel.`; actionColor = "#FF365F"; break;
-                  case "new_video": icon = "video_library"; message = `released a new video. Tap to watch.`; actionColor = "#F5A623"; break;
+                  case "new_video": icon = "video_library"; message = `released a new video. Tap play to watch.`; actionColor = "#F5A623"; break;
                   case "upload": icon = "upload"; message = `Your upload was successful.`; actionColor = "#2BA640"; break;
-                  case "share": icon = "share"; message = `shared your video.`; actionColor = "#9C27B0"; break;
                   default: icon = "info"; message = `interacted with your content.`;
                 }
 
                 return (
                   <div key={n.id} style={{ display: "flex", alignItems: "center", background: isSelected ? "rgba(255,54,95,0.1)" : "var(--ma-bg-secondary)", border: `1px solid ${isSelected ? "var(--ma-accent)" : "transparent"}`, borderLeft: !n.is_read ? "3px solid var(--ma-accent)" : "3px solid transparent", borderRadius: "8px", marginBottom: "8px", padding: "10px 12px" }}>
                     
+                    {/* Checkbox */}
                     <div onClick={() => {
                       setSelectedNotifs(prev => isSelected ? prev.filter(id => id !== n.id) : [...prev, n.id]);
                     }} style={{ cursor: "pointer", marginRight: "10px", display: "flex" }}>
@@ -2916,17 +2916,12 @@ document.body
                       </span>
                     </div>
 
+                    {/* CLICKING THE CARD ONLY MARKS AS READ */}
                     <div onClick={async () => {
                       if (!n.is_read) {
                         await supabase.from("notifications").update({ is_read: true }).eq("id", n.id);
                         setUnreadCount(prev => Math.max(0, prev - 1));
                         setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, is_read: true } : x));
-                      }
-                      if (n.type === "subscribe") openChannel(n.actor_id);
-                      else if (n.media_id) {
-                        const found = media.find(m => m.id === n.media_id);
-                        if (found) openPlayer(found);
-                        else setMessage("Video unavailable.");
                       }
                     }} style={{ flex: 1, display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", minWidth: 0 }}>
                       
@@ -2942,6 +2937,20 @@ document.body
                       </div>
                     </div>
 
+                    {/* EXPLICIT PLAY BUTTON */}
+                    {n.media_id && (
+                      <button onClick={(e) => {
+                        e.stopPropagation();
+                        setShowNotifications(false);
+                        const found = media.find(m => m.id === n.media_id);
+                        if (found) openPlayer(found);
+                        else setMessage("Video unavailable.");
+                      }} style={{ background: "transparent", border: "none", color: "var(--ma-accent)", cursor: "pointer", display: "flex", padding: "4px", marginLeft: "8px", flexShrink: 0 }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>play_circle</span>
+                      </button>
+                    )}
+
+                    {/* DELETE BUTTON */}
                     <button onClick={async (e) => {
                       e.stopPropagation();
                       await supabase.from("notifications").delete().eq("id", n.id);
@@ -2956,8 +2965,9 @@ document.body
             )}
           </div>
 
-          {/* 🎵 MINI PLAYER INJECTED HERE */}
-          {activeMedia && !showWatchPage && (
+          {/* 🎵 INJECTED MINI PLAYER */}
+          <div onClick={(e) => e.stopPropagation()}>
+             {activeMedia && !showWatchPage && (
         <div 
           className={"yt-mini-player" + (navVisible || isDragging || miniPlayerPos ? "" : " yt-mini-hidden") + (isDragging ? " yt-mini-dragging" : "")}
           style={{
@@ -3012,6 +3022,7 @@ document.body
 
         </div>
       )}
+          </div>
 
         </section>,
         document.body
