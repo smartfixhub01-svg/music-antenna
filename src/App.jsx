@@ -189,6 +189,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [likedLoading, setLikedLoading] = useState(false);
 
   const [manageMedia, setManageMedia] = useState([]);
+  const [manageSearch, setManageSearch] = useState("");
   const [manageLoading, setManageLoading] = useState(false);
   const [editingMedia, setEditingMedia] = useState(null);
   
@@ -4080,7 +4081,9 @@ document.body
               <span className="material-symbols-outlined">arrow_back</span>
             </button>
             <h2 style={{ fontSize: "18px", margin: 0, fontWeight: "700" }}>Manage Content</h2>
-            <div style={{ width: "40px" }}></div>
+            <button className="yt-icon-btn" onClick={() => { setShowManagePage(false); setShowUpload(true); }}>
+              <span className="material-symbols-outlined">add</span>
+            </button>
           </div>
 
           {editingMedia ? (
@@ -4128,56 +4131,78 @@ document.body
               </div>
             </form>
           ) : (
-            <div className="yt-manage-list">
-              {manageLoading ? (
-                <p style={{ padding: "20px", color: "var(--ma-text-secondary)", textAlign: "center" }}>Loading uploads...</p>
-              ) : manageMedia.length === 0 ? (
-                <div className="ma-empty-state">
-                  <span className="material-symbols-outlined">video_library</span>
-                  <h3>No uploads yet</h3>
-                  <p>Your published tracks and videos will appear here.</p>
+            <>
+              <div className="ma-manage-controls">
+                <div className="ma-search-box">
+                  <span className="material-symbols-outlined">search</span>
+                  <input 
+                    type="text" 
+                    placeholder="Search your uploads..." 
+                    value={manageSearch}
+                    onChange={(e) => setManageSearch(e.target.value)}
+                  />
                 </div>
-              ) : (
-                manageMedia.map(item => (
-                  <div key={item.id} className="ma-manage-card">
-                    <div className="ma-manage-thumb">
-                      {item.thumbnail_path ? (
-                        <img src={supabase.storage.from("track-covers").getPublicUrl(item.thumbnail_path).data.publicUrl} alt="" />
-                      ) : (
-                        <div className="ma-manage-thumb-fallback">
-                          <span className="material-symbols-outlined">movie</span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="ma-manage-info">
-                      <h4>{item.title}</h4>
-                      <div className="ma-manage-meta">
-                        <span>{item.views || 0} views</span>
-                        <span>•</span>
-                        <span>{new Date(item.created_at).toLocaleDateString()}</span>
-                      </div>
-                      <div className="ma-manage-badges">
-                        <span className={`ma-badge ${item.visibility || 'public'}`}>{item.visibility || 'Public'}</span>
-                        <span className={`ma-badge ${item.media_type}`}>{item.media_type}</span>
-                      </div>
-                    </div>
+                <button className="ma-btn-primary" onClick={() => { setShowManagePage(false); setShowUpload(true); }} style={{ width: "auto", padding: "10px 16px", whiteSpace: "nowrap" }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>add</span> Upload
+                </button>
+              </div>
 
-                    <div className="ma-manage-actions">
-                      <button className="ma-action-btn play" onClick={() => { setShowManagePage(false); openPlayer(item); }}>
-                        <span className="material-symbols-outlined">play_arrow</span>
-                      </button>
-                      <button className="ma-action-btn edit" onClick={() => startEditingVideo(item)}>
-                        <span className="material-symbols-outlined">edit</span>
-                      </button>
-                      <button className="ma-action-btn delete" onClick={() => { if(window.confirm("Delete this upload permanently?")) handleDeleteVideo(item.id, item.storage_path, item.thumbnail_path); }}>
-                        <span className="material-symbols-outlined">delete</span>
-                      </button>
-                    </div>
+              <div className="yt-manage-list">
+                {manageLoading ? (
+                  <p style={{ padding: "20px", color: "var(--ma-text-secondary)", textAlign: "center" }}>Loading uploads...</p>
+                ) : manageMedia.length === 0 ? (
+                  <div className="ma-empty-state">
+                    <span className="material-symbols-outlined">video_library</span>
+                    <h3>No uploads yet</h3>
+                    <p>Your published tracks and videos will appear here.</p>
+                    <button className="ma-btn-primary" onClick={() => { setShowManagePage(false); setShowUpload(true); }} style={{ width: "auto", padding: "12px 24px", marginTop: "16px" }}>
+                      Upload Media
+                    </button>
                   </div>
-                ))
-              )}
-            </div>
+                ) : (
+                  manageMedia
+                    .filter(item => item.title.toLowerCase().includes(manageSearch.toLowerCase()))
+                    .map(item => (
+                    <div key={item.id} className="ma-manage-card">
+                      <div className="ma-manage-thumb">
+                        {item.thumbnail_path ? (
+                          <img src={supabase.storage.from("track-covers").getPublicUrl(item.thumbnail_path).data.publicUrl} alt="" />
+                        ) : (
+                          <div className="ma-manage-thumb-fallback">
+                            <span className="material-symbols-outlined">movie</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="ma-manage-info">
+                        <h4>{item.title}</h4>
+                        <div className="ma-manage-meta">
+                          <span>{item.views || 0} views</span>
+                          <span>•</span>
+                          <span>{new Date(item.created_at).toLocaleDateString()}</span>
+                        </div>
+                        <div className="ma-manage-badges">
+                          <span className={`ma-badge ${item.visibility || 'public'}`}>{item.visibility || 'Public'}</span>
+                          <span className={`ma-badge ${item.media_type}`}>{item.media_type}</span>
+                        </div>
+                      </div>
+
+                      <div className="ma-manage-actions">
+                        <button className="ma-action-btn play" onClick={() => { setShowManagePage(false); openPlayer(item); }} title="Play">
+                          <span className="material-symbols-outlined">play_arrow</span>
+                        </button>
+                        <button className="ma-action-btn edit" onClick={() => startEditingVideo(item)} title="Edit">
+                          <span className="material-symbols-outlined">edit</span>
+                        </button>
+                        <button className="ma-action-btn delete" onClick={() => { if(window.confirm("Delete this upload permanently?")) handleDeleteVideo(item.id, item.storage_path, item.thumbnail_path); }} title="Delete">
+                          <span className="material-symbols-outlined">delete</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </>
           )}
         </section>
       )}
