@@ -642,8 +642,8 @@ useEffect(() => {
   }
 
   async function createNotification(targetUserId, type, mediaId = null) {
-    // 🛑 SECURITY LOCK: Password changes must NEVER trigger a notification
-    if (type === "password_change" || type === "password_reset") {
+    // 🛑 SECURITY LOCK: Passwords are strictly forbidden from being logged
+    if (type === "password_change" || type === "password_reset" || type.includes("password")) {
       console.log("Silent action: Password change notification blocked.");
       return;
     }
@@ -2853,7 +2853,7 @@ document.body
             <button className="ma-icon-btn" onClick={() => setShowNotifications(false)}>
               <span className="material-symbols-outlined">arrow_back</span>
             </button>
-            <h2 style={{ fontSize: "18px", margin: 0, fontWeight: "700" }}>Notifications</h2>
+            <h2 style={{ fontSize: "18px", margin: 0, fontWeight: "700" }}>Activity Log</h2>
             <div style={{ display: "flex", gap: "8px" }}>
               {notifications.length > 0 && (
                 <button className="ma-icon-btn" onClick={() => {
@@ -2878,9 +2878,9 @@ document.body
           <div className="ma-notif-list">
             {notifications.length === 0 ? (
               <div className="ma-empty-state" style={{ marginTop: "40px" }}>
-                <span className="material-symbols-outlined">notifications_off</span>
-                <h3>No evidence found</h3>
-                <p>New likes, comments, and subscribers will be logged here.</p>
+                <span className="material-symbols-outlined">history</span>
+                <h3>No activity yet</h3>
+                <p>Every like, comment, subscribe, and upload will be recorded here.</p>
               </div>
             ) : (
               notifications.map(n => {
@@ -2894,14 +2894,31 @@ document.body
                   hour: 'numeric', minute: '2-digit', hour12: true 
                 });
 
-                // Detective Icons
+                // Detective Icons & Messages for EVERY Action
                 let icon = "notifications";
                 let message = "";
-                if (n.type === "like") { icon = "thumb_up"; message = `${actorName} liked your video.`; }
-                else if (n.type === "comment") { icon = "comment"; message = `${actorName} commented on your video.`; }
-                else if (n.type === "subscribe") { icon = "person_add"; message = `${actorName} subscribed to your channel.`; }
-                else if (n.type === "new_video") { icon = "video_library"; message = `${actorName} released a new video. Tap to watch.`; }
-                else { message = `${actorName} interacted with your content.`; }
+                let actionColor = "var(--ma-text-primary)";
+
+                switch(n.type) {
+                  case "like":
+                    icon = "thumb_up"; message = `${actorName} liked your video.`; actionColor = "#3ea6ff"; break;
+                  case "comment":
+                    icon = "comment"; message = `${actorName} commented on your video.`; actionColor = "#2ba640"; break;
+                  case "subscribe":
+                    icon = "person_add"; message = `${actorName} subscribed to your channel.`; actionColor = "#ff365f"; break;
+                  case "new_video":
+                    icon = "video_library"; message = `${actorName} released a new video.`; actionColor = "#f5a623"; break;
+                  case "upload":
+                    icon = "upload"; message = `You uploaded a new video successfully.`; actionColor = "#2ba640"; break;
+                  case "share":
+                    icon = "share"; message = `${actorName} shared your video.`; actionColor = "#9c27b0"; break;
+                  case "password_change":
+                  case "password_reset":
+                    // Silent action - this shouldn't even exist in the DB, but just in case
+                    return null; 
+                  default:
+                    icon = "info"; message = `${actorName} interacted with your content.`;
+                }
 
                 return (
                   <div key={n.id} className={`ma-notif-card ${!n.is_read ? 'unread' : ''} ${isSelected ? 'selected' : ''}`}>
@@ -2926,12 +2943,12 @@ document.body
                         else setMessage("Video unavailable.");
                       }
                     }}>
-                      <div className="ma-notif-avatar">
-                        {n.actor?.avatar_url ? <img src={n.actor.avatar_url} alt="" /> : <span className="material-symbols-outlined">person</span>}
+                      <div className="ma-notif-avatar" style={{ border: `2px solid ${actionColor}` }}>
+                        {n.actor?.avatar_url ? <img src={n.actor.avatar_url} alt="" /> : <span className="material-symbols-outlined" style={{ color: actionColor }}>person</span>}
                       </div>
                       <div className="ma-notif-text">
                         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
-                          <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "var(--ma-accent)" }}>{icon}</span>
+                          <span className="material-symbols-outlined" style={{ fontSize: "16px", color: actionColor }}>{icon}</span>
                           <p style={{ margin: 0 }}>{message}</p>
                         </div>
                         <span>{dateStr}</span>
