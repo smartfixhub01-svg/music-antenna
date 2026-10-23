@@ -2848,89 +2848,85 @@ document.body
               {unreadCount > 0 && <span className="yt-nav-badge" style={{ position: "absolute", top: 4, right: 4, background: "red", color: "white", borderRadius: "10px", padding: "2px 6px", fontSize: "10px", fontWeight: "bold" }}>{unreadCount}</span>}
             </button>
             {showNotifications && (
-        <section className="ma-notif-page">
-          <div className="ma-notif-header">
-            <button className="ma-icon-btn" onClick={() => setShowNotifications(false)}>
-              <span className="material-symbols-outlined">arrow_back</span>
-            </button>
-            <h2 style={{ fontSize: "18px", margin: 0, fontWeight: "700" }}>Activity Log</h2>
+        <section style={{ position: "fixed", inset: 0, zIndex: 9999999, background: "var(--ma-bg-primary)", display: "flex", flexDirection: "column" }}>
+          
+          {/* HEADER */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px", borderBottom: "1px solid var(--ma-border)", background: "var(--ma-bg-primary)", zIndex: 10 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+              <button className="ma-icon-btn" onClick={() => setShowNotifications(false)} style={{ background: "transparent", border: "none", color: "var(--ma-text-primary)", cursor: "pointer", display: "flex" }}>
+                <span className="material-symbols-outlined">arrow_back</span>
+              </button>
+              <h2 style={{ fontSize: "18px", margin: 0, fontWeight: "700", color: "var(--ma-text-primary)" }}>Activity Log</h2>
+            </div>
+            
             <div style={{ display: "flex", gap: "8px" }}>
               {notifications.length > 0 && (
-                <button className="ma-icon-btn" onClick={() => {
+                <button onClick={() => {
                   if (selectedNotifs.length === notifications.length) setSelectedNotifs([]);
                   else setSelectedNotifs(notifications.map(n => n.id));
-                }}>
+                }} style={{ background: "transparent", border: "none", color: "var(--ma-text-primary)", cursor: "pointer", display: "flex", alignItems: "center" }}>
                   <span className="material-symbols-outlined">{selectedNotifs.length === notifications.length ? "check_box" : "check_box_outline_blank"}</span>
                 </button>
               )}
               {selectedNotifs.length > 0 && (
-                <button className="ma-icon-btn" style={{ color: "var(--ma-accent)" }} onClick={async () => {
+                <button onClick={async () => {
                   await supabase.from("notifications").delete().in("id", selectedNotifs);
                   setNotifications(prev => prev.filter(n => !selectedNotifs.includes(n.id)));
                   setSelectedNotifs([]);
-                }}>
+                  setMessage("Selected notifications deleted.");
+                }} style={{ background: "transparent", border: "none", color: "#FF4E45", cursor: "pointer", display: "flex", alignItems: "center" }}>
                   <span className="material-symbols-outlined">delete</span>
                 </button>
               )}
             </div>
           </div>
 
-          <div className="ma-notif-list">
+          {/* LIST */}
+          <div style={{ flex: 1, overflowY: "auto", padding: "16px", paddingBottom: "100px" }}>
             {notifications.length === 0 ? (
-              <div className="ma-empty-state" style={{ marginTop: "40px" }}>
-                <span className="material-symbols-outlined">history</span>
-                <h3>No activity yet</h3>
-                <p>Every like, comment, subscribe, and upload will be recorded here.</p>
+              <div style={{ textAlign: "center", padding: "60px 20px" }}>
+                <span className="material-symbols-outlined" style={{ fontSize: "48px", color: "var(--ma-text-secondary)", marginBottom: "16px" }}>history</span>
+                <h3 style={{ color: "var(--ma-text-primary)", margin: "0 0 8px 0" }}>No activity yet</h3>
+                <p style={{ color: "var(--ma-text-secondary)", fontSize: "14px" }}>Every like, comment, and subscriber will be recorded here.</p>
               </div>
             ) : (
               notifications.map(n => {
                 const isSelected = selectedNotifs.includes(n.id);
                 const actorName = n.actor?.display_name || "Someone";
                 
-                // Precise Date & Time (Evidence)
+                // Precise Date & Time (d/m/y at h:m)
                 const date = new Date(n.created_at);
-                const dateStr = date.toLocaleString('en-US', { 
-                  month: 'short', day: 'numeric', year: 'numeric', 
-                  hour: 'numeric', minute: '2-digit', hour12: true 
-                });
+                const dateStr = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} at ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
 
-                // Detective Icons & Messages for EVERY Action
+                // Message & Icon mapping
                 let icon = "notifications";
                 let message = "";
-                let actionColor = "var(--ma-text-primary)";
+                let actionColor = "#FF365F";
 
                 switch(n.type) {
-                  case "like":
-                    icon = "thumb_up"; message = `${actorName} liked your video.`; actionColor = "#3ea6ff"; break;
-                  case "comment":
-                    icon = "comment"; message = `${actorName} commented on your video.`; actionColor = "#2ba640"; break;
-                  case "subscribe":
-                    icon = "person_add"; message = `${actorName} subscribed to your channel.`; actionColor = "#ff365f"; break;
-                  case "new_video":
-                    icon = "video_library"; message = `${actorName} released a new video.`; actionColor = "#f5a623"; break;
-                  case "upload":
-                    icon = "upload"; message = `You uploaded a new video successfully.`; actionColor = "#2ba640"; break;
-                  case "share":
-                    icon = "share"; message = `${actorName} shared your video.`; actionColor = "#9c27b0"; break;
-                  case "password_change":
-                  case "password_reset":
-                    // Silent action - this shouldn't even exist in the DB, but just in case
-                    return null; 
-                  default:
-                    icon = "info"; message = `${actorName} interacted with your content.`;
+                  case "like": icon = "thumb_up"; message = `${actorName} liked your video.`; actionColor = "#3EA6FF"; break;
+                  case "comment": icon = "comment"; message = `${actorName} commented on your video.`; actionColor = "#2BA640"; break;
+                  case "subscribe": icon = "person_add"; message = `${actorName} subscribed to your channel.`; actionColor = "#FF365F"; break;
+                  case "new_video": icon = "video_library"; message = `${actorName} released a new video. Tap to watch.`; actionColor = "#F5A623"; break;
+                  case "upload": icon = "upload"; message = `You uploaded a new video successfully.`; actionColor = "#2BA640"; break;
+                  case "share": icon = "share"; message = `${actorName} shared your video.`; actionColor = "#9C27B0"; break;
+                  default: icon = "info"; message = `${actorName} interacted with your content.`;
                 }
 
                 return (
-                  <div key={n.id} className={`ma-notif-card ${!n.is_read ? 'unread' : ''} ${isSelected ? 'selected' : ''}`}>
-                    <div className="ma-notif-checkbox" onClick={() => {
+                  <div key={n.id} style={{ display: "flex", alignItems: "center", background: isSelected ? "rgba(255,54,95,0.1)" : "var(--ma-bg-secondary)", border: `1px solid ${isSelected ? "var(--ma-accent)" : "var(--ma-border)"}`, borderLeft: !n.is_read ? "4px solid var(--ma-accent)" : "4px solid transparent", borderRadius: "12px", marginBottom: "10px", padding: "12px 16px" }}>
+                    
+                    {/* Checkbox */}
+                    <div onClick={() => {
                       setSelectedNotifs(prev => isSelected ? prev.filter(id => id !== n.id) : [...prev, n.id]);
-                    }}>
+                    }} style={{ cursor: "pointer", marginRight: "12px", display: "flex" }}>
                       <span className="material-symbols-outlined" style={{ color: isSelected ? "var(--ma-accent)" : "var(--ma-text-secondary)" }}>
                         {isSelected ? "check_circle" : "radio_button_unchecked"}
                       </span>
                     </div>
-                    
-                    <div className="ma-notif-content" onClick={async () => {
+
+                    {/* Content */}
+                    <div onClick={async () => {
                       if (!n.is_read) {
                         await supabase.from("notifications").update({ is_read: true }).eq("id", n.id);
                         setUnreadCount(prev => Math.max(0, prev - 1));
@@ -2942,24 +2938,28 @@ document.body
                         if (found) openPlayer(found);
                         else setMessage("Video unavailable.");
                       }
-                    }}>
-                      <div className="ma-notif-avatar" style={{ border: `2px solid ${actionColor}` }}>
-                        {n.actor?.avatar_url ? <img src={n.actor.avatar_url} alt="" /> : <span className="material-symbols-outlined" style={{ color: actionColor }}>person</span>}
+                    }} style={{ flex: 1, display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }}>
+                      
+                      <div style={{ width: "44px", height: "44px", borderRadius: "50%", overflow: "hidden", border: `2px solid ${actionColor}`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--ma-bg-hover)" }}>
+                        {n.actor?.avatar_url ? <img src={n.actor.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="" /> : <span className="material-symbols-outlined" style={{ color: actionColor, fontSize: "20px" }}>person</span>}
                       </div>
-                      <div className="ma-notif-text">
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
+
+                      <div style={{ display: "flex", flexDirection: "column" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                           <span className="material-symbols-outlined" style={{ fontSize: "16px", color: actionColor }}>{icon}</span>
-                          <p style={{ margin: 0 }}>{message}</p>
+                          <span style={{ fontSize: "14px", fontWeight: "600", color: "var(--ma-text-primary)" }}>{message}</span>
                         </div>
-                        <span>{dateStr}</span>
+                        <span style={{ fontSize: "12px", color: "var(--ma-text-secondary)", marginTop: "4px" }}>{dateStr}</span>
                       </div>
                     </div>
 
-                    <button className="ma-notif-delete" onClick={async () => {
+                    {/* Delete Button */}
+                    <button onClick={async (e) => {
+                      e.stopPropagation();
                       await supabase.from("notifications").delete().eq("id", n.id);
                       setNotifications(prev => prev.filter(x => x.id !== n.id));
                       setSelectedNotifs(prev => prev.filter(id => id !== n.id));
-                    }}>
+                    }} style={{ background: "transparent", border: "none", color: "var(--ma-text-secondary)", cursor: "pointer", display: "flex", padding: "8px", marginLeft: "8px" }}>
                       <span className="material-symbols-outlined">close</span>
                     </button>
                   </div>
