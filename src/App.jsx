@@ -2366,7 +2366,7 @@ useEffect(() => {
                     </button>
                   
       {showMoreOptions && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 999999, display: "flex", alignItems: "flex-end" }} onClick={() => setShowMoreOptions(false)}>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 2147483647, display: "flex", alignItems: "flex-end" }} onClick={() => setShowMoreOptions(false)}>
           <div style={{ background: "#212121", width: "100%", borderTopLeftRadius: "16px", borderTopRightRadius: "16px", padding: "20px", paddingBottom: "40px" }} onClick={e => e.stopPropagation()}>
             
             <div style={{ width: "40px", height: "4px", background: "#555", borderRadius: "2px", margin: "0 auto 20px" }}></div>
@@ -2678,7 +2678,7 @@ document.body
                       onClick={() => setShowCreatorResetModal(true)}>Reset Art ID</button>
 
         {showCreatorResetModal && (
-          <div style={{ position: "fixed", inset: 0, zIndex: 9999999, background: "rgba(15, 15, 15, 0.95)", display: "flex", justifyContent: "center", alignItems: "center", padding: "20px" }}>
+          <div style={{ position: "fixed", inset: 0, zIndex: 21474836479, background: "rgba(15, 15, 15, 0.95)", display: "flex", justifyContent: "center", alignItems: "center", padding: "20px" }}>
             <div style={{ width: "100%", maxWidth: "400px", padding: "24px", background: "#1C1C1C", borderRadius: "16px", border: "1px solid #303030", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>
               <h3 style={{ textAlign: "center", color: "#F1F1F1", marginBottom: "8px", fontSize: "20px" }}>Reset Art ID & Password</h3>
               <p style={{ textAlign: "center", color: "#AAAAAA", marginBottom: "24px", fontSize: "14px" }}>Enter your Creator email to recover your Art ID and reset your password.</p>
@@ -2835,7 +2835,7 @@ document.body
               {unreadCount > 0 && <span className="yt-nav-badge" style={{ position: "absolute", top: 4, right: 4, background: "red", color: "white", borderRadius: "10px", padding: "2px 6px", fontSize: "10px", fontWeight: "bold" }}>{unreadCount}</span>}
             </button>
             {showNotifications && createPortal(
-        <section style={{ position: "fixed", inset: 0, zIndex: 9999999, background: "var(--ma-bg-primary)", display: "flex", flexDirection: "column" }}>
+        <section style={{ position: "fixed", inset: 0, zIndex: 21474836479, background: "var(--ma-bg-primary)", display: "flex", flexDirection: "column" }}>
           
           {/* HEADER */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid var(--ma-border)", background: "var(--ma-bg-primary)", zIndex: 10 }}>
@@ -3997,7 +3997,7 @@ document.body
                 <span className="material-symbols-outlined">search</span>
               </button>
               <button className="yt-icon-btn" aria-label="More">
-                <span className="material-symbols-outlined" style={{ cursor: "pointer" }} onClick={() => setMessage("More options coming soon!")}>more_vert</span>
+                <span className="material-symbols-outlined" style={{ cursor: "pointer" }} onClick={(e) => { e.stopPropagation(); setShowMoreMenu(true); }}>more_vert</span>
               </button>
             </div>
           </div>
@@ -4739,7 +4739,7 @@ document.body
           color: "#FFFFFF", 
           padding: "14px 24px", 
           borderRadius: "8px", 
-          zIndex: 999999, 
+          zIndex: 2147483647, 
           boxShadow: "0 8px 24px rgba(0,0,0,0.5)", 
           fontWeight: "600", 
           fontSize: "14px", 
@@ -4754,7 +4754,7 @@ document.body
 
 
       {showMoreMenu && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 999999, display: "flex", alignItems: "flex-end", backdropFilter: "blur(4px)" }} onClick={() => setShowMoreMenu(false)}>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 2147483647, display: "flex", alignItems: "flex-end", backdropFilter: "blur(4px)" }} onClick={() => setShowMoreMenu(false)}>
           <div style={{ 
             background: "var(--ma-bg, #ffffff)", 
             color: "var(--ma-text, #0f0f0f)", 
