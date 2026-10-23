@@ -5939,3 +5939,9 @@ p
 .yt-mini-player span:not(.material-symbols-outlined) {
   display: none !important;
 }
+
+/* ===== RED BORDER FOR MINI PLAYER ===== */
+.yt-mini-player {
+  border: 2px solid #FF365F !important;
+  box-shadow: 0 0 12px rgba(255, 54, 95, 0.3) !important;
+}
