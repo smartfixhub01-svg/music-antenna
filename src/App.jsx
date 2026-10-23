@@ -3016,8 +3016,9 @@ document.body
             {menuOpen && (
               <>
                 <div className="ma-menu-backdrop" onClick={() => setMenuOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 99999, backdropFilter: "blur(2px)" }} />
-                <div className="ma-avatar-menu" role="menu" style={{ position: "fixed", top: "70px", right: "12px", height: "auto", maxHeight: "calc(100dvh - 100px)", width: "200px", background: "var(--ma-bg, #ffffff)", display: "flex", flexDirection: "column", overflowY: "auto", zIndex: 100000, boxShadow: "0 4px 20px rgba(0,0,0,0.2)", borderRadius: "12px", padding: "16px 0", border: "1px solid var(--ma-border, #e5e5e5)" }}>
-                  <div className="ma-avatar-menu-header">
+                <div className="ma-avatar-menu" role="menu" style={{ position: "fixed", top: "65px", right: "10px", height: "auto", maxHeight: "85vh", width: "160px", background: "var(--ma-bg, #ffffff)", display: "flex", flexDirection: "column", overflowY: "auto", zIndex: 100000, boxShadow: "0 10px 30px rgba(0,0,0,0.2)", borderRadius: "12px", padding: "10px", border: "1px solid var(--ma-border, #e5e5e5)", fontSize: "12px" }}>
+                  <button onClick={() => setMenuOpen(false)} style={{ position: "absolute", top: "8px", right: "8px", background: "transparent", border: "none", color: "var(--ma-text-secondary, #606060)", cursor: "pointer", padding: "4px", zIndex: 100001 }}><span className="material-symbols-outlined" style={{ fontSize: "16px" }}>close</span></button>
+                  <div className="ma-avatar-menu-header" style={{ paddingRight: "20px" }}>
                     {profile?.avatar_url ? (
                       <img className="ma-avatar-menu-img" src={profile.avatar_url} alt="" />
                     ) : (
