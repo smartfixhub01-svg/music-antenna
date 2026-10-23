@@ -2851,21 +2851,24 @@ document.body
         <section style={{ position: "fixed", inset: 0, zIndex: 9999999, background: "var(--ma-bg-primary)", display: "flex", flexDirection: "column" }}>
           
           {/* HEADER */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px", borderBottom: "1px solid var(--ma-border)", background: "var(--ma-bg-primary)", zIndex: 10 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-              <button onClick={() => setShowNotifications(false)} style={{ background: "transparent", border: "none", color: "var(--ma-text-primary)", cursor: "pointer", display: "flex" }}>
-                <span className="material-symbols-outlined">arrow_back</span>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid var(--ma-border)", background: "var(--ma-bg-primary)", zIndex: 10 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <button onClick={() => setShowNotifications(false)} style={{ background: "transparent", border: "none", color: "var(--ma-text-primary)", cursor: "pointer", display: "flex", padding: "4px" }}>
+                <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>arrow_back</span>
               </button>
-              <h2 style={{ fontSize: "18px", margin: 0, fontWeight: "700", color: "var(--ma-text-primary)" }}>Activity Log</h2>
+              <h2 style={{ fontSize: "16px", margin: 0, fontWeight: "700", color: "var(--ma-text-primary)" }}>Activity Log</h2>
             </div>
             
-            <div style={{ display: "flex", gap: "8px" }}>
+            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
               {notifications.length > 0 && (
-                <button onClick={() => {
-                  if (selectedNotifs.length === notifications.length) setSelectedNotifs([]);
-                  else setSelectedNotifs(notifications.map(n => n.id));
-                }} style={{ background: "transparent", border: "none", color: "var(--ma-text-primary)", cursor: "pointer", display: "flex", alignItems: "center" }}>
-                  <span className="material-symbols-outlined">{selectedNotifs.length === notifications.length ? "check_box" : "check_box_outline_blank"}</span>
+                <button onClick={async () => {
+                  if(window.confirm("Clear all notifications?")) {
+                    await supabase.from("notifications").delete().eq("user_id", session.user.id);
+                    setNotifications([]);
+                    setUnreadCount(0);
+                  }
+                }} style={{ background: "transparent", border: "none", color: "#FF4E45", cursor: "pointer", fontSize: "12px", fontWeight: "600" }}>
+                  Clear All
                 </button>
               )}
               {selectedNotifs.length > 0 && (
@@ -2874,32 +2877,31 @@ document.body
                   setNotifications(prev => prev.filter(n => !selectedNotifs.includes(n.id)));
                   setSelectedNotifs([]);
                   setMessage("Selected notifications deleted.");
-                }} style={{ background: "transparent", border: "none", color: "#FF4E45", cursor: "pointer", display: "flex", alignItems: "center" }}>
-                  <span className="material-symbols-outlined">delete</span>
+                }} style={{ background: "transparent", border: "none", color: "var(--ma-text-primary)", cursor: "pointer", display: "flex", alignItems: "center" }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>delete</span>
                 </button>
               )}
             </div>
           </div>
 
-          {/* LIST */}
-          <div style={{ flex: 1, overflowY: "auto", padding: "16px", paddingBottom: "100px" }}>
+          {/* COMPACT LIST */}
+          <div style={{ flex: 1, overflowY: "auto", padding: "12px", paddingBottom: "100px" }}>
             {notifications.length === 0 ? (
-              <div style={{ textAlign: "center", padding: "60px 20px" }}>
-                <span className="material-symbols-outlined" style={{ fontSize: "48px", color: "var(--ma-text-secondary)", marginBottom: "16px" }}>history</span>
-                <h3 style={{ color: "var(--ma-text-primary)", margin: "0 0 8px 0" }}>No activity yet</h3>
-                <p style={{ color: "var(--ma-text-secondary)", fontSize: "14px" }}>Every like, comment, and subscriber will be recorded here.</p>
+              <div style={{ textAlign: "center", padding: "40px 20px" }}>
+                <span className="material-symbols-outlined" style={{ fontSize: "40px", color: "var(--ma-text-secondary)", marginBottom: "12px" }}>history</span>
+                <h3 style={{ color: "var(--ma-text-primary)", margin: "0 0 4px 0", fontSize: "15px" }}>No activity yet</h3>
+                <p style={{ color: "var(--ma-text-secondary)", fontSize: "13px", margin: 0 }}>Every like, comment, and subscriber will be recorded here.</p>
               </div>
             ) : (
               notifications.map(n => {
-                // 🚨 FIX THE RED SLIVER BUG: Skip broken notification objects
                 if (!n || !n.id || !n.type) return null;
 
                 const isSelected = selectedNotifs.includes(n.id);
                 const actorName = n.actor?.display_name || "Someone";
                 
-                // Precise Date & Time (d/m/y at h:m)
+                // Precise Date & Time
                 const date = new Date(n.created_at);
-                const dateStr = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} at ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+                const dateStr = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
 
                 // Message & Icon mapping
                 let icon = "notifications";
@@ -2907,28 +2909,28 @@ document.body
                 let actionColor = "#FF365F";
 
                 switch(n.type) {
-                  case "like": icon = "thumb_up"; message = `${actorName} liked your video.`; actionColor = "#3EA6FF"; break;
-                  case "comment": icon = "comment"; message = `${actorName} commented on your video.`; actionColor = "#2BA640"; break;
-                  case "subscribe": icon = "person_add"; message = `${actorName} subscribed to your channel.`; actionColor = "#FF365F"; break;
-                  case "new_video": icon = "video_library"; message = `${actorName} released a new video. Tap to watch.`; actionColor = "#F5A623"; break;
-                  case "upload": icon = "upload"; message = `You uploaded a new video successfully.`; actionColor = "#2BA640"; break;
-                  case "share": icon = "share"; message = `${actorName} shared your video.`; actionColor = "#9C27B0"; break;
-                  default: icon = "info"; message = `${actorName} interacted with your content.`;
+                  case "like": icon = "thumb_up"; message = `liked your video.`; actionColor = "#3EA6FF"; break;
+                  case "comment": icon = "comment"; message = `commented on your video.`; actionColor = "#2BA640"; break;
+                  case "subscribe": icon = "person_add"; message = `subscribed to your channel.`; actionColor = "#FF365F"; break;
+                  case "new_video": icon = "video_library"; message = `released a new video. Tap to watch.`; actionColor = "#F5A623"; break;
+                  case "upload": icon = "upload"; message = `Your upload was successful.`; actionColor = "#2BA640"; break;
+                  case "share": icon = "share"; message = `shared your video.`; actionColor = "#9C27B0"; break;
+                  default: icon = "info"; message = `interacted with your content.`;
                 }
 
                 return (
-                  <div key={n.id} style={{ display: "flex", alignItems: "center", background: isSelected ? "rgba(255,54,95,0.1)" : "var(--ma-bg-secondary)", border: `1px solid ${isSelected ? "var(--ma-accent)" : "var(--ma-border)"}`, borderLeft: !n.is_read ? "4px solid var(--ma-accent)" : "4px solid transparent", borderRadius: "12px", marginBottom: "10px", padding: "12px 16px" }}>
+                  <div key={n.id} style={{ display: "flex", alignItems: "center", background: isSelected ? "rgba(255,54,95,0.1)" : "var(--ma-bg-secondary)", border: `1px solid ${isSelected ? "var(--ma-accent)" : "transparent"}`, borderLeft: !n.is_read ? "3px solid var(--ma-accent)" : "3px solid transparent", borderRadius: "8px", marginBottom: "8px", padding: "10px 12px" }}>
                     
                     {/* Checkbox */}
                     <div onClick={() => {
                       setSelectedNotifs(prev => isSelected ? prev.filter(id => id !== n.id) : [...prev, n.id]);
-                    }} style={{ cursor: "pointer", marginRight: "12px", display: "flex" }}>
-                      <span className="material-symbols-outlined" style={{ color: isSelected ? "var(--ma-accent)" : "var(--ma-text-secondary)" }}>
+                    }} style={{ cursor: "pointer", marginRight: "10px", display: "flex" }}>
+                      <span className="material-symbols-outlined" style={{ color: isSelected ? "var(--ma-accent)" : "var(--ma-text-secondary)", fontSize: "18px" }}>
                         {isSelected ? "check_circle" : "radio_button_unchecked"}
                       </span>
                     </div>
 
-                    {/* Content */}
+                    {/* Compact Avatar */}
                     <div onClick={async () => {
                       if (!n.is_read) {
                         await supabase.from("notifications").update({ is_read: true }).eq("id", n.id);
@@ -2941,18 +2943,17 @@ document.body
                         if (found) openPlayer(found);
                         else setMessage("Video unavailable.");
                       }
-                    }} style={{ flex: 1, display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }}>
+                    }} style={{ flex: 1, display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", minWidth: 0 }}>
                       
-                      <div style={{ width: "44px", height: "44px", borderRadius: "50%", overflow: "hidden", border: `2px solid ${actionColor}`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--ma-bg-hover)" }}>
-                        {n.actor?.avatar_url ? <img src={n.actor.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="" /> : <span className="material-symbols-outlined" style={{ color: actionColor, fontSize: "20px" }}>person</span>}
+                      <div style={{ width: "32px", height: "32px", borderRadius: "50%", overflow: "hidden", border: `1.5px solid ${actionColor}`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--ma-bg-hover)" }}>
+                        {n.actor?.avatar_url ? <img src={n.actor.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="" /> : <span className="material-symbols-outlined" style={{ color: actionColor, fontSize: "16px" }}>person</span>}
                       </div>
 
-                      <div style={{ display: "flex", flexDirection: "column" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                          <span className="material-symbols-outlined" style={{ fontSize: "16px", color: actionColor }}>{icon}</span>
-                          <span style={{ fontSize: "14px", fontWeight: "600", color: "var(--ma-text-primary)" }}>{message}</span>
+                      <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+                        <div style={{ fontSize: "13px", color: "var(--ma-text-primary)", lineHeight: "1.3", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                          <strong>{actorName}</strong> {message}
                         </div>
-                        <span style={{ fontSize: "12px", color: "var(--ma-text-secondary)", marginTop: "4px" }}>{dateStr}</span>
+                        <span style={{ fontSize: "11px", color: "var(--ma-text-secondary)", marginTop: "2px" }}>{dateStr}</span>
                       </div>
                     </div>
 
@@ -2962,8 +2963,8 @@ document.body
                       await supabase.from("notifications").delete().eq("id", n.id);
                       setNotifications(prev => prev.filter(x => x.id !== n.id));
                       setSelectedNotifs(prev => prev.filter(id => id !== n.id));
-                    }} style={{ background: "transparent", border: "none", color: "var(--ma-text-secondary)", cursor: "pointer", display: "flex", padding: "8px", marginLeft: "8px" }}>
-                      <span className="material-symbols-outlined">close</span>
+                    }} style={{ background: "transparent", border: "none", color: "var(--ma-text-secondary)", cursor: "pointer", display: "flex", padding: "4px", marginLeft: "8px", flexShrink: 0 }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>close</span>
                     </button>
                   </div>
                 );
