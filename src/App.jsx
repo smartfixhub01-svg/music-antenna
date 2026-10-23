@@ -3652,7 +3652,7 @@ document.body
                           {item.views || 0} views • {timeAgo(item.created_at)}
                         </p>
                       </div>
-                      <button className="yt-video-menu" aria-label="More">⋮</button>
+                      <button className="yt-video-menu" aria-label="More" onClick={(e) => { e.stopPropagation(); setActiveMedia(item); setShowMoreMenu(true); }}>⋮</button>
                     </div>
                   </article>
                 ))}
