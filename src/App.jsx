@@ -3510,8 +3510,8 @@ document.body
             </div>
           )}
           
+          <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 px-4 mt-2 mb-2">Welcome back, <span className="text-black dark:text-white font-bold">Fikie</span>!</p>
           <div className="yt-chips">
-        <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 px-4 mt-2 mb-2">Welcome back, <span className="text-black dark:text-white font-bold">Fikie</span>!</p>
               {["All", "Music", "Videos", "Shorts"].map((c) => (
                 <button
                   key={c}
