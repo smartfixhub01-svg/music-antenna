@@ -2836,37 +2836,65 @@ document.body
 
         <div className="ma-user">
           <div style={{ position: "relative" }}>
-            <button className="ma-icon-btn" aria-label="Notifications" onClick={() => setShowNotifications(!showNotifications)}>
+            <button className="ma-icon-btn" aria-label="Notifications" onClick={() => { setShowNotifications(!showNotifications); if (!showNotifications) fetchNotifications(); }}>
               <span className="material-symbols-outlined">notifications</span>
               {unreadCount > 0 && <span className="yt-nav-badge" style={{ position: "absolute", top: 4, right: 4, background: "red", color: "white", borderRadius: "10px", padding: "2px 6px", fontSize: "10px", fontWeight: "bold" }}>{unreadCount}</span>}
             </button>
             {showNotifications && (
-              <div className="yt-notif-dropdown" style={{ position: "absolute", top: "100%", right: 0, width: "300px", background: "#212121", borderRadius: "12px", padding: "16px", zIndex: 100, boxShadow: "0 10px 30px rgba(0,0,0,0.5)", color: "white" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-                  <h3 style={{ margin: 0, fontSize: "16px" }}>Notifications</h3>
+              <div className="yt-notif-dropdown" style={{ position: "absolute", top: "100%", right: 0, width: "320px", background: "var(--ma-bg-elevated)", borderRadius: "12px", padding: "16px", zIndex: 100, boxShadow: "0 10px 30px rgba(0,0,0,0.5)", color: "var(--ma-text-primary)", border: "1px solid var(--ma-border)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", borderBottom: "1px solid var(--ma-border)", paddingBottom: "8px" }}>
+                  <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "700" }}>Notifications</h3>
                   {notifications.length > 0 && (
                     <button onClick={async () => {
                       await supabase.from("notifications").delete().eq("user_id", session.user.id);
                       setNotifications([]);
                       setUnreadCount(0);
-                    }} style={{ background: "transparent", border: "none", color: "#ff365f", fontSize: "12px", cursor: "pointer" }}>Clear All</button>
+                    }} style={{ background: "transparent", border: "none", color: "var(--ma-accent)", fontSize: "12px", cursor: "pointer", fontWeight: "600" }}>Clear All</button>
                   )}
                 </div>
-                {notifications.length === 0 ? (
-                  <p style={{ fontSize: "13px", color: "#aaa", margin: 0 }}>You're all caught up.</p>
-                ) : (
-                  notifications.map(n => (
-                    <div key={n.id} style={{ display: "flex", gap: "10px", marginBottom: "12px", borderBottom: "1px solid #333", paddingBottom: "8px" }}>
-                      <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#ff365f", display: "grid", placeItems: "center", overflow: "hidden" }}>
-                        {n.actor?.avatar_url ? <img src={n.actor.avatar_url} style={{width:'100%', height:'100%', objectFit:'cover'}} /> : "♫"}
+                <div style={{ maxHeight: "400px", overflowY: "auto" }}>
+                  {notifications.length === 0 ? (
+                    <p style={{ fontSize: "13px", color: "var(--ma-text-secondary)", margin: 0, textAlign: "center", padding: "20px 0" }}>You're all caught up.</p>
+                  ) : (
+                    notifications.map(n => (
+                      <div 
+                        key={n.id} 
+                        onClick={async () => {
+                          // Mark as read in DB
+                          if (!n.is_read) {
+                            await supabase.from("notifications").update({ is_read: true }).eq("id", n.id);
+                            setUnreadCount(prev => Math.max(0, prev - 1));
+                          }
+                          setShowNotifications(false);
+                          
+                          // Route to the correct place
+                          if (n.type === 'subscribe') {
+                            openChannel(n.actor_id);
+                          } else if (n.media_id) {
+                            const foundMedia = media.find(m => m.id === n.media_id);
+                            if (foundMedia) openPlayer(foundMedia);
+                            else setMessage("Video has been removed or unavailable.");
+                          }
+                        }}
+                        style={{ 
+                          display: "flex", gap: "10px", padding: "10px", 
+                          background: n.is_read ? "transparent" : "rgba(255, 54, 95, 0.08)", 
+                          borderRadius: "8px", marginBottom: "8px", cursor: "pointer",
+                          borderLeft: n.is_read ? "3px solid transparent" : "3px solid var(--ma-accent)",
+                          transition: "background 0.2s"
+                        }}
+                      >
+                        <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "var(--ma-bg-secondary)", display: "grid", placeItems: "center", overflow: "hidden", flexShrink: 0 }}>
+                          {n.actor?.avatar_url ? <img src={n.actor.avatar_url} style={{width:'100%', height:'100%', objectFit:'cover'}} alt="" /> : <span className="material-symbols-outlined" style={{color: "var(--ma-text-secondary)", fontSize: "18px"}}>person</span>}
+                        </div>
+                        <div style={{ fontSize: "13px", lineHeight: "1.4" }}>
+                          <strong>@{n.actor?.display_name || "User"}</strong> {n.type === 'like' ? 'liked' : n.type === 'comment' ? 'commented on' : n.type} your {n.type === 'subscribe' ? 'channel' : 'video'}.
+                          <br/><span style={{color: "var(--ma-text-secondary)", fontSize: "11px"}}>{timeAgo(n.created_at)}</span>
+                        </div>
                       </div>
-                      <div style={{ fontSize: "12px" }}>
-                        <strong>@{n.actor?.display_name || "User"}</strong> {n.type} your {n.type === 'subscribe' ? 'channel' : 'video'}.
-                        <br/><span style={{color: "#aaa", fontSize: "10px"}}>{timeAgo(n.created_at)}</span>
-                      </div>
-                    </div>
-                  ))
-                )}
+                    ))
+                  )}
+                </div>
               </div>
             )}
           </div>
