@@ -4056,84 +4056,101 @@ document.body
             <button className="yt-icon-btn" onClick={() => { setShowManagePage(false); setEditingMedia(null); setShowAccountPage(true); }}>
               <span className="material-symbols-outlined">arrow_back</span>
             </button>
-            <h2 style={{ fontSize: "18px", margin: 0 }}>Manage Uploads</h2>
+            <h2 style={{ fontSize: "18px", margin: 0, fontWeight: "700" }}>Manage Content</h2>
             <div style={{ width: "40px" }}></div>
           </div>
 
           {editingMedia ? (
-            <form className="yt-upload-form" style={{ padding: "0 16px", marginTop: "16px" }} onSubmit={handleUpdateVideo}>
-              <h3 style={{ marginBottom: "16px" }}>Edit details</h3>
-              
-              <label className="yt-upload-field">
+            <form className="ma-edit-form" onSubmit={handleUpdateVideo}>
+              <h3 style={{ marginBottom: "20px", color: "var(--ma-text-primary)" }}>Edit Details</h3>
+
+              <label className="ma-edit-label">
                 <span>Title</span>
-                <input value={editTitle} onChange={e => setEditTitle(e.target.value)} required />
-              </label>
-              
-              <label className="yt-upload-field">
-                <span>Description</span>
-                <textarea value={editDesc} onChange={e => setEditDesc(e.target.value)} rows={4} />
+                <input value={editTitle} onChange={e => setEditTitle(e.target.value)} required className="ma-edit-input" />
               </label>
 
-              <div className="yt-upload-field">
+              <label className="ma-edit-label">
+                <span>Description</span>
+                <textarea value={editDesc} onChange={e => setEditDesc(e.target.value)} rows={4} className="ma-edit-input" />
+              </label>
+
+              <div className="ma-edit-label">
                 <span>Thumbnail</span>
-                <label className="yt-upload-thumb">
+                <label className="ma-edit-file">
                   <input type="file" accept="image/*" onChange={e => setEditThumbnailFile(e.target.files?.[0] || null)} />
                   <span className="material-symbols-outlined">image</span>
                   <span>{editThumbnailFile ? editThumbnailFile.name : "Upload new thumbnail"}</span>
                 </label>
               </div>
 
-              <label className="yt-upload-field">
+              <label className="ma-edit-label">
                 <span>Visibility</span>
-                <select value={editVisibility} onChange={e => setEditVisibility(e.target.value)}>
+                <select value={editVisibility} onChange={e => setEditVisibility(e.target.value)} className="ma-edit-input">
                   <option value="public">Public</option>
                   <option value="private">Private</option>
                   <option value="unlisted">Unlisted</option>
                 </select>
               </label>
 
-              <label className="ma-checkbox yt-upload-checkbox">
+              <label className="ma-checkbox" style={{ marginBottom: "24px" }}>
                 <input type="checkbox" checked={editAllowDownload} onChange={e => setEditAllowDownload(e.target.checked)} />
                 Allow downloads
               </label>
 
-              <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
-                <button type="button" className="yt-upload-cancel" onClick={() => setEditingMedia(null)}>Cancel</button>
-                <button type="submit" className="yt-upload-submit" disabled={editSaving}>
-                  {editSaving ? "Saving..." : "Save changes"}
+              <div style={{ display: "flex", gap: "12px" }}>
+                <button type="button" className="ma-btn-cancel" onClick={() => setEditingMedia(null)}>Cancel</button>
+                <button type="submit" className="ma-btn-primary" disabled={editSaving}>
+                  {editSaving ? "Saving..." : "Save Changes"}
                 </button>
               </div>
-
-              <button type="button" onClick={() => handleDeleteVideo(editingMedia.id, editingMedia.storage_path, editingMedia.thumbnail_path)}
-                style={{ background: "transparent", border: "1px solid red", color: "red", padding: "10px", borderRadius: "20px", width: "100%", marginTop: "30px", cursor: "pointer", fontWeight: "bold" }}>
-                Delete Video Permanently
-              </button>
             </form>
           ) : (
             <div className="yt-manage-list">
               {manageLoading ? (
-                <p style={{ padding: "20px", color: "#aaa" }}>Loading uploads...</p>
+                <p style={{ padding: "20px", color: "var(--ma-text-secondary)", textAlign: "center" }}>Loading uploads...</p>
               ) : manageMedia.length === 0 ? (
-                <p style={{ padding: "20px", color: "#aaa" }}>You haven't uploaded anything yet.</p>
+                <div className="ma-empty-state">
+                  <span className="material-symbols-outlined">video_library</span>
+                  <h3>No uploads yet</h3>
+                  <p>Your published tracks and videos will appear here.</p>
+                </div>
               ) : (
                 manageMedia.map(item => (
-                  <div key={item.id} className="yt-manage-item">
-                    <div className="yt-manage-thumb">
+                  <div key={item.id} className="ma-manage-card">
+                    <div className="ma-manage-thumb">
                       {item.thumbnail_path ? (
                         <img src={supabase.storage.from("track-covers").getPublicUrl(item.thumbnail_path).data.publicUrl} alt="" />
                       ) : (
-                        <div style={{ background: "#303030", display: "grid", placeItems: "center", height: "100%", color: "#aaa" }}>
+                        <div className="ma-manage-thumb-fallback">
                           <span className="material-symbols-outlined">movie</span>
                         </div>
                       )}
                     </div>
-                    <div className="yt-manage-details">
+                    
+                    <div className="ma-manage-info">
                       <h4>{item.title}</h4>
-                      <p>{item.visibility || "public"} • {item.media_type}</p>
+                      <div className="ma-manage-meta">
+                        <span>{item.views || 0} views</span>
+                        <span>•</span>
+                        <span>{new Date(item.created_at).toLocaleDateString()}</span>
+                      </div>
+                      <div className="ma-manage-badges">
+                        <span className={`ma-badge ${item.visibility || 'public'}`}>{item.visibility || 'Public'}</span>
+                        <span className={`ma-badge ${item.media_type}`}>{item.media_type}</span>
+                      </div>
                     </div>
-                    <button type="button" className="yt-manage-edit-btn" onClick={() => startEditingVideo(item)}>
-                      <span className="material-symbols-outlined">edit</span>
-                    </button>
+
+                    <div className="ma-manage-actions">
+                      <button className="ma-action-btn play" onClick={() => { setShowManagePage(false); openPlayer(item); }}>
+                        <span className="material-symbols-outlined">play_arrow</span>
+                      </button>
+                      <button className="ma-action-btn edit" onClick={() => startEditingVideo(item)}>
+                        <span className="material-symbols-outlined">edit</span>
+                      </button>
+                      <button className="ma-action-btn delete" onClick={() => { if(window.confirm("Delete this upload permanently?")) handleDeleteVideo(item.id, item.storage_path, item.thumbnail_path); }}>
+                        <span className="material-symbols-outlined">delete</span>
+                      </button>
+                    </div>
                   </div>
                 ))
               )}
