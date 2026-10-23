@@ -166,16 +166,15 @@ export default function App() {
     let newLeft = dragRef.current.initialLeft + dx;
     let newTop = dragRef.current.initialTop + dy;
 
-    // SMART BOUNDARIES: Keep the player on screen
     const el = e.currentTarget;
     if (el) {
-      const maxLeft = window.innerWidth - el.offsetWidth - 4;
-      const maxTop = window.innerHeight - el.offsetHeight - 4;
+      // 16px boundary so it never touches the extreme edge
+      const maxLeft = window.innerWidth - el.offsetWidth - 16;
+      const maxTop = window.innerHeight - el.offsetHeight - 16;
       
-      newLeft = Math.max(4, Math.min(maxLeft, newLeft));
-      newTop = Math.max(4, Math.min(maxTop, newTop));
+      newLeft = Math.max(16, Math.min(maxLeft, newLeft));
+      newTop = Math.max(16, Math.min(maxTop, newTop));
 
-      // Move smoothly using transform relative to the initial position
       el.style.transform = `translate3d(${newLeft - dragRef.current.initialLeft}px, ${newTop - dragRef.current.initialTop}px, 0)`;
     }
   };
@@ -183,10 +182,22 @@ export default function App() {
   const handlePointerUp = (e) => {
     setIsDragging(false);
     e.currentTarget.releasePointerCapture(e.pointerId);
+    
+    const dx = e.clientX - dragRef.current.startX;
+    const dy = e.clientY - dragRef.current.startY;
+    
+    let newLeft = dragRef.current.initialLeft + dx;
+    let newTop = dragRef.current.initialTop + dy;
+
     const el = e.currentTarget;
     if (el) {
-      const rect = el.getBoundingClientRect();
-      setMiniPlayerPos({ left: rect.left, top: rect.top });
+      const maxLeft = window.innerWidth - el.offsetWidth - 16;
+      const maxTop = window.innerHeight - el.offsetHeight - 16;
+      newLeft = Math.max(16, Math.min(maxLeft, newLeft));
+      newTop = Math.max(16, Math.min(maxTop, newTop));
+      
+      el.style.transform = '';
+      setMiniPlayerPos({ left: newLeft, top: newTop });
     }
   };
 
