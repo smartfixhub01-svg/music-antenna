@@ -3027,19 +3027,7 @@ document.body
               </span>
             </button>
             
-            <button 
-              onClick={(e) => { 
-                e.stopPropagation(); 
-                setActiveMedia(null); 
-                setShowWatchPage(false);
-                setMiniPlayerPos(null); // Reset position when closed
-                if (audioRef.current) audioRef.current.pause(); 
-                if (videoRef.current) videoRef.current.pause(); 
-              }} 
-              className="yt-mini-close-btn"
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: "18px", pointerEvents: "none" }}>close</span>
-            </button>
+            
           </div>
 
         </div>
@@ -4545,19 +4533,7 @@ document.body
               </span>
             </button>
             
-            <button 
-              onClick={(e) => { 
-                e.stopPropagation(); 
-                setActiveMedia(null); 
-                setShowWatchPage(false);
-                setMiniPlayerPos(null); // Reset position when closed
-                if (audioRef.current) audioRef.current.pause(); 
-                if (videoRef.current) videoRef.current.pause(); 
-              }} 
-              className="yt-mini-close-btn"
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: "18px", pointerEvents: "none" }}>close</span>
-            </button>
+            
           </div>
 
         </div>
