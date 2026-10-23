@@ -1249,16 +1249,16 @@ useEffect(() => {
     setActiveMedia(null);
     setManageLoading(true);
 
-    // 1. INSTANT LOAD: Use the videos we already have in memory
+    // 1. INSTANT LOAD from local memory
     const localMedia = media.filter(m => m.artist_id === session.user.id);
     if (localMedia.length > 0) {
       setManageMedia(localMedia);
-      setManageLoading(false); // Stop loading instantly if we have local data
+      setManageLoading(false);
     } else {
       setManageMedia([]);
     }
 
-    // 2. BACKGROUND FETCH: Get the freshest data from Supabase
+    // 2. BACKGROUND FETCH and generate missing URLs
     try {
       const { data, error } = await supabase
         .from("media")
@@ -1266,18 +1266,28 @@ useEffect(() => {
         .eq("artist_id", session.user.id)
         .order("created_at", { ascending: false });
 
-      if (error) {
-        console.error("Supabase Error:", error);
-        if (localMedia.length === 0) setMessage("Failed to load: " + error.message);
-        return;
-      }
+      if (error) throw error;
 
       if (data && data.length > 0) {
-        setManageMedia(data);
+        // Map over data to add playbackUrl and thumbnailUrl for the player
+        const processedData = await Promise.all(data.map(async (item) => {
+          const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(item.storage_path);
+          let thumbnailUrl = "";
+          if (item.thumbnail_path) {
+            const { data: thumb } = supabase.storage.from("track-covers").getPublicUrl(item.thumbnail_path);
+            thumbnailUrl = thumb?.publicUrl || "";
+          }
+          return {
+            ...item,
+            playbackUrl: pub?.publicUrl || "",
+            thumbnailUrl
+          };
+        }));
+        setManageMedia(processedData);
       }
     } catch (err) {
-      console.error("Manage page crash:", err);
-      if (localMedia.length === 0) setMessage("Error: " + err.message);
+      console.error("Manage page fetch error:", err);
+      if (localMedia.length === 0) setMessage("Failed to load: " + err.message);
     } finally {
       setManageLoading(false);
     }

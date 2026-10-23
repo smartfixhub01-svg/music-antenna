@@ -5542,16 +5542,34 @@ p
 }
 
 /* ===== FIX UPLOAD FORM INPUTS (LIGHT/DARK THEME) ===== */
-.theme-aware-form input[type="text"],
-.theme-aware-form textarea,
-.theme-aware-form select {
+
+
+
+/* ===== FIX UPLOAD FORM INPUTS ===== */
+.yt-upload-form input[type="text"],
+.yt-upload-form textarea,
+.yt-upload-form select,
+.yt-upload-form input[type="file"] {
   background-color: var(--ma-bg-secondary) !important;
   color: var(--ma-text-primary) !important;
   border: 1px solid var(--ma-border) !important;
   border-radius: 8px !important;
   padding: 12px !important;
+  font-family: inherit;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 16px;
 }
-.theme-aware-form input::placeholder,
-.theme-aware-form textarea::placeholder {
+
+.yt-upload-form input::placeholder,
+.yt-upload-form textarea::placeholder {
   color: var(--ma-text-secondary) !important;
+}
+
+.yt-upload-form label span {
+  color: var(--ma-text-primary) !important;
+  font-weight: 600;
+  font-size: 14px;
+  display: block;
+  margin-bottom: 8px;
 }
