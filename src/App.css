@@ -734,19 +734,8 @@ body, .ma-app {
   margin: 0 auto;
 }
 
-.ma-search-box {
-  display: flex;
-  align-items: center;
-  flex: 1;
-  height: 40px;
-  padding: 0 4px 0 16px;
-  background: var(--yt-search-bg);
-  border: 1px solid var(--yt-search-border);
-  border-right: 0;
-  border-radius: 40px 0 0 40px;
-  transition: border-color .1s;
-}
-.ma-search:focus-within .ma-search-box { border-color: var(--yt-search-focus); }
+
+.ma-search:focus-within 
 .ma-search input {
   flex: 1;
   min-width: 0;
@@ -893,7 +882,7 @@ body, .ma-app {
   .ma-header-left { gap: 4px; }
   .ma-brand-text { display: none; }
   .ma-search { max-width: none; }
-  .ma-search-box { border-radius: 40px; border-right: 1px solid var(--yt-search-border); }
+  
   .ma-search-btn { display: none; }
   .ma-avatar-menu { right: -8px; width: min(300px, calc(100vw - 16px)); }
 }
@@ -3644,13 +3633,7 @@ body, .ma-app, p, h1, h2, h3, h4, h5, h6, span, div, button, input {
   height: 56px !important;
   padding: 0 16px !important;
 }
-.ma-search-box {
-  background-color: var(--yt-bg-elevated) !important;
-  border: 1px solid var(--yt-border) !important;
-  border-radius: 40px !important;
-  height: 40px !important;
-  padding-left: 16px !important;
-}
+
 .ma-search input {
   font-size: 16px !important;
   color: var(--yt-text-primary) !important;
@@ -5459,16 +5442,10 @@ p
 .ma-manage-controls {
   display: flex; gap: 12px; padding: 16px; max-width: 800px; margin: 0 auto; align-items: center;
 }
-.ma-search-box {
-  flex: 1; display: flex; align-items: center; background: var(--ma-bg-secondary);
-  border: 1px solid var(--ma-border); border-radius: 8px; padding: 0 12px; height: 40px;
-}
-.ma-search-box .material-symbols-outlined { color: var(--ma-text-secondary); margin-right: 8px; }
-.ma-search-box input {
-  flex: 1; border: none; background: transparent; color: var(--ma-text-primary);
-  outline: none; font-size: 14px;
-}
-.ma-search-box:focus-within { border-color: var(--ma-accent); }
+
+
+
+
 
 /* ===== FIXED CARD LAYOUT ===== */
 
@@ -5521,10 +5498,7 @@ p
 .ma-action-btn.delete:hover { background: #FF4E45; color: #fff; }
 
 /* ===== FIX SEARCH INPUT ===== */
-.ma-search-box input {
-  background: transparent !important; color: var(--ma-text-primary) !important;
-  border: none !important; box-shadow: none !important;
-}
+
 
 /* ===== FIX UPLOAD FORM INPUTS (LIGHT/DARK THEME) ===== */
 
@@ -5616,4 +5590,46 @@ p
 }
 .yt-manage-page .ma-manage-meta span {
   color: var(--ma-text-secondary) !important;
+}
+
+/* ===== PROFESSIONAL THEME-AWARE SEARCH BAR ===== */
+.ma-search-box {
+  display: flex;
+  align-items: center;
+  background-color: var(--ma-bg-secondary) !important;
+  border: 1px solid var(--ma-border) !important;
+  border-radius: 8px;
+  padding: 0 12px;
+  height: 40px;
+  transition: all 0.2s ease;
+}
+
+/* Focus state (glows pink when typing) */
+.ma-search-box:focus-within {
+  border-color: var(--ma-accent) !important;
+  box-shadow: 0 0 0 2px rgba(255, 54, 95, 0.2) !important;
+}
+
+/* The search icon */
+.ma-search-box .material-symbols-outlined {
+  color: var(--ma-text-secondary) !important;
+  margin-right: 8px;
+  font-size: 20px;
+}
+
+/* The input field */
+.ma-search-box input {
+  flex: 1;
+  border: none !important;
+  background: transparent !important;
+  color: var(--ma-text-primary) !important;
+  outline: none !important;
+  font-size: 14px;
+  height: 100%;
+}
+
+/* The placeholder text */
+.ma-search-box input::placeholder {
+  color: var(--ma-text-secondary) !important;
+  opacity: 0.8;
 }
