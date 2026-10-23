@@ -1247,10 +1247,18 @@ useEffect(() => {
     setShowChannelPage(false);
     setActiveMedia(null);
     setManageLoading(true);
-    setManageMedia([]); // Clear old data first
 
+    // 1. INSTANT LOAD: Use the videos we already have in memory
+    const localMedia = media.filter(m => m.artist_id === session.user.id);
+    if (localMedia.length > 0) {
+      setManageMedia(localMedia);
+      setManageLoading(false); // Stop loading instantly if we have local data
+    } else {
+      setManageMedia([]);
+    }
+
+    // 2. BACKGROUND FETCH: Get the freshest data from Supabase
     try {
-      // Fetch everything for this artist, regardless of status
       const { data, error } = await supabase
         .from("media")
         .select("*")
@@ -1259,16 +1267,16 @@ useEffect(() => {
 
       if (error) {
         console.error("Supabase Error:", error);
-        setMessage("Failed to load content: " + error.message);
+        if (localMedia.length === 0) setMessage("Failed to load: " + error.message);
         return;
       }
 
-      if (data) {
+      if (data && data.length > 0) {
         setManageMedia(data);
       }
     } catch (err) {
       console.error("Manage page crash:", err);
-      setMessage("An unexpected error occurred.");
+      if (localMedia.length === 0) setMessage("Error: " + err.message);
     } finally {
       setManageLoading(false);
     }
