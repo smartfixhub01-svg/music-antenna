@@ -579,7 +579,9 @@ useEffect(() => {
       if (!alive) return;
       if (error) setMessage(error.message);
       setSession(data?.session ?? null);
-      setLoading(false);
+          setTimeout(() => {
+            if (alive) setLoading(false);
+          }, 500);
     });
 
     const {
