@@ -93,6 +93,7 @@ export default function App() {
   const [media, setMedia] = useState([]);
   const [feedLoading, setFeedLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const [searchStatusMsg, setSearchStatusMsg] = useState("");
   const [searchSummary, setSearchSummary] = useState("");
   const [searchLoading, setSearchLoading] = useState(false);
   const [navVisible, setNavVisible] = useState(true);
@@ -756,10 +757,12 @@ useEffect(() => {
   };
 
   
+  
   function handleVoiceSearch() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      setMessage("Voice search is not supported in this browser.");
+      setSearchStatusMsg("Voice search is not supported in this browser.");
+      setTimeout(() => setSearchStatusMsg(""), 3000);
       return;
     }
     
@@ -769,21 +772,24 @@ useEffect(() => {
     recognition.maxAlternatives = 1;
 
     recognition.onstart = () => {
-      setMessage("🎤 Listening... Speak now.");
+      setSearchStatusMsg("🎤 Listening... Speak now.");
     };
 
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
       setSearch(transcript);
-      setMessage(`Searching for: "${transcript}"`);
+      setSearchStatusMsg(`Heard: "${transcript}"`);
+      setTimeout(() => setSearchStatusMsg(""), 2000);
     };
 
     recognition.onerror = (event) => {
-      setMessage("Voice search error: " + event.error);
+      setSearchStatusMsg("Voice search error: " + event.error);
+      setTimeout(() => setSearchStatusMsg(""), 3000);
     };
 
     recognition.start();
   }
+
 
   async function loadMedia() {
     
@@ -2806,7 +2812,7 @@ document.body
           <div className="ma-search-box">
             <span className="material-symbols-outlined ma-search-icon">search</span>
             <input aria-label="Search" placeholder="Search..." value={search}
-              onChange={(e) => setSearch(e.target.value)} />
+              onChange={(e) => { setSearch(e.target.value); setSearchStatusMsg(""); }} />
             
             {/* THE ROLLING SPINNER */}
             {searchLoading && (
@@ -3353,10 +3359,21 @@ document.body
           
           
           
-          {searchSummary && (
-            <div className="ma-inline-message" style={{ marginBottom: "12px", marginTop: "0" }}>
-              <span className="material-symbols-outlined">search</span>
-              {searchSummary}
+          
+          
+          
+          {(searchStatusMsg || search.trim() !== "") && (
+            <div className="ma-inline-message">
+              <span className="material-symbols-outlined">
+                {searchStatusMsg.includes("Listening") ? "mic" : searchStatusMsg.includes("error") ? "error" : "search"}
+              </span>
+              <span>
+                {searchStatusMsg || (
+                  visibleMedia.length === 0 
+                    ? `No results found for "${search}"` 
+                    : `Found ${visibleMedia.filter(i => i.media_type === 'audio').length} audio and ${visibleMedia.filter(i => i.media_type === 'video').length} video${visibleMedia.filter(i => i.media_type === 'video').length > 1 ? 's' : ''} for "${search}"`
+                )}
+              </span>
             </div>
           )}
           

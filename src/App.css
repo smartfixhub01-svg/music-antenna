@@ -5677,22 +5677,36 @@ p
 }
 
 /* ===== INLINE MESSAGE BANNER ===== */
-.ma-inline-message {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 16px 16px 0;
-  padding: 12px 16px;
-  background-color: rgba(255, 54, 95, 0.1);
-  color: var(--ma-accent);
-  border: 1px solid rgba(255, 54, 95, 0.3);
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
+
 .ma-inline-message .material-symbols-outlined {
   font-size: 20px;
+}
+
+/* ===== FIXED SEARCH BAR (No Black Background) ===== */
+
+
+.ma-search-box:focus-within {
+  border-color: var(--ma-accent) !important;
+  box-shadow: 0 0 0 2px rgba(255, 54, 95, 0.2) !important;
+}
+.ma-mic-btn {
+  background-color: var(--ma-bg-secondary) !important;
+  border: 1px solid var(--ma-border) !important;
+  color: var(--ma-text-primary) !important;
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* ===== SEARCH SUMMARY MESSAGE ===== */
+
+.ma-inline-message .material-symbols-outlined {
+  font-size: 18px;
 }
 
 /* ===== FIXED SEARCH BAR (No Black Background) ===== */
@@ -5703,7 +5717,8 @@ p
   flex: 1;
   min-width: 0;
   margin: 0 8px;
-  background: transparent !important; /* KILLS THE BLACK SHAPE */
+  background: transparent !important; 
+  box-shadow: none !important;
 }
 .ma-search-box {
   display: flex;
@@ -5734,21 +5749,38 @@ p
   flex-shrink: 0;
 }
 
-/* ===== SEARCH SUMMARY MESSAGE ===== */
+/* ===== UNIFIED INLINE BANNER ===== */
 .ma-inline-message {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   margin: 0 16px 12px;
   padding: 10px 14px;
   background-color: rgba(255, 54, 95, 0.1);
   color: var(--ma-accent);
   border: 1px solid rgba(255, 54, 95, 0.3);
   border-radius: 8px;
-  font-size: 13px; /* Resized words */
+  font-size: 13px;
   font-weight: 600;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  animation: slideDown 0.3s ease;
 }
 .ma-inline-message .material-symbols-outlined {
   font-size: 18px;
+  color: var(--ma-accent);
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== FIX EMPTY STATE CONTRAST ===== */
+.ma-empty, .yt-empty {
+  background-color: var(--ma-bg-secondary) !important;
+  border: 1px solid var(--ma-border) !important;
+  color: var(--ma-text-primary) !important;
+}
+.ma-empty h3, .yt-empty h3,
+.ma-empty p, .yt-empty p {
+  color: var(--ma-text-primary) !important;
 }
