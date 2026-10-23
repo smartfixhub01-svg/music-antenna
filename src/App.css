@@ -5826,40 +5826,13 @@ p
 }
 
 /* ===== PREMIUM BALANCED MINI PLAYER ===== */
-.yt-mini-player {
-  position: fixed;
-  z-index: 9999;
-  width: auto !important;
-  min-width: 200px !important;
-  max-width: fit-content !important;
-  height: 60px !important;
-  display: flex;
-  align-items: center;
-  background: var(--ma-bg-elevated) !important;
-  border: 1px solid var(--ma-border) !important;
-  border-radius: 30px !important; /* Pill shape */
-  padding: 4px 16px 4px 4px !important;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.25) !important;
-  cursor: grab;
-  transition: transform 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease;
-}
+
 
 /* Auto-hide to the left when scrolling or paused */
-.yt-mini-player.is-hidden {
-  transform: translateX(-80%) !important; 
-  opacity: 0.6;
-}
+
 
 /* Cover Art */
-.yt-mini-player .yt-mini-cover {
-  width: 52px !important;
-  height: 52px !important;
-  border-radius: 50% !important;
-  margin-right: 12px !important;
-  flex-shrink: 0;
-  overflow: hidden;
-  box-shadow: 0 0 0 2px var(--ma-border);
-}
+
 
 .yt-mini-player .yt-mini-cover img {
   width: 100%;
@@ -5868,21 +5841,7 @@ p
 }
 
 /* Buttons */
-.yt-mini-player button {
-  width: 40px !important;
-  height: 40px !important;
-  background: transparent !important;
-  border: none !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  color: var(--ma-text-primary) !important;
-  cursor: pointer !important;
-  padding: 0 !important;
-  margin: 0 4px !important;
-  border-radius: 50% !important;
-  transition: background 0.2s;
-}
+
 
 .yt-mini-player button .material-symbols-outlined {
   font-size: 24px !important; /* Bigger icons */
@@ -5898,6 +5857,83 @@ p
 }
 
 /* Hide text elements to keep it clean */
+.yt-mini-player .yt-mini-title,
+.yt-mini-player .yt-mini-artist,
+.yt-mini-player span:not(.material-symbols-outlined) {
+  display: none !important;
+}
+
+/* ===== MICRO BALL MINI PLAYER (32px Height) ===== */
+.yt-mini-player {
+  position: fixed;
+  z-index: 9999;
+  width: fit-content !important;
+  height: 32px !important;
+  display: flex;
+  align-items: center;
+  background: var(--ma-bg-elevated) !important;
+  border: 1px solid var(--ma-border) !important;
+  border-radius: 16px !important;
+  padding: 2px 8px 2px 2px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+  cursor: grab;
+  touch-action: none !important; /* CRITICAL: Stops page scrolling while dragging */
+  will-change: left, top;       /* CRITICAL: Tells GPU to prep for movement */
+  transition: opacity 0.3s ease;
+}
+
+.yt-mini-player:active {
+  cursor: grabbing;
+}
+
+.yt-mini-player.is-hidden {
+  transform: translateX(-80%) !important; 
+  opacity: 0.6;
+}
+
+/* Micro Cover */
+.yt-mini-player .yt-mini-cover {
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 50% !important;
+  margin-right: 4px !important;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: var(--ma-bg-hover);
+}
+
+.yt-mini-player .yt-mini-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Micro Buttons */
+.yt-mini-player button {
+  width: 24px !important;
+  height: 24px !important;
+  background: transparent !important;
+  border: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: var(--ma-text-primary) !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  margin: 0 1px !important;
+  border-radius: 50% !important;
+}
+
+.yt-mini-player button .material-symbols-outlined {
+  font-size: 16px !important;
+}
+
+.yt-mini-player button:hover {
+  background: var(--ma-bg-hover) !important;
+}
+
+/* Hide text */
 .yt-mini-player .yt-mini-title,
 .yt-mini-player .yt-mini-artist,
 .yt-mini-player span:not(.material-symbols-outlined) {
