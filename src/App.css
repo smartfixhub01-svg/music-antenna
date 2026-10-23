@@ -5944,13 +5944,14 @@ p
   box-shadow: 0 0 12px rgba(255, 54, 95, 0.3) !important;
 }
 
+
 /* ===== 3-LEVEL MINI PLAYER OPACITY ===== */
 .yt-mini-player.is-idle {
-  opacity: 0.5 !important; /* Fades to 50% when doing nothing */
+  opacity: 0.9 !important; /* Fades to 90% when doing nothing */
 }
 
 .yt-mini-player.is-scrolling {
-  opacity: 0.35 !important; /* Fades deeper to 35% while scrolling */
+  opacity: 0.5 !important; /* Fades deeper to 50% while scrolling */
 }
 
 /* Back to 100% when tapped or dragging */
