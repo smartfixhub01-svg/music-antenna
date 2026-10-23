@@ -2847,13 +2847,13 @@ document.body
               <span className="material-symbols-outlined">notifications</span>
               {unreadCount > 0 && <span className="yt-nav-badge" style={{ position: "absolute", top: 4, right: 4, background: "red", color: "white", borderRadius: "10px", padding: "2px 6px", fontSize: "10px", fontWeight: "bold" }}>{unreadCount}</span>}
             </button>
-            {showNotifications && (
+            {showNotifications && createPortal(
         <section style={{ position: "fixed", inset: 0, zIndex: 9999999, background: "var(--ma-bg-primary)", display: "flex", flexDirection: "column" }}>
           
           {/* HEADER */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px", borderBottom: "1px solid var(--ma-border)", background: "var(--ma-bg-primary)", zIndex: 10 }}>
             <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-              <button className="ma-icon-btn" onClick={() => setShowNotifications(false)} style={{ background: "transparent", border: "none", color: "var(--ma-text-primary)", cursor: "pointer", display: "flex" }}>
+              <button onClick={() => setShowNotifications(false)} style={{ background: "transparent", border: "none", color: "var(--ma-text-primary)", cursor: "pointer", display: "flex" }}>
                 <span className="material-symbols-outlined">arrow_back</span>
               </button>
               <h2 style={{ fontSize: "18px", margin: 0, fontWeight: "700", color: "var(--ma-text-primary)" }}>Activity Log</h2>
@@ -2891,6 +2891,9 @@ document.body
               </div>
             ) : (
               notifications.map(n => {
+                // 🚨 FIX THE RED SLIVER BUG: Skip broken notification objects
+                if (!n || !n.id || !n.type) return null;
+
                 const isSelected = selectedNotifs.includes(n.id);
                 const actorName = n.actor?.display_name || "Someone";
                 
@@ -2967,7 +2970,8 @@ document.body
               })
             )}
           </div>
-        </section>
+        </section>,
+        document.body
       )}
           </div>
 
