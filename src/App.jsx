@@ -168,12 +168,12 @@ export default function App() {
 
     const el = e.currentTarget;
     if (el) {
-      // 16px hard boundary prevents going off-screen
-      const maxLeft = window.innerWidth - el.offsetWidth - 16;
-      const maxTop = window.innerHeight - el.offsetHeight - 16;
+      // Force a hard 0px boundary so it never goes off-screen
+      const maxLeft = window.innerWidth - el.offsetWidth;
+      const maxTop = window.innerHeight - el.offsetHeight;
       
-      newLeft = Math.max(16, Math.min(maxLeft, newLeft));
-      newTop = Math.max(16, Math.min(maxTop, newTop));
+      newLeft = Math.max(0, Math.min(maxLeft, newLeft));
+      newTop = Math.max(0, Math.min(maxTop, newTop));
 
       el.style.transform = `translate3d(${newLeft - dragRef.current.initialLeft}px, ${newTop - dragRef.current.initialTop}px, 0)`;
     }
@@ -191,12 +191,12 @@ export default function App() {
 
     const el = e.currentTarget;
     if (el) {
-      const maxLeft = window.innerWidth - el.offsetWidth - 16;
-      const maxTop = window.innerHeight - el.offsetHeight - 16;
-      newLeft = Math.max(16, Math.min(maxLeft, newLeft));
-      newTop = Math.max(16, Math.min(maxTop, newTop));
+      const maxLeft = window.innerWidth - el.offsetWidth;
+      const maxTop = window.innerHeight - el.offsetHeight;
+      newLeft = Math.max(0, Math.min(maxLeft, newLeft));
+      newTop = Math.max(0, Math.min(maxTop, newTop));
       
-      el.style.transform = ''; // Reset transform before saving state
+      el.style.transform = ''; 
       setMiniPlayerPos({ left: newLeft, top: newTop });
     }
   };
