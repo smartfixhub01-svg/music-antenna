@@ -5959,3 +5959,34 @@ p
 .yt-mini-player.is-dragging {
   opacity: 1 !important; 
 }
+
+/* ===== PREMIUM SHIMMER SKELETON LOADER ===== */
+.ma-skeleton {
+  background: #E0E0E0; /* Visible light grey for light mode */
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .ma-skeleton {
+  background: #2A2A2A; /* Dark grey for dark mode */
+}
+
+.ma-skeleton::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: shimmer 1.5s infinite;
+}
+
+[data-theme="dark"] .ma-skeleton::after {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}

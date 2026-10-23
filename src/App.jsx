@@ -3622,18 +3622,18 @@ document.body
             )}
           </div>
         ) : feedLoading ? (
-              <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "20px" }}>
+              <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "24px" }}>
                 {[1, 2, 3].map((i) => (
-                  <div key={i} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                  <div key={i} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                     {/* Thumbnail Skeleton */}
-                    <div style={{ width: "100%", height: "220px", background: "var(--ma-bg-secondary)", borderRadius: "12px", animation: "pulse 1.5s infinite" }}></div>
+                    <div className="ma-skeleton" style={{ width: "100%", height: "220px", borderRadius: "12px" }}></div>
                     
                     {/* Info Skeleton */}
                     <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-                      <div style={{ width: "48px", height: "48px", borderRadius: "50%", background: "var(--ma-bg-secondary)", animation: "pulse 1.5s infinite", flexShrink: 0 }}></div>
-                      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "8px" }}>
-                        <div style={{ width: "60%", height: "16px", background: "var(--ma-bg-secondary)", borderRadius: "4px", animation: "pulse 1.5s infinite" }}></div>
-                        <div style={{ width: "40%", height: "12px", background: "var(--ma-bg-secondary)", borderRadius: "4px", animation: "pulse 1.5s infinite" }}></div>
+                      <div className="ma-skeleton" style={{ width: "48px", height: "48px", borderRadius: "50%", flexShrink: 0 }}></div>
+                      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "10px" }}>
+                        <div className="ma-skeleton" style={{ width: "70%", height: "16px", borderRadius: "4px" }}></div>
+                        <div className="ma-skeleton" style={{ width: "40%", height: "12px", borderRadius: "4px" }}></div>
                       </div>
                     </div>
                   </div>
