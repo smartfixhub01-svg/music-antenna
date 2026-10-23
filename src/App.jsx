@@ -158,6 +158,7 @@ export default function App() {
 
   const handlePointerMove = (e) => {
     if (!isDragging) return;
+    if (e.cancelable) e.preventDefault();
     const dx = e.clientX - dragRef.current.startX;
     const dy = e.clientY - dragRef.current.startY;
     
@@ -170,6 +171,11 @@ export default function App() {
   const handlePointerUp = (e) => {
     setIsDragging(false);
     e.currentTarget.releasePointerCapture(e.pointerId);
+    const el = e.currentTarget;
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      setMiniPlayerPos({ left: rect.left, top: rect.top });
+    }
   };
 
 const [showCommentsModal, setShowCommentsModal] = useState(false);
