@@ -2114,128 +2114,63 @@ useEffect(() => {
 
   if (loading) {
     return (
-      <main className="auth-page">
-        <section className="auth-card">
-          <img src="/music-antenna-logo.png" alt="Music Antenna" style={{ width: "100%", maxWidth: "180px", height: "auto", objectFit: "contain", margin: "0 auto 16px" }} />
-          <h1></h1>
-          <p>Connecting securely...</p>
-        </section>
-      
+      <main style={{ 
+        position: "fixed", inset: 0, zIndex: 99999, 
+        background: "var(--ma-bg-primary)", 
+        display: "flex", flexDirection: "column", 
+        justifyContent: "center", alignItems: "center", 
+        padding: "20px" 
+      }}>
         
-      
-        
-      {showResetModal && createPortal(
-        <div className="ma-modal-backdrop" onClick={() => setShowResetModal(false)}>
-          <div className="ma-modal-card" onClick={e => e.stopPropagation()}>
-            <h3 className="ma-modal-title">Reset Password</h3>
-            <p className="ma-modal-desc">Enter your email address and we will send you a link to reset your password.</p>
-            <form onSubmit={submitPasswordReset}>
-              <input
-                type="email"
-                className="ma-modal-input"
-                placeholder="you@example.com"
-                value={resetEmail}
-                onChange={(e) => setResetEmail(e.target.value)}
-                autoFocus
-                required
-              />
-              <div className="ma-modal-actions">
-                <button type="button" className="ma-modal-btn cancel" onClick={() => setShowResetModal(false)}>Cancel</button>
-                <button type="submit" className="ma-modal-btn primary" style={{ display: "block" }}>Send Link</button>
-              </div>
-            </form>
-          </div>
-        </div>,
-        document.body
-      )}
+        <div style={{ 
+          display: "flex", flexDirection: "column", alignItems: "center",
+          animation: "fadeIn 0.5s ease-out", textAlign: "center" 
+        }}>
+          
+          {/* OFFICIAL LOGO */}
+          <img 
+            src="/music-antenna-logo.png" 
+            alt="Music Antenna" 
+            style={{ 
+              width: "220px", maxWidth: "80vw", height: "auto", 
+              background: "#ffffff", padding: "16px", borderRadius: "20px", 
+              boxShadow: "0 10px 30px rgba(0,0,0,0.15)", marginBottom: "28px" 
+            }} 
+          />
 
-      
+          {/* WELCOME MESSAGE */}
+          <h1 style={{ 
+            color: "var(--ma-text-primary)", fontSize: "28px", 
+            fontWeight: "800", margin: "0 0 12px 0", letterSpacing: "-0.5px" 
+          }}>
+            Welcome to Music Antenna
+          </h1>
+          
+          <p style={{ 
+            color: "var(--ma-text-secondary)", fontSize: "16px", 
+            margin: "0 0 40px 0" 
+          }}>
+            Your sound. Your world.
+          </p>
 
-      
-        
-      
+          {/* PREMIUM SPINNER */}
+          <div style={{ 
+            width: "36px", height: "36px", 
+            border: "3px solid var(--ma-border)", 
+            borderTop: "3px solid var(--ma-accent)", 
+            borderRadius: "50%", 
+            animation: "spin 1s linear infinite",
+            marginBottom: "16px"
+          }}></div>
+          
+          <p style={{ 
+            color: "var(--ma-text-secondary)", fontSize: "14px", 
+            margin: 0, fontWeight: "500" 
+          }}>
+            Connecting securely...
+          </p>
 
-      
-        
-      {showCreatorResetModal && createPortal(
-        <div className="ma-modal-backdrop" onClick={() => setShowCreatorResetModal(false)}>
-          <div className="ma-modal-card" onClick={e => e.stopPropagation()}>
-            <h3 className="ma-modal-title">Reset Art ID & Password</h3>
-            <p className="ma-modal-desc">Enter your Creator email address to recover your Art ID and reset your password.</p>
-            <form onSubmit={handleCreatorReset}>
-              <input
-                type="email"
-                className="ma-modal-input"
-                placeholder="Creator email address"
-                value={creatorResetEmail}
-                onChange={(e) => setCreatorResetEmail(e.target.value)}
-                autoFocus
-                required
-              />
-              <div className="ma-modal-actions">
-                <button type="button" className="ma-modal-btn cancel" onClick={() => setShowCreatorResetModal(false)}>Cancel</button>
-                <button type="submit" className="ma-modal-btn primary">Send Link</button>
-              </div>
-            </form>
-          </div>
-        </div>,
-        document.body
-      )}
-
-      
-        
-      {showCreatorResetModal && createPortal(
-        <div className="ma-modal-backdrop" onClick={() => setShowCreatorResetModal(false)}>
-          <div className="ma-modal-card" onClick={e => e.stopPropagation()}>
-            <h3 className="ma-modal-title">Reset Art ID & Password</h3>
-            <p className="ma-modal-desc">Enter your Creator email address to recover your Art ID and reset your password.</p>
-            <form onSubmit={handleCreatorReset}>
-              <input
-                type="email"
-                className="ma-modal-input"
-                placeholder="Creator email address"
-                value={creatorResetEmail}
-                onChange={(e) => setCreatorResetEmail(e.target.value)}
-                autoFocus
-                required
-              />
-              <div className="ma-modal-actions">
-                <button type="button" className="ma-modal-btn cancel" onClick={() => setShowCreatorResetModal(false)}>Cancel</button>
-                <button type="submit" className="ma-modal-btn primary">Send Link</button>
-              </div>
-            </form>
-          </div>
-        </div>,
-        document.body
-      )}
-
-      
-        
-      {showCreatorResetModal && createPortal(
-        <div className="ma-modal-backdrop" onClick={() => setShowCreatorResetModal(false)}>
-          <div className="ma-modal-card" onClick={e => e.stopPropagation()}>
-            <h3 className="ma-modal-title">Reset Art ID & Password</h3>
-            <p className="ma-modal-desc">Enter your Creator email address to recover your Art ID and reset your password.</p>
-            <form onSubmit={handleCreatorReset}>
-              <input
-                type="email"
-                className="ma-modal-input"
-                placeholder="Creator email address"
-                value={creatorResetEmail}
-                onChange={(e) => setCreatorResetEmail(e.target.value)}
-                autoFocus
-                required
-              />
-              <div className="ma-modal-actions">
-                <button type="button" className="ma-modal-btn cancel" onClick={() => setShowCreatorResetModal(false)}>Cancel</button>
-                <button type="submit" className="ma-modal-btn primary">Send Link</button>
-              </div>
-            </form>
-          </div>
-        </div>,
-        document.body
-      )}
-
+        </div>
       </main>
     );
   }
