@@ -324,6 +324,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   }, [showSubscriptionsFeed, category]);
 
   const [notifications, setNotifications] = useState([]);
+  const [selectedNotifs, setSelectedNotifs] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isShortUpload, setIsShortUpload] = useState(false);
@@ -2841,62 +2842,101 @@ document.body
               {unreadCount > 0 && <span className="yt-nav-badge" style={{ position: "absolute", top: 4, right: 4, background: "red", color: "white", borderRadius: "10px", padding: "2px 6px", fontSize: "10px", fontWeight: "bold" }}>{unreadCount}</span>}
             </button>
             {showNotifications && (
-              <div className="yt-notif-dropdown" style={{ position: "absolute", top: "100%", right: 0, width: "320px", background: "var(--ma-bg-elevated)", borderRadius: "12px", padding: "16px", zIndex: 100, boxShadow: "0 10px 30px rgba(0,0,0,0.5)", color: "var(--ma-text-primary)", border: "1px solid var(--ma-border)" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", borderBottom: "1px solid var(--ma-border)", paddingBottom: "8px" }}>
-                  <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "700" }}>Notifications</h3>
-                  {notifications.length > 0 && (
-                    <button onClick={async () => {
-                      await supabase.from("notifications").delete().eq("user_id", session.user.id);
-                      setNotifications([]);
-                      setUnreadCount(0);
-                    }} style={{ background: "transparent", border: "none", color: "var(--ma-accent)", fontSize: "12px", cursor: "pointer", fontWeight: "600" }}>Clear All</button>
-                  )}
-                </div>
-                <div style={{ maxHeight: "400px", overflowY: "auto" }}>
-                  {notifications.length === 0 ? (
-                    <p style={{ fontSize: "13px", color: "var(--ma-text-secondary)", margin: 0, textAlign: "center", padding: "20px 0" }}>You're all caught up.</p>
-                  ) : (
-                    notifications.map(n => (
-                      <div 
-                        key={n.id} 
-                        onClick={async () => {
-                          // Mark as read in DB
-                          if (!n.is_read) {
-                            await supabase.from("notifications").update({ is_read: true }).eq("id", n.id);
-                            setUnreadCount(prev => Math.max(0, prev - 1));
-                          }
-                          setShowNotifications(false);
-                          
-                          // Route to the correct place
-                          if (n.type === 'subscribe') {
-                            openChannel(n.actor_id);
-                          } else if (n.media_id) {
-                            const foundMedia = media.find(m => m.id === n.media_id);
-                            if (foundMedia) openPlayer(foundMedia);
-                            else setMessage("Video has been removed or unavailable.");
-                          }
-                        }}
-                        style={{ 
-                          display: "flex", gap: "10px", padding: "10px", 
-                          background: n.is_read ? "transparent" : "rgba(255, 54, 95, 0.08)", 
-                          borderRadius: "8px", marginBottom: "8px", cursor: "pointer",
-                          borderLeft: n.is_read ? "3px solid transparent" : "3px solid var(--ma-accent)",
-                          transition: "background 0.2s"
-                        }}
-                      >
-                        <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "var(--ma-bg-secondary)", display: "grid", placeItems: "center", overflow: "hidden", flexShrink: 0 }}>
-                          {n.actor?.avatar_url ? <img src={n.actor.avatar_url} style={{width:'100%', height:'100%', objectFit:'cover'}} alt="" /> : <span className="material-symbols-outlined" style={{color: "var(--ma-text-secondary)", fontSize: "18px"}}>person</span>}
-                        </div>
-                        <div style={{ fontSize: "13px", lineHeight: "1.4" }}>
-                          <strong>@{n.actor?.display_name || "User"}</strong> {n.type === 'like' ? 'liked' : n.type === 'comment' ? 'commented on' : n.type} your {n.type === 'subscribe' ? 'channel' : 'video'}.
-                          <br/><span style={{color: "var(--ma-text-secondary)", fontSize: "11px"}}>{timeAgo(n.created_at)}</span>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
+        <section className="ma-notif-page">
+          <div className="ma-notif-header">
+            <button className="ma-icon-btn" onClick={() => setShowNotifications(false)}>
+              <span className="material-symbols-outlined">arrow_back</span>
+            </button>
+            <h2 style={{ fontSize: "18px", margin: 0, fontWeight: "700" }}>Notifications</h2>
+            <div style={{ display: "flex", gap: "8px" }}>
+              {notifications.length > 0 && (
+                <button className="ma-icon-btn" onClick={() => {
+                  if (selectedNotifs.length === notifications.length) setSelectedNotifs([]);
+                  else setSelectedNotifs(notifications.map(n => n.id));
+                }}>
+                  <span className="material-symbols-outlined">{selectedNotifs.length === notifications.length ? "check_box" : "check_box_outline_blank"}</span>
+                </button>
+              )}
+              {selectedNotifs.length > 0 && (
+                <button className="ma-icon-btn" style={{ color: "var(--ma-accent)" }} onClick={async () => {
+                  await supabase.from("notifications").delete().in("id", selectedNotifs);
+                  setNotifications(prev => prev.filter(n => !selectedNotifs.includes(n.id)));
+                  setUnreadCount(prev => Math.max(0, prev - selectedNotifs.filter(id => !notifications.find(n => n.id === id)?.is_read).length));
+                  setSelectedNotifs([]);
+                }}>
+                  <span className="material-symbols-outlined">delete</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="ma-notif-list">
+            {notifications.length === 0 ? (
+              <div className="ma-empty-state" style={{ marginTop: "40px" }}>
+                <span className="material-symbols-outlined">notifications_off</span>
+                <h3>You're all caught up</h3>
+                <p>New likes, comments, and subscribers will appear here.</p>
               </div>
+            ) : (
+              notifications.map(n => {
+                const isSelected = selectedNotifs.includes(n.id);
+                const actorName = n.actor?.display_name || "Someone";
+                const date = new Date(n.created_at);
+                const dateStr = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} at ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+                
+                let message = "";
+                if (n.type === "like") message = `${actorName} liked your video.`;
+                else if (n.type === "comment") message = `${actorName} commented on your video.`;
+                else if (n.type === "subscribe") message = `${actorName} subscribed to your channel.`;
+                else if (n.type === "new_video") message = `${actorName} released a new video. Tap to watch.`;
+                else message = `${actorName} interacted with your content.`;
+
+                return (
+                  <div key={n.id} className={`ma-notif-card ${!n.is_read ? 'unread' : ''} ${isSelected ? 'selected' : ''}`}>
+                    <div className="ma-notif-checkbox" onClick={() => {
+                      setSelectedNotifs(prev => isSelected ? prev.filter(id => id !== n.id) : [...prev, n.id]);
+                    }}>
+                      <span className="material-symbols-outlined" style={{ color: isSelected ? "var(--ma-accent)" : "var(--ma-text-secondary)" }}>
+                        {isSelected ? "check_circle" : "radio_button_unchecked"}
+                      </span>
+                    </div>
+                    
+                    <div className="ma-notif-content" onClick={async () => {
+                      if (!n.is_read) {
+                        await supabase.from("notifications").update({ is_read: true }).eq("id", n.id);
+                        setUnreadCount(prev => Math.max(0, prev - 1));
+                        setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, is_read: true } : x));
+                      }
+                      if (n.type === "subscribe") openChannel(n.actor_id);
+                      else if (n.media_id) {
+                        const found = media.find(m => m.id === n.media_id);
+                        if (found) openPlayer(found);
+                        else setMessage("Video unavailable.");
+                      }
+                    }}>
+                      <div className="ma-notif-avatar">
+                        {n.actor?.avatar_url ? <img src={n.actor.avatar_url} alt="" /> : <span className="material-symbols-outlined">person</span>}
+                      </div>
+                      <div className="ma-notif-text">
+                        <p>{message}</p>
+                        <span>{dateStr}</span>
+                      </div>
+                    </div>
+
+                    <button className="ma-notif-delete" onClick={async () => {
+                      await supabase.from("notifications").delete().eq("id", n.id);
+                      setNotifications(prev => prev.filter(x => x.id !== n.id));
+                      setSelectedNotifs(prev => prev.filter(id => id !== n.id));
+                    }}>
+                      <span className="material-symbols-outlined">close</span>
+                    </button>
+                  </div>
+                );
+              })
             )}
+          </div>
+        </section>
+      )}
           </div>
 
           <div className="ma-avatar-wrap">
