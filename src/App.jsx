@@ -446,10 +446,23 @@ useEffect(() => {
 
   function openPlayer(item) {
     if (!item) return;
+    
+    // Auto-generate URLs if they are missing (fixes Manage Page Play button)
+    let playbackUrl = item.playbackUrl;
+    if (!playbackUrl && item.storage_path) {
+      const { data } = supabase.storage.from(BUCKET).getPublicUrl(item.storage_path);
+      playbackUrl = data?.publicUrl || "";
+    }
+    let thumbnailUrl = item.thumbnailUrl;
+    if (!thumbnailUrl && item.thumbnail_path) {
+      const { data } = supabase.storage.from("track-covers").getPublicUrl(item.thumbnail_path);
+      thumbnailUrl = data?.publicUrl || "";
+    }
+
     setShowAnalytics(false);
     setShowAccountPage(false);
     setShowChannelPage(false);
-    setActiveMedia(item);
+    setActiveMedia({ ...item, playbackUrl, thumbnailUrl });
     setShowWatchPage(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -2984,6 +2997,25 @@ document.body
 
           {showUpload && (
 <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, background: "#0f0f0f", overflowY: "auto" }}>
+        <style>{`
+          .yt-upload-form input, .yt-upload-form textarea, .yt-upload-form select {
+            background-color: var(--ma-bg-secondary) !important;
+            color: var(--ma-text-primary) !important;
+            border: 1px solid var(--ma-border) !important;
+            border-radius: 8px !important;
+            padding: 12px !important;
+            width: 100%;
+            box-sizing: border-box;
+          }
+          .yt-upload-form input::placeholder, .yt-upload-form textarea::placeholder {
+            color: var(--ma-text-secondary) !important;
+          }
+          .yt-upload-form label span {
+            color: var(--ma-text-primary) !important;
+            font-weight: 600;
+            font-size: 14px;
+          }
+        `}</style>
 
             <section className="yt-upload">
               <div className="yt-upload-topbar">
