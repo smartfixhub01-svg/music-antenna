@@ -2871,21 +2871,11 @@ document.body
                   Clear All
                 </button>
               )}
-              {selectedNotifs.length > 0 && (
-                <button onClick={async () => {
-                  await supabase.from("notifications").delete().in("id", selectedNotifs);
-                  setNotifications(prev => prev.filter(n => !selectedNotifs.includes(n.id)));
-                  setSelectedNotifs([]);
-                  setMessage("Selected notifications deleted.");
-                }} style={{ background: "transparent", border: "none", color: "var(--ma-text-primary)", cursor: "pointer", display: "flex", alignItems: "center" }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>delete</span>
-                </button>
-              )}
             </div>
           </div>
 
-          {/* COMPACT LIST */}
-          <div style={{ flex: 1, overflowY: "auto", padding: "12px", paddingBottom: "100px" }}>
+          {/* COMPACT LIST (Added bottom padding to avoid overlap with mini player) */}
+          <div style={{ flex: 1, overflowY: "auto", padding: "12px", paddingBottom: "160px" }}>
             {notifications.length === 0 ? (
               <div style={{ textAlign: "center", padding: "40px 20px" }}>
                 <span className="material-symbols-outlined" style={{ fontSize: "40px", color: "var(--ma-text-secondary)", marginBottom: "12px" }}>history</span>
@@ -2898,12 +2888,9 @@ document.body
 
                 const isSelected = selectedNotifs.includes(n.id);
                 const actorName = n.actor?.display_name || "Someone";
-                
-                // Precise Date & Time
                 const date = new Date(n.created_at);
                 const dateStr = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
 
-                // Message & Icon mapping
                 let icon = "notifications";
                 let message = "";
                 let actionColor = "#FF365F";
@@ -2921,7 +2908,6 @@ document.body
                 return (
                   <div key={n.id} style={{ display: "flex", alignItems: "center", background: isSelected ? "rgba(255,54,95,0.1)" : "var(--ma-bg-secondary)", border: `1px solid ${isSelected ? "var(--ma-accent)" : "transparent"}`, borderLeft: !n.is_read ? "3px solid var(--ma-accent)" : "3px solid transparent", borderRadius: "8px", marginBottom: "8px", padding: "10px 12px" }}>
                     
-                    {/* Checkbox */}
                     <div onClick={() => {
                       setSelectedNotifs(prev => isSelected ? prev.filter(id => id !== n.id) : [...prev, n.id]);
                     }} style={{ cursor: "pointer", marginRight: "10px", display: "flex" }}>
@@ -2930,7 +2916,6 @@ document.body
                       </span>
                     </div>
 
-                    {/* Compact Avatar */}
                     <div onClick={async () => {
                       if (!n.is_read) {
                         await supabase.from("notifications").update({ is_read: true }).eq("id", n.id);
@@ -2957,7 +2942,6 @@ document.body
                       </div>
                     </div>
 
-                    {/* Delete Button */}
                     <button onClick={async (e) => {
                       e.stopPropagation();
                       await supabase.from("notifications").delete().eq("id", n.id);
@@ -2971,6 +2955,64 @@ document.body
               })
             )}
           </div>
+
+          {/* 🎵 MINI PLAYER INJECTED HERE */}
+          {activeMedia && !showWatchPage && (
+        <div 
+          className={"yt-mini-player" + (navVisible || isDragging || miniPlayerPos ? "" : " yt-mini-hidden") + (isDragging ? " yt-mini-dragging" : "")}
+          style={{
+            bottom: miniPlayerPos ? 'auto' : '72px',
+            left: miniPlayerPos ? `${miniPlayerPos.left}px` : '16px',
+            top: miniPlayerPos ? `${miniPlayerPos.top}px` : 'auto',
+          }}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+        >
+          
+          <div className="yt-mini-cover" onClick={() => setShowWatchPage(true)}>
+            {activeMedia.thumbnailUrl ? (
+              <img src={activeMedia.thumbnailUrl} alt="" style={{ pointerEvents: "none" }} />
+            ) : (
+              <div className="yt-mini-cover-fallback">♫</div>
+            )}
+          </div>
+
+          <div className="yt-mini-controls">
+            <button 
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                const mediaEl = activeMedia.media_type === "audio" ? audioRef.current : videoRef.current;
+                if (mediaEl) {
+                  if (mediaEl.paused) mediaEl.play();
+                  else mediaEl.pause();
+                }
+              }} 
+              className="yt-mini-play-btn"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: "22px", fontVariationSettings: "'FILL' 1", pointerEvents: "none" }}>
+                {isPlaying ? "pause" : "play_arrow"}
+              </span>
+            </button>
+            
+            <button 
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                setActiveMedia(null); 
+                setShowWatchPage(false);
+                setMiniPlayerPos(null); // Reset position when closed
+                if (audioRef.current) audioRef.current.pause(); 
+                if (videoRef.current) videoRef.current.pause(); 
+              }} 
+              className="yt-mini-close-btn"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: "18px", pointerEvents: "none" }}>close</span>
+            </button>
+          </div>
+
+        </div>
+      )}
+
         </section>,
         document.body
       )}
