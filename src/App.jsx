@@ -2991,7 +2991,7 @@ document.body
           <div onClick={(e) => e.stopPropagation()}>
              {activeMedia && !showWatchPage && (
         <div 
-          className={"yt-mini-player" + (navVisible || isDragging || miniPlayerPos ? "" : " yt-mini-hidden") + ((!isPlaying || isScrolling) && !isDragging ? " is-hidden" : "") + (isDragging ? " yt-mini-dragging" : "")}
+          className={"yt-mini-player" + (navVisible || isDragging || miniPlayerPos ? "" : " yt-mini-hidden") + ((!isPlaying || !isScrolling) && !isDragging ? " is-hidden" : "") + (isDragging ? " yt-mini-dragging" : "")}
           style={{
             bottom: miniPlayerPos ? 'auto' : '72px',
             left: miniPlayerPos ? `${miniPlayerPos.left}px` : '16px',
@@ -4497,7 +4497,7 @@ document.body
 
       {activeMedia && !showWatchPage && (
         <div 
-          className={"yt-mini-player" + (navVisible || isDragging || miniPlayerPos ? "" : " yt-mini-hidden") + ((!isPlaying || isScrolling) && !isDragging ? " is-hidden" : "") + (isDragging ? " yt-mini-dragging" : "")}
+          className={"yt-mini-player" + (navVisible || isDragging || miniPlayerPos ? "" : " yt-mini-hidden") + ((!isPlaying || !isScrolling) && !isDragging ? " is-hidden" : "") + (isDragging ? " yt-mini-dragging" : "")}
           style={{
             bottom: miniPlayerPos ? 'auto' : '72px',
             left: miniPlayerPos ? `${miniPlayerPos.left}px` : '16px',

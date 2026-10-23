@@ -5887,8 +5887,8 @@ p
 }
 
 .yt-mini-player.is-hidden {
-  transform: translateX(-80%) !important; 
-  opacity: 0.6;
+  transform: translateX(-16px) !important; /* Slides just enough to touch the left edge */
+  opacity: 0.4 !important; /* Fades out when idle */
 }
 
 /* Micro Cover */
