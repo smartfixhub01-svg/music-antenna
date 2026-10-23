@@ -2792,7 +2792,7 @@ document.body
         <div className="ma-search">
           <div className="ma-search-box">
             <span className="material-symbols-outlined ma-search-icon">search</span>
-            <input aria-label="Search" placeholder="Search Music Antenna" value={search}
+            <input aria-label="Search" placeholder="Search..." value={search}
               onChange={(e) => setSearch(e.target.value)} />
             
             {/* THE ROLLING SPINNER */}
