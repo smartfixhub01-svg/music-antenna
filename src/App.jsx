@@ -128,6 +128,19 @@ export default function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [miniPlayerPos, setMiniPlayerPos] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isScrolling, setIsScrolling] = useState(false);
+  
+  useEffect(() => {
+    let scrollTimeout;
+    const handleScroll = () => {
+      setIsScrolling(true);
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => setIsScrolling(false), 1000);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const dragRef = useRef({ startX: 0, startY: 0, initialLeft: 0, initialTop: 0 });
 
   const handlePointerDown = (e) => {
@@ -148,11 +161,8 @@ export default function App() {
     const dx = e.clientX - dragRef.current.startX;
     const dy = e.clientY - dragRef.current.startY;
     
-    // Keep it inside the screen bounds
     let newLeft = dragRef.current.initialLeft + dx;
     let newTop = dragRef.current.initialTop + dy;
-    newLeft = Math.max(8, Math.min(window.innerWidth - 140, newLeft));
-    newTop = Math.max(8, Math.min(window.innerHeight - 140, newTop));
     
     setMiniPlayerPos({ left: newLeft, top: newTop });
   };
@@ -2969,7 +2979,7 @@ document.body
           <div onClick={(e) => e.stopPropagation()}>
              {activeMedia && !showWatchPage && (
         <div 
-          className={"yt-mini-player" + (navVisible || isDragging || miniPlayerPos ? "" : " yt-mini-hidden") + (isDragging ? " yt-mini-dragging" : "")}
+          className={"yt-mini-player" + (navVisible || isDragging || miniPlayerPos ? "" : " yt-mini-hidden") + ((!isPlaying || isScrolling) && !isDragging ? " is-hidden" : "") + (isDragging ? " yt-mini-dragging" : "")}
           style={{
             bottom: miniPlayerPos ? 'auto' : '72px',
             left: miniPlayerPos ? `${miniPlayerPos.left}px` : '16px',
@@ -4487,7 +4497,7 @@ document.body
 
       {activeMedia && !showWatchPage && (
         <div 
-          className={"yt-mini-player" + (navVisible || isDragging || miniPlayerPos ? "" : " yt-mini-hidden") + (isDragging ? " yt-mini-dragging" : "")}
+          className={"yt-mini-player" + (navVisible || isDragging || miniPlayerPos ? "" : " yt-mini-hidden") + ((!isPlaying || isScrolling) && !isDragging ? " is-hidden" : "") + (isDragging ? " yt-mini-dragging" : "")}
           style={{
             bottom: miniPlayerPos ? 'auto' : '72px',
             left: miniPlayerPos ? `${miniPlayerPos.left}px` : '16px',
