@@ -3879,6 +3879,12 @@ document.body
 
             
 
+            {profile?.role === "artist" && (
+              <p style={{ margin: "8px 0 16px", fontSize: "13px", color: "var(--ma-text-secondary, #666)", fontWeight: "600", display: "flex", alignItems: "center", gap: "4px" }}>
+                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>artist</span> Artist
+              </p>
+            )}
+
             {/* 3. STATS ROW */}
             <div style={{ display: profile?.role === "artist" ? "flex" : "none", justifyContent: "space-around", alignItems: "center", padding: "12px 0", borderBottom: "1px solid var(--ma-border, #e5e5e5)", marginBottom: "16px" }}>
               <div style={{ textAlign: "center" }}>
