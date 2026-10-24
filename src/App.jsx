@@ -3031,7 +3031,7 @@ document.body
                     </div>
                   </div>
                   <div className="ma-avatar-menu-line" />
-                  <button onClick={() => { setShowAnalytics(false);  setMenuOpen(false); setShowAccountPage(true); setShowProfileEditor(false); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+                  <button style={{ display: profile?.role === "artist" ? "flex" : "none", alignItems: "center", gap: "10px", padding: "10px 8px", fontSize: "13px", fontWeight: "500", color: "var(--ma-text, #000)", background: "transparent", border: "none", borderRadius: "8px", cursor: "pointer", textAlign: "left" }} onClick={() => { setShowAnalytics(false);  setMenuOpen(false); setShowAccountPage(true); setShowProfileEditor(false); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
                     <span className="material-symbols-outlined">account_circle</span> Your channel
                   </button>
                   <button onClick={() => { setShowAnalytics(false);  setMenuOpen(false); setProfileName(profile?.username || profile?.display_name || ""); setProfileBio(profile?.bio || ""); setShowAccountPage(true); setShowProfileEditor(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
