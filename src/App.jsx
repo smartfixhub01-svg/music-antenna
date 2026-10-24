@@ -3844,8 +3844,8 @@ document.body
         <section className="yt-you" style={{ padding: "0 0 100px", background: "var(--ma-bg, #fff)", minHeight: "100vh" }}>
           
           {/* 1. BANNER */}
-          <div style={{ width: "100%", height: "120px", background: "linear-gradient(135deg, #2a1622, #121722, #ff365f)", position: "relative" }}>
-            <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, background: "url('https://wcuqehdequrealcndkyw.supabase.co/storage/v1/object/public/track-covers/logo.png') center/cover", opacity: 0.15 }}></div>
+          <div style={{ width: "100%", height: "120px", background: "#ff365f", position: "relative" }}>
+            
           </div>
 
           {/* 2. PROFILE HEADER (Overlapping the banner) */}
@@ -3859,12 +3859,13 @@ document.body
                 )}
               </div>
               <div style={{ paddingBottom: "4px" }}>
-                <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "700", color: "#ffffff", display: "flex", alignItems: "center", gap: "4px", textShadow: "0 2px 4px rgba(0,0,0,0.8)" }}>
+                {/* Forced white text with shadow for visibility */}
+                <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "700", color: "#ffffff !important", display: "flex", alignItems: "center", gap: "4px", textShadow: "0 2px 4px rgba(0,0,0,0.8)" }}>
                   {profile?.display_name || displayUser || "Music listener"}
-                  <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "var(--ma-accent)", fontVariationSettings: "'FILL' 1" }}>verified</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "#ffffff", fontVariationSettings: "'FILL' 1" }}>verified</span>
                 </h2>
-                <p style={{ margin: "2px 0", fontSize: "13px", color: "rgba(255, 255, 255, 0.9)", textShadow: "0 1px 2px rgba(0,0,0,0.8)" }}>@{profile?.username || profile?.display_name || "music-antenna-user"}</p>
-                <p style={{ margin: "2px 0", fontSize: "13px", color: "rgba(255, 255, 255, 0.9)", textShadow: "0 1px 2px rgba(0,0,0,0.8)" }}>{profile?.bio || "Shadow Boss"}</p>
+                <p style={{ margin: "2px 0", fontSize: "13px", color: "#ffffff !important", textShadow: "0 1px 2px rgba(0,0,0,0.8)" }}>@{profile?.username || profile?.display_name || "music-antenna-user"}</p>
+                <p style={{ margin: "2px 0", fontSize: "13px", color: "#ffffff !important", textShadow: "0 1px 2px rgba(0,0,0,0.8)" }}>{profile?.bio || "Shadow Boss"}</p>
               </div>
             </div>
 
@@ -3892,19 +3893,13 @@ document.body
 
             {/* 4. ACTION BUTTONS */}
             <div style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
-              {profile?.role === "artist" && (
-                <div style={{ flex: 1, display: "flex" }}>
-                  <button onClick={() => { setShowAccountPage(false); openChannel(session?.user?.id); }} style={{ width: "100%", backgroundColor: "#ff365f", color: "#ffffff", padding: "10px", borderRadius: "8px", fontWeight: "600", fontSize: "14px", border: 0, cursor: "pointer", display: "block" }}>
-                    View channel
-                  </button>
-                </div>
-              )}
-              <div style={{ flex: 1, display: "flex" }}>
-                <button onClick={() => { setProfileName(profile?.username || ""); setProfileBio(profile?.bio || ""); setShowProfileEditor(!showProfileEditor); }} style={{ width: "100%", backgroundColor: "var(--ma-surface, #f0f0f0)", color: "var(--ma-text, #000)", padding: "10px", borderRadius: "8px", fontWeight: "500", fontSize: "14px", border: "1px solid var(--ma-border, #e5e5e5)", cursor: "pointer", display: "block" }}>
-                  {showProfileEditor ? "Close Editor" : "Edit profile"}
-                </button>
-              </div>
-              <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleShareProfile(); }} style={{ backgroundColor: "var(--ma-surface, #f0f0f0)", color: "var(--ma-text, #000)", width: "44px", height: "44px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid var(--ma-border, #e5e5e5)", cursor: "pointer", flexShrink: 0 }}>
+              <button onClick={() => { setShowAccountPage(false); openChannel(session?.user?.id); }} style={{ display: profile?.role === "artist" ? "flex" : "none", alignItems: "center", justifyContent: "center", flex: 1, backgroundColor: "#ff365f", color: "#ffffff", padding: "10px", borderRadius: "8px", fontWeight: "600", fontSize: "14px", border: "none", cursor: "pointer" }}>
+                View channel
+              </button>
+              <button onClick={() => { setProfileName(profile?.username || ""); setProfileBio(profile?.bio || ""); setShowProfileEditor(!showProfileEditor); }} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "var(--ma-surface, #f0f0f0)", color: "var(--ma-text, #000)", padding: "10px", borderRadius: "8px", fontWeight: "500", fontSize: "14px", border: "1px solid var(--ma-border, #e5e5e5)", cursor: "pointer" }}>
+                {showProfileEditor ? "Close Editor" : "Edit profile"}
+              </button>
+              <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleShareProfile(); }} style={{ display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "var(--ma-surface, #f0f0f0)", color: "var(--ma-text, #000)", width: "44px", height: "44px", borderRadius: "50%", border: "1px solid var(--ma-border, #e5e5e5)", cursor: "pointer" }}>
                 <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>share</span>
               </button>
             </div>
