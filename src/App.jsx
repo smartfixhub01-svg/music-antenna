@@ -1472,16 +1472,7 @@ useEffect(() => {
     }
   }
 
-  async function handleDeleteComment(commentId) {
-    if (!window.confirm("Delete this comment?")) return;
-    try {
-      const { error } = await supabase.from("comments").delete().eq("id", commentId);
-      if (error) throw error;
-      setComments(prev => prev.filter(c => c.id !== commentId));
-    } catch (err) {
-      setMessage("Error deleting comment: " + err.message);
-    }
-  }
+  
 
   async function handlePinComment(commentId, currentPinned) {
     try {
@@ -5114,7 +5105,7 @@ document.body
                           {(session?.user?.id === activeMedia.artist_id || session?.user?.id === c.user_id) && (
                             <>
                               <button onClick={() => { setEditingCommentId(c.id); setEditCommentText(c.content); }} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", fontSize: "11px", padding: 0, cursor: "pointer", marginLeft: "auto" }}>Edit</button>
-                              <button onClick={() => handleDeleteComment(c.id)} style={{ background: "transparent", border: 0, color: "#ff365f", fontSize: "11px", padding: 0, cursor: "pointer" }}>Delete</button>
+                              <button onClick={() => handleDeleteComment(c.id)} style={{ background: "transparent", border: 0, color: "var(--ma-accent, #ff365f)", fontSize: "11px", padding: 0, cursor: "pointer" }}>Delete</button>
                             </>
                           )}
                         </div>
@@ -5126,7 +5117,7 @@ document.body
             </div>
 
             {/* Input Area */}
-            <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "#0f0f0f", borderTop: "1px solid #272727", padding: "12px 16px", display: "flex", flexDirection: "column", gap: "8px" }}>
+            <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "var(--ma-bg, #fff)", borderTop: "1px solid var(--ma-border, #e5e5e5)", padding: "12px 16px", display: "flex", flexDirection: "column", gap: "8px" }}>
               
               {replyTarget && (
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px", fontSize: "12px", color: "var(--ma-text-secondary, #666)" }}>
@@ -5138,7 +5129,7 @@ document.body
               <form onSubmit={handlePostComment} style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%" }}>
                 
                 {(commentImage || commentAudioUrl) ? (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "10px", padding: "12px", background: "#1f2c34", borderRadius: "12px", border: "1px solid #2a3942" }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "10px", padding: "12px", background: "var(--ma-surface, #f0f0f0)", borderRadius: "12px", border: "1px solid var(--ma-border, #e5e5e5)" }}>
                     
                     {commentImage && (
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
