@@ -3973,53 +3973,62 @@ document.body
             </div>
 
             {/* EDIT PROFILE FORM */}
+
             {showProfileEditor && (
-              <div style={{ position: "fixed", inset: 0, background: "var(--ma-bg, #0f0f0f)", zIndex: 99999, display: "flex", flexDirection: "column", overflowY: "auto" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px", borderBottom: "1px solid var(--ma-border, #333)", background: "var(--ma-bg, #0f0f0f)", position: "sticky", top: 0, zIndex: 10 }}>
-                  <button type="button" onClick={() => setShowProfileEditor(false)} style={{ background: "transparent", border: 0, color: "var(--ma-text, #fff)", cursor: "pointer", display: "flex", padding: "8px" }}>
+              <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", background: "var(--ma-bg, #fff)", zIndex: 999999, display: "flex", flexDirection: "column", overflowY: "auto" }}>
+                
+                {/* Top Header */}
+                <div style={{ display: "flex", alignItems: "center", padding: "16px", borderBottom: "1px solid var(--ma-border, #e5e5e5)", background: "var(--ma-bg, #fff)", position: "sticky", top: 0, zIndex: 10 }}>
+                  <button type="button" onClick={() => setShowProfileEditor(false)} style={{ background: "transparent", border: 0, color: "var(--ma-text, #000)", cursor: "pointer", display: "flex", padding: "8px", marginRight: "8px" }}>
                     <span className="material-symbols-outlined">arrow_back</span>
                   </button>
-                  <h2 style={{ margin: 0, fontSize: "18px", color: "var(--ma-text, #fff)", fontWeight: "600" }}>Edit Profile</h2>
-                  <button type="submit" form="editProfileForm" style={{ background: "transparent", border: 0, color: "#ff365f", fontWeight: "bold", fontSize: "16px", cursor: "pointer", padding: "8px" }}>
-                    Save
-                  </button>
+                  <h2 style={{ margin: 0, fontSize: "18px", color: "var(--ma-text, #000)", fontWeight: "600" }}>Edit Profile</h2>
                 </div>
 
-                <form id="editProfileForm" onSubmit={handleSaveProfile} style={{ padding: "24px 16px", display: "flex", flexDirection: "column", alignItems: "center", gap: "24px", flex: 1 }}>
+                {/* Form Container */}
+                <form onSubmit={handleSaveProfile} style={{ padding: "24px 16px", display: "flex", flexDirection: "column", alignItems: "center", gap: "24px", flex: 1 }}>
+                  
+                  {/* Avatar Upload */}
                   <div style={{ position: "relative", width: "110px", height: "110px" }}>
-                    <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: "var(--ma-surface, #333)", overflow: "hidden", border: "2px solid var(--ma-border, #444)" }}>
+                    <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: "var(--ma-surface, #f0f0f0)", overflow: "hidden", border: "2px solid var(--ma-border, #e5e5e5)" }}>
                       {profilePhotoFile ? (
                         <img src={URL.createObjectURL(profilePhotoFile)} alt="Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       ) : profile?.avatar_url ? (
                         <img src={profile.avatar_url} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       ) : (
-                        <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", fontSize: "32px", color: "var(--ma-text, #fff)", fontWeight: "bold" }}>{displayUser.charAt(0).toUpperCase()}</div>
+                        <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", fontSize: "32px", color: "var(--ma-text, #000)", fontWeight: "bold" }}>{displayUser.charAt(0).toUpperCase()}</div>
                       )}
                     </div>
-                    <label style={{ position: "absolute", bottom: 0, right: 0, background: "#ff365f", color: "#fff", width: "36px", height: "36px", borderRadius: "50%", display: "grid", placeItems: "center", cursor: "pointer", border: "3px solid var(--ma-bg, #0f0f0f)", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
+                    <label style={{ position: "absolute", bottom: 0, right: 0, background: "#ff365f", color: "#fff", width: "36px", height: "36px", borderRadius: "50%", display: "grid", placeItems: "center", cursor: "pointer", border: "3px solid var(--ma-bg, #fff)", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
                       <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>photo_camera</span>
                       <input type="file" accept="image/*" onChange={(e) => setProfilePhotoFile(e.target.files[0])} style={{ display: "none" }} />
                     </label>
                   </div>
 
+                  {/* Inputs */}
                   <div style={{ width: "100%", maxWidth: "400px", display: "flex", flexDirection: "column", gap: "20px" }}>
                     <div>
-                      <label style={{ display: "block", fontSize: "14px", color: "var(--ma-text-secondary, #aaa)", marginBottom: "8px", fontWeight: "500" }}>Name</label>
-                      <input type="text" value={profileName} onChange={(e) => setProfileName(e.target.value)} placeholder="Your Name" style={{ width: "100%", padding: "14px", borderRadius: "10px", background: "var(--ma-surface, #212121)", color: "var(--ma-text, #fff)", border: "1px solid var(--ma-border, #333)", outline: "none", fontSize: "15px" }} />
+                      <label style={{ display: "block", fontSize: "14px", color: "var(--ma-text-secondary, #666)", marginBottom: "8px", fontWeight: "600" }}>Name</label>
+                      <input type="text" value={profileName} onChange={(e) => setProfileName(e.target.value)} placeholder="Your Name" style={{ width: "100%", padding: "14px", borderRadius: "10px", background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #ccc)", outline: "none", fontSize: "15px" }} />
                     </div>
                     <div>
-                      <label style={{ display: "block", fontSize: "14px", color: "var(--ma-text-secondary, #aaa)", marginBottom: "8px", fontWeight: "500" }}>Bio</label>
-                      <textarea value={profileBio} onChange={(e) => setProfileBio(e.target.value)} placeholder="Tell people about yourself..." rows="4" style={{ width: "100%", padding: "14px", borderRadius: "10px", background: "var(--ma-surface, #212121)", color: "var(--ma-text, #fff)", border: "1px solid var(--ma-border, #333)", outline: "none", fontSize: "15px", resize: "none" }} />
+                      <label style={{ display: "block", fontSize: "14px", color: "var(--ma-text-secondary, #666)", marginBottom: "8px", fontWeight: "600" }}>Bio</label>
+                      <textarea value={profileBio} onChange={(e) => setProfileBio(e.target.value)} placeholder="Tell people about yourself..." rows="4" style={{ width: "100%", padding: "14px", borderRadius: "10px", background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #ccc)", outline: "none", fontSize: "15px", resize: "none" }} />
                     </div>
                     
-                    <button type="button" onClick={() => setShowProfileEditor(false)} style={{ width: "100%", padding: "16px", background: "transparent", color: "var(--ma-text, #fff)", border: "1px solid var(--ma-border, #333)", borderRadius: "10px", fontWeight: "bold", fontSize: "15px", cursor: "pointer", marginTop: "10px" }}>
-                      Cancel
-                    </button>
+                    {/* Action Buttons */}
+                    <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "12px" }}>
+                      <button type="submit" disabled={profileSaving} style={{ width: "100%", padding: "16px", background: "#ff365f", color: "white", border: "none", borderRadius: "10px", fontWeight: "bold", fontSize: "16px", cursor: profileSaving ? "not-allowed" : "pointer", opacity: profileSaving ? 0.7 : 1, boxShadow: "0 4px 12px rgba(255,54,95,0.3)" }}>
+                        {profileSaving ? "Saving..." : "Save Changes"}
+                      </button>
+                      <button type="button" onClick={() => setShowProfileEditor(false)} style={{ width: "100%", padding: "16px", background: "transparent", color: "var(--ma-text-secondary, #666)", border: "none", borderRadius: "10px", fontWeight: "600", fontSize: "15px", cursor: "pointer" }}>
+                        Cancel
+                      </button>
+                    </div>
                   </div>
                 </form>
               </div>
             )}
-
           </div>
         </section>
       )}
