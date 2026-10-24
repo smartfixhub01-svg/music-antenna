@@ -3870,7 +3870,10 @@ document.body
               <div style={{ paddingBottom: "4px" }}>
                 <h2 className="force-name" style={{ margin: 0, fontSize: "20px", fontWeight: "700", display: "flex", alignItems: "center", gap: "4px" }}>
                   {profile?.display_name || displayUser || "Music listener"}
-                  {profile?.role === "artist" && (<span className="material-symbols-outlined" style={{ fontSize: "20px", color: "#1D9BF0", fontVariationSettings: "'FILL' 1" }}>verified</span>)}
+                  
+                  {profile?.role === "artist" && media.filter(m => m.artist_id === session?.user?.id).length >= 10 && mySubCount >= 500 && (
+                    <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "#1D9BF0", fontVariationSettings: "'FILL' 1" }} title="Verified Artist">verified</span>
+                  )}
                 </h2>
                 <p className="force-bio" style={{ margin: "2px 0", fontSize: "13px" }}>@{profile?.username || profile?.display_name || "music-antenna-user"}</p>
                 <p className="force-bio" style={{ margin: "2px 0", fontSize: "13px" }}>{profile?.bio || "Shadow Boss"}</p>
