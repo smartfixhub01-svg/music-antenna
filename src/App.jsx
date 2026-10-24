@@ -3902,13 +3902,19 @@ document.body
 
             {/* 4. ACTION BUTTONS */}
             <div style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
-              <button onClick={() => { setShowAccountPage(false); openChannel(session?.user?.id); }} style={{ display: profile?.role === "artist" ? "flex" : "none", alignItems: "center", justifyContent: "center", flex: 1, backgroundColor: "#ff365f", color: "#ffffff", padding: "10px", borderRadius: "8px", fontWeight: "600", fontSize: "14px", border: 0 }}>
-                View channel
-              </button>
-              <button onClick={() => { setProfileName(profile?.username || ""); setProfileBio(profile?.bio || ""); setShowProfileEditor(!showProfileEditor); }} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--ma-surface, #f0f0f0)", color: "var(--ma-text, #000)", padding: "10px", borderRadius: "8px", fontWeight: "500", fontSize: "14px", border: "1px solid var(--ma-border, #e5e5e5)", cursor: "pointer" }}>
-                {showProfileEditor ? "Close Editor" : "Edit profile"}
-              </button>
-              <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleShareProfile(); }} style={{ display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "var(--ma-surface, #f0f0f0)", color: "var(--ma-text, #000)", width: "44px", height: "44px", borderRadius: "50%", border: "1px solid var(--ma-border, #e5e5e5)", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
+              {profile?.role === "artist" && (
+                <div style={{ flex: 1, display: "flex" }}>
+                  <button onClick={() => { setShowAccountPage(false); openChannel(session?.user?.id); }} style={{ width: "100%", backgroundColor: "#ff365f", color: "#ffffff", padding: "10px", borderRadius: "8px", fontWeight: "600", fontSize: "14px", border: 0, cursor: "pointer", display: "block" }}>
+                    View channel
+                  </button>
+                </div>
+              )}
+              <div style={{ flex: 1, display: "flex" }}>
+                <button onClick={() => { setProfileName(profile?.username || ""); setProfileBio(profile?.bio || ""); setShowProfileEditor(!showProfileEditor); }} style={{ width: "100%", backgroundColor: "var(--ma-surface, #f0f0f0)", color: "var(--ma-text, #000)", padding: "10px", borderRadius: "8px", fontWeight: "500", fontSize: "14px", border: "1px solid var(--ma-border, #e5e5e5)", cursor: "pointer", display: "block" }}>
+                  {showProfileEditor ? "Close Editor" : "Edit profile"}
+                </button>
+              </div>
+              <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleShareProfile(); }} style={{ backgroundColor: "var(--ma-surface, #f0f0f0)", color: "var(--ma-text, #000)", width: "44px", height: "44px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid var(--ma-border, #e5e5e5)", cursor: "pointer", flexShrink: 0 }}>
                 <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>share</span>
               </button>
             </div>
