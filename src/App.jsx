@@ -799,6 +799,8 @@ useEffect(() => {
       }
     } else {
       window.prompt("Copy this link to share:", url);
+    }
+  };
   const handleShareProfile = async () => {
     const profileUrl = window.location.origin + "?profile=" + (profile?.username || session?.user?.id || "");
     const shareData = {
@@ -809,8 +811,6 @@ useEffect(() => {
     if (navigator.share) {
       try { await navigator.share(shareData); } catch (err) { if (err.name !== "AbortError") window.prompt("Copy this link to share:", profileUrl); }
     } else { window.prompt("Copy this link to share:", profileUrl); }
-  };
-    }
   };
 
   
