@@ -3986,6 +3986,7 @@ document.body
                 </div>
 
                 {/* Form Container */}
+                <style>{`.force-save-btn { background-color: #ff365f !important; color: #ffffff !important; display: block !important; width: 100% !important; padding: 16px !important; border: none !important; border-radius: 10px !important; font-weight: bold !important; font-size: 16px !important; cursor: pointer !important; }`}</style>
                 <form onSubmit={handleSaveProfile} style={{ padding: "24px 16px", display: "flex", flexDirection: "column", alignItems: "center", gap: "24px", flex: 1 }}>
                   
                   {/* Avatar Upload */}
@@ -4018,7 +4019,7 @@ document.body
                     
                     {/* Action Buttons */}
                     <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "12px" }}>
-                      <button type="submit" disabled={profileSaving} style={{ width: "100%", padding: "16px", background: "#ff365f", color: "#ffffff", border: "none", borderRadius: "10px", fontWeight: "bold", fontSize: "16px", cursor: profileSaving ? "not-allowed" : "pointer", opacity: profileSaving ? 0.7 : 1, boxShadow: "0 4px 12px rgba(255,54,95,0.3)", display: "block" }}>
+                      <button type="submit" className="force-save-btn" disabled={profileSaving}>
                         {profileSaving ? "Saving..." : "Save Changes"}
                       </button>
                       <button type="button" onClick={() => setShowProfileEditor(false)} style={{ width: "100%", padding: "16px", background: "transparent", color: "#666", border: "none", borderRadius: "10px", fontWeight: "600", fontSize: "15px", cursor: "pointer" }}>
