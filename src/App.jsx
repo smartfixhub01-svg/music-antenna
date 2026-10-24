@@ -3877,9 +3877,7 @@ document.body
               </div>
             </div>
 
-            <p style={{ margin: "8px 0 16px", fontSize: "12px", color: "#ff365f", display: profile?.role === "artist" ? "flex" : "none", alignItems: "center", gap: "4px", fontWeight: "500" }}>
-              <span className="material-symbols-outlined" style={{ fontSize: "14px", fontVariationSettings: "'FILL' 1" }}>verified</span> Verified Artist
-            </p>
+            
 
             {/* 3. STATS ROW */}
             <div style={{ display: profile?.role === "artist" ? "flex" : "none", justifyContent: "space-around", alignItems: "center", padding: "12px 0", borderBottom: "1px solid var(--ma-border, #e5e5e5)", marginBottom: "16px" }}>
