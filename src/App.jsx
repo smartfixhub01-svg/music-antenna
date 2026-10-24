@@ -3882,7 +3882,7 @@ document.body
               </button>
             </div>
 
-            <div className="yt-watch-channel" style={{ padding: "8px 0", margin: "0 0 8px 0" }}>
+            <div className="yt-watch-channel" style={{ padding: "8px 0", margin: "0px 0px 4px 0px" }}>
               {watchArtist?.avatar_url ? (
                 <img className="yt-watch-avatar" src={watchArtist.avatar_url} alt="" onError={(e) => { e.currentTarget.style.display = "none"; }} />
               ) : (
@@ -3929,11 +3929,11 @@ document.body
               </div>
               
               {comments.length > 0 && (
-                <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                  <div className="yt-video-avatar" style={{ width: "28px", height: "28px" }}>
+                <div style={{ display: "flex", gap: "8px", alignItems: "center", width: "100%", minWidth: 0 }}>
+                  <div className="yt-video-avatar" style={{ width: "24px", height: "24px", flexShrink: 0 }}>
                     {comments[0].profiles?.avatar_url ? <img src={comments[0].profiles.avatar_url} style={{width:'100%',height:'100%',objectFit:'cover'}}/> : "♫"}
                   </div>
-                  <p style={{ margin: 0, fontSize: "13px", color: "var(--ma-text, #000)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  <p style={{ margin: 0, fontSize: "12px", color: "var(--ma-text-secondary, #666)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1 }}>
                     {comments[0].content}
                   </p>
                 </div>
