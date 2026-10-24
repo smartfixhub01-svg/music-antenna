@@ -3871,7 +3871,7 @@ document.body
                 <h2 className="force-name" style={{ margin: 0, fontSize: "20px", fontWeight: "700", display: "flex", alignItems: "center", gap: "4px" }}>
                   {profile?.display_name || displayUser || "Music listener"}
                   
-                  {profile?.role === "artist" && media.filter(m => m.artist_id === session?.user?.id).length >= 10 && mySubCount >= 500 && (
+                  {profile?.role === "artist" && media.filter(m => m.artist_id === session?.user?.id).length >= 1 && mySubCount >= 1 && (
                     <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "#1D9BF0", fontVariationSettings: "'FILL' 1" }} title="Verified Artist">verified</span>
                   )}
                 </h2>
