@@ -2839,6 +2839,33 @@ document.body
     <div className="ma-app">
 
 <style>{`
+  /* Watch Page Main Container */
+  .yt-watch { background: var(--ma-bg, #fff) !important; color: var(--ma-text, #000) !important; }
+  
+  /* Video Title & Meta */
+  .yt-watch-title { color: var(--ma-text, #000) !important; font-size: 20px !important; font-weight: 700 !important; margin: 8px 0 !important; line-height: 1.3 !important; }
+  .yt-watch-meta { color: var(--ma-text-secondary, #666) !important; font-size: 13px !important; margin-bottom: 16px !important; }
+  
+  /* Action Buttons (Like, Share, Download) */
+  .yt-watch-actions { display: flex !important; gap: 8px !important; overflow-x: auto !important; padding-bottom: 16px !important; border-bottom: 1px solid var(--ma-border, #e5e5e5) !important; margin-bottom: 16px !important; }
+  .yt-watch-actions button { background: var(--ma-surface, #f2f2f2) !important; color: var(--ma-text, #000) !important; border: 1px solid var(--ma-border, #e5e5e5) !important; border-radius: 10px !important; padding: 8px 16px !important; font-weight: 600 !important; display: flex !important; align-items: center !important; gap: 6px !important; font-size: 14px !important; cursor: pointer !important; }
+  
+  /* Channel Row */
+  .yt-watch-channel { display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 12px 0 !important; border-bottom: 1px solid var(--ma-border, #e5e5e5) !important; margin-bottom: 24px !important; }
+  .yt-watch-channel-name { color: var(--ma-text, #000) !important; font-weight: 700 !important; font-size: 16px !important; }
+  .yt-watch-channel-sub { color: var(--ma-text-secondary, #666) !important; font-size: 13px !important; }
+  
+  /* Inline Comments Section */
+  .yt-watch-comments-wrapper { background: var(--ma-surface, #f2f2f2) !important; border-radius: 16px !important; padding: 16px !important; }
+  .yt-watch-comments-wrapper h3 { color: var(--ma-text, #000) !important; font-size: 15px !important; font-weight: 600 !important; }
+  .yt-watch-comment-text { color: var(--ma-text, #000) !important; font-size: 14px !important; }
+  
+  /* Comment Input Box */
+  .yt-watch-comment-input { background: var(--ma-bg, #fff) !important; color: var(--ma-text, #000) !important; border: 1px solid var(--ma-border, #e5e5e5) !important; border-radius: 12px !important; padding: 12px !important; }
+`}</style>
+
+
+<style>{`
   .premium-comment-input-wrap {
     transition: all 0.2s ease;
   }
