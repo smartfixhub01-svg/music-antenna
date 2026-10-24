@@ -799,6 +799,17 @@ useEffect(() => {
       }
     } else {
       window.prompt("Copy this link to share:", url);
+  const handleShareProfile = async () => {
+    const profileUrl = window.location.origin + "?profile=" + (profile?.username || session?.user?.id || "");
+    const shareData = {
+      title: profile?.display_name || displayUser || "Music Antenna User",
+      text: "Check out " + (profile?.display_name || displayUser) + " on Music Antenna!",
+      url: profileUrl
+    };
+    if (navigator.share) {
+      try { await navigator.share(shareData); } catch (err) { if (err.name !== "AbortError") window.prompt("Copy this link to share:", profileUrl); }
+    } else { window.prompt("Copy this link to share:", profileUrl); }
+  };
     }
   };
 
@@ -3897,7 +3908,7 @@ document.body
               <button onClick={() => { setProfileName(profile?.username || ""); setProfileBio(profile?.bio || ""); setShowProfileEditor(!showProfileEditor); }} style={{ flex: 1, background: "#212121", color: "#f1f1f1", padding: "10px", borderRadius: "8px", fontWeight: "500", fontSize: "14px", border: 0, cursor: "pointer" }}>
                 {showProfileEditor ? "Close Editor" : "Edit profile"}
               </button>
-              <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleShare(activeMedia); }} style={{ background: "#212121", color: "#f1f1f1", width: "40px", height: "40px", borderRadius: "8px", display: "grid", placeItems: "center", border: 0, cursor: "pointer" }}>
+              <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleShareProfile(); }} style={{ background: "#212121", color: "#f1f1f1", width: "40px", height: "40px", borderRadius: "8px", display: "grid", placeItems: "center", border: 0, cursor: "pointer" }}>
                 <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>share</span>
               </button>
             </div>
