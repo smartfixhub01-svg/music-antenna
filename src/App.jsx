@@ -4009,21 +4009,30 @@ document.body
                   <div style={{ width: "100%", maxWidth: "420px", display: "flex", flexDirection: "column", gap: "24px" }}>
                     <div>
                       <label style={{ display: "block", fontSize: "12px", color: "var(--ma-text-secondary, #666)", marginBottom: "8px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px" }}>Display Name</label>
-                      <input type="text" value={profileName} onChange={(e) => setProfileName(e.target.value)} placeholder="Your Name" style={{ width: "100%", padding: "16px", borderRadius: "14px", background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #e5e5e5)", outline: "none", fontSize: "15px" }} />
+                      <input type="text" value={profileName} onChange={(e) => setProfileName(e.target.value)} placeholder="Your Name" style={{ width: "100%", padding: "16px", borderRadius: "14px", background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #e5e5e5)", outline: "none", fontSize: "15px", display: "block" }} />
                     </div>
                     <div>
                       <label style={{ display: "block", fontSize: "12px", color: "var(--ma-text-secondary, #666)", marginBottom: "8px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px" }}>Bio</label>
-                      <textarea value={profileBio} onChange={(e) => setProfileBio(e.target.value)} placeholder="Tell people about yourself..." rows="4" style={{ width: "100%", padding: "16px", borderRadius: "14px", background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #e5e5e5)", outline: "none", fontSize: "15px", resize: "none" }} />
+                      <textarea value={profileBio} onChange={(e) => setProfileBio(e.target.value)} placeholder="Tell people about yourself..." rows="4" style={{ width: "100%", padding: "16px", borderRadius: "14px", background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #e5e5e5)", outline: "none", fontSize: "15px", resize: "none", display: "block" }} />
                     </div>
                     
-                    {/* Action Buttons */}
+                    {/* Action Buttons (Failsafe Wrappers) */}
                     <div style={{ marginTop: "16px", display: "flex", flexDirection: "column", gap: "16px" }}>
-                      <button type="submit" disabled={profileSaving} style={{ width: "100%", padding: "16px", backgroundColor: "#ff365f", color: "#ffffff", border: "none", borderRadius: "14px", fontWeight: "700", fontSize: "16px", cursor: profileSaving ? "not-allowed" : "pointer", boxShadow: "0 8px 24px rgba(255, 54, 95, 0.3)", display: "block", opacity: profileSaving ? 0.7 : 1 }}>
-                        {profileSaving ? "Saving..." : "Save Changes"}
-                      </button>
-                      <button type="button" onClick={() => setShowProfileEditor(false)} style={{ width: "100%", padding: "16px", backgroundColor: "transparent", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #e5e5e5)", borderRadius: "14px", fontWeight: "600", fontSize: "15px", cursor: "pointer" }}>
-                        Cancel
-                      </button>
+                      
+                      {/* SAVE BUTTON WRAPPER */}
+                      <div style={{ width: "100%", backgroundColor: "#ff365f", borderRadius: "14px", boxShadow: "0 8px 24px rgba(255, 54, 95, 0.3)", display: "block" }}>
+                        <button type="submit" disabled={profileSaving} style={{ width: "100%", padding: "16px", backgroundColor: "transparent", color: "#ffffff", border: "none", fontWeight: "700", fontSize: "16px", cursor: profileSaving ? "not-allowed" : "pointer", display: "block" }}>
+                          {profileSaving ? "Saving..." : "Save Changes"}
+                        </button>
+                      </div>
+
+                      {/* CANCEL BUTTON WRAPPER */}
+                      <div style={{ width: "100%", border: "1px solid var(--ma-border, #e5e5e5)", borderRadius: "14px", display: "block" }}>
+                        <button type="button" onClick={() => setShowProfileEditor(false)} style={{ width: "100%", padding: "16px", backgroundColor: "transparent", color: "var(--ma-text, #000)", border: "none", fontWeight: "600", fontSize: "15px", cursor: "pointer", display: "block" }}>
+                          Cancel
+                        </button>
+                      </div>
+
                     </div>
                   </div>
                 </form>
