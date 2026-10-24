@@ -3977,52 +3977,81 @@ document.body
             {showProfileEditor && (
               <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", background: "var(--ma-bg, #fff)", zIndex: 999999, display: "flex", flexDirection: "column", overflowY: "auto" }}>
                 
+                <style>{`
+                  .premium-input {
+                    width: 100%;
+                    padding: 16px;
+                    border-radius: 14px;
+                    background: var(--ma-bg, #fff);
+                    color: var(--ma-text, #000);
+                    border: 1px solid var(--ma-border, #e5e5e5);
+                    outline: none;
+                    font-size: 15px;
+                    transition: border-color 0.2s, box-shadow 0.2s;
+                  }
+                  .premium-input:focus {
+                    border-color: #ff365f;
+                    box-shadow: 0 0 0 3px rgba(255, 54, 95, 0.15);
+                  }
+                  .premium-btn-primary {
+                    width: 100%; padding: 16px; background: #ff365f; color: #ffffff;
+                    border: none; border-radius: 14px; font-weight: 700; font-size: 16px;
+                    cursor: pointer; box-shadow: 0 8px 24px rgba(255, 54, 95, 0.3);
+                    transition: transform 0.1s;
+                  }
+                  .premium-btn-primary:active { transform: scale(0.98); }
+                  .premium-btn-secondary {
+                    width: 100%; padding: 16px; background: transparent; color: var(--ma-text, #000);
+                    border: 1px solid var(--ma-border, #e5e5e5); border-radius: 14px; 
+                    font-weight: 600; font-size: 15px; cursor: pointer;
+                  }
+                `}</style>
+
                 {/* Top Header */}
                 <div style={{ display: "flex", alignItems: "center", padding: "16px", borderBottom: "1px solid var(--ma-border, #e5e5e5)", background: "var(--ma-bg, #fff)", position: "sticky", top: 0, zIndex: 10 }}>
                   <button type="button" onClick={() => setShowProfileEditor(false)} style={{ background: "transparent", border: 0, color: "var(--ma-text, #000)", cursor: "pointer", display: "flex", padding: "8px", marginRight: "8px" }}>
                     <span className="material-symbols-outlined">arrow_back</span>
                   </button>
-                  <h2 style={{ margin: 0, fontSize: "18px", color: "var(--ma-text, #000)", fontWeight: "600" }}>Edit Profile</h2>
+                  <h2 style={{ margin: 0, fontSize: "18px", color: "var(--ma-text, #000)", fontWeight: "700" }}>Edit Profile</h2>
                 </div>
 
                 {/* Form Container */}
-                <style>{`.force-save-btn { background-color: #ff365f !important; color: #ffffff !important; display: block !important; width: 100% !important; padding: 16px !important; border: none !important; border-radius: 10px !important; font-weight: bold !important; font-size: 16px !important; cursor: pointer !important; }`}</style>
-                <form onSubmit={handleSaveProfile} style={{ padding: "24px 16px", display: "flex", flexDirection: "column", alignItems: "center", gap: "24px", flex: 1 }}>
+                <form onSubmit={handleSaveProfile} style={{ padding: "32px 24px", display: "flex", flexDirection: "column", alignItems: "center", gap: "32px", flex: 1 }}>
                   
                   {/* Avatar Upload */}
-                  <div style={{ position: "relative", width: "110px", height: "110px" }}>
-                    <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: "var(--ma-surface, #f0f0f0)", overflow: "hidden", border: "2px solid var(--ma-border, #e5e5e5)" }}>
+                  <div style={{ position: "relative", width: "120px", height: "120px" }}>
+                    <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: "var(--ma-surface, #f0f0f0)", overflow: "hidden", border: "3px solid var(--ma-bg, #fff)", boxShadow: "0 4px 20px rgba(0,0,0,0.1)" }}>
                       {profilePhotoFile ? (
                         <img src={URL.createObjectURL(profilePhotoFile)} alt="Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       ) : profile?.avatar_url ? (
                         <img src={profile.avatar_url} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       ) : (
-                        <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", fontSize: "32px", color: "var(--ma-text, #000)", fontWeight: "bold" }}>{displayUser.charAt(0).toUpperCase()}</div>
+                        <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", fontSize: "36px", color: "var(--ma-text, #000)", fontWeight: "bold" }}>{displayUser.charAt(0).toUpperCase()}</div>
                       )}
                     </div>
-                    <label style={{ position: "absolute", bottom: 0, right: 0, background: "#ff365f", color: "#fff", width: "36px", height: "36px", borderRadius: "50%", display: "grid", placeItems: "center", cursor: "pointer", border: "3px solid var(--ma-bg, #fff)", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>photo_camera</span>
+                    <label style={{ position: "absolute", bottom: "0", right: "0", background: "#ff365f", color: "#fff", width: "40px", height: "40px", borderRadius: "50%", display: "grid", placeItems: "center", cursor: "pointer", border: "3px solid var(--ma-bg, #fff)", boxShadow: "0 4px 12px rgba(255,54,95,0.4)" }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>photo_camera</span>
                       <input type="file" accept="image/*" onChange={(e) => setProfilePhotoFile(e.target.files[0])} style={{ display: "none" }} />
                     </label>
                   </div>
 
                   {/* Inputs */}
-                  <div style={{ width: "100%", maxWidth: "400px", display: "flex", flexDirection: "column", gap: "20px" }}>
+                  <div style={{ width: "100%", maxWidth: "420px", display: "flex", flexDirection: "column", gap: "24px" }}>
                     <div>
-                      <label style={{ display: "block", fontSize: "14px", color: "var(--ma-text-secondary, #666)", marginBottom: "8px", fontWeight: "600" }}>Name</label>
-                      <input type="text" value={profileName} onChange={(e) => setProfileName(e.target.value)} placeholder="Your Name" style={{ width: "100%", padding: "14px", borderRadius: "10px", background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #ccc)", outline: "none", fontSize: "15px" }} />
+                      <label style={{ display: "block", fontSize: "12px", color: "var(--ma-text-secondary, #666)", marginBottom: "8px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px" }}>Display Name</label>
+                      <input type="text" className="premium-input" value={profileName} onChange={(e) => setProfileName(e.target.value)} placeholder="Your Name" />
                     </div>
                     <div>
-                      <label style={{ display: "block", fontSize: "14px", color: "var(--ma-text-secondary, #666)", marginBottom: "8px", fontWeight: "600" }}>Bio</label>
-                      <textarea value={profileBio} onChange={(e) => setProfileBio(e.target.value)} placeholder="Tell people about yourself..." rows="4" style={{ width: "100%", padding: "14px", borderRadius: "10px", background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #ccc)", outline: "none", fontSize: "15px", resize: "none" }} />
+                      <label style={{ display: "block", fontSize: "12px", color: "var(--ma-text-secondary, #666)", marginBottom: "8px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px" }}>Bio</label>
+                      <textarea className="premium-input" value={profileBio} onChange={(e) => setProfileBio(e.target.value)} placeholder="Tell people about yourself..." rows="4" style={{ resize: "none" }} />
                     </div>
                     
                     {/* Action Buttons */}
-                    <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "12px" }}>
-                      <button type="submit" className="force-save-btn" disabled={profileSaving}>
+                    <div style={{ marginTop: "16px", display: "flex", flexDirection: "column", gap: "16px" }}>
+                      <button type="submit" className="premium-btn-primary" disabled={profileSaving}>
                         {profileSaving ? "Saving..." : "Save Changes"}
                       </button>
-                      <button type="button" onClick={() => setShowProfileEditor(false)} style={{ width: "100%", padding: "16px", background: "transparent", color: "#666", border: "none", borderRadius: "10px", fontWeight: "600", fontSize: "15px", cursor: "pointer" }}>
+                      <button type="button" className="premium-btn-secondary" onClick={() => setShowProfileEditor(false)}>
                         Cancel
                       </button>
                     </div>
