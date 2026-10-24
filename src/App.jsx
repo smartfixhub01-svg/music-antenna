@@ -3844,7 +3844,7 @@ document.body
               {" · "}{new Date(activeMedia.created_at).toLocaleDateString()}
             </p>
 
-            <div className="yt-watch-actions">
+            <div className="yt-watch-actions" style={{ marginBottom: "8px", paddingBottom: "8px" }}>
               <button className="yt-watch-action" onClick={(e) => { e.stopPropagation(); handleToggleLike(activeMedia.id); }}>
                 <span className="material-symbols-outlined" style={{ fontVariationSettings: isLiked ? "'FILL' 1" : "'FILL' 0" }}>
                   thumb_up
@@ -3882,7 +3882,7 @@ document.body
               </button>
             </div>
 
-            <div className="yt-watch-channel">
+            <div className="yt-watch-channel" style={{ padding: "8px 0", margin: "0 0 8px 0" }}>
               {watchArtist?.avatar_url ? (
                 <img className="yt-watch-avatar" src={watchArtist.avatar_url} alt="" onError={(e) => { e.currentTarget.style.display = "none"; }} />
               ) : (
@@ -3921,7 +3921,7 @@ document.body
 
             <div 
               onClick={(e) => { e.stopPropagation(); setShowCommentsModal(true); }}
-              style={{ width: "100%", padding: "10px 12px", background: "var(--ma-surface, #f2f2f2)", borderRadius: "10px", color: "var(--ma-text, #000)", marginTop: "0px", display: "flex", flexDirection: "column", gap: "8px", cursor: "pointer", border: "1px solid var(--ma-border, #e5e5e5)" }}
+              style={{ width: "100%", padding: "8px 10px", background: "var(--ma-surface, #f2f2f2)", borderRadius: "10px", color: "var(--ma-text, #000)", marginTop: "0px", display: "flex", flexDirection: "column", gap: "8px", cursor: "pointer", border: "1px solid var(--ma-border, #e5e5e5)" }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <span style={{ fontWeight: "600", fontSize: "14px" }}>Comments <span style={{ color: "var(--ma-text-secondary, #666)" }}>{comments.length}</span></span>
