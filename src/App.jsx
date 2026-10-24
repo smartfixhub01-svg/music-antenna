@@ -3841,7 +3841,8 @@ document.body
       )}
 
       {showAccountPage && (
-        <section className="yt-you" style={{ padding: "0 0 100px", background: "var(--ma-bg, #fff)", minHeight: "100vh" }}>
+        <section className="yt-you" style={{ padding: "0 0 120px", background: "var(--ma-bg, #fff)", minHeight: "100vh" }}>
+          <style>{`button { min-height: 44px !important; min-width: 44px !important; }`}</style>
           
           {/* 1. BANNER */}
           <div style={{ width: "100%", height: "120px", background: "#ff365f", position: "relative" }}>
@@ -3869,7 +3870,7 @@ document.body
               <div style={{ paddingBottom: "4px" }}>
                 <h2 className="force-name" style={{ margin: 0, fontSize: "20px", fontWeight: "700", display: "flex", alignItems: "center", gap: "4px" }}>
                   {profile?.display_name || displayUser || "Music listener"}
-                  <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "var(--ma-accent)", fontVariationSettings: "'FILL' 1" }}>verified</span>
+                  {profile?.role === "artist" && (<span className="material-symbols-outlined" style={{ fontSize: "16px", color: "var(--ma-accent)", fontVariationSettings: "'FILL' 1" }}>verified</span>)}
                 </h2>
                 <p className="force-bio" style={{ margin: "2px 0", fontSize: "13px" }}>@{profile?.username || profile?.display_name || "music-antenna-user"}</p>
                 <p className="force-bio" style={{ margin: "2px 0", fontSize: "13px" }}>{profile?.bio || "Shadow Boss"}</p>
@@ -3912,7 +3913,7 @@ document.body
                   {showProfileEditor ? "Close Editor" : "Edit profile"}
                 </button>
               </div>
-              <button className="btn-circle" onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleShareProfile(); }}>
+              <button className="btn-circle" aria-label="Share Profile" onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleShareProfile(); }}>
                 <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>share</span>
               </button>
             </div>
