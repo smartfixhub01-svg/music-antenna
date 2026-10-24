@@ -3851,8 +3851,6 @@ document.body
           {/* 2. PROFILE HEADER (Overlapping the banner) */}
           <div style={{ padding: "0 16px", marginTop: "-44px", position: "relative", zIndex: 2 }}>
             <div style={{ display: "flex", alignItems: "flex-end", gap: "16px" }}>
-              
-              {/* Avatar */}
               <div style={{ width: "88px", height: "88px", borderRadius: "50%", border: "4px solid var(--ma-bg, #fff)", background: "#ff365f", overflow: "hidden", flexShrink: 0 }}>
                 {profile?.avatar_url ? (
                   <img src={profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -3860,18 +3858,16 @@ document.body
                   <span style={{ fontSize: "32px", fontWeight: "bold", color: "white", display: "flex", width: "100%", height: "100%", alignItems: "center", justifyContent: "center" }}>{(profile?.display_name || displayUser || "M").charAt(0).toUpperCase()}</span>
                 )}
               </div>
-
-              {/* Name & Bio */}
               <div style={{ paddingBottom: "4px" }}>
-                <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "700", color: "#ffffff !important", display: "flex", alignItems: "center", gap: "4px" }}>
+                <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "700", color: "#ffffff", display: "flex", alignItems: "center", gap: "4px", textShadow: "0 2px 4px rgba(0,0,0,0.8)" }}>
                   {profile?.display_name || displayUser || "Music listener"}
                   <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "var(--ma-accent)", fontVariationSettings: "'FILL' 1" }}>verified</span>
                 </h2>
-                <p style={{ margin: "2px 0", fontSize: "13px", color: "rgba(255, 255, 255, 0.8)" }}>@{profile?.username || profile?.display_name || "music-antenna-user"}</p>
-                <p style={{ margin: "2px 0", fontSize: "13px", color: "rgba(255, 255, 255, 0.8)" }}>{profile?.bio || "Shadow Boss"}</p>
+                <p style={{ margin: "2px 0", fontSize: "13px", color: "rgba(255, 255, 255, 0.9)", textShadow: "0 1px 2px rgba(0,0,0,0.8)" }}>@{profile?.username || profile?.display_name || "music-antenna-user"}</p>
+                <p style={{ margin: "2px 0", fontSize: "13px", color: "rgba(255, 255, 255, 0.9)", textShadow: "0 1px 2px rgba(0,0,0,0.8)" }}>{profile?.bio || "Shadow Boss"}</p>
               </div>
             </div>
-            
+
             <p style={{ margin: "8px 0 16px", fontSize: "12px", color: "#ff365f", display: profile?.role === "artist" ? "flex" : "none", alignItems: "center", gap: "4px", fontWeight: "500" }}>
               <span className="material-symbols-outlined" style={{ fontSize: "14px", fontVariationSettings: "'FILL' 1" }}>verified</span> Verified Artist
             </p>
@@ -3882,19 +3878,13 @@ document.body
                 <div style={{ fontSize: "18px", fontWeight: "700", color: "var(--ma-text, #000)" }}>{media.filter(m => m.artist_id === session?.user?.id).length}</div>
                 <div style={{ fontSize: "12px", color: "var(--ma-text-secondary, #666)" }}>Uploads</div>
               </div>
-              <div style={{ width: "1px", height: "24px", background: "#303030" }}></div>
+              <div style={{ width: "1px", height: "24px", background: "var(--ma-border, #e5e5e5)" }}></div>
               <div style={{ textAlign: "center" }}>
                 <div style={{ fontSize: "18px", fontWeight: "700", color: "var(--ma-text, #000)" }}>{media.filter(m => m.artist_id === session?.user?.id).reduce((sum, m) => sum + (m.views || 0), 0)}</div>
                 <div style={{ fontSize: "12px", color: "var(--ma-text-secondary, #666)" }}>Views</div>
               </div>
-              <div style={{ width: "1px", height: "24px", background: "#303030" }}></div>
-              <div style={{ textAlign: "center", cursor: "pointer" }} onClick={() => { 
-                if (session?.user?.id) {
-                  supabase.from("subscriptions").select("*", { count: "exact", head: true }).eq("channel_id", session.user.id).then(({ count }) => setMySubCount(count || 0));
-                  setMessage("Refreshed subscriber count!");
-                  
-                }
-              }}>
+              <div style={{ width: "1px", height: "24px", background: "var(--ma-border, #e5e5e5)" }}></div>
+              <div style={{ textAlign: "center", cursor: "pointer" }} onClick={() => { if (session?.user?.id) { supabase.from("subscriptions").select("*", { count: "exact", head: true }).eq("channel_id", session.user.id).then(({ count }) => setMySubCount(count || 0)); setMessage("Refreshed subscriber count!"); } }}>
                 <div style={{ fontSize: "18px", fontWeight: "700", color: "var(--ma-text, #000)" }}>{mySubCount}</div>
                 <div style={{ fontSize: "12px", color: "var(--ma-text-secondary, #666)" }}>Subscribers</div>
               </div>
@@ -3904,17 +3894,17 @@ document.body
             <div style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
               {profile?.role === "artist" && (
                 <div style={{ flex: 1, display: "flex" }}>
-                  <button onClick={() => { setShowAccountPage(false); openChannel(session?.user?.id); }} style={{ width: "100%", backgroundColor: "#ff365f", color: "#ffffff", padding: "10px", borderRadius: "8px", fontWeight: "600", fontSize: "14px", border: "none", display: "block" }}>
+                  <button onClick={() => { setShowAccountPage(false); openChannel(session?.user?.id); }} style={{ width: "100%", backgroundColor: "#ff365f", color: "#ffffff", padding: "10px", borderRadius: "8px", fontWeight: "600", fontSize: "14px", border: 0, cursor: "pointer", display: "block" }}>
                     View channel
                   </button>
                 </div>
               )}
               <div style={{ flex: 1, display: "flex" }}>
-                <button onClick={() => { setProfileName(profile?.username || ""); setProfileBio(profile?.bio || ""); setShowProfileEditor(!showProfileEditor); }} style={{ width: "100%", backgroundColor: "var(--ma-surface, #f0f0f0)", color: "var(--ma-text, #000)", padding: "10px", borderRadius: "8px", fontWeight: "500", fontSize: "14px", border: "1px solid var(--ma-border, #e5e5e5)", display: "block" }}>
+                <button onClick={() => { setProfileName(profile?.username || ""); setProfileBio(profile?.bio || ""); setShowProfileEditor(!showProfileEditor); }} style={{ width: "100%", backgroundColor: "var(--ma-surface, #f0f0f0)", color: "var(--ma-text, #000)", padding: "10px", borderRadius: "8px", fontWeight: "500", fontSize: "14px", border: "1px solid var(--ma-border, #e5e5e5)", cursor: "pointer", display: "block" }}>
                   {showProfileEditor ? "Close Editor" : "Edit profile"}
                 </button>
               </div>
-              <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleShareProfile(); }} style={{ backgroundColor: "var(--ma-surface, #f0f0f0)", color: "var(--ma-text, #000)", width: "44px", height: "44px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid var(--ma-border, #e5e5e5)" }}>
+              <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleShareProfile(); }} style={{ backgroundColor: "var(--ma-surface, #f0f0f0)", color: "var(--ma-text, #000)", width: "44px", height: "44px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid var(--ma-border, #e5e5e5)", cursor: "pointer", flexShrink: 0 }}>
                 <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>share</span>
               </button>
             </div>
