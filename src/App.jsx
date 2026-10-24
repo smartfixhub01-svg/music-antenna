@@ -2840,21 +2840,7 @@ document.body
     <div className="ma-app">
 
 <style>{`
-  .yt-watch-desc-preview {
-    font-size: 11px !important; 
-    color: var(--ma-text-secondary, #666) !important;
-    margin: 2px 0 8px 0 !important; 
-    display: -webkit-box !important;
-    -webkit-line-clamp: 1 !important;
-    -webkit-box-orient: vertical !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    cursor: pointer !important;
-    background: transparent !important;
-    padding: 0 !important; 
-    border: none !important; 
-    opacity: 0.8 !important;
-  }
+  
 `}</style>
 
 
@@ -3838,9 +3824,13 @@ document.body
 
           <div className="yt-watch-body">
             <h1 className="yt-watch-title">{activeMedia.title}</h1>
-            <p className="yt-watch-desc-preview" onClick={() => setShowDescModal(true)}>
-              <span style={{ fontWeight: "700" }}>Discrip:</span> {activeMedia.description || activeMedia.caption || "No description..."}
-            </p>
+            <div 
+              onClick={() => setShowDescModal(true)} 
+              style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "6px", marginBottom: "12px", cursor: "pointer", width: "fit-content" }}
+            >
+              <span style={{ fontSize: "13px", fontWeight: "700", color: "var(--ma-text-secondary, #666)" }}>Discrip</span>
+              <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "var(--ma-text-secondary, #666)" }}>expand_more</span>
+            </div>
             <p className="yt-watch-meta">
               @{watchArtist?.username || watchArtist?.display_name || "music-antenna"}
               {" · "}{activeMedia.views || 0} views
