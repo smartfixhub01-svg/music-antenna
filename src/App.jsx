@@ -4967,7 +4967,7 @@ document.body
           >
             {/* Header */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
-              <h3 style={{ margin: 0, color: "var(--ma-text, #000)", fontSize: "18px" }}>Comments ({comments.length})</h3>
+              <h3 style={{ margin: 0, color: "var(--ma-text, #000)", fontSize: "15px", fontWeight: "600" }}>Comments ({comments.length})</h3>
               <button onClick={() => setShowCommentsModal(false)} style={{ background: "transparent", border: 0, color: "var(--ma-text, #000)" }}>
                 <span className="material-symbols-outlined">close</span>
               </button>
