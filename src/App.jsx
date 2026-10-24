@@ -3861,12 +3861,12 @@ document.body
               </div>
             </div>
             
-            <p style={{ margin: "8px 0 16px", fontSize: "12px", color: "#ff365f", display: "flex", alignItems: "center", gap: "4px", fontWeight: "500" }}>
+            <p style={{ margin: "8px 0 16px", fontSize: "12px", color: "#ff365f", display: profile?.role === "artist" ? "flex" : "none", alignItems: "center", gap: "4px", fontWeight: "500" }}>
               <span className="material-symbols-outlined" style={{ fontSize: "14px", fontVariationSettings: "'FILL' 1" }}>verified</span> Verified Artist
             </p>
 
             {/* 3. STATS ROW */}
-            <div style={{ display: "flex", justifyContent: "space-around", alignItems: "center", padding: "12px 0", borderBottom: "1px solid #212121", marginBottom: "16px" }}>
+            <div style={{ display: profile?.role === "artist" ? "flex" : "none", justifyContent: "space-around", alignItems: "center", padding: "12px 0", borderBottom: "1px solid #212121", marginBottom: "16px" }}>
               <div style={{ textAlign: "center" }}>
                 <div style={{ fontSize: "18px", fontWeight: "700", color: "#f1f1f1" }}>{media.filter(m => m.artist_id === session?.user?.id).length}</div>
                 <div style={{ fontSize: "12px", color: "#aaa" }}>Uploads</div>
@@ -3891,7 +3891,7 @@ document.body
 
             {/* 4. ACTION BUTTONS */}
             <div style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
-              <button onClick={() => { setShowAccountPage(false); openChannel(session?.user?.id); }} style={{ flex: 1, background: "#ff365f", color: "#fff", padding: "10px", borderRadius: "8px", fontWeight: "600", fontSize: "14px", border: 0 }}>
+              <button onClick={() => { setShowAccountPage(false); openChannel(session?.user?.id); }} style={{ display: profile?.role === "artist" ? "block" : "none", flex: 1, background: "#ff365f", color: "#fff", padding: "10px", borderRadius: "8px", fontWeight: "600", fontSize: "14px", border: 0 }}>
                 View channel
               </button>
               <button onClick={() => { setProfileName(profile?.username || ""); setProfileBio(profile?.bio || ""); setShowProfileEditor(!showProfileEditor); }} style={{ flex: 1, background: "#212121", color: "#f1f1f1", padding: "10px", borderRadius: "8px", fontWeight: "500", fontSize: "14px", border: 0, cursor: "pointer" }}>
@@ -3903,7 +3903,7 @@ document.body
             </div>
 
             {/* 5. TABS */}
-            <div style={{ display: "flex", gap: "24px", borderBottom: "1px solid #303030", marginBottom: "16px" }}>
+            <div style={{ display: profile?.role === "artist" ? "flex" : "none", gap: "24px", borderBottom: "1px solid #303030", marginBottom: "16px" }}>
               <button style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "#ff365f", fontWeight: "600", fontSize: "14px", borderBottom: "2px solid #ff365f" }}>Overview</button>
               <button onClick={() => { setShowAccountPage(false); openManagePage(); }} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "#aaa", fontWeight: "500", fontSize: "14px", cursor: "pointer" }}>Content</button>
               <button onClick={openAnalytics} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "#aaa", fontWeight: "500", fontSize: "14px", cursor: "pointer" }}>Analytics</button>
@@ -4318,7 +4318,7 @@ document.body
 
               <div style={{ background: "#212121", padding: "16px", borderRadius: "12px", border: "1px solid #333" }}>
                 <h3 style={{ margin: "0 0 16px", fontSize: "16px", color: "#f1f1f1" }}>Last 7 Days</h3>
-                <div style={{ display: "flex", justifyContent: "space-around", textAlign: "center" }}>
+                <div style={{ display: profile?.role === "artist" ? "flex" : "none", justifyContent: "space-around", textAlign: "center" }}>
                   <div>
                     <h2 style={{ margin: 0, color: "var(--ma-accent)", fontSize: "24px" }}>+{analyticsData.weeklyViews}</h2>
                     <p style={{ margin: 0, fontSize: "12px", color: "#aaa" }}>New Views</p>
