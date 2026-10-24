@@ -3863,12 +3863,12 @@ document.body
 
               {/* Name & Bio */}
               <div style={{ paddingBottom: "4px" }}>
-                <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "700", color: "var(--ma-text, #000)", display: "flex", alignItems: "center", gap: "4px" }}>
+                <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "700", color: "#ffffff", display: "flex", alignItems: "center", gap: "4px" }}>
                   {profile?.display_name || displayUser || "Music listener"}
                   <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "var(--ma-accent)", fontVariationSettings: "'FILL' 1" }}>verified</span>
                 </h2>
-                <p style={{ margin: "2px 0", fontSize: "13px", color: "var(--ma-text-secondary, #666)" }}>@{profile?.username || profile?.display_name || "music-antenna-user"}</p>
-                <p style={{ margin: "2px 0", fontSize: "13px", color: "var(--ma-text-secondary, #666)" }}>{profile?.bio || "Shadow Boss"}</p>
+                <p style={{ margin: "2px 0", fontSize: "13px", color: "rgba(255, 255, 255, 0.8)" }}>@{profile?.username || profile?.display_name || "music-antenna-user"}</p>
+                <p style={{ margin: "2px 0", fontSize: "13px", color: "rgba(255, 255, 255, 0.8)" }}>{profile?.bio || "Shadow Boss"}</p>
               </div>
             </div>
             
