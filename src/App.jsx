@@ -1711,7 +1711,14 @@ useEffect(() => {
       setIsSubscribed(wasSubscribed);
       setSubscriberCount(oldCount);
       setMySubCount(oldMyCount);
-      setMessage("Sub Error: " + err.message);
+      
+      // Handle duplicate errors gracefully
+      if (err.message.includes("duplicate key")) {
+        setIsSubscribed(true);
+        setMessage("You are already subscribed to this channel.");
+      } else {
+        setMessage("Sub Error: " + err.message);
+      }
     }
   }
 
@@ -1787,6 +1794,9 @@ useEffect(() => {
     setChannelMedia([]);
     setSubscriberCount(0);
     window.scrollTo({ top: 0, behavior: "smooth" });
+    
+    // CRITICAL FIX: Fetch the subscription status immediately
+    checkSubscription(artistId);
 
     try {
       const { data: prof, error: profErr } = await supabase
