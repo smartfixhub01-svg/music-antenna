@@ -3850,8 +3850,8 @@ document.body
 
           {/* 2. PROFILE HEADER (Overlapping the banner) */}
           <style>{`
-            .force-name { color: #ffffff !important; text-shadow: 0 2px 4px rgba(0,0,0,0.8) !important; }
-            .force-bio { color: rgba(255,255,255,0.9) !important; text-shadow: 0 1px 2px rgba(0,0,0,0.8) !important; }
+            .force-name { color: #ffffff !important; text-shadow: none !important; letter-spacing: -0.5px; }
+            .force-bio { color: rgba(255, 255, 255, 0.85) !important; text-shadow: none !important; font-weight: 500 !important; font-size: 14px !important; margin-top: 4px !important; }
             .btn-pink { background-color: #ff365f !important; color: #ffffff !important; padding: 10px !important; border-radius: 8px !important; font-weight: 600 !important; font-size: 14px !important; border: none !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; width: 100% !important; }
             .btn-gray { background-color: var(--ma-surface, #f0f0f0) !important; color: var(--ma-text, #000) !important; padding: 10px !important; border-radius: 8px !important; font-weight: 500 !important; font-size: 14px !important; border: 1px solid var(--ma-border, #e5e5e5) !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; width: 100% !important; }
             .btn-circle { background-color: var(--ma-surface, #f0f0f0) !important; color: var(--ma-text, #000) !important; width: 44px !important; height: 44px !important; border-radius: 50% !important; border: 1px solid var(--ma-border, #e5e5e5) !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; flex-shrink: 0 !important; }
