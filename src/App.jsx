@@ -2384,7 +2384,7 @@ useEffect(() => {
             
             {/* Playback Speed */}
             <div style={{ marginBottom: "24px" }}>
-              <p style={{ color: "#aaa", fontSize: "14px", marginBottom: "8px" }}>Playback Speed</p>
+              <p style={{ color: "var(--ma-text-secondary, #666)", fontSize: "14px", marginBottom: "8px" }}>Playback Speed</p>
               <div style={{ display: "flex", gap: "10px" }}>
                 {[1, 1.5, 2].map(speed => (
                   <button key={speed} onClick={() => {
@@ -3757,7 +3757,7 @@ document.body
               </button>
               
               {activeMedia.allow_download && (
-                <a href={activeMedia.playbackUrl} download={activeMedia.title} target="_blank" rel="noopener noreferrer" className="yt-watch-action" style={{ textDecoration: "none", color: "#f1f1f1" }}>
+                <a href={activeMedia.playbackUrl} download={activeMedia.title} target="_blank" rel="noopener noreferrer" className="yt-watch-action" style={{ textDecoration: "none", color: "var(--ma-text, #000)" }}>
                   <span className="material-symbols-outlined">download</span>
                   <span className="yt-watch-action-label">Download</span>
                 </a>
@@ -3816,10 +3816,10 @@ document.body
 
             <div 
               onClick={(e) => { e.stopPropagation(); setShowCommentsModal(true); }}
-              style={{ width: "100%", padding: "12px 16px", background: "#212121", borderRadius: "12px", color: "#f1f1f1", marginTop: "16px", display: "flex", flexDirection: "column", gap: "12px", cursor: "pointer" }}
+              style={{ width: "100%", padding: "12px 16px", background: "#212121", borderRadius: "12px", color: "var(--ma-text, #000)", marginTop: "16px", display: "flex", flexDirection: "column", gap: "12px", cursor: "pointer" }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontWeight: "bold", fontSize: "14px" }}>Comments <span style={{ color: "#aaa" }}>{comments.length}</span></span>
+                <span style={{ fontWeight: "bold", fontSize: "14px" }}>Comments <span style={{ color: "var(--ma-text-secondary, #666)" }}>{comments.length}</span></span>
                 <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>expand_more</span>
               </div>
               
@@ -3828,7 +3828,7 @@ document.body
                   <div className="yt-video-avatar" style={{ width: "28px", height: "28px" }}>
                     {comments[0].profiles?.avatar_url ? <img src={comments[0].profiles.avatar_url} style={{width:'100%',height:'100%',objectFit:'cover'}}/> : "♫"}
                   </div>
-                  <p style={{ margin: 0, fontSize: "13px", color: "#f1f1f1", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  <p style={{ margin: 0, fontSize: "13px", color: "var(--ma-text, #000)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                     {comments[0].content}
                   </p>
                 </div>
@@ -3841,7 +3841,7 @@ document.body
       )}
 
       {showAccountPage && (
-        <section className="yt-you" style={{ padding: "0 0 100px", background: "#0f0f0f", minHeight: "100vh" }}>
+        <section className="yt-you" style={{ padding: "0 0 100px", background: "var(--ma-bg, #fff)", minHeight: "100vh" }}>
           
           {/* 1. BANNER */}
           <div style={{ width: "100%", height: "120px", background: "linear-gradient(135deg, #2a1622, #121722, #ff365f)", position: "relative" }}>
@@ -3853,7 +3853,7 @@ document.body
             <div style={{ display: "flex", alignItems: "flex-end", gap: "16px" }}>
               
               {/* Avatar */}
-              <div style={{ width: "88px", height: "88px", borderRadius: "50%", border: "4px solid #0f0f0f", background: "#ff365f", overflow: "hidden", flexShrink: 0 }}>
+              <div style={{ width: "88px", height: "88px", borderRadius: "50%", border: "4px solid var(--ma-bg, #fff)", background: "#ff365f", overflow: "hidden", flexShrink: 0 }}>
                 {profile?.avatar_url ? (
                   <img src={profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 ) : (
@@ -3863,12 +3863,12 @@ document.body
 
               {/* Name & Bio */}
               <div style={{ paddingBottom: "4px" }}>
-                <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "700", color: "#f1f1f1", display: "flex", alignItems: "center", gap: "4px" }}>
+                <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "700", color: "var(--ma-text, #000)", display: "flex", alignItems: "center", gap: "4px" }}>
                   {profile?.display_name || displayUser || "Music listener"}
                   <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "var(--ma-accent)", fontVariationSettings: "'FILL' 1" }}>verified</span>
                 </h2>
-                <p style={{ margin: "2px 0", fontSize: "13px", color: "#aaa" }}>@{profile?.username || profile?.display_name || "music-antenna-user"}</p>
-                <p style={{ margin: "2px 0", fontSize: "13px", color: "#aaa" }}>{profile?.bio || "Shadow Boss"}</p>
+                <p style={{ margin: "2px 0", fontSize: "13px", color: "var(--ma-text-secondary, #666)" }}>@{profile?.username || profile?.display_name || "music-antenna-user"}</p>
+                <p style={{ margin: "2px 0", fontSize: "13px", color: "var(--ma-text-secondary, #666)" }}>{profile?.bio || "Shadow Boss"}</p>
               </div>
             </div>
             
@@ -3877,15 +3877,15 @@ document.body
             </p>
 
             {/* 3. STATS ROW */}
-            <div style={{ display: profile?.role === "artist" ? "flex" : "none", justifyContent: "space-around", alignItems: "center", padding: "12px 0", borderBottom: "1px solid #212121", marginBottom: "16px" }}>
+            <div style={{ display: profile?.role === "artist" ? "flex" : "none", justifyContent: "space-around", alignItems: "center", padding: "12px 0", borderBottom: "1px solid var(--ma-border, #e5e5e5)", marginBottom: "16px" }}>
               <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: "18px", fontWeight: "700", color: "#f1f1f1" }}>{media.filter(m => m.artist_id === session?.user?.id).length}</div>
-                <div style={{ fontSize: "12px", color: "#aaa" }}>Uploads</div>
+                <div style={{ fontSize: "18px", fontWeight: "700", color: "var(--ma-text, #000)" }}>{media.filter(m => m.artist_id === session?.user?.id).length}</div>
+                <div style={{ fontSize: "12px", color: "var(--ma-text-secondary, #666)" }}>Uploads</div>
               </div>
               <div style={{ width: "1px", height: "24px", background: "#303030" }}></div>
               <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: "18px", fontWeight: "700", color: "#f1f1f1" }}>{media.filter(m => m.artist_id === session?.user?.id).reduce((sum, m) => sum + (m.views || 0), 0)}</div>
-                <div style={{ fontSize: "12px", color: "#aaa" }}>Views</div>
+                <div style={{ fontSize: "18px", fontWeight: "700", color: "var(--ma-text, #000)" }}>{media.filter(m => m.artist_id === session?.user?.id).reduce((sum, m) => sum + (m.views || 0), 0)}</div>
+                <div style={{ fontSize: "12px", color: "var(--ma-text-secondary, #666)" }}>Views</div>
               </div>
               <div style={{ width: "1px", height: "24px", background: "#303030" }}></div>
               <div style={{ textAlign: "center", cursor: "pointer" }} onClick={() => { 
@@ -3895,8 +3895,8 @@ document.body
                   
                 }
               }}>
-                <div style={{ fontSize: "18px", fontWeight: "700", color: "#f1f1f1" }}>{mySubCount}</div>
-                <div style={{ fontSize: "12px", color: "#aaa" }}>Subscribers</div>
+                <div style={{ fontSize: "18px", fontWeight: "700", color: "var(--ma-text, #000)" }}>{mySubCount}</div>
+                <div style={{ fontSize: "12px", color: "var(--ma-text-secondary, #666)" }}>Subscribers</div>
               </div>
             </div>
 
@@ -3905,7 +3905,7 @@ document.body
               <button onClick={() => { setShowAccountPage(false); openChannel(session?.user?.id); }} style={{ display: profile?.role === "artist" ? "block" : "none", flex: 1, background: "#ff365f", color: "#fff", padding: "10px", borderRadius: "8px", fontWeight: "600", fontSize: "14px", border: 0 }}>
                 View channel
               </button>
-              <button onClick={() => { setProfileName(profile?.username || ""); setProfileBio(profile?.bio || ""); setShowProfileEditor(!showProfileEditor); }} style={{ flex: 1, background: "#212121", color: "#f1f1f1", padding: "10px", borderRadius: "8px", fontWeight: "500", fontSize: "14px", border: 0, cursor: "pointer" }}>
+              <button onClick={() => { setProfileName(profile?.username || ""); setProfileBio(profile?.bio || ""); setShowProfileEditor(!showProfileEditor); }} style={{ flex: 1, background: "#212121", color: "var(--ma-text, #000)", padding: "10px", borderRadius: "8px", fontWeight: "500", fontSize: "14px", border: 0, cursor: "pointer" }}>
                 {showProfileEditor ? "Close Editor" : "Edit profile"}
               </button>
               <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleShareProfile(); }} style={{ background: "var(--ma-bg-hover, rgba(255,255,255,0.1))", color: "var(--ma-text, #f1f1f1)", width: "44px", height: "44px", borderRadius: "50%", display: "grid", placeItems: "center", border: "1px solid var(--ma-border, rgba(255,255,255,0.05))", cursor: "pointer", transition: "all 0.2s ease", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
@@ -3914,35 +3914,35 @@ document.body
             </div>
 
             {/* 5. TABS */}
-            <div style={{ display: profile?.role === "artist" ? "flex" : "none", gap: "24px", borderBottom: "1px solid #303030", marginBottom: "16px" }}>
+            <div style={{ display: profile?.role === "artist" ? "flex" : "none", gap: "24px", borderBottom: "1px solid var(--ma-border, #e5e5e5)", marginBottom: "16px" }}>
               <button style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "#ff365f", fontWeight: "600", fontSize: "14px", borderBottom: "2px solid #ff365f" }}>Overview</button>
-              <button onClick={() => { setShowAccountPage(false); openManagePage(); }} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "#aaa", fontWeight: "500", fontSize: "14px", cursor: "pointer" }}>Content</button>
-              <button onClick={openAnalytics} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "#aaa", fontWeight: "500", fontSize: "14px", cursor: "pointer" }}>Analytics</button>
-              <button onClick={() => setMessage("About section coming soon.")} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "#aaa", fontWeight: "500", fontSize: "14px", cursor: "pointer" }}>About</button>
+              <button onClick={() => { setShowAccountPage(false); openManagePage(); }} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "var(--ma-text-secondary, #666)", fontWeight: "500", fontSize: "14px", cursor: "pointer" }}>Content</button>
+              <button onClick={openAnalytics} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "var(--ma-text-secondary, #666)", fontWeight: "500", fontSize: "14px", cursor: "pointer" }}>Analytics</button>
+              <button onClick={() => setMessage("About section coming soon.")} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "var(--ma-text-secondary, #666)", fontWeight: "500", fontSize: "14px", cursor: "pointer" }}>About</button>
             </div>
 
             {/* 6. CREATOR DASHBOARD CARD */}
             {profile?.role === "artist" && (
-              <div style={{ background: "#181818", borderRadius: "12px", padding: "16px", border: "1px solid #303030", marginBottom: "24px" }}>
+              <div style={{ background: "var(--ma-surface, #f0f0f0)", borderRadius: "12px", padding: "16px", border: "1px solid var(--ma-border, #e5e5e5)", marginBottom: "24px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-                  <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "600", color: "#f1f1f1" }}>Creator dashboard</h3>
+                  <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "600", color: "var(--ma-text, #000)" }}>Creator dashboard</h3>
                   <span className="material-symbols-outlined" onClick={openAnalytics} style={{ color: "#ff365f", fontSize: "20px", cursor: "pointer" }}>bar_chart</span>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", marginBottom: "16px" }}>
                   <div style={{ background: "#212121", borderRadius: "8px", padding: "12px", textAlign: "center" }}>
                     <span className="material-symbols-outlined" style={{ color: "#ff365f", background: "rgba(255,54,95,0.1)", padding: "6px", borderRadius: "50%", fontSize: "18px", marginBottom: "8px", display: "inline-block" }}>upload</span>
-                    <div style={{ fontSize: "16px", fontWeight: "700", color: "#f1f1f1" }}>{media.filter(m => m.artist_id === session?.user?.id).length}</div>
-                    <div style={{ fontSize: "11px", color: "#aaa" }}>Uploads</div>
+                    <div style={{ fontSize: "16px", fontWeight: "700", color: "var(--ma-text, #000)" }}>{media.filter(m => m.artist_id === session?.user?.id).length}</div>
+                    <div style={{ fontSize: "11px", color: "var(--ma-text-secondary, #666)" }}>Uploads</div>
                   </div>
                   <div style={{ background: "#212121", borderRadius: "8px", padding: "12px", textAlign: "center" }}>
                     <span className="material-symbols-outlined" style={{ color: "#ff365f", background: "rgba(255,54,95,0.1)", padding: "6px", borderRadius: "50%", fontSize: "18px", marginBottom: "8px", display: "inline-block" }}>visibility</span>
-                    <div style={{ fontSize: "16px", fontWeight: "700", color: "#f1f1f1" }}>{media.filter(m => m.artist_id === session?.user?.id).reduce((sum, m) => sum + (m.views || 0), 0)}</div>
-                    <div style={{ fontSize: "11px", color: "#aaa" }}>Views</div>
+                    <div style={{ fontSize: "16px", fontWeight: "700", color: "var(--ma-text, #000)" }}>{media.filter(m => m.artist_id === session?.user?.id).reduce((sum, m) => sum + (m.views || 0), 0)}</div>
+                    <div style={{ fontSize: "11px", color: "var(--ma-text-secondary, #666)" }}>Views</div>
                   </div>
                   <div style={{ background: "#212121", borderRadius: "8px", padding: "12px", textAlign: "center" }}>
                     <span className="material-symbols-outlined" style={{ color: "#ff365f", background: "rgba(255,54,95,0.1)", padding: "6px", borderRadius: "50%", fontSize: "18px", marginBottom: "8px", display: "inline-block" }}>group</span>
-                    <div style={{ fontSize: "16px", fontWeight: "700", color: "#f1f1f1" }}>{mySubCount}</div>
-                    <div style={{ fontSize: "11px", color: "#aaa" }}>Subscribers</div>
+                    <div style={{ fontSize: "16px", fontWeight: "700", color: "var(--ma-text, #000)" }}>{mySubCount}</div>
+                    <div style={{ fontSize: "11px", color: "var(--ma-text-secondary, #666)" }}>Subscribers</div>
                   </div>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px" }}>
@@ -3960,14 +3960,14 @@ document.body
             )}
             
             {/* HISTORY */}
-            <h3 style={{ margin: "0 0 12px", fontSize: "16px", fontWeight: "600", color: "#f1f1f1" }}>History</h3>
+            <h3 style={{ margin: "0 0 12px", fontSize: "16px", fontWeight: "600", color: "var(--ma-text, #000)" }}>History</h3>
             <div style={{ display: "flex", gap: "12px", overflowX: "auto", paddingBottom: "16px", marginBottom: "16px" }}>
                {history.slice(0, 4).map((item) => (
                   <div key={item.id} onClick={() => { const found = media.find(m => m.id === item.id); if (found) openPlayer(found); }} style={{ flexShrink: 0, width: "140px", cursor: "pointer" }}>
                     <div style={{ width: "140px", height: "80px", background: "#212121", borderRadius: "8px", overflow: "hidden", marginBottom: "6px" }}>
-                      {item.thumbnailUrl ? <img src={item.thumbnailUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "grid", placeItems: "center", height: "100%", color: "#aaa" }}><span className="material-symbols-outlined">movie</span></div>}
+                      {item.thumbnailUrl ? <img src={item.thumbnailUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "grid", placeItems: "center", height: "100%", color: "var(--ma-text-secondary, #666)" }}><span className="material-symbols-outlined">movie</span></div>}
                     </div>
-                    <p style={{ margin: 0, fontSize: "12px", color: "#f1f1f1", fontWeight: "500", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.title}</p>
+                    <p style={{ margin: 0, fontSize: "12px", color: "var(--ma-text, #000)", fontWeight: "500", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.title}</p>
                   </div>
                 ))}
             </div>
@@ -4349,7 +4349,7 @@ document.body
       )}
 
       {showAnalytics && (
-        <section style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: "56px", background: "#0f0f0f", zIndex: 9999, overflowY: "auto", padding: "16px", color: "#f1f1f1", fontFamily: "Roboto, sans-serif" }}>
+        <section style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: "56px", background: "#0f0f0f", zIndex: 9999, overflowY: "auto", padding: "16px", color: "var(--ma-text, #000)", fontFamily: "Roboto, sans-serif" }}>
           
           <div style={{ display: "flex", alignItems: "center", marginBottom: "20px", borderBottom: "1px solid #333", paddingBottom: "12px" }}>
             <button onClick={() => { setShowAnalytics(false); setShowAccountPage(true); }} style={{ background: "transparent", border: 0, color: "white", cursor: "pointer", display: "flex", alignItems: "center" }}>
@@ -4359,38 +4359,38 @@ document.body
           </div>
 
           {analyticsLoading ? (
-            <p style={{ textAlign: "center", marginTop: "40px", color: "#aaa" }}>Loading data...</p>
+            <p style={{ textAlign: "center", marginTop: "40px", color: "var(--ma-text-secondary, #666)" }}>Loading data...</p>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
               
               <div style={{ background: "#212121", padding: "16px", borderRadius: "12px", border: "1px solid #333" }}>
-                <h3 style={{ margin: "0 0 16px", fontSize: "16px", color: "#f1f1f1" }}>Overview</h3>
+                <h3 style={{ margin: "0 0 16px", fontSize: "16px", color: "var(--ma-text, #000)" }}>Overview</h3>
                 <div style={{ display: "flex", justifyContent: "space-between", textAlign: "center" }}>
                   <div style={{ flex: 1 }}>
                     <h2 style={{ margin: 0, color: "var(--ma-accent)", fontSize: "24px" }}>{analyticsData.totalViews}</h2>
-                    <p style={{ margin: 0, fontSize: "12px", color: "#aaa" }}>Views</p>
+                    <p style={{ margin: 0, fontSize: "12px", color: "var(--ma-text-secondary, #666)" }}>Views</p>
                   </div>
                   <div style={{ flex: 1 }}>
                     <h2 style={{ margin: 0, color: "#ff365f", fontSize: "24px" }}>{analyticsData.totalSubs}</h2>
-                    <p style={{ margin: 0, fontSize: "12px", color: "#aaa" }}>Subs</p>
+                    <p style={{ margin: 0, fontSize: "12px", color: "var(--ma-text-secondary, #666)" }}>Subs</p>
                   </div>
                   <div style={{ flex: 1 }}>
-                    <h2 style={{ margin: 0, color: "#aaa", fontSize: "24px" }}>{analyticsData.totalComments}</h2>
-                    <p style={{ margin: 0, fontSize: "12px", color: "#aaa" }}>Comments</p>
+                    <h2 style={{ margin: 0, color: "var(--ma-text-secondary, #666)", fontSize: "24px" }}>{analyticsData.totalComments}</h2>
+                    <p style={{ margin: 0, fontSize: "12px", color: "var(--ma-text-secondary, #666)" }}>Comments</p>
                   </div>
                 </div>
               </div>
 
               <div style={{ background: "#212121", padding: "16px", borderRadius: "12px", border: "1px solid #333" }}>
-                <h3 style={{ margin: "0 0 16px", fontSize: "16px", color: "#f1f1f1" }}>Last 7 Days</h3>
+                <h3 style={{ margin: "0 0 16px", fontSize: "16px", color: "var(--ma-text, #000)" }}>Last 7 Days</h3>
                 <div style={{ display: profile?.role === "artist" ? "flex" : "none", justifyContent: "space-around", textAlign: "center" }}>
                   <div>
                     <h2 style={{ margin: 0, color: "var(--ma-accent)", fontSize: "24px" }}>+{analyticsData.weeklyViews}</h2>
-                    <p style={{ margin: 0, fontSize: "12px", color: "#aaa" }}>New Views</p>
+                    <p style={{ margin: 0, fontSize: "12px", color: "var(--ma-text-secondary, #666)" }}>New Views</p>
                   </div>
                   <div>
                     <h2 style={{ margin: 0, color: "#ff365f", fontSize: "24px" }}>+{analyticsData.weeklySubs}</h2>
-                    <p style={{ margin: 0, fontSize: "12px", color: "#aaa" }}>New Subs</p>
+                    <p style={{ margin: 0, fontSize: "12px", color: "var(--ma-text-secondary, #666)" }}>New Subs</p>
                   </div>
                 </div>
               </div>
@@ -4759,10 +4759,10 @@ document.body
       </nav>
       {showPlaylistModal && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ background: "#212121", width: "90%", maxWidth: "400px", borderRadius: "12px", padding: "20px", color: "#f1f1f1", fontFamily: "Roboto, sans-serif", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>
+          <div style={{ background: "#212121", width: "90%", maxWidth: "400px", borderRadius: "12px", padding: "20px", color: "var(--ma-text, #000)", fontFamily: "Roboto, sans-serif", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
               <h3 style={{ margin: 0, fontSize: "18px" }}>Save to playlist</h3>
-              <button onClick={() => setShowPlaylistModal(false)} style={{ background: "transparent", border: 0, color: "#aaa", cursor: "pointer", display: "flex" }}>
+              <button onClick={() => setShowPlaylistModal(false)} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", cursor: "pointer", display: "flex" }}>
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
@@ -4780,7 +4780,7 @@ document.body
 
             <div style={{ maxHeight: "250px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "8px" }}>
               {playlists.length === 0 ? (
-                <p style={{ color: "#aaa", fontSize: "14px", textAlign: "center", margin: "20px 0" }}>No playlists yet. Create one above.</p>
+                <p style={{ color: "var(--ma-text-secondary, #666)", fontSize: "14px", textAlign: "center", margin: "20px 0" }}>No playlists yet. Create one above.</p>
               ) : (
                 playlists.map(pl => (
                   <button key={pl.id} onClick={() => addToPlaylist(pl.id)} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px", background: "#1c1c1c", border: "1px solid #333", borderRadius: "8px", color: "white", cursor: "pointer", textAlign: "left", fontSize: "14px" }}>
@@ -4902,7 +4902,7 @@ document.body
             {/* Comments List */}
             <div style={{ flex: 1, overflowY: "auto", padding: "16px", paddingBottom: "100px" }}>
               {comments.length === 0 ? (
-                <p style={{ color: "#aaa", textAlign: "center", marginTop: "40px" }}>No comments yet. Be the first!</p>
+                <p style={{ color: "var(--ma-text-secondary, #666)", textAlign: "center", marginTop: "40px" }}>No comments yet. Be the first!</p>
               ) : (
                 comments.map(c => (
                   <div key={c.id} style={{ display: "flex", gap: "10px", marginBottom: "16px", alignItems: "flex-start", textAlign: "left" }}>
@@ -4916,7 +4916,7 @@ document.body
                       
                       {/* Name & Time - Compact */}
                       <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "2px" }}>
-                        <span style={{ fontSize: "12px", fontWeight: "bold", color: "#f1f1f1" }}>
+                        <span style={{ fontSize: "12px", fontWeight: "bold", color: "var(--ma-text, #000)" }}>
                           @{c.profiles?.display_name || "user"}
                         </span>
                         <span style={{ fontSize: "11px", color: "#aaaaaa" }}>
@@ -4934,13 +4934,13 @@ document.body
                         <div style={{ width: "100%", marginBottom: "6px" }}>
                           <input value={editCommentText} onChange={e => setEditCommentText(e.target.value)} style={{ width: "100%", padding: "6px", borderRadius: "6px", border: "1px solid #333", background: "#121212", color: "white", fontSize: "13px", marginBottom: "6px" }} />
                           <div style={{ display: "flex", gap: "8px" }}>
-                            <button onClick={() => setEditingCommentId(null)} style={{ background: "transparent", border: 0, color: "#aaa", fontSize: "11px" }}>Cancel</button>
+                            <button onClick={() => setEditingCommentId(null)} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", fontSize: "11px" }}>Cancel</button>
                             <button onClick={() => handleUpdateComment(c.id)} style={{ background: "#3ea6ff", border: 0, borderRadius: "12px", padding: "2px 10px", color: "#0f0f0f", fontWeight: "bold", fontSize: "11px" }}>Save</button>
                           </div>
                         </div>
                       ) : (
                         <div style={{ width: "100%", marginBottom: "4px" }}>
-                          {c.content && <p style={{ margin: 0, fontSize: "13px", color: "#f1f1f1", lineHeight: 1.3, wordWrap: "break-word" }}>{c.content}</p>}
+                          {c.content && <p style={{ margin: 0, fontSize: "13px", color: "var(--ma-text, #000)", lineHeight: 1.3, wordWrap: "break-word" }}>{c.content}</p>}
                           {c.image_url && <img src={c.image_url} style={{ maxWidth: "100%", maxHeight: "160px", borderRadius: "6px", marginTop: "6px" }} />}
                           {c.audio_url && (
                           <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "#1f2c34", padding: "8px 12px", borderRadius: "12px", border: "1px solid #2a3942", marginTop: "8px", width: "fit-content" }}>
@@ -5020,11 +5020,11 @@ document.body
                       {/* Action Row - Tighter */}
                       {editingCommentId !== c.id && (
                         <div style={{ display: "flex", gap: "12px", alignItems: "center", width: "100%", marginTop: "2px" }}>
-                          <button onClick={() => handleLikeComment(c.id, c.likes || 0)} style={{ background: "transparent", border: 0, color: "#aaa", display: "flex", alignItems: "center", gap: "3px", fontSize: "11px", padding: 0, cursor: "pointer" }}>
+                          <button onClick={() => handleLikeComment(c.id, c.likes || 0)} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", display: "flex", alignItems: "center", gap: "3px", fontSize: "11px", padding: 0, cursor: "pointer" }}>
                             <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>thumb_up</span> {c.likes || 0}
                           </button>
                           
-                          <button onClick={() => { setReplyTarget(c.id); setReplyingToName(c.profiles?.display_name || "user"); }} style={{ background: "transparent", border: 0, color: "#aaa", display: "flex", alignItems: "center", gap: "3px", fontSize: "11px", padding: 0, cursor: "pointer" }}>
+                          <button onClick={() => { setReplyTarget(c.id); setReplyingToName(c.profiles?.display_name || "user"); }} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", display: "flex", alignItems: "center", gap: "3px", fontSize: "11px", padding: 0, cursor: "pointer" }}>
                             <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>chat_bubble</span> Reply
                           </button>
 
@@ -5041,7 +5041,7 @@ document.body
 
                           {(session?.user?.id === activeMedia.artist_id || session?.user?.id === c.user_id) && (
                             <>
-                              <button onClick={() => { setEditingCommentId(c.id); setEditCommentText(c.content); }} style={{ background: "transparent", border: 0, color: "#aaa", fontSize: "11px", padding: 0, cursor: "pointer", marginLeft: "auto" }}>Edit</button>
+                              <button onClick={() => { setEditingCommentId(c.id); setEditCommentText(c.content); }} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", fontSize: "11px", padding: 0, cursor: "pointer", marginLeft: "auto" }}>Edit</button>
                               <button onClick={() => handleDeleteComment(c.id)} style={{ background: "transparent", border: 0, color: "#ff365f", fontSize: "11px", padding: 0, cursor: "pointer" }}>Delete</button>
                             </>
                           )}
@@ -5057,7 +5057,7 @@ document.body
             <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "#0f0f0f", borderTop: "1px solid #272727", padding: "12px 16px", display: "flex", flexDirection: "column", gap: "8px" }}>
               
               {replyTarget && (
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px", fontSize: "12px", color: "#aaa" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px", fontSize: "12px", color: "var(--ma-text-secondary, #666)" }}>
                   <span>Replying to <strong>@{replyingToName}</strong></span>
                   <button onClick={() => { setReplyTarget(null); setReplyingToName(""); }} style={{ background: "transparent", border: 0, color: "var(--ma-accent)", cursor: "pointer" }}>Cancel</button>
                 </div>
@@ -5141,7 +5141,7 @@ document.body
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <div style={{ flex: 1, display: "flex", alignItems: "center", background: "#212121", borderRadius: "24px", padding: "4px 12px", border: "1px solid #333" }}>
                       
-                      <button type="button" onClick={() => setShowEmojiPicker(!showEmojiPicker)} style={{ background: "transparent", border: 0, color: "#aaa", padding: 0, display: "flex", cursor: "pointer" }}>
+                      <button type="button" onClick={() => setShowEmojiPicker(!showEmojiPicker)} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", padding: 0, display: "flex", cursor: "pointer" }}>
                         <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>sentiment_satisfied</span>
                       </button>
 
@@ -5152,7 +5152,7 @@ document.body
                         style={{ flex: 1, padding: "10px", background: "transparent", border: 0, color: "white", outline: "none", fontSize: "14px" }} 
                       />
 
-                      <label style={{ cursor: "pointer", display: "flex", alignItems: "center", color: "#aaa" }}>
+                      <label style={{ cursor: "pointer", display: "flex", alignItems: "center", color: "var(--ma-text-secondary, #666)" }}>
                         <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>image</span>
                         <input type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => setCommentImage(e.target.files[0])} />
                       </label>
@@ -5162,7 +5162,7 @@ document.body
                           <span style={{ fontSize: "12px", fontWeight: "bold" }}>{recordingTime}s</span>
                         </button>
                       ) : (
-                        <button type="button" onClick={startRecording} style={{ background: "transparent", border: 0, color: "#aaa", display: "flex", cursor: "pointer", padding: 0, marginLeft: "8px" }}>
+                        <button type="button" onClick={startRecording} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", display: "flex", cursor: "pointer", padding: 0, marginLeft: "8px" }}>
                           <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>mic</span>
                         </button>
                       )}
