@@ -202,6 +202,7 @@ export default function App() {
   };
 
 const [showCommentsModal, setShowCommentsModal] = useState(false);
+  const [showDescModal, setShowDescModal] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -2839,6 +2840,25 @@ document.body
     <div className="ma-app">
 
 <style>{`
+  .yt-watch-desc-preview {
+    font-size: 11px !important; 
+    color: var(--ma-text-secondary, #666) !important;
+    margin: 2px 0 8px 0 !important; 
+    display: -webkit-box !important;
+    -webkit-line-clamp: 1 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    cursor: pointer !important;
+    background: transparent !important;
+    padding: 0 !important; 
+    border: none !important; 
+    opacity: 0.8 !important;
+  }
+`}</style>
+
+
+<style>{`
   /* Watch Page Main Container */
   .yt-watch { background: var(--ma-bg, #fff) !important; color: var(--ma-text, #000) !important; }
   
@@ -3818,6 +3838,9 @@ document.body
 
           <div className="yt-watch-body">
             <h1 className="yt-watch-title">{activeMedia.title}</h1>
+            <p className="yt-watch-desc-preview" onClick={() => setShowDescModal(true)}>
+              <span style={{ fontWeight: "700" }}>Discrip:</span> {activeMedia.description || activeMedia.caption || "No description..."}
+            </p>
             <p className="yt-watch-meta">
               @{watchArtist?.username || watchArtist?.display_name || "music-antenna"}
               {" · "}{activeMedia.views || 0} views
@@ -4983,6 +5006,22 @@ document.body
           </div>
         </div>
       )}
+      {showDescModal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 100000, display: "flex", alignItems: "flex-end", backdropFilter: "blur(4px)" }} onClick={() => setShowDescModal(false)}>
+          <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "100%", borderTopLeftRadius: "20px", borderTopRightRadius: "20px", padding: "24px 20px", paddingBottom: "40px", boxShadow: "0 -4px 20px rgba(0,0,0,0.15)", maxHeight: "60vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+              <h3 style={{ margin: 0, fontSize: "14px", fontWeight: "700" }}>Discrip</h3>
+              <button onClick={() => setShowDescModal(false)} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", cursor: "pointer", padding: "4px" }}>
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <p style={{ margin: 0, fontSize: "13px", lineHeight: "1.5", whiteSpace: "pre-wrap", color: "var(--ma-text, #000)" }}>
+              {activeMedia.description || activeMedia.caption || "No description provided for this track."}
+            </p>
+          </div>
+        </div>
+      )}
+
       {showCommentsModal && (
         <div 
           style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.8)", zIndex: 9999, display: "flex", flexDirection: "column", justifyContent: "flex-end" }}
