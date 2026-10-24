@@ -4048,10 +4048,10 @@ document.body
                     
                     {/* Action Buttons */}
                     <div style={{ marginTop: "16px", display: "flex", flexDirection: "column", gap: "16px" }}>
-                      <button type="submit" className="premium-btn-primary" disabled={profileSaving}>
+                      <button type="submit" disabled={profileSaving} style={{ width: "100%", padding: "16px", background: "#ff365f", color: "#ffffff", border: "none", borderRadius: "14px", fontWeight: "700", fontSize: "16px", cursor: profileSaving ? "not-allowed" : "pointer", boxShadow: "0 8px 24px rgba(255, 54, 95, 0.3)", opacity: profileSaving ? 0.7 : 1, display: "block" }}>
                         {profileSaving ? "Saving..." : "Save Changes"}
                       </button>
-                      <button type="button" className="premium-btn-secondary" onClick={() => setShowProfileEditor(false)}>
+                      <button type="button" onClick={() => setShowProfileEditor(false)} style={{ width: "100%", padding: "16px", background: "transparent", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #e5e5e5)", borderRadius: "14px", fontWeight: "600", fontSize: "15px", cursor: "pointer" }}>
                         Cancel
                       </button>
                     </div>
