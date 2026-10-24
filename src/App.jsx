@@ -3974,14 +3974,50 @@ document.body
 
             {/* EDIT PROFILE FORM */}
             {showProfileEditor && (
-              <section style={{ background: "#212121", borderRadius: "12px", padding: "16px", marginBottom: "24px" }}>
-                <h3 style={{ margin: "0 0 16px" }}>Edit Profile</h3>
-                <form onSubmit={handleSaveProfile}>
-                  <input type="text" value={profileName} onChange={(e) => setProfileName(e.target.value)} style={{ width: "100%", padding: "10px", borderRadius: "8px", background: "#121212", color: "white", border: "1px solid #333", marginBottom: "12px" }} />
-                  <textarea value={profileBio} onChange={(e) => setProfileBio(e.target.value)} style={{ width: "100%", padding: "10px", borderRadius: "8px", background: "#121212", color: "white", border: "1px solid #333", marginBottom: "12px" }} />
-                  <button type="submit" style={{ width: "100%", padding: "10px", background: "#ff365f", color: "white", border: 0, borderRadius: "8px", fontWeight: "bold" }}>Save changes</button>
+              <div style={{ position: "fixed", inset: 0, background: "var(--ma-bg, #0f0f0f)", zIndex: 99999, display: "flex", flexDirection: "column", overflowY: "auto" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px", borderBottom: "1px solid var(--ma-border, #333)", background: "var(--ma-bg, #0f0f0f)", position: "sticky", top: 0, zIndex: 10 }}>
+                  <button type="button" onClick={() => setShowProfileEditor(false)} style={{ background: "transparent", border: 0, color: "var(--ma-text, #fff)", cursor: "pointer", display: "flex", padding: "8px" }}>
+                    <span className="material-symbols-outlined">arrow_back</span>
+                  </button>
+                  <h2 style={{ margin: 0, fontSize: "18px", color: "var(--ma-text, #fff)", fontWeight: "600" }}>Edit Profile</h2>
+                  <button type="submit" form="editProfileForm" style={{ background: "transparent", border: 0, color: "#ff365f", fontWeight: "bold", fontSize: "16px", cursor: "pointer", padding: "8px" }}>
+                    Save
+                  </button>
+                </div>
+
+                <form id="editProfileForm" onSubmit={handleSaveProfile} style={{ padding: "24px 16px", display: "flex", flexDirection: "column", alignItems: "center", gap: "24px", flex: 1 }}>
+                  <div style={{ position: "relative", width: "110px", height: "110px" }}>
+                    <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: "var(--ma-surface, #333)", overflow: "hidden", border: "2px solid var(--ma-border, #444)" }}>
+                      {profilePhotoFile ? (
+                        <img src={URL.createObjectURL(profilePhotoFile)} alt="Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      ) : profile?.avatar_url ? (
+                        <img src={profile.avatar_url} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      ) : (
+                        <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", fontSize: "32px", color: "var(--ma-text, #fff)", fontWeight: "bold" }}>{displayUser.charAt(0).toUpperCase()}</div>
+                      )}
+                    </div>
+                    <label style={{ position: "absolute", bottom: 0, right: 0, background: "#ff365f", color: "#fff", width: "36px", height: "36px", borderRadius: "50%", display: "grid", placeItems: "center", cursor: "pointer", border: "3px solid var(--ma-bg, #0f0f0f)", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>photo_camera</span>
+                      <input type="file" accept="image/*" onChange={(e) => setProfilePhotoFile(e.target.files[0])} style={{ display: "none" }} />
+                    </label>
+                  </div>
+
+                  <div style={{ width: "100%", maxWidth: "400px", display: "flex", flexDirection: "column", gap: "20px" }}>
+                    <div>
+                      <label style={{ display: "block", fontSize: "14px", color: "var(--ma-text-secondary, #aaa)", marginBottom: "8px", fontWeight: "500" }}>Name</label>
+                      <input type="text" value={profileName} onChange={(e) => setProfileName(e.target.value)} placeholder="Your Name" style={{ width: "100%", padding: "14px", borderRadius: "10px", background: "var(--ma-surface, #212121)", color: "var(--ma-text, #fff)", border: "1px solid var(--ma-border, #333)", outline: "none", fontSize: "15px" }} />
+                    </div>
+                    <div>
+                      <label style={{ display: "block", fontSize: "14px", color: "var(--ma-text-secondary, #aaa)", marginBottom: "8px", fontWeight: "500" }}>Bio</label>
+                      <textarea value={profileBio} onChange={(e) => setProfileBio(e.target.value)} placeholder="Tell people about yourself..." rows="4" style={{ width: "100%", padding: "14px", borderRadius: "10px", background: "var(--ma-surface, #212121)", color: "var(--ma-text, #fff)", border: "1px solid var(--ma-border, #333)", outline: "none", fontSize: "15px", resize: "none" }} />
+                    </div>
+                    
+                    <button type="button" onClick={() => setShowProfileEditor(false)} style={{ width: "100%", padding: "16px", background: "transparent", color: "var(--ma-text, #fff)", border: "1px solid var(--ma-border, #333)", borderRadius: "10px", fontWeight: "bold", fontSize: "15px", cursor: "pointer", marginTop: "10px" }}>
+                      Cancel
+                    </button>
+                  </div>
                 </form>
-              </section>
+              </div>
             )}
 
           </div>
