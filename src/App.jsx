@@ -4962,13 +4962,13 @@ document.body
           onClick={() => setShowCommentsModal(false)}
         >
           <div 
-            style={{ background: "#0f0f0f", height: "85vh", borderTopLeftRadius: "16px", borderTopRightRadius: "16px", display: "flex", flexDirection: "column" }}
+            style={{ background: "var(--ma-bg, #fff)", height: "85vh", borderTopLeftRadius: "16px", borderTopRightRadius: "16px", display: "flex", flexDirection: "column" }}
             onClick={e => e.stopPropagation()}
           >
             {/* Header */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px", borderBottom: "1px solid #333" }}>
-              <h3 style={{ margin: 0, color: "white", fontSize: "18px" }}>Comments ({comments.length})</h3>
-              <button onClick={() => setShowCommentsModal(false)} style={{ background: "transparent", border: 0, color: "white" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
+              <h3 style={{ margin: 0, color: "var(--ma-text, #000)", fontSize: "18px" }}>Comments ({comments.length})</h3>
+              <button onClick={() => setShowCommentsModal(false)} style={{ background: "transparent", border: 0, color: "var(--ma-text, #000)" }}>
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
