@@ -3910,18 +3910,14 @@ document.body
               )}
             </div>
 
-            <div className="yt-watch-desc">
-              <p className="yt-watch-desc-text">
-                {activeMedia.description || "No description yet."}
-              </p>
-            </div>
+            
 
             <div 
               onClick={(e) => { e.stopPropagation(); setShowCommentsModal(true); }}
-              style={{ width: "100%", padding: "12px 16px", background: "#212121", borderRadius: "12px", color: "var(--ma-text, #000)", marginTop: "16px", display: "flex", flexDirection: "column", gap: "12px", cursor: "pointer" }}
+              style={{ width: "100%", padding: "14px 16px", background: "var(--ma-surface, #f2f2f2)", borderRadius: "12px", color: "var(--ma-text, #000)", marginTop: "0px", display: "flex", flexDirection: "column", gap: "12px", cursor: "pointer", border: "1px solid var(--ma-border, #e5e5e5)" }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontWeight: "bold", fontSize: "14px" }}>Comments <span style={{ color: "var(--ma-text-secondary, #666)" }}>{comments.length}</span></span>
+                <span style={{ fontWeight: "600", fontSize: "14px" }}>Comments <span style={{ color: "var(--ma-text-secondary, #666)" }}>{comments.length}</span></span>
                 <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>expand_more</span>
               </div>
               
