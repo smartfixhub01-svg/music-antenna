@@ -3902,13 +3902,13 @@ document.body
 
             {/* 4. ACTION BUTTONS */}
             <div style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
-              <button onClick={() => { setShowAccountPage(false); openChannel(session?.user?.id); }} style={{ display: profile?.role === "artist" ? "block" : "none", flex: 1, background: "#ff365f", color: "#fff", padding: "10px", borderRadius: "8px", fontWeight: "600", fontSize: "14px", border: 0 }}>
+              <button onClick={() => { setShowAccountPage(false); openChannel(session?.user?.id); }} style={{ display: profile?.role === "artist" ? "flex" : "none", flex: 1, alignItems: "center", justifyContent: "center", background: "#ff365f", color: "#fff", padding: "10px", borderRadius: "8px", fontWeight: "600", fontSize: "14px", border: 0 }}>
                 View channel
               </button>
-              <button onClick={() => { setProfileName(profile?.username || ""); setProfileBio(profile?.bio || ""); setShowProfileEditor(!showProfileEditor); }} style={{ flex: 1, background: "#212121", color: "var(--ma-text, #000)", padding: "10px", borderRadius: "8px", fontWeight: "500", fontSize: "14px", border: 0, cursor: "pointer" }}>
+              <button onClick={() => { setProfileName(profile?.username || ""); setProfileBio(profile?.bio || ""); setShowProfileEditor(!showProfileEditor); }} style={{ flex: 1, background: "var(--ma-surface, #f0f0f0)", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #e5e5e5)", padding: "10px", borderRadius: "8px", fontWeight: "500", fontSize: "14px", border: 0, cursor: "pointer" }}>
                 {showProfileEditor ? "Close Editor" : "Edit profile"}
               </button>
-              <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleShareProfile(); }} style={{ background: "var(--ma-bg-hover, rgba(255,255,255,0.1))", color: "var(--ma-text, #f1f1f1)", width: "44px", height: "44px", borderRadius: "50%", display: "grid", placeItems: "center", border: "1px solid var(--ma-border, rgba(255,255,255,0.05))", cursor: "pointer", transition: "all 0.2s ease", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
+              <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleShareProfile(); }} style={{ background: "var(--ma-surface, #f0f0f0)", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #e5e5e5)", width: "44px", height: "44px", borderRadius: "50%", display: "grid", placeItems: "center", border: "1px solid var(--ma-border, rgba(255,255,255,0.05))", cursor: "pointer", transition: "all 0.2s ease", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
                 <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>share</span>
               </button>
             </div>
