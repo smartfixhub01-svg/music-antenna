@@ -2551,7 +2551,6 @@ document.body
           ) : (
             <>
               {/* ===================== CREATOR SCREEN ===================== */}
-              <div style={{ textAlign: "center", marginBottom: "24px" }}><span style={{ background: "rgba(255, 54, 95, 0.15)", color: "#FF365F", padding: "6px 16px", borderRadius: "20px", fontSize: "12px", fontWeight: "700", letterSpacing: "0.5px", border: "1px solid rgba(255, 54, 95, 0.3)" }}>CREATOR STUDIO PORTAL</span></div>
 
               {mode === "login" ? (
                 <form onSubmit={handleCreatorLogin} className="auth-screen-form">
@@ -2653,6 +2652,7 @@ document.body
                   </button>
                 </form>
               )}
+              <div style={{ textAlign: "center", marginBottom: "20px" }}><span style={{ background: "rgba(255, 54, 95, 0.15)", color: "#FF365F", padding: "6px 16px", borderRadius: "20px", fontSize: "12px", fontWeight: "700", letterSpacing: "0.5px", border: "1px solid rgba(255, 54, 95, 0.3)" }}>CREATOR STUDIO PORTAL</span></div>
 
               <div className="auth-screen-links">
                 {mode === "login" ? (
