@@ -3929,30 +3929,30 @@ document.body
                   <span className="material-symbols-outlined" onClick={openAnalytics} style={{ color: "#ff365f", fontSize: "20px", cursor: "pointer" }}>bar_chart</span>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", marginBottom: "16px" }}>
-                  <div style={{ background: "#212121", borderRadius: "8px", padding: "12px", textAlign: "center" }}>
+                  <div style={{ background: "var(--ma-bg, #fff)", borderRadius: "8px", padding: "12px", textAlign: "center" }}>
                     <span className="material-symbols-outlined" style={{ color: "#ff365f", background: "rgba(255,54,95,0.1)", padding: "6px", borderRadius: "50%", fontSize: "18px", marginBottom: "8px", display: "inline-block" }}>upload</span>
                     <div style={{ fontSize: "16px", fontWeight: "700", color: "var(--ma-text, #000)" }}>{media.filter(m => m.artist_id === session?.user?.id).length}</div>
                     <div style={{ fontSize: "11px", color: "var(--ma-text-secondary, #666)" }}>Uploads</div>
                   </div>
-                  <div style={{ background: "#212121", borderRadius: "8px", padding: "12px", textAlign: "center" }}>
+                  <div style={{ background: "var(--ma-bg, #fff)", borderRadius: "8px", padding: "12px", textAlign: "center" }}>
                     <span className="material-symbols-outlined" style={{ color: "#ff365f", background: "rgba(255,54,95,0.1)", padding: "6px", borderRadius: "50%", fontSize: "18px", marginBottom: "8px", display: "inline-block" }}>visibility</span>
                     <div style={{ fontSize: "16px", fontWeight: "700", color: "var(--ma-text, #000)" }}>{media.filter(m => m.artist_id === session?.user?.id).reduce((sum, m) => sum + (m.views || 0), 0)}</div>
                     <div style={{ fontSize: "11px", color: "var(--ma-text-secondary, #666)" }}>Views</div>
                   </div>
-                  <div style={{ background: "#212121", borderRadius: "8px", padding: "12px", textAlign: "center" }}>
+                  <div style={{ background: "var(--ma-bg, #fff)", borderRadius: "8px", padding: "12px", textAlign: "center" }}>
                     <span className="material-symbols-outlined" style={{ color: "#ff365f", background: "rgba(255,54,95,0.1)", padding: "6px", borderRadius: "50%", fontSize: "18px", marginBottom: "8px", display: "inline-block" }}>group</span>
                     <div style={{ fontSize: "16px", fontWeight: "700", color: "var(--ma-text, #000)" }}>{mySubCount}</div>
                     <div style={{ fontSize: "11px", color: "var(--ma-text-secondary, #666)" }}>Subscribers</div>
                   </div>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px" }}>
-                  <button onClick={() => { setShowAccountPage(false); setShowUpload(true); }} style={{ background: "#272727", color: "white", border: 0, padding: "10px", borderRadius: "8px", fontSize: "12px", fontWeight: "500", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px", cursor: "pointer" }}>
+                  <button onClick={() => { setShowAccountPage(false); setShowUpload(true); }} style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #e5e5e5)", padding: "10px", borderRadius: "8px", fontSize: "12px", fontWeight: "500", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px", cursor: "pointer" }}>
                     <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>upload</span> Upload
                   </button>
-                  <button onClick={() => { setShowAccountPage(false); openManagePage(); }} style={{ background: "#272727", color: "white", border: 0, padding: "10px", borderRadius: "8px", fontSize: "12px", fontWeight: "500", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px", cursor: "pointer" }}>
+                  <button onClick={() => { setShowAccountPage(false); openManagePage(); }} style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #e5e5e5)", padding: "10px", borderRadius: "8px", fontSize: "12px", fontWeight: "500", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px", cursor: "pointer" }}>
                     <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>format_list_bulleted</span> Manage
                   </button>
-                  <button onClick={openAnalytics} style={{ background: "#272727", color: "white", border: 0, padding: "10px", borderRadius: "8px", fontSize: "12px", fontWeight: "500", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px", cursor: "pointer" }}>
+                  <button onClick={openAnalytics} style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #e5e5e5)", padding: "10px", borderRadius: "8px", fontSize: "12px", fontWeight: "500", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px", cursor: "pointer" }}>
                     <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>bar_chart</span> Analytics
                   </button>
                 </div>
