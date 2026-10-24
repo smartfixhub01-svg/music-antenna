@@ -4018,7 +4018,7 @@ document.body
                     
                     {/* Action Buttons */}
                     <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "12px" }}>
-                      <button type="submit" disabled={profileSaving} style={{ width: "100%", padding: "16px", background: "#ff365f", color: "#ffffff", border: "none", borderRadius: "10px", fontWeight: "bold", fontSize: "16px", cursor: profileSaving ? "not-allowed" : "pointer", opacity: profileSaving ? 0.7 : 1, boxShadow: "0 4px 12px rgba(255,54,95,0.3)" }}>
+                      <button type="submit" disabled={profileSaving} style={{ width: "100%", padding: "16px", background: "#ff365f", color: "#ffffff", border: "none", borderRadius: "10px", fontWeight: "bold", fontSize: "16px", cursor: profileSaving ? "not-allowed" : "pointer", opacity: profileSaving ? 0.7 : 1, boxShadow: "0 4px 12px rgba(255,54,95,0.3)", display: "block" }}>
                         {profileSaving ? "Saving..." : "Save Changes"}
                       </button>
                       <button type="button" onClick={() => setShowProfileEditor(false)} style={{ width: "100%", padding: "16px", background: "transparent", color: "#666", border: "none", borderRadius: "10px", fontWeight: "600", fontSize: "15px", cursor: "pointer" }}>
