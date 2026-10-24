@@ -633,9 +633,7 @@ useEffect(() => {
             .insert({
               id: user.id,
               display_name: name,
-              role: ["artist", "listener"].includes(user.user_metadata?.account_type)
-                ? user.user_metadata.account_type
-                : "listener",
+              role: user.user_metadata?.account_type === "creator" ? "artist" : (user.user_metadata?.account_type || "listener"),
             })
             .select("id,display_name,role,created_at,username,bio,avatar_url,cover_url,updated_at")
             .single();
