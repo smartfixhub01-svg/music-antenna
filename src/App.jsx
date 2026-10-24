@@ -3849,6 +3849,14 @@ document.body
           </div>
 
           {/* 2. PROFILE HEADER (Overlapping the banner) */}
+          <style>{`
+            .force-name { color: #ffffff !important; text-shadow: 0 2px 4px rgba(0,0,0,0.8) !important; }
+            .force-bio { color: rgba(255,255,255,0.9) !important; text-shadow: 0 1px 2px rgba(0,0,0,0.8) !important; }
+            .btn-pink { background-color: #ff365f !important; color: #ffffff !important; padding: 10px !important; border-radius: 8px !important; font-weight: 600 !important; font-size: 14px !important; border: none !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; width: 100% !important; }
+            .btn-gray { background-color: var(--ma-surface, #f0f0f0) !important; color: var(--ma-text, #000) !important; padding: 10px !important; border-radius: 8px !important; font-weight: 500 !important; font-size: 14px !important; border: 1px solid var(--ma-border, #e5e5e5) !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; width: 100% !important; }
+            .btn-circle { background-color: var(--ma-surface, #f0f0f0) !important; color: var(--ma-text, #000) !important; width: 44px !important; height: 44px !important; border-radius: 50% !important; border: 1px solid var(--ma-border, #e5e5e5) !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; flex-shrink: 0 !important; }
+          `}</style>
+
           <div style={{ padding: "0 16px", marginTop: "-44px", position: "relative", zIndex: 2 }}>
             <div style={{ display: "flex", alignItems: "flex-end", gap: "16px" }}>
               <div style={{ width: "88px", height: "88px", borderRadius: "50%", border: "4px solid var(--ma-bg, #fff)", background: "#ff365f", overflow: "hidden", flexShrink: 0 }}>
@@ -3859,13 +3867,12 @@ document.body
                 )}
               </div>
               <div style={{ paddingBottom: "4px" }}>
-                {/* Forced white text with shadow for visibility */}
-                <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "700", color: "#ffffff !important", display: "flex", alignItems: "center", gap: "4px", textShadow: "0 2px 4px rgba(0,0,0,0.8)" }}>
+                <h2 className="force-name" style={{ margin: 0, fontSize: "20px", fontWeight: "700", display: "flex", alignItems: "center", gap: "4px" }}>
                   {profile?.display_name || displayUser || "Music listener"}
-                  <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "#ffffff", fontVariationSettings: "'FILL' 1" }}>verified</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "var(--ma-accent)", fontVariationSettings: "'FILL' 1" }}>verified</span>
                 </h2>
-                <p style={{ margin: "2px 0", fontSize: "13px", color: "#ffffff !important", textShadow: "0 1px 2px rgba(0,0,0,0.8)" }}>@{profile?.username || profile?.display_name || "music-antenna-user"}</p>
-                <p style={{ margin: "2px 0", fontSize: "13px", color: "#ffffff !important", textShadow: "0 1px 2px rgba(0,0,0,0.8)" }}>{profile?.bio || "Shadow Boss"}</p>
+                <p className="force-bio" style={{ margin: "2px 0", fontSize: "13px" }}>@{profile?.username || profile?.display_name || "music-antenna-user"}</p>
+                <p className="force-bio" style={{ margin: "2px 0", fontSize: "13px" }}>{profile?.bio || "Shadow Boss"}</p>
               </div>
             </div>
 
@@ -3893,13 +3900,19 @@ document.body
 
             {/* 4. ACTION BUTTONS */}
             <div style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
-              <button onClick={() => { setShowAccountPage(false); openChannel(session?.user?.id); }} style={{ display: profile?.role === "artist" ? "flex" : "none", alignItems: "center", justifyContent: "center", flex: 1, backgroundColor: "#ff365f", color: "#ffffff", padding: "10px", borderRadius: "8px", fontWeight: "600", fontSize: "14px", border: "none", cursor: "pointer" }}>
-                View channel
-              </button>
-              <button onClick={() => { setProfileName(profile?.username || ""); setProfileBio(profile?.bio || ""); setShowProfileEditor(!showProfileEditor); }} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "var(--ma-surface, #f0f0f0)", color: "var(--ma-text, #000)", padding: "10px", borderRadius: "8px", fontWeight: "500", fontSize: "14px", border: "1px solid var(--ma-border, #e5e5e5)", cursor: "pointer" }}>
-                {showProfileEditor ? "Close Editor" : "Edit profile"}
-              </button>
-              <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleShareProfile(); }} style={{ display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "var(--ma-surface, #f0f0f0)", color: "var(--ma-text, #000)", width: "44px", height: "44px", borderRadius: "50%", border: "1px solid var(--ma-border, #e5e5e5)", cursor: "pointer" }}>
+              {profile?.role === "artist" && (
+                <div style={{ flex: 1, display: "flex" }}>
+                  <button className="btn-pink" onClick={() => { setShowAccountPage(false); openChannel(session?.user?.id); }}>
+                    View channel
+                  </button>
+                </div>
+              )}
+              <div style={{ flex: 1, display: "flex" }}>
+                <button className="btn-gray" onClick={() => { setProfileName(profile?.username || ""); setProfileBio(profile?.bio || ""); setShowProfileEditor(!showProfileEditor); }}>
+                  {showProfileEditor ? "Close Editor" : "Edit profile"}
+                </button>
+              </div>
+              <button className="btn-circle" onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleShareProfile(); }}>
                 <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>share</span>
               </button>
             </div>
