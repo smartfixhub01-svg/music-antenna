@@ -1683,20 +1683,36 @@ useEffect(() => {
 
   async function handleToggleSubscribe(channelId) {
     if (!session?.user?.id) return setMessage("Please sign in to subscribe.");
+    
+    // OPTIMISTIC UPDATE: Change the UI instantly so it feels fast
+    const wasSubscribed = isSubscribed;
+    const oldCount = subscriberCount;
+    const oldMyCount = mySubCount;
+
+    setIsSubscribed(!wasSubscribed);
+    setSubscriberCount(prev => wasSubscribed ? Math.max(0, prev - 1) : prev + 1);
+    if (channelId === session.user.id) {
+      setMySubCount(prev => wasSubscribed ? Math.max(0, prev - 1) : prev + 1);
+    }
+
     try {
-      if (isSubscribed) {
+      if (wasSubscribed) {
+        // Unsubscribe
         const { error } = await supabase.from("subscriptions").delete().eq("channel_id", channelId).eq("subscriber_id", session.user.id);
         if (error) throw error;
-        setSubscriberCount(prev => Math.max(0, prev - 1));
-        setIsSubscribed(false);
       } else {
+        // Subscribe
         const { error } = await supabase.from("subscriptions").insert({ channel_id: channelId, subscriber_id: session.user.id });
-        createNotification(channelId, "subscribe");
         if (error) throw error;
-        setSubscriberCount(prev => prev + 1);
-        setIsSubscribed(true);
+        createNotification(channelId, "subscribe");
       }
-    } catch (err) { setMessage("Sub Error: " + err.message); }
+    } catch (err) {
+      // REVERT UI if database fails
+      setIsSubscribed(wasSubscribed);
+      setSubscriberCount(oldCount);
+      setMySubCount(oldMyCount);
+      setMessage("Sub Error: " + err.message);
+    }
   }
 
             async function openAnalytics() {
@@ -2820,6 +2836,18 @@ document.body
 
   return (
     <div className="ma-app">
+
+<style>{`
+  .yt-watch-subscribe.subscribed, .yt-you-btn-secondary {
+    background-color: var(--ma-surface, #f0f0f0) !important;
+    color: var(--ma-text, #000) !important;
+    border: 1px solid var(--ma-border, #e5e5e5) !important;
+  }
+  .yt-watch-subscribe.subscribed:hover, .yt-you-btn-secondary:hover {
+    background-color: var(--ma-bg-hover, #e5e5e5) !important;
+  }
+`}</style>
+
 
       
 
