@@ -2769,25 +2769,47 @@ document.body
   }
 
   function handleFirstPlay(e) {
-    if (!viewCountedRef.current && activeMedia?.id) {
-      // 1. Don't count if the creator is watching their own video
-      if (session?.user?.id === activeMedia.artist_id) return;
+    if (viewCountedRef.current || !activeMedia?.id) return;
+    
+    // 1. Don't count if the creator is watching their own video
+    if (session?.user?.id === activeMedia.artist_id) return;
 
-      // 2. Don't count if this user already viewed it (stored locally)
-      const viewedKey = `viewed_${activeMedia.id}`;
-      if (localStorage.getItem(viewedKey)) return;
+    // 2. Mark as triggered locally so multiple onPlay events don't stack
+    viewCountedRef.current = true;
+    
+    // 3. Generate a unique session ID for this playback
+    const sessionId = crypto.randomUUID();
+    
+    // 4. YouTube-style delay: Only count the view if they watch for 10 seconds
+    const mediaEl = e.target;
+    let viewTimer = setTimeout(async () => {
+      // Ensure it's still playing and hasn't been paused/ended
+      if (mediaEl && !mediaEl.paused && !mediaEl.ended) {
+        try {
+          // 5. Call the SECURE RPC function
+          const { error } = await supabase.rpc('record_video_view', {
+            p_media_id: activeMedia.id,
+            p_session_id: sessionId
+          });
+          
+          if (error) {
+            console.warn("View not recorded:", error.message);
+          } else {
+            console.log("View recorded successfully!");
+            // Update local UI so the user sees the count go up instantly
+            setMedia(prev => prev.map(m => m.id === activeMedia.id ? { ...m, views: (m.views || 0) + 1 } : m));
+            setActiveMedia(prev => prev && prev.id === activeMedia.id ? { ...prev, views: (prev.views || 0) + 1 } : prev);
+          }
+        } catch (err) {
+          console.error("RPC Error:", err);
+        }
+      }
+    }, 10000); // 10,000 milliseconds = 10 seconds
 
-      viewCountedRef.current = true;
-      localStorage.setItem(viewedKey, "true");
-
-      // 3. Increment the main counter on the media table
-      supabase.rpc("increment_view", { media_id: activeMedia.id }).then(() => {
-        setMedia(prev => prev.map(m => m.id === activeMedia.id ? { ...m, views: (m.views || 0) + 1 } : m));
-      });
-
-      // 4. Log the view in the new table for analytics
-      supabase.from("video_views").insert({ media_id: activeMedia.id, user_id: session?.user?.id || null }).then(() => {});
-    }
+    // If they pause or close the video before 10 seconds, cancel the view
+    const cancelView = () => clearTimeout(viewTimer);
+    mediaEl.addEventListener('pause', cancelView, { once: true });
+    mediaEl.addEventListener('ended', cancelView, { once: true });
   }
 
   function formatVoiceTime(sec) {
