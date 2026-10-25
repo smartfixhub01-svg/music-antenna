@@ -1555,7 +1555,8 @@ useEffect(() => {
     }
   }
 
-  async function handleLikeComment(commentId, currentLikes) {
+  async function handleLikeComment(commentId, currentLikes, e) {
+    if (e) e.preventDefault(); // Stop event bubbling
     if (!session?.user?.id) return setMessage("Sign in to like comments.");
     
     const isLiked = likedComments.includes(commentId);
@@ -3798,6 +3799,8 @@ document.body
                     controls
                     playsInline
                     autoPlay
+                    preload="metadata"
+                    crossOrigin="anonymous"
                   />
                 ) : (
                   <div className="ma-audio-player">
@@ -4085,6 +4088,8 @@ document.body
                   controls
                   playsInline
                   autoPlay
+                  preload="metadata"
+                  crossOrigin="anonymous"
                 />
               ) : (
                 <div className="yt-watch-audio">
