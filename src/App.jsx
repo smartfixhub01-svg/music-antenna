@@ -62,6 +62,22 @@ export default function App() {
 
   const [resetEmail, setResetEmail] = useState("");
   const [theme, setTheme] = useState("device");
+  
+  // Dynamically update the mobile status bar color based on the theme
+  useEffect(() => {
+    const isDark = theme === 'dark' || (theme === 'device' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const color = isDark ? '#0f0f0f' : '#ffffff'; // Black for dark, White for light
+    
+    let meta = document.querySelector('meta[name="theme-color"]');
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.name = 'theme-color';
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute('content', color);
+  }, [theme]);
+
+
 
   useEffect(() => {
     const applyTheme = () => {
