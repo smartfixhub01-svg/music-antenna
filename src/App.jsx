@@ -1,6 +1,9 @@
 import { createPortal } from 'react-dom';
 import { useEffect, useRef, useState } from "react";
 
+import { supabase } from "./lib/supabase";
+import "./App.css";
+
 function timeAgo(dateString) {
   const date = new Date(dateString);
   const now = new Date();
@@ -14,10 +17,10 @@ function timeAgo(dateString) {
   if (days < 30) return days + "d ago";
   const months = Math.floor(days / 30);
   if (months < 12) return months + "mo ago";
-  const years = Math.floor(days / 365);  return years + "y ago";
+  const years = Math.floor(days / 365);
+  return years + "y ago";
 }
-import { supabase } from "./lib/supabase";
-import "./App.css";
+
 
 const BUCKET = "music-antenna-media";
 

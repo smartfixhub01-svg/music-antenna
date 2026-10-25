@@ -1,13 +1,14 @@
-self.addEventListener('install', function(e) { self.skipWaiting(); });
-self.addEventListener('activate', function(e) {
-  e.waitUntil(
-    caches.keys().then(function(cacheNames) {
-      return Promise.all(
-        cacheNames.map(function(cacheName) { return caches.delete(cacheName); })
-      );
-    }).then(function() { return self.clients.claim(); })
-  );
+
+// Self-destructing Service Worker to clear all caches
+self.addEventListener('install', (e) => {
+  self.skipWaiting();
 });
-self.addEventListener('fetch', function(e) {
-  e.respondWith(fetch(e.request).catch(function() { return caches.match(e.request); }));
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then((keyList) => {
+      return Promise.all(keyList.map((key) => caches.delete(key)));
+    }).then(() => {
+      return self.registration.unregister();
+    })
+  );
 });
