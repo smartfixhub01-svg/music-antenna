@@ -4272,7 +4272,7 @@ document.body
           <style>{`button { min-height: 44px !important; min-width: 44px !important; }`}</style>
           
           {/* 1. BANNER */}
-          <div style={{ width: "100%", height: "150px", background: "linear-gradient(to bottom, #ff365f 0%, #a81c39 40%, var(--ma-bg, #0f0f0f) 100%)", position: "relative" }}>
+          <div style={{ width: "100%", height: "140px", background: "radial-gradient(circle at 50% -20%, #ff365f 0%, rgba(255, 54, 95, 0.6) 60%, var(--ma-bg, #fff) 100%)", position: "relative" }}>
             
           </div>
 
