@@ -3492,7 +3492,60 @@ document.body
                 <div className="yt-upload-topbar-right" />
               </div>
 
-              <form className="yt-upload-form theme-aware-form" onSubmit={handleUpload}>
+              
+<style>{`/* V2_UPLOAD_OVERRIDES */
+  /* 1. Fix the weird blue Select Files button */
+  label.yt-upload-select {
+    background-color: #ff365f !important;
+    border-radius: 8px !important;
+    padding: 12px 24px !important;
+    border: none !important;
+    box-shadow: 0 4px 12px rgba(255,54,95,0.3) !important;
+  }
+  label.yt-upload-select span {
+    background-color: transparent !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* 2. Fix the Thumbnail box */
+  label.yt-upload-thumb {
+    background-color: var(--ma-surface, #f9f9f9) !important;
+    border: 2px dashed var(--ma-border, #ccc) !important;
+    color: var(--ma-text-secondary, #666) !important;
+  }
+  label.yt-upload-thumb span {
+    color: var(--ma-text-secondary, #666) !important;
+  }
+
+  /* 3. Fix the Visibility/Radio box */
+  div.yt-upload-publish {
+    background-color: var(--ma-surface, #f9f9f9) !important;
+    border: 1px solid var(--ma-border, #e5e5e5) !important;
+    color: var(--ma-text, #000) !important;
+    border-radius: 12px !important;
+    padding: 16px !important;
+  }
+  span.yt-upload-publish-label {
+    color: var(--ma-text, #000) !important;
+  }
+  label.yt-upload-radio span {
+    color: var(--ma-text, #000) !important;
+  }
+  input.yt-upload-datetime {
+    background-color: var(--ma-bg, #fff) !important;
+    color: var(--ma-text, #000) !important;
+    border: 1px solid var(--ma-border, #e5e5e5) !important;
+  }
+
+  /* 4. Fix Checkbox Labels */
+  label.yt-upload-checkbox {
+    color: var(--ma-text, #000) !important;
+  }
+`}</style>
+
+          <form className="yt-upload-form theme-aware-form" onSubmit={handleUpload}>
                 <div className="yt-upload-dropzone">
                   <span className="material-symbols-outlined">upload</span>
                   <p>Drag and drop video or audio files</p>
