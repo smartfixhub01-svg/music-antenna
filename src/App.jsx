@@ -3889,6 +3889,25 @@ document.body
           )}
           
           {message && message.includes("Welcome back") && <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 px-4 mt-2 mb-2">{message}</p>}
+          
+<style>{`
+  /* Force the active filter chip to be brand pink */
+  .yt-chip.yt-chip-active {
+    background-color: #ff365f !important;
+    color: #ffffff !important;
+    border-color: #ff365f !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 12px rgba(255, 54, 95, 0.3) !important;
+  }
+  
+  /* Ensure the inactive chips have a clean, theme-aware background */
+  .yt-chip:not(.yt-chip-active) {
+    background-color: var(--ma-surface, #f2f2f2) !important;
+    color: var(--ma-text, #000) !important;
+    border: 1px solid var(--ma-border, #e5e5e5) !important;
+  }
+`}</style>
+
           <div className="yt-chips">
               {["All", "Music", "Videos", "Shorts"].map((c) => (
                 <button
