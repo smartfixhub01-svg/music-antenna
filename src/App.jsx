@@ -1235,6 +1235,16 @@ useEffect(() => {
         .order("created_at", { ascending: false });
       setComments(data || []);
 
+      // NEW: Fetch user's liked comments from DB
+      if (session?.user?.id) {
+        const { data: userLikes } = await supabase.from("comment_likes")
+          .select("comment_id")
+          .eq("user_id", session.user.id);
+        if (userLikes) setLikedComments(userLikes.map(l => l.comment_id));
+      } else {
+        setLikedComments([]);
+      }
+
       // NEW: Fetch which comments this user has already liked from the DB
       if (session?.user?.id) {
         const { data: userLikes } = await supabase
