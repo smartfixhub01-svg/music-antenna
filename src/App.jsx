@@ -107,6 +107,7 @@ export default function App() {
   }, [message]);
 
   const [media, setMedia] = useState([]);
+  const [feedLimit, setFeedLimit] = useState(15);
   const [feedLoading, setFeedLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [searchStatusMsg, setSearchStatusMsg] = useState("");
@@ -377,7 +378,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   useEffect(() => {
     loadMedia();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showSubscriptionsFeed, category]);
+  }, [showSubscriptionsFeed, category, feedLimit]);
 
   const [notifications, setNotifications] = useState([]);
   const [selectedNotifs, setSelectedNotifs] = useState([]);
@@ -881,7 +882,8 @@ useEffect(() => {
         .from("media")
         .select("*")
         .eq("status", "published")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(feedLimit);
 
       if (showSubscriptionsFeed && session?.user?.id) {
         const { data: subs } = await supabase.from("subscriptions").select("channel_id").eq("subscriber_id", session.user.id);
@@ -3194,7 +3196,7 @@ document.body
           
           <div className="yt-mini-cover" onClick={() => setShowWatchPage(true)}>
             {activeMedia.thumbnailUrl ? (
-              <img src={activeMedia.thumbnailUrl} alt="" style={{ pointerEvents: "none" }} />
+              <img loading="lazy" src={activeMedia.thumbnailUrl} alt="" style={{ pointerEvents: "none" }} />
             ) : (
               <div className="yt-mini-cover-fallback">♫</div>
             )}
@@ -3845,7 +3847,7 @@ document.body
                       aria-label={"Play " + item.title}
                     >
                       {item.thumbnailUrl ? (
-                        <img src={item.thumbnailUrl} alt="" loading="lazy" />
+                        <img loading="lazy" src={item.thumbnailUrl} alt="" loading="lazy" />
                       ) : (
                         <div className="yt-thumb-fallback">
                           <span>{item.media_type === "video" ? "▶" : "♫"}</span>
@@ -3883,6 +3885,18 @@ document.body
                     </div>
                   </article>
                 ))}
+                
+                {/* Load More Button */}
+                {visibleMedia.length >= feedLimit && (
+                  <div style={{ display: "flex", justifyContent: "center", padding: "20px 0", width: "100%" }}>
+                    <button 
+                      onClick={() => setFeedLimit(prev => prev + 15)} 
+                      style={{ padding: "12px 24px", background: "var(--ma-surface, #f0f0f0)", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #e5e5e5)", borderRadius: "24px", fontWeight: "600", cursor: "pointer", fontSize: "14px" }}
+                    >
+                      Load More Videos
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </section>
@@ -3930,7 +3944,7 @@ document.body
                 <div className="yt-watch-audio">
                   <div className="yt-watch-audio-art">
                     {activeMedia.thumbnailUrl ? (
-                      <img src={activeMedia.thumbnailUrl} alt="" />
+                      <img loading="lazy" src={activeMedia.thumbnailUrl} alt="" />
                     ) : (
                       <img src="/logo.png" alt="" style={{ height: "36px", width: "auto", objectFit: "contain", borderRadius: "6px" }} />
                     )}
@@ -4196,7 +4210,7 @@ document.body
                {history.slice(0, 4).map((item) => (
                   <div key={item.id} onClick={() => { const found = media.find(m => m.id === item.id); if (found) openPlayer(found); }} style={{ flexShrink: 0, width: "140px", cursor: "pointer" }}>
                     <div style={{ width: "140px", height: "80px", background: "#212121", borderRadius: "8px", overflow: "hidden", marginBottom: "6px" }}>
-                      {item.thumbnailUrl ? <img src={item.thumbnailUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "grid", placeItems: "center", height: "100%", color: "var(--ma-text-secondary, #666)" }}><span className="material-symbols-outlined">movie</span></div>}
+                      {item.thumbnailUrl ? <img loading="lazy" src={item.thumbnailUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "grid", placeItems: "center", height: "100%", color: "var(--ma-text-secondary, #666)" }}><span className="material-symbols-outlined">movie</span></div>}
                     </div>
                     <p style={{ margin: 0, fontSize: "12px", color: "var(--ma-text, #000)", fontWeight: "500", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.title}</p>
                   </div>
@@ -4432,7 +4446,7 @@ document.body
                         aria-label={"Play " + item.title}
                       >
                         {item.thumbnailUrl ? (
-                          <img src={item.thumbnailUrl} alt="" loading="lazy" />
+                          <img loading="lazy" src={item.thumbnailUrl} alt="" loading="lazy" />
                         ) : (
                           <div className="yt-thumb-fallback">
                             <span>{item.media_type === "video" ? "▶" : "♫"}</span>
@@ -4783,7 +4797,7 @@ document.body
           
           <div className="yt-mini-cover" onClick={() => setShowWatchPage(true)}>
             {activeMedia.thumbnailUrl ? (
-              <img src={activeMedia.thumbnailUrl} alt="" style={{ pointerEvents: "none" }} />
+              <img loading="lazy" src={activeMedia.thumbnailUrl} alt="" style={{ pointerEvents: "none" }} />
             ) : (
               <div className="yt-mini-cover-fallback">♫</div>
             )}
