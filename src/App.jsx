@@ -882,8 +882,12 @@ useEffect(() => {
         .from("media")
         .select("*")
         .eq("status", "published")
-        .order("created_at", { ascending: false })
-        .limit(feedLimit);
+        .order("created_at", { ascending: false });
+        
+      // ONLY limit the feed if the user is NOT searching
+      if (!search.trim()) {
+        query = query.limit(feedLimit);
+      }
 
       if (showSubscriptionsFeed && session?.user?.id) {
         const { data: subs } = await supabase.from("subscriptions").select("channel_id").eq("subscriber_id", session.user.id);
