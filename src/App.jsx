@@ -2857,6 +2857,25 @@ document.body
     <div className="ma-app">
 
 <style>{`
+  .yt-watch-action {
+    -webkit-tap-highlight-color: transparent !important;
+    transition: all 0.2s ease !important;
+  }
+  .yt-watch-action:active, .yt-watch-action:focus, .yt-watch-action:hover {
+    background-color: var(--ma-surface, #f0f0f0) !important;
+    color: var(--ma-text, #000) !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  /* If the Like button is active/liked, give it a soft pink background */
+  .yt-watch-action.liked {
+    background-color: rgba(255, 54, 95, 0.1) !important;
+    color: #ff365f !important;
+  }
+`}</style>
+
+
+<style>{`
   /* Tighten the gap between Action Buttons, Channel Row, and Comments */
   .yt-watch-actions { margin-bottom: 8px !important; }
   .yt-watch-channel { padding: 8px 0 !important; margin-bottom: 12px !important; }
@@ -3862,7 +3881,7 @@ document.body
             </p>
 
             <div className="yt-watch-actions" style={{ marginBottom: "8px", paddingBottom: "8px" }}>
-              <button className="yt-watch-action" onClick={(e) => { e.stopPropagation(); handleToggleLike(activeMedia.id); }}>
+              <button className={`yt-watch-action ${isLiked ? "liked" : ""}`} onClick={(e) => { e.stopPropagation(); handleToggleLike(activeMedia.id); }}>
                 <span className="material-symbols-outlined" style={{ fontVariationSettings: isLiked ? "'FILL' 1" : "'FILL' 0" }}>
                   thumb_up
                 </span>
