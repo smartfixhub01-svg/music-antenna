@@ -3435,7 +3435,51 @@ document.body
           }
         `}</style>
 
-            <section className="yt-upload">
+            
+<style>{`
+  /* Main Upload Screen Background */
+  .yt-upload { background: var(--ma-bg, #fff) !important; color: var(--ma-text, #000) !important; }
+  .yt-upload-heading { color: var(--ma-text, #000) !important; }
+  
+  /* Dropzone */
+  .yt-upload-dropzone { 
+    background: var(--ma-surface, #f9f9f9) !important; 
+    border: 2px dashed var(--ma-border, #e5e5e5) !important; 
+    color: var(--ma-text, #000) !important; 
+  }
+  .yt-upload-dropzone p { color: var(--ma-text, #000) !important; }
+  .yt-upload-dropzone-sub { color: var(--ma-text-secondary, #666) !important; }
+  
+  /* The 'Select Files' Button (Turn it pink) */
+  .yt-upload-select {
+    background: #ff365f !important;
+    color: #ffffff !important;
+    border: none !important;
+    box-shadow: 0 4px 12px rgba(255,54,95,0.3) !important;
+  }
+  
+  /* Input Fields (Title, Description, Category, Artist) */
+  .yt-upload-field input, 
+  .yt-upload-field textarea, 
+  .yt-upload-field select {
+    background: var(--ma-surface, #f2f2f2) !important;
+    color: var(--ma-text, #000) !important;
+    border: 1px solid var(--ma-border, #e5e5e5) !important;
+    outline: none !important;
+  }
+  
+  /* Input Labels */
+  .yt-upload-field span {
+    color: var(--ma-text, #000) !important;
+  }
+  
+  /* Top Bar Close Button */
+  .yt-upload-topbar .yt-icon-btn {
+    color: var(--ma-text, #000) !important;
+  }
+`}</style>
+
+          <section className="yt-upload">
               <div className="yt-upload-topbar">
                 <button
                   className="yt-icon-btn"
