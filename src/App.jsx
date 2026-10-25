@@ -2941,6 +2941,26 @@ document.body
   return (
     <div className="ma-app">
 
+<style>{`/* PREMIUM_MEDIA_BADGES */
+  .yt-duration {
+    position: absolute !important;
+    bottom: 8px !important;
+    right: 8px !important;
+    background-color: rgba(0, 0, 0, 0.7) !important;
+    color: #ffffff !important;
+    padding: 4px 8px !important;
+    border-radius: 6px !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+  }
+`}</style>
+
+
 <style>{`
   .yt-watch-action {
     -webkit-tap-highlight-color: transparent !important;
