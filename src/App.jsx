@@ -1217,6 +1217,16 @@ useEffect(() => {
         .order("is_pinned", { ascending: false })
         .order("created_at", { ascending: false });
       setComments(data || []);
+
+      // Fetch which comments THIS user has liked
+      if (session?.user?.id) {
+        const { data: userLikes } = await supabase.from("comment_likes")
+          .select("comment_id")
+          .eq("user_id", session.user.id);
+        if (userLikes) {
+          setLikedComments(userLikes.map(l => l.comment_id));
+        }
+      }
     } catch (e) { console.error(e); }
     setCommentsLoading(false);
   }
