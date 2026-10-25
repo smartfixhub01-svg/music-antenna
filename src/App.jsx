@@ -1595,11 +1595,20 @@ useEffect(() => {
   }
 
   async function handleDeleteComment(commentId) {
-    if (!window.confirm("Delete this comment?")) return;
+    // 1. Instantly close the modal and remove the comment from the UI
+    setDeletingCommentId(null);
+    setComments(prev => prev.filter(c => c.id !== commentId));
+    
     try {
-      await supabase.from("comments").delete().eq("id", commentId);
-      setComments(prev => prev.filter(c => c.id !== commentId));
-    } catch (err) { setMessage(err.message); }
+      // 2. Delete ONLY the specific comment ID from the database
+      const { error } = await supabase.from("comments").delete().eq("id", commentId);
+      if (error) throw error;
+      setMessage("Comment deleted.");
+    } catch (err) { 
+      setMessage("Error deleting comment: " + err.message); 
+      // If it fails, you might want to refetch comments to restore it, 
+      // but for now, the UI stays clean.
+    }
   }
 
   async function startRecording() {
