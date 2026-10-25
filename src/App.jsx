@@ -4459,6 +4459,53 @@ document.body
 
             {showChannelPage && (
         <section className="yt-channel">
+
+          <style>{`/* CHANNEL_PAGE_THEME_FIX */
+            /* Main Container */
+            section.yt-channel {
+              background-color: var(--ma-bg, #fff) !important;
+              color: var(--ma-text, #000) !important;
+            }
+
+            /* Top Bar */
+            .yt-channel-topbar {
+              background-color: var(--ma-bg, #fff) !important;
+              border-bottom: 1px solid var(--ma-border, #e5e5e5) !important;
+              color: var(--ma-text, #000) !important;
+            }
+
+            /* Meta Text */
+            .yt-channel-meta h1 {
+              color: var(--ma-text, #000) !important;
+            }
+            .yt-channel-sub, 
+            .yt-channel-subscribers, 
+            .yt-channel-bio {
+              color: var(--ma-text-secondary, #666) !important;
+            }
+
+            /* Action Buttons (Edit channel / Analytics) */
+            .yt-channel-actions button {
+              background-color: var(--ma-surface, #f2f2f2) !important;
+              color: var(--ma-text, #000) !important;
+              border: 1px solid var(--ma-border, #e5e5e5) !important;
+            }
+
+            /* Tabs */
+            .yt-channel-tabs {
+              border-bottom: 1px solid var(--ma-border, #e5e5e5) !important;
+            }
+            .yt-channel-tab {
+              color: var(--ma-text-secondary, #666) !important;
+              background: transparent !important;
+            }
+            .yt-channel-tab-active {
+              color: #ff365f !important;
+              border-bottom: 2px solid #ff365f !important;
+              font-weight: 600 !important;
+            }
+          `}</style>
+
           <div className="yt-channel-topbar">
             <button
               className="yt-icon-btn"
