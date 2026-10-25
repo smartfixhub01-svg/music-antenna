@@ -219,6 +219,7 @@ export default function App() {
   };
 
 const [showCommentsModal, setShowCommentsModal] = useState(false);
+  const [videoQuality, setVideoQuality] = useState("Auto");
   const [showDescModal, setShowDescModal] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
@@ -5331,6 +5332,15 @@ document.body
           }} onClick={e => e.stopPropagation()}>
 
             <div style={{ width: "40px", height: "4px", background: "var(--ma-border, #ccc)", borderRadius: "2px", margin: "0 auto 20px" }}></div>
+
+            <p style={{ color: "var(--ma-text-secondary, #606060)", fontSize: "14px", marginBottom: "12px", fontWeight: "bold" }}>Video Quality</p>
+            <div style={{ display: "flex", gap: "10px", marginBottom: "24px", overflowX: "auto", paddingBottom: "4px" }}>
+              {["Auto", "1080p", "720p", "480p", "360p"].map(q => (
+                <button key={q} onClick={() => { setVideoQuality(q); setShowMoreMenu(false); setMessage(`Quality set to ${q}`); }} style={{ padding: "10px 16px", background: videoQuality === q ? "#ff365f" : "var(--ma-surface, #f2f2f2)", color: videoQuality === q ? "#ffffff" : "var(--ma-text, #000)", border: "1px solid " + (videoQuality === q ? "#ff365f" : "var(--ma-border, #e5e5e5)"), borderRadius: "10px", fontSize: "14px", fontWeight: "600", cursor: "pointer", whiteSpace: "nowrap" }}>
+                  {q}
+                </button>
+              ))}
+            </div>
 
             <p style={{ color: "var(--ma-text-secondary, #606060)", fontSize: "14px", marginBottom: "12px", fontWeight: "bold" }}>Playback Speed</p>
             <div style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
