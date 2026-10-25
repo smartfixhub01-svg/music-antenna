@@ -4280,12 +4280,13 @@ document.body
           <style>{`
             .force-name { color: #ffffff !important; text-shadow: none !important; letter-spacing: -0.5px; }
             .force-bio { 
-  color: rgba(255, 255, 255, 0.85) !important; 
-  text-shadow: 0 1px 3px rgba(0,0,0,0.4) !important; 
-  font-weight: 400 !important; 
-  font-size: 12px !important; 
-  margin-top: 2px !important; 
-  line-height: 1.3 !important; 
+  color: var(--ma-text-secondary, #555) !important; 
+  text-shadow: none !important; 
+  font-weight: 500 !important; 
+  font-size: 10px !important; /* SUPER SMALL */
+  margin: 0px !important; 
+  line-height: 1.2 !important; 
+  letter-spacing: 0.3px !important;
 }
             .btn-pink { background-color: #ff365f !important; color: #ffffff !important; padding: 10px !important; border-radius: 8px !important; font-weight: 600 !important; font-size: 14px !important; border: none !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; width: 100% !important; }
             .btn-gray { background-color: var(--ma-surface, #f0f0f0) !important; color: var(--ma-text, #000) !important; padding: 10px !important; border-radius: 8px !important; font-weight: 500 !important; font-size: 14px !important; border: 1px solid var(--ma-border, #e5e5e5) !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; width: 100% !important; }
@@ -4321,8 +4322,8 @@ document.body
                     <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "#1D9BF0", fontVariationSettings: "'FILL' 1" }} title="Verified Artist">verified</span>
                   )}
                 </h2>
-                <p className="force-bio" style={{ margin: "0px 0 4px 0", fontSize: "12px" }}>@{profile?.username || profile?.display_name || "music-antenna-user"}</p>
-                <p className="force-bio" style={{ margin: "0px", fontSize: "12px" }}>{profile?.bio || "Shadow Boss"}</p>
+                <p className="force-bio" style={{ margin: "0px 0 2px 0", fontSize: "10px" }}>@{profile?.username || profile?.display_name || "music-antenna-user"}</p>
+                <p className="force-bio" style={{ margin: "0px", fontSize: "10px" }}>{profile?.bio || "Shadow Boss"}</p>
               </div>
             </div>
 
