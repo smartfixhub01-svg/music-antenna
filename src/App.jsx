@@ -398,6 +398,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [comments, setComments] = useState([]);
+  const [deletingCommentId, setDeletingCommentId] = useState(null);
   const [likedComments, setLikedComments] = useState([]);
   const [expandedReplies, setExpandedReplies] = useState([]);
   const [newComment, setNewComment] = useState("");
@@ -5061,6 +5062,26 @@ document.body
         </div>
       )}
 
+      
+      {deletingCommentId && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 100000, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }} onClick={() => setDeletingCommentId(null)}>
+          <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "90%", maxWidth: "320px", borderRadius: "16px", padding: "24px", boxShadow: "0 10px 30px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
+            <h3 style={{ margin: "0 0 12px 0", fontSize: "18px", fontWeight: "700" }}>Delete Comment</h3>
+            <p style={{ margin: "0 0 24px 0", fontSize: "14px", color: "var(--ma-text-secondary, #666)", lineHeight: "1.4" }}>
+              Are you sure you want to delete this comment? This action cannot be undone.
+            </p>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+              <button onClick={() => setDeletingCommentId(null)} style={{ padding: "10px 16px", borderRadius: "8px", border: "1px solid var(--ma-border, #e5e5e5)", background: "transparent", color: "var(--ma-text, #000)", fontWeight: "600", fontSize: "14px", cursor: "pointer" }}>
+                Cancel
+              </button>
+              <button onClick={() => handleDeleteComment(deletingCommentId)} style={{ padding: "10px 16px", borderRadius: "8px", border: "none", background: "#ff365f", color: "#ffffff", fontWeight: "600", fontSize: "14px", cursor: "pointer", boxShadow: "0 4px 12px rgba(255,54,95,0.3)" }}>
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showCommentsModal && (
         <div 
           style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.8)", zIndex: 9999, display: "flex", flexDirection: "column", justifyContent: "flex-end" }}
@@ -5221,7 +5242,7 @@ document.body
                           {(session?.user?.id === activeMedia.artist_id || session?.user?.id === c.user_id) && (
                             <>
                               <button onClick={() => { setEditingCommentId(c.id); setEditCommentText(c.content); }} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", fontSize: "12px", fontWeight: "600", padding: 0, cursor: "pointer", marginLeft: "auto" }}>Edit</button>
-                              <button onClick={() => handleDeleteComment(c.id)} style={{ background: "transparent", border: 0, color: "#ff365f", fontSize: "12px", fontWeight: "600", padding: 0, cursor: "pointer" }}>Delete</button>
+                              <button onClick={() => setDeletingCommentId(c.id)} style={{ background: "transparent", border: 0, color: "#ff365f", fontSize: "12px", fontWeight: "600", padding: 0, cursor: "pointer" }}>Delete</button>
                             </>
                           )}
                         </div>
