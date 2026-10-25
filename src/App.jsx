@@ -378,7 +378,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   useEffect(() => {
     loadMedia();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showSubscriptionsFeed, category, feedLimit]);
+  }, [showSubscriptionsFeed, category, feedLimit, feedLimit]);
 
   const [notifications, setNotifications] = useState([]);
   const [selectedNotifs, setSelectedNotifs] = useState([]);
