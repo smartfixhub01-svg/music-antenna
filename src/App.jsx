@@ -5066,10 +5066,10 @@ document.body
                       {/* Text Content */}
                       {editingCommentId === c.id ? (
                         <div style={{ width: "100%", marginBottom: "6px" }}>
-                          <input value={editCommentText} onChange={e => setEditCommentText(e.target.value)} style={{ width: "100%", padding: "6px", borderRadius: "6px", border: "1px solid #333", background: "#121212", color: "white", fontSize: "13px", marginBottom: "6px" }} />
+                          <input value={editCommentText} onChange={e => setEditCommentText(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "8px", border: "1px solid var(--ma-border, #e5e5e5)", background: "var(--ma-surface, #f2f2f2)", color: "var(--ma-text, #000)", fontSize: "13px", marginBottom: "8px", outline: "none" }} />
                           <div style={{ display: "flex", gap: "8px" }}>
                             <button onClick={() => setEditingCommentId(null)} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", fontSize: "11px" }}>Cancel</button>
-                            <button onClick={() => handleUpdateComment(c.id)} style={{ background: "#3ea6ff", border: 0, borderRadius: "12px", padding: "2px 10px", color: "#0f0f0f", fontWeight: "bold", fontSize: "11px" }}>Save</button>
+                            <button onClick={() => handleUpdateComment(c.id)} style={{ background: "#ff365f", border: 0, borderRadius: "12px", padding: "4px 12px", color: "#ffffff", fontWeight: "bold", fontSize: "12px", cursor: "pointer" }}>Save</button>
                           </div>
                         </div>
                       ) : (
@@ -5077,7 +5077,7 @@ document.body
                           {c.content && <p style={{ margin: 0, fontSize: "13px", color: "var(--ma-text, #000)", lineHeight: 1.3, wordWrap: "break-word" }}>{c.content}</p>}
                           {c.image_url && <img src={c.image_url} style={{ maxWidth: "100%", maxHeight: "160px", borderRadius: "6px", marginTop: "6px" }} />}
                           {c.audio_url && (
-                          <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "#1f2c34", padding: "8px 12px", borderRadius: "12px", border: "1px solid #2a3942", marginTop: "8px", width: "fit-content" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "10px", background: "var(--ma-surface, #f2f2f2)", padding: "8px 12px", borderRadius: "12px", border: "1px solid var(--ma-border, #e5e5e5)", marginTop: "8px", width: "100%", maxWidth: "300px" }}>
                             <button 
                               onClick={() => {
                                 if (playingCommentId === c.id) {
@@ -5093,14 +5093,14 @@ document.body
                                   setPlayingCommentSpeed(1);
                                 }
                               }} 
-                              style={{ background: "transparent", border: 0, color: "white", cursor: "pointer", display: "flex", padding: 0 }}
+                              style={{ background: "transparent", border: 0, color: "var(--ma-text, #000)", cursor: "pointer", display: "flex", padding: 0 }}
                             >
                               <span className="material-symbols-outlined" style={{ fontSize: "28px" }}>
                                 {playingCommentId === c.id && !playingCommentRef.current?.paused ? "pause_circle" : "play_circle"}
                               </span>
                             </button>
 
-                            <span style={{ fontSize: "11px", color: "#fff", minWidth: "28px", fontWeight: "bold" }}>
+                            <span style={{ fontSize: "12px", color: "var(--ma-text, #000)", minWidth: "28px", fontWeight: "600" }}>
                               {playingCommentId === c.id ? formatVoiceTime(playingCommentProgress) : "0:00"}
                             </span>
 
