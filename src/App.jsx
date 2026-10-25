@@ -4026,30 +4026,34 @@ document.body
                       </span>
                     </button>
 
-                    <div className="yt-video-row">
+                    <div className="yt-video-row" style={{ display: "flex", gap: "12px", alignItems: "flex-start", marginTop: "12px" }}>
                       <div 
                         className="yt-video-avatar" 
-                        onClick={(e) => { e.stopPropagation(); openChannel(item.artist_id); }}
-                        style={{ cursor: "pointer" }}
+                        onClick={(e) => { e.stopPropagation(); openChannel(item.artist_id); }} 
+                        style={{ width: "36px", height: "36px", borderRadius: "50%", overflow: "hidden", flexShrink: 0, cursor: "pointer", background: "#ff365f", display: "grid", placeItems: "center", color: "#fff", fontSize: "16px", fontWeight: "bold" }}
                       >
                         {item.profiles?.avatar_url ? (
-                          <img src={item.profiles.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                        ) : "♫"}
+                          <img loading="lazy" src={item.profiles.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        ) : (
+                          (item.profiles?.display_name || "M").charAt(0).toUpperCase()
+                        )}
                       </div>
-                      <div className="yt-video-info">
-                        <h3 className="yt-video-title">{item.title}</h3>
+                      <div className="yt-video-info" style={{ flex: 1, minWidth: 0 }}>
+                        <h3 className="yt-video-title" style={{ margin: "0 0 4px 0", fontSize: "14px", fontWeight: "600", color: "var(--ma-text, #000)", lineHeight: "1.3", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                          {item.title}
+                        </h3>
                         <p 
                           className="yt-video-channel" 
-                          onClick={(e) => { e.stopPropagation(); openChannel(item.artist_id); }}
-                          style={{ cursor: "pointer" }}
+                          onClick={(e) => { e.stopPropagation(); openChannel(item.artist_id); }} 
+                          style={{ margin: "0 0 2px 0", fontSize: "12px", color: "var(--ma-text-secondary, #666)", cursor: "pointer", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
                         >
                           {item.profiles?.display_name || "Unknown Artist"}
                         </p>
-                        <p className="yt-video-meta">
-                          {item.views || 0} views • {timeAgo(item.created_at)}
+                        <p className="yt-video-meta" style={{ margin: 0, fontSize: "11px", color: "var(--ma-text-secondary, #888)" }}>
+                          {item.views || 0} views • {new Date(item.created_at).toLocaleDateString()}
                         </p>
                       </div>
-                      <button className="yt-video-menu" aria-label="More" onClick={(e) => { e.stopPropagation(); setShowMoreMenu(item); }}>⋮</button>
+                      <button className="yt-video-menu" aria-label="More" onClick={(e) => { e.stopPropagation(); setShowMoreMenu(item); }} style={{ background: "transparent", border: 0, color: "var(--ma-text, #000)", cursor: "pointer", padding: "4px" }}>⋮</button>
                     </div>
                   </article>
                 ))}
