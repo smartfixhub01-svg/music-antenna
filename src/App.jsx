@@ -5077,7 +5077,7 @@ document.body
                           {c.content && <p style={{ margin: 0, fontSize: "13px", color: "var(--ma-text, #000)", lineHeight: 1.3, wordWrap: "break-word" }}>{c.content}</p>}
                           {c.image_url && <img src={c.image_url} style={{ maxWidth: "100%", maxHeight: "160px", borderRadius: "6px", marginTop: "6px" }} />}
                           {c.audio_url && (
-                          <div style={{ display: "flex", alignItems: "center", gap: "10px", background: "var(--ma-surface, #f2f2f2)", padding: "8px 12px", borderRadius: "12px", border: "1px solid var(--ma-border, #e5e5e5)", marginTop: "8px", width: "100%", maxWidth: "300px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "12px", background: "var(--ma-surface, #f2f2f2)", padding: "10px 14px", borderRadius: "16px", border: "1px solid var(--ma-border, #e5e5e5)", marginTop: "10px", width: "100%", maxWidth: "340px", boxShadow: "0 2px 8px rgba(0,0,0,0.03)" }}>
                             <button 
                               onClick={() => {
                                 if (playingCommentId === c.id) {
@@ -5119,7 +5119,7 @@ document.body
                                 setPlayingCommentSpeed(nextSpeed);
                                 if (playingCommentRef.current) playingCommentRef.current.playbackRate = nextSpeed;
                               }} 
-                              style={{ background: "transparent", border: "1px dashed var(--ma-border, #e5e5e5)", borderRadius: "50%", color: "var(--ma-text, #000)", width: "24px", height: "24px", display: "grid", placeItems: "center", fontSize: "9px", fontWeight: "bold", cursor: "pointer" }}
+                              style={{ background: "var(--ma-bg, #fff)", border: "1px solid var(--ma-border, #e5e5e5)", borderRadius: "6px", color: "var(--ma-text, #000)", width: "28px", height: "22px", display: "grid", placeItems: "center", fontSize: "10px", fontWeight: "700", cursor: "pointer" }}
                             >
                               {playingCommentId === c.id ? `${playingCommentSpeed}x` : "1x"}
                             </button>
@@ -5153,7 +5153,7 @@ document.body
 
                       {/* Action Row - Tighter */}
                       {editingCommentId !== c.id && (
-                        <div style={{ display: "flex", gap: "12px", alignItems: "center", width: "100%", marginTop: "2px" }}>
+                        <div style={{ display: "flex", gap: "16px", alignItems: "center", width: "100%", marginTop: "8px" }}>
                           <button onClick={() => handleLikeComment(c.id, c.likes || 0)} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", display: "flex", alignItems: "center", gap: "3px", fontSize: "11px", padding: 0, cursor: "pointer" }}>
                             <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>thumb_up</span> {c.likes || 0}
                           </button>
@@ -5175,8 +5175,8 @@ document.body
 
                           {(session?.user?.id === activeMedia.artist_id || session?.user?.id === c.user_id) && (
                             <>
-                              <button onClick={() => { setEditingCommentId(c.id); setEditCommentText(c.content); }} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", fontSize: "11px", padding: 0, cursor: "pointer", marginLeft: "auto" }}>Edit</button>
-                              <button onClick={() => handleDeleteComment(c.id)} style={{ background: "transparent", border: 0, color: "var(--ma-accent, #ff365f)", fontSize: "11px", padding: 0, cursor: "pointer" }}>Delete</button>
+                              <button onClick={() => { setEditingCommentId(c.id); setEditCommentText(c.content); }} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", fontSize: "12px", fontWeight: "600", padding: 0, cursor: "pointer", marginLeft: "auto" }}>Edit</button>
+                              <button onClick={() => handleDeleteComment(c.id)} style={{ background: "transparent", border: 0, color: "#ff365f", fontSize: "12px", fontWeight: "600", padding: 0, cursor: "pointer" }}>Delete</button>
                             </>
                           )}
                         </div>
@@ -5188,7 +5188,7 @@ document.body
             </div>
 
             {/* Input Area */}
-            <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "var(--ma-bg, #fff)", borderTop: "1px solid var(--ma-border, #e5e5e5)", padding: "12px 16px", display: "flex", flexDirection: "column", gap: "8px" }}>
+            <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "var(--ma-bg, #fff)", borderTop: "1px solid var(--ma-border, #e5e5e5)", padding: "12px 16px", display: "flex", flexDirection: "column", gap: "8px", boxShadow: "0 -4px 12px rgba(0,0,0,0.03)", zIndex: 10 }}>
               
               {replyTarget && (
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px", fontSize: "12px", color: "var(--ma-text-secondary, #666)" }}>
