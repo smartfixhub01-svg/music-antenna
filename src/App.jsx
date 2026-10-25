@@ -5183,7 +5183,7 @@ document.body
                               <button onClick={() => handlePinComment(c.id, c.is_pinned)} style={{ background: "transparent", border: 0, color: c.is_pinned ? "#3ea6ff" : "#aaa", display: "flex", alignItems: "center", padding: 0, cursor: "pointer" }}>
                                 <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>push_pin</span>
                               </button>
-                              <button onClick={() => handleCreatorHeart(c.id, c.has_creator_heart)} style={{ background: "transparent", border: 0, color: c.has_creator_heart ? "#ff365f" : "#aaa", display: "flex", alignItems: "center", padding: 0, cursor: "pointer" }}>
+                              <button onClick={() => handleCreatorHeart(c.id, c.has_creator_heart)} style={{ background: "transparent", border: 0, color: c.has_creator_heart ? "#ff365f" : "var(--ma-text-secondary, #666)", display: "flex", alignItems: "center", padding: 0, cursor: "pointer" }}>
                                 <span className="material-symbols-outlined" style={{ fontSize: "14px", fontVariationSettings: c.has_creator_heart ? "'FILL' 1" : "'FILL' 0" }}>favorite</span>
                               </button>
                             </>
@@ -5195,6 +5195,26 @@ document.body
                               <button onClick={() => handleDeleteComment(c.id)} style={{ background: "transparent", border: 0, color: "#ff365f", fontSize: "12px", fontWeight: "600", padding: 0, cursor: "pointer" }}>Delete</button>
                             </>
                           )}
+                        </div>
+                      )}
+
+                      {/* Nested Replies */}
+                      {expandedReplies.includes(c.id) && (
+                        <div style={{ marginLeft: "36px", marginTop: "12px", display: "flex", flexDirection: "column", gap: "12px", borderLeft: "2px solid var(--ma-border, #e5e5e5)", paddingLeft: "12px" }}>
+                          {comments.filter(r => r.parent_id === c.id).map(reply => (
+                            <div key={reply.id} style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
+                              <div style={{ width: "24px", height: "24px", borderRadius: "50%", overflow: "hidden", flexShrink: 0 }}>
+                                {reply.profiles?.avatar_url ? <img src={reply.profiles.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ width: "100%", height: "100%", background: "#ff365f", color: "white", display: "grid", placeItems: "center", fontSize: "12px" }}>♫</div>}
+                              </div>
+                              <div style={{ flex: 1 }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                  <span style={{ fontSize: "12px", fontWeight: "600", color: "var(--ma-text, #000)" }}>@{reply.profiles?.display_name || "user"}</span>
+                                  <span style={{ fontSize: "10px", color: "var(--ma-text-secondary, #666)" }}>{timeAgo(reply.created_at)}</span>
+                                </div>
+                                <p style={{ margin: "2px 0 0 0", fontSize: "13px", color: "var(--ma-text, #000)", lineHeight: 1.3 }}>{reply.content}</p>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       )}
 
