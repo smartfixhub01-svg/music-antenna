@@ -4272,7 +4272,7 @@ document.body
           <style>{`button { min-height: 44px !important; min-width: 44px !important; }`}</style>
           
           {/* 1. BANNER */}
-          <div style={{ width: "100%", height: "140px", background: "linear-gradient(180deg, #ff365f 0%, rgba(255, 54, 95, 0.6) 50%, var(--ma-bg, #0f0f0f) 100%)", position: "relative" }}>
+          <div style={{ width: "100%", height: "150px", background: "linear-gradient(to bottom, #ff365f 0%, #a81c39 40%, var(--ma-bg, #0f0f0f) 100%)", position: "relative" }}>
             
           </div>
 
@@ -4295,7 +4295,19 @@ document.body
                 )}
               </div>
               <div style={{ paddingBottom: "4px" }}>
-                <h2 className="force-name" style={{ margin: 0, fontSize: "20px", fontWeight: "700", display: "flex", alignItems: "center", gap: "4px" }}>
+                
+<style>{`
+  .force-name { 
+    text-shadow: 0 2px 10px rgba(0,0,0,0.8) !important; 
+    font-size: 24px !important; 
+  }
+  .force-bio { 
+    text-shadow: 0 1px 4px rgba(0,0,0,0.8) !important; 
+    font-size: 14px !important;
+  }
+`}</style>
+
+            <h2 className="force-name" style={{ margin: 0, fontSize: "20px", fontWeight: "700", display: "flex", alignItems: "center", gap: "4px" }}>
                   {profile?.display_name || displayUser || "Music listener"}
                   
                   {profile?.role === "artist" && media.filter(m => m.artist_id === session?.user?.id).length >= 10 && mySubCount >= 500 && (
