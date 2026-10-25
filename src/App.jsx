@@ -3545,6 +3545,51 @@ document.body
   }
 `}</style>
 
+          
+<style>{`/* V3_DROPZONE_RESIZE */
+  /* 1. Shrink the overall dashed box */
+  div.yt-upload-dropzone {
+    padding: 24px 16px !important;
+    gap: 6px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 12px !important;
+  }
+  
+  /* 2. Shrink the upload icon */
+  div.yt-upload-dropzone > .material-symbols-outlined {
+    font-size: 32px !important;
+    margin-bottom: 4px !important;
+    color: var(--ma-text-secondary, #666) !important;
+  }
+
+  /* 3. Shrink the text inside */
+  div.yt-upload-dropzone p {
+    font-size: 14px !important;
+    margin: 0 !important;
+    line-height: 1.4 !important;
+    text-align: center !important;
+  }
+  div.yt-upload-dropzone p.yt-upload-dropzone-sub {
+    font-size: 12px !important;
+    color: var(--ma-text-secondary, #666) !important;
+  }
+
+  /* 4. Make the pink button sleeker */
+  label.yt-upload-select {
+    padding: 10px 24px !important;
+    margin-top: 12px !important;
+    font-size: 14px !important;
+    border-radius: 8px !important;
+  }
+  label.yt-upload-select span {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+  }
+`}</style>
+
           <form className="yt-upload-form theme-aware-form" onSubmit={handleUpload}>
                 <div className="yt-upload-dropzone">
                   <span className="material-symbols-outlined">upload</span>
