@@ -398,6 +398,8 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [comments, setComments] = useState([]);
+  const [likedComments, setLikedComments] = useState([]);
+  const [expandedReplies, setExpandedReplies] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [commentImage, setCommentImage] = useState(null);
@@ -1494,9 +1496,20 @@ useEffect(() => {
   }
 
   async function handleLikeComment(commentId, currentLikes) {
-    try {
-      await supabase.from("comments").update({ likes: currentLikes + 1 }).eq("id", commentId);
+    const isLiked = likedComments.includes(commentId);
+    
+    // Optimistic UI update
+    if (isLiked) {
+      setLikedComments(prev => prev.filter(id => id !== commentId));
+      setComments(prev => prev.map(c => c.id === commentId ? { ...c, likes: Math.max(0, (c.likes || 0) - 1) } : c));
+    } else {
+      setLikedComments(prev => [...prev, commentId]);
       setComments(prev => prev.map(c => c.id === commentId ? { ...c, likes: (c.likes || 0) + 1 } : c));
+    }
+
+    try {
+      const newCount = isLiked ? Math.max(0, currentLikes - 1) : currentLikes + 1;
+      await supabase.from("comments").update({ likes: newCount }).eq("id", commentId);
     } catch (err) { setMessage(err.message); }
   }
 
@@ -5154,12 +5167,12 @@ document.body
                       {/* Action Row - Tighter */}
                       {editingCommentId !== c.id && (
                         <div style={{ display: "flex", gap: "16px", alignItems: "center", width: "100%", marginTop: "8px" }}>
-                          <button onClick={() => handleLikeComment(c.id, c.likes || 0)} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", display: "flex", alignItems: "center", gap: "3px", fontSize: "11px", padding: 0, cursor: "pointer" }}>
-                            <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>thumb_up</span> {c.likes || 0}
+                          <button onClick={() => handleLikeComment(c.id, c.likes || 0)} style={{ background: "transparent", border: 0, color: likedComments.includes(c.id) ? "#ff365f" : "var(--ma-text-secondary, #666)", display: "flex", alignItems: "center", gap: "3px", fontSize: "11px", padding: 0, cursor: "pointer" }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: "14px", fontVariationSettings: likedComments.includes(c.id) ? "'FILL' 1" : "'FILL' 0" }}>thumb_up</span> {c.likes || 0}
                           </button>
                           
-                          <button onClick={() => { setReplyTarget(c.id); setReplyingToName(c.profiles?.display_name || "user"); }} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", display: "flex", alignItems: "center", gap: "3px", fontSize: "11px", padding: 0, cursor: "pointer" }}>
-                            <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>chat_bubble</span> Reply
+                          <button onClick={() => { setExpandedReplies(prev => prev.includes(c.id) ? prev.filter(id => id !== c.id) : [...prev, c.id]); setReplyTarget(c.id); setReplyingToName(c.profiles?.display_name || "user"); }} style={{ background: "transparent", border: 0, color: expandedReplies.includes(c.id) ? "var(--ma-text, #000)" : "var(--ma-text-secondary, #666)", display: "flex", alignItems: "center", gap: "3px", fontSize: "11px", padding: 0, cursor: "pointer", fontWeight: expandedReplies.includes(c.id) ? "600" : "normal" }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>chat_bubble</span> Reply {comments.filter(r => r.parent_id === c.id).length > 0 && `(${comments.filter(r => r.parent_id === c.id).length})`}
                           </button>
 
                           {(session?.user?.id === activeMedia.artist_id) && (
@@ -5179,6 +5192,26 @@ document.body
                               <button onClick={() => handleDeleteComment(c.id)} style={{ background: "transparent", border: 0, color: "#ff365f", fontSize: "12px", fontWeight: "600", padding: 0, cursor: "pointer" }}>Delete</button>
                             </>
                           )}
+                        </div>
+                      )}
+
+                      {/* Nested Replies */}
+                      {expandedReplies.includes(c.id) && (
+                        <div style={{ marginLeft: "36px", marginTop: "12px", display: "flex", flexDirection: "column", gap: "12px", borderLeft: "2px solid var(--ma-border, #e5e5e5)", paddingLeft: "12px" }}>
+                          {comments.filter(r => r.parent_id === c.id).map(reply => (
+                            <div key={reply.id} style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
+                              <div style={{ width: "24px", height: "24px", borderRadius: "50%", overflow: "hidden", flexShrink: 0 }}>
+                                {reply.profiles?.avatar_url ? <img src={reply.profiles.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ width: "100%", height: "100%", background: "#ff365f", color: "white", display: "grid", placeItems: "center", fontSize: "12px" }}>♫</div>}
+                              </div>
+                              <div style={{ flex: 1 }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                  <span style={{ fontSize: "12px", fontWeight: "600", color: "var(--ma-text, #000)" }}>@{reply.profiles?.display_name || "user"}</span>
+                                  <span style={{ fontSize: "10px", color: "var(--ma-text-secondary, #666)" }}>{timeAgo(reply.created_at)}</span>
+                                </div>
+                                <p style={{ margin: "2px 0 0 0", fontSize: "13px", color: "var(--ma-text, #000)", lineHeight: 1.3 }}>{reply.content}</p>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       )}
                     </div>
