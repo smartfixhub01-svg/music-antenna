@@ -1550,6 +1550,8 @@ useEffect(() => {
   }
 
   async function handleLikeComment(commentId, currentLikes) {
+    if (!session?.user?.id) return setMessage("Sign in to like comments.");
+    
     const isLiked = likedComments.includes(commentId);
     
     // Optimistic UI update
@@ -1562,9 +1564,25 @@ useEffect(() => {
     }
 
     try {
-      const newCount = isLiked ? Math.max(0, currentLikes - 1) : currentLikes + 1;
-      await supabase.from("comments").update({ likes: newCount }).eq("id", commentId);
-    } catch (err) { setMessage(err.message); }
+      if (isLiked) {
+        // Remove from real DB table
+        await supabase.from("comment_likes").delete().eq("comment_id", commentId).eq("user_id", session.user.id);
+      } else {
+        // Add to real DB table
+        const { error } = await supabase.from("comment_likes").insert({ comment_id: commentId, user_id: session.user.id });
+        if (error && error.code !== '23505') throw error; // Ignore unique violation
+      }
+    } catch (err) { 
+      // Revert on failure
+      if (isLiked) {
+        setLikedComments(prev => [...prev, commentId]);
+        setComments(prev => prev.map(c => c.id === commentId ? { ...c, likes: (c.likes || 0) + 1 } : c));
+      } else {
+        setLikedComments(prev => prev.filter(id => id !== commentId));
+        setComments(prev => prev.map(c => c.id === commentId ? { ...c, likes: Math.max(0, (c.likes || 0) - 1) } : c));
+      }
+      setMessage(err.message); 
+    }
   }
 
   async function handleUpdateComment(commentId) {
