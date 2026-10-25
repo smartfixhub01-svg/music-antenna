@@ -423,6 +423,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const timerRef = useRef(null);
 
   const [replyTarget, setReplyTarget] = useState(null);
+  const [replyingName, setReplyingName] = useState("");
   const [replyingToName, setReplyingToName] = useState("");
   const [commentsLoading, setCommentsLoading] = useState(false);
 
