@@ -5156,12 +5156,16 @@ document.body
               Are you sure you want to delete this comment? This action cannot be undone.
             </p>
             <div style={{ display: "flex", gap: "10px", width: "100%", marginTop: "8px" }}>
-              <button onClick={() => setDeletingCommentId(null)} style={{ flex: 1, padding: "12px", borderRadius: "10px", border: "1px solid var(--ma-border, #e5e5e5)", background: "transparent", color: "var(--ma-text, #000)", fontWeight: "600", fontSize: "14px", cursor: "pointer" }}>
-                Cancel
-              </button>
-              <button onClick={() => handleDeleteComment(deletingCommentId)} style={{ flex: 1, padding: "12px", borderRadius: "10px", border: "none", background: "#ff365f", color: "#ffffff", fontWeight: "600", fontSize: "14px", cursor: "pointer", boxShadow: "0 4px 12px rgba(255,54,95,0.3)" }}>
-                Delete
-              </button>
+              <div style={{ flex: 1, display: "flex" }}>
+                <button onClick={() => setDeletingCommentId(null)} style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "1px solid var(--ma-border, #e5e5e5)", backgroundColor: "transparent", color: "var(--ma-text, #000)", fontWeight: "600", fontSize: "14px", cursor: "pointer", display: "block" }}>
+                  Cancel
+                </button>
+              </div>
+              <div style={{ flex: 1, display: "flex", backgroundColor: "#ff365f", borderRadius: "10px", boxShadow: "0 4px 12px rgba(255,54,95,0.3)" }}>
+                <button onClick={() => handleDeleteComment(deletingCommentId)} style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "none", backgroundColor: "transparent", color: "#ffffff", fontWeight: "600", fontSize: "14px", cursor: "pointer", display: "block" }}>
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
         </div>
