@@ -1489,10 +1489,13 @@ useEffect(() => {
   }
 
   async function handleCreatorHeart(commentId, currentHeart) {
+    setComments(prev => prev.map(c => c.id === commentId ? { ...c, has_creator_heart: !currentHeart } : c));
     try {
       await supabase.from("comments").update({ has_creator_heart: !currentHeart }).eq("id", commentId);
-      setComments(prev => prev.map(c => c.id === commentId ? { ...c, has_creator_heart: !currentHeart } : c));
-    } catch (err) { setMessage(err.message); }
+    } catch (err) { 
+      setComments(prev => prev.map(c => c.id === commentId ? { ...c, has_creator_heart: currentHeart } : c));
+      setMessage(err.message); 
+    }
   }
 
   async function handleLikeComment(commentId, currentLikes) {
