@@ -4889,10 +4889,14 @@ document.body
                   <p className="yt-channel-sub">
                     @{channelProfile.username || channelProfile.display_name || "music-antenna"} · {channelMedia.length} {channelMedia.length === 1 ? "upload" : "uploads"}
                   </p>
-                  <p className="yt-channel-subscribers">{subscriberCount} subscribers</p>
-                  <p className="yt-channel-bio">
-                    {channelProfile.bio || "Welcome to my  channel."}
-                  </p>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "2px", width: "100%" }}>
+                    <p className="yt-channel-subscribers" style={{ margin: 0, fontSize: "12px", color: "var(--ma-text-secondary, #666)" }}>{subscriberCount} subscribers</p>
+                    {channelProfile.bio && (
+                      <p className="yt-channel-bio" style={{ margin: "4px 0 0 0", fontSize: "11px", lineHeight: "1.4", color: "var(--ma-text-secondary, #666)", textAlign: "left", maxWidth: "100%", wordBreak: "break-word" }}>
+                        {channelProfile.bio}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
 
