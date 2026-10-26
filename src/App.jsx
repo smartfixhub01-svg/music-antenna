@@ -4433,24 +4433,58 @@ document.body
             )}
 
             {profileTab === "about" && (
-              <div style={{ padding: "20px", background: "var(--ma-surface, #f0f0f0)", borderRadius: "12px", border: "1px solid var(--ma-border, #e5e5e5)", marginBottom: "24px" }}>
-                <h3 style={{ margin: "0 0 16px 0", fontSize: "16px", fontWeight: "600", color: "var(--ma-text, #000)" }}>About</h3>
-                <p style={{ margin: "0 0 20px 0", fontSize: "14px", color: "var(--ma-text-secondary, #666)", lineHeight: "1.6" }}>
-                  {profile?.bio || "No bio provided yet."}
-                </p>
-                <div style={{ borderTop: "1px solid var(--ma-border, #e5e5e5)", paddingTop: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
-                  <p style={{ margin: 0, fontSize: "13px", color: "var(--ma-text-secondary, #666)", display: "flex", justifyContent: "space-between" }}>
-                    <strong style={{ color: "var(--ma-text, #000)" }}>Joined:</strong> 
-                    <span>{new Date(profile?.created_at || Date.now()).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
+              <div style={{ background: "var(--ma-surface, #f0f0f0)", borderRadius: "16px", border: "1px solid var(--ma-border, #e5e5e5)", padding: "24px", marginBottom: "24px", boxShadow: "0 4px 20px rgba(0,0,0,0.02)" }}>
+                
+                {/* Header */}
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "20px" }}>
+                  <span className="material-symbols-outlined" style={{ color: "#ff365f", fontSize: "22px" }}>info</span>
+                  <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "700", color: "var(--ma-text, #000)" }}>Channel Details</h3>
+                </div>
+
+                {/* Bio Section */}
+                <div style={{ marginBottom: "24px", padding: "16px", background: "var(--ma-bg, #fff)", borderRadius: "12px", borderLeft: "4px solid #ff365f" }}>
+                  <p style={{ margin: 0, fontSize: "14px", color: "var(--ma-text-secondary, #666)", lineHeight: "1.6", fontStyle: "italic" }}>
+                    "{profile?.bio || "This artist hasn't added a bio yet."}"
                   </p>
-                  <p style={{ margin: 0, fontSize: "13px", color: "var(--ma-text-secondary, #666)", display: "flex", justifyContent: "space-between" }}>
-                    <strong style={{ color: "var(--ma-text, #000)" }}>Total Uploads:</strong> 
-                    <span>{media.filter(m => m.artist_id === session?.user?.id).length}</span>
-                  </p>
-                  <p style={{ margin: 0, fontSize: "13px", color: "var(--ma-text-secondary, #666)", display: "flex", justifyContent: "space-between" }}>
-                    <strong style={{ color: "var(--ma-text, #000)" }}>Total Views:</strong> 
-                    <span>{media.filter(m => m.artist_id === session?.user?.id).reduce((sum, m) => sum + (m.views || 0), 0)}</span>
-                  </p>
+                </div>
+
+                {/* Premium Stats Grid */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  
+                  {/* Joined Date */}
+                  <div style={{ background: "var(--ma-bg, #fff)", padding: "16px", borderRadius: "12px", border: "1px solid var(--ma-border, #e5e5e5)", display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "var(--ma-text-secondary, #888)" }}>calendar_month</span>
+                    <span style={{ fontSize: "11px", color: "var(--ma-text-secondary, #666)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: "600" }}>Joined</span>
+                    <span style={{ fontSize: "15px", fontWeight: "700", color: "var(--ma-text, #000)" }}>
+                      {new Date(profile?.created_at || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </span>
+                  </div>
+
+                  {/* Subscribers */}
+                  <div style={{ background: "var(--ma-bg, #fff)", padding: "16px", borderRadius: "12px", border: "1px solid var(--ma-border, #e5e5e5)", display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "var(--ma-text-secondary, #888)" }}>group</span>
+                    <span style={{ fontSize: "11px", color: "var(--ma-text-secondary, #666)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: "600" }}>Subscribers</span>
+                    <span style={{ fontSize: "15px", fontWeight: "700", color: "var(--ma-text, #000)" }}>{mySubCount}</span>
+                  </div>
+
+                  {/* Total Uploads */}
+                  <div style={{ background: "var(--ma-bg, #fff)", padding: "16px", borderRadius: "12px", border: "1px solid var(--ma-border, #e5e5e5)", display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "var(--ma-text-secondary, #888)" }}>upload</span>
+                    <span style={{ fontSize: "11px", color: "var(--ma-text-secondary, #666)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: "600" }}>Uploads</span>
+                    <span style={{ fontSize: "15px", fontWeight: "700", color: "var(--ma-text, #000)" }}>
+                      {media.filter(m => m.artist_id === session?.user?.id).length}
+                    </span>
+                  </div>
+
+                  {/* Total Views */}
+                  <div style={{ background: "var(--ma-bg, #fff)", padding: "16px", borderRadius: "12px", border: "1px solid var(--ma-border, #e5e5e5)", display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "var(--ma-text-secondary, #888)" }}>visibility</span>
+                    <span style={{ fontSize: "11px", color: "var(--ma-text-secondary, #666)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: "600" }}>Total Views</span>
+                    <span style={{ fontSize: "15px", fontWeight: "700", color: "var(--ma-text, #000)" }}>
+                      {media.filter(m => m.artist_id === session?.user?.id).reduce((sum, m) => sum + (m.views || 0), 0)}
+                    </span>
+                  </div>
+
                 </div>
               </div>
             )}
