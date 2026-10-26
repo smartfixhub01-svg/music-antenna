@@ -1655,7 +1655,11 @@ useEffect(() => {
             target_media_id: commentData.media_id,
             creator_name: profile?.display_name || "Creator"
           });
-          if (notifError) console.error("RPC ERROR:", notifError);
+          if (notifError) {
+            alert("RPC ERROR: " + notifError.message);
+          } else {
+            alert("Notification inserted successfully!");
+          }
         }
       if (error) throw error;
       setMessage("Comment deleted.");
