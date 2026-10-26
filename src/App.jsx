@@ -238,6 +238,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [profileTab, setProfileTab] = useState("overview");
   const [showUpload, setShowUpload] = useState(false);
   const [showManagePage, setShowManagePage] = useState(false);
+  const [manageSource, setManageSource] = useState("account");
   const [showHistoryPage, setShowHistoryPage] = useState(false);
   const [showPlaylistModal, setShowPlaylistModal] = useState(false);
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
@@ -1465,12 +1466,13 @@ useEffect(() => {
     }
   }
 
-  async function openManagePage() {
+  async function openManagePage(source = "account") {
     if (!session?.user?.id) {
       setMessage("Please sign in to manage content.");
       return;
     }
     
+    setManageSource(source);
     setShowManagePage(true);
     setShowAccountPage(false);
     setShowChannelPage(false);
