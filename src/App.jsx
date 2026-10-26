@@ -1618,6 +1618,23 @@ useEffect(() => {
     } catch (err) { setMessage(err.message); }
   }
 
+  
+  async function handleReportVideo(mediaId) {
+    try {
+      const { data } = await supabase.from("media").select("report_count").eq("id", mediaId).single();
+      const newCount = (data?.report_count || 0) + 1;
+      
+      await supabase.from("media").update({ 
+        report_count: newCount,
+        status: newCount >= 3 ? "under_review" : "published" 
+      }).eq("id", mediaId);
+      
+      setMessage(newCount >= 3 ? "Video reported. It has been hidden for review." : "Video reported. Thank you.");
+    } catch (err) {
+      setMessage("Could not report video.");
+    }
+  }
+
   async function handleDeleteComment(commentId) {
     // 1. Instantly close the modal and remove the comment from the UI
     setDeletingCommentId(null);
@@ -1714,6 +1731,19 @@ useEffect(() => {
     e.preventDefault();
     if (!session?.user?.id) return setMessage("Sign in to comment.");
     if (!newComment.trim() && !commentImage && !commentAudio) return;
+
+    // --- CUSTOM WORD FILTER ---
+    const blockedWordsRaw = activeMedia?.profiles?.blocked_words;
+    if (blockedWordsRaw && newComment.trim()) {
+      const blockedList = blockedWordsRaw.split(',').map(w => w.trim().toLowerCase()).filter(w => w);
+      const commentLower = newComment.toLowerCase();
+      for (let word of blockedList) {
+        if (commentLower.includes(word)) {
+          return setMessage(`This comment contains restricted words: "${word}"`);
+        }
+      }
+    }
+    // --------------------------
     
     setMessage("Posting comment...");
     let imageUrl = null;
@@ -5453,7 +5483,7 @@ document.body
                 <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary, #606060)" }}>share</span> Share Link
               </button>
 
-              <button onClick={() => { setMessage("Video reported. Thank you."); setShowMoreMenu(false); }} style={{ padding: "16px", background: "transparent", color: "var(--ma-text, #0f0f0f)", border: "none", borderRadius: "10px", fontSize: "15px", display: "flex", alignItems: "center", gap: "16px", cursor: "pointer", textAlign: "left" }}>
+              <button onClick={() => { handleReportVideo(activeMedia.id); setShowMoreMenu(false); }} style={{ padding: "16px", background: "transparent", color: "var(--ma-text, #0f0f0f)", border: "none", borderRadius: "10px", fontSize: "15px", display: "flex", alignItems: "center", gap: "16px", cursor: "pointer", textAlign: "left" }}>
                 <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary, #606060)" }}>flag</span> Report Video
               </button>
 
