@@ -4951,9 +4951,59 @@ document.body
               </div>
 
               {channelTab === "About" ? (
-                <div style={{ padding: "20px", background: "var(--ma-surface)", borderRadius: "12px", border: "1px solid var(--ma-border)" }}>
-                  <h3 style={{ color: "var(--ma-text)", marginTop: 0, fontSize: "16px" }}>About</h3>
-                  <p style={{ color: "var(--ma-text-secondary)", fontSize: "14px", lineHeight: "1.5" }}>{channelProfile?.bio || "No description provided."}</p>
+                <div style={{ background: "var(--ma-surface, #f0f0f0)", borderRadius: "16px", border: "1px solid var(--ma-border, #e5e5e5)", padding: "24px", marginBottom: "24px", boxShadow: "0 4px 20px rgba(0,0,0,0.02)" }}>
+                  
+                  {/* Header */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "20px" }}>
+                    <span className="material-symbols-outlined" style={{ color: "#ff365f", fontSize: "22px" }}>info</span>
+                    <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "700", color: "var(--ma-text, #000)" }}>Channel Details</h3>
+                  </div>
+
+                  {/* Bio Section */}
+                  <div style={{ marginBottom: "24px", padding: "16px", background: "var(--ma-bg, #fff)", borderRadius: "12px", borderLeft: "4px solid #ff365f" }}>
+                    <p style={{ margin: 0, fontSize: "14px", color: "var(--ma-text-secondary, #666)", lineHeight: "1.6", fontStyle: "italic" }}>
+                      "{channelProfile?.bio || "This artist hasn't added a bio yet."}"
+                    </p>
+                  </div>
+
+                  {/* Premium Stats Grid */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                    
+                    {/* Joined Date */}
+                    <div style={{ background: "var(--ma-bg, #fff)", padding: "16px", borderRadius: "12px", border: "1px solid var(--ma-border, #e5e5e5)", display: "flex", flexDirection: "column", gap: "6px" }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "var(--ma-text-secondary, #888)" }}>calendar_month</span>
+                      <span style={{ fontSize: "11px", color: "var(--ma-text-secondary, #666)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: "600" }}>Joined</span>
+                      <span style={{ fontSize: "15px", fontWeight: "700", color: "var(--ma-text, #000)" }}>
+                        {new Date(channelProfile?.created_at || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </span>
+                    </div>
+
+                    {/* Subscribers */}
+                    <div style={{ background: "var(--ma-bg, #fff)", padding: "16px", borderRadius: "12px", border: "1px solid var(--ma-border, #e5e5e5)", display: "flex", flexDirection: "column", gap: "6px" }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "var(--ma-text-secondary, #888)" }}>group</span>
+                      <span style={{ fontSize: "11px", color: "var(--ma-text-secondary, #666)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: "600" }}>Subscribers</span>
+                      <span style={{ fontSize: "15px", fontWeight: "700", color: "var(--ma-text, #000)" }}>{subscriberCount}</span>
+                    </div>
+
+                    {/* Total Uploads */}
+                    <div style={{ background: "var(--ma-bg, #fff)", padding: "16px", borderRadius: "12px", border: "1px solid var(--ma-border, #e5e5e5)", display: "flex", flexDirection: "column", gap: "6px" }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "var(--ma-text-secondary, #888)" }}>upload</span>
+                      <span style={{ fontSize: "11px", color: "var(--ma-text-secondary, #666)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: "600" }}>Uploads</span>
+                      <span style={{ fontSize: "15px", fontWeight: "700", color: "var(--ma-text, #000)" }}>
+                        {channelMedia.length}
+                      </span>
+                    </div>
+
+                    {/* Total Views */}
+                    <div style={{ background: "var(--ma-bg, #fff)", padding: "16px", borderRadius: "12px", border: "1px solid var(--ma-border, #e5e5e5)", display: "flex", flexDirection: "column", gap: "6px" }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "var(--ma-text-secondary, #888)" }}>visibility</span>
+                      <span style={{ fontSize: "11px", color: "var(--ma-text-secondary, #666)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: "600" }}>Total Views</span>
+                      <span style={{ fontSize: "15px", fontWeight: "700", color: "var(--ma-text, #000)" }}>
+                        {channelMedia.reduce((sum, item) => sum + (item.views || 0), 0)}
+                      </span>
+                    </div>
+
+                  </div>
                 </div>
               ) : (() => {
                 let filtered = channelMedia;
