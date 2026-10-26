@@ -1779,13 +1779,12 @@ useEffect(() => {
 
   async function handlePostComment(e) {
     e.preventDefault();
-    // BULLETPROOF LOCK: Stop double clicks
-    if (isSubmittingRef.current || isPostingComment) return;
+
+    // LAYER 1: SYNCHRONOUS LOCK (Blocks double clicks instantly)
+    if (isSubmittingRef.current) return;
+    
     if (!session?.user?.id) return setMessage("Sign in to comment.");
     if (!newComment.trim() && !commentImage && !commentAudio) return;
-    
-    isSubmittingRef.current = true;
-    setIsPostingComment(true);
 
     // --- CUSTOM WORD FILTER ---
     const blockedWordsRaw = activeMedia?.blocked_words;
@@ -1798,37 +1797,23 @@ useEffect(() => {
         }
       }
     }
-    // --------------------------
-    
+
+    // ENGAGE LOCK
+    isSubmittingRef.current = true;
+    setIsPostingComment(true);
     setMessage("Posting comment...");
+
     let imageUrl = null;
     let audioUrl = null;
-
-    // --- BULLETPROOF RATE LIMIT (3 SECONDS) ---
-    const now = Date.now();
-    const lastPost = localStorage.getItem('lastCommentTime');
-    if (lastPost && now - lastPost < 3000) {
-      setIsPostingComment(false);
-      isSubmittingRef.current = false;
-      return setMessage("Please wait a moment before posting again.");
-    }
-    localStorage.setItem('lastCommentTime', now);
-    // ------------------------------------------
-
+    
     const submitComment = newComment;
     const submitReplyTarget = replyTarget;
     const submitImage = commentImage;
     const submitAudio = commentAudio;
 
     try {
-      // SAFETY CHECK: Verify the parent comment still exists before replying
       if (submitReplyTarget) {
-        const { data: parentExists } = await supabase
-          .from("comments")
-          .select("id")
-          .eq("id", submitReplyTarget)
-          .single();
-          
+        const { data: parentExists } = await supabase.from("comments").select("id").eq("id", submitReplyTarget).single();
         if (!parentExists) {
           setReplyTarget(null);
           setReplyingName("");
@@ -1836,51 +1821,51 @@ useEffect(() => {
         }
       }
 
-      // Upload Image if exists
       if (submitImage) {
-        const safeName = commentImage.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const safeName = submitImage.name.replace(/[^a-zA-Z0-9._-]/g, "_");
         const path = session.user.id + "/" + Date.now() + "-img-" + safeName;
-        const { error: imgErr } = await supabase.storage.from("comment-media").upload(path, commentImage);
+        const { error: imgErr } = await supabase.storage.from("comment-media").upload(path, submitImage);
         if (imgErr) throw imgErr;
         imageUrl = supabase.storage.from("comment-media").getPublicUrl(path).data.publicUrl;
       }
 
-      // Upload Audio if exists
       if (submitAudio) {
         const path = session.user.id + "/" + Date.now() + "-voice.webm";
-        const { error: audErr } = await supabase.storage.from("comment-media").upload(path, commentAudio);
+        const { error: audErr } = await supabase.storage.from("comment-media").upload(path, submitAudio);
         if (audErr) throw audErr;
         audioUrl = supabase.storage.from("comment-media").getPublicUrl(path).data.publicUrl;
       }
 
       const { data, error } = await supabase.from("comments").insert({
-        media_id: activeMedia.id, 
-        user_id: session.user.id, 
+        media_id: activeMedia.id,
+        user_id: session.user.id,
         content: submitComment.trim(),
         parent_id: submitReplyTarget ? submitReplyTarget : null,
         image_url: imageUrl,
         audio_url: audioUrl
       }).select("*, profiles(display_name, avatar_url)").single();
-      
+
       if (error) throw error;
-      
-      // Only add if it's not already in the list
+
+      // LAYER 3: DISPLAY CORRECTION (React deduplication)
       setComments(prev => prev.some(c => c.id === data.id) ? prev : [data, ...prev]);
+      
       setNewComment("");
       setCommentImage(null);
-      setCommentAudio(null); setCommentAudioUrl(null); setVoicePreviewPlaying(false); setVoicePreviewProgress(0);
+      setCommentAudio(null);
+      setCommentAudioUrl(null);
+      setVoicePreviewPlaying(false);
+      setVoicePreviewProgress(0);
       setReplyTarget(null);
       setReplyingName("");
       setMessage("Comment posted!");
-      
-      
-    } catch (err) { setMessage("Error: " + err.message); }
-    finally { 
-      // KEEP BUTTON LOCKED FOR 3 SECONDS
-      setTimeout(() => {
-        setIsPostingComment(false);
-        isSubmittingRef.current = false;
-      }, 3000);
+
+    } catch (err) {
+      setMessage("Error: " + err.message);
+    } finally {
+      // RELEASE LOCK
+      setIsPostingComment(false);
+      isSubmittingRef.current = false;
     }
   }
 
