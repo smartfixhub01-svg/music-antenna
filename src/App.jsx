@@ -1378,8 +1378,11 @@ useEffect(() => {
       setMessage("Playlist deleted.");
     } catch (err) { setMessage("Error: " + err.message); }
     finally { 
-      setIsPostingComment(false); 
-      isSubmittingRef.current = false;
+      // KEEP BUTTON LOCKED FOR 3 SECONDS
+      setTimeout(() => {
+        setIsPostingComment(false);
+        isSubmittingRef.current = false;
+      }, 3000);
     }
   }
 
@@ -1390,8 +1393,11 @@ useEffect(() => {
       setMessage("Removed from playlist.");
     } catch (err) { setMessage("Error: " + err.message); }
     finally { 
-      setIsPostingComment(false); 
-      isSubmittingRef.current = false;
+      // KEEP BUTTON LOCKED FOR 3 SECONDS
+      setTimeout(() => {
+        setIsPostingComment(false);
+        isSubmittingRef.current = false;
+      }, 3000);
     }
   }
 
@@ -1406,8 +1412,11 @@ useEffect(() => {
       setMessage("Playlist created! Now select it to add the video.");
     } catch (err) { setMessage("Error: " + err.message); }
     finally { 
-      setIsPostingComment(false); 
-      isSubmittingRef.current = false;
+      // KEEP BUTTON LOCKED FOR 3 SECONDS
+      setTimeout(() => {
+        setIsPostingComment(false);
+        isSubmittingRef.current = false;
+      }, 3000);
     }
   }
 
@@ -1419,8 +1428,11 @@ useEffect(() => {
       setShowPlaylistModal(false);
     } catch (err) { setMessage("Error: " + err.message); }
     finally { 
-      setIsPostingComment(false); 
-      isSubmittingRef.current = false;
+      // KEEP BUTTON LOCKED FOR 3 SECONDS
+      setTimeout(() => {
+        setIsPostingComment(false);
+        isSubmittingRef.current = false;
+      }, 3000);
     }
   }
 
@@ -1864,8 +1876,11 @@ useEffect(() => {
       
     } catch (err) { setMessage("Error: " + err.message); }
     finally { 
-      setIsPostingComment(false); 
-      isSubmittingRef.current = false;
+      // KEEP BUTTON LOCKED FOR 3 SECONDS
+      setTimeout(() => {
+        setIsPostingComment(false);
+        isSubmittingRef.current = false;
+      }, 3000);
     }
   }
 
