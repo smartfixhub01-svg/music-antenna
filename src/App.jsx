@@ -1777,6 +1777,21 @@ useEffect(() => {
     let audioUrl = null;
 
     try {
+      // SAFETY CHECK: Verify the parent comment still exists before replying
+      if (replyTarget) {
+        const { data: parentExists } = await supabase
+          .from("comments")
+          .select("id")
+          .eq("id", replyTarget)
+          .single();
+          
+        if (!parentExists) {
+          setReplyTarget(null);
+          setReplyingName("");
+          throw new Error("The comment you are replying to has been deleted.");
+        }
+      }
+
       // Upload Image if exists
       if (commentImage) {
         const safeName = commentImage.name.replace(/[^a-zA-Z0-9._-]/g, "_");
