@@ -1649,14 +1649,13 @@ useEffect(() => {
         if (error) throw error;
 
         if (commentData && commentData.user_id !== session?.user?.id) {
-          const { error: notifError } = await supabase.from("notifications").insert({
-            user_id: commentData.user_id,
-            actor_id: session.user.id,
-            video_id: commentData.media_id,
-            type: "comment_deleted",
-            message: `Your comment was removed by the creator (${profile?.display_name || "Creator"}).`
+          const { error: notifError } = await supabase.rpc('notify_comment_deleted', {
+            target_user_id: commentData.user_id,
+            actor_user_id: session.user.id,
+            target_media_id: commentData.media_id,
+            creator_name: profile?.display_name || "Creator"
           });
-          if (notifError) console.error("NOTIFICATION INSERT ERROR:", notifError);
+          if (notifError) console.error("RPC ERROR:", notifError);
         }
       if (error) throw error;
       setMessage("Comment deleted.");
