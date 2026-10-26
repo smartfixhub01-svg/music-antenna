@@ -5054,9 +5054,10 @@ document.body
                 
                 {/* Create Playlist Button (Only visible to owner) */}
                 {channelProfile?.id === session?.user?.id && (
-                  <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "16px" }}>
-                    <button onClick={() => setShowCreatePlaylistModal(true)} style={{ display: "flex", alignItems: "center", gap: "6px", background: "#ff365f", color: "white", border: "none", padding: "10px 16px", borderRadius: "10px", fontSize: "14px", fontWeight: "600", cursor: "pointer", boxShadow: "0 4px 12px rgba(255,54,95,0.3)" }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>add</span> Create Playlist
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+                    <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "700", color: "var(--ma-text)" }}>Channel Playlists</h3>
+                    <button onClick={() => setShowCreatePlaylistModal(true)} style={{ display: "flex", alignItems: "center", gap: "4px", background: "var(--ma-surface)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", padding: "8px 14px", borderRadius: "20px", fontSize: "13px", fontWeight: "600", cursor: "pointer" }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>add</span> Create
                     </button>
                   </div>
                 )}
@@ -5064,7 +5065,7 @@ document.body
                 {channelPlaylists.length === 0 ? (
                   <p className="yt-you-empty" style={{ textAlign: "center", marginTop: "20px", color: "var(--ma-text-secondary)" }}>No playlists found on this channel.</p>
                 ) : (
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: "16px" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
                     {channelPlaylists.map(playlist => {
                       // Find the first item with a thumbnail to use as cover
                       const firstItemWithThumb = playlist.playlist_items?.find(item => item.media?.thumbnail_path);
@@ -5073,28 +5074,30 @@ document.body
                         : null;
 
                       return (
-                        <div key={playlist.id} onClick={() => openPlaylist(playlist)} style={{ cursor: "pointer", background: "var(--ma-surface)", borderRadius: "12px", overflow: "hidden", border: "1px solid var(--ma-border)", display: "flex", flexDirection: "column" }}>
+                        <div key={playlist.id} onClick={() => openPlaylist(playlist)} style={{ cursor: "pointer", background: "var(--ma-surface)", borderRadius: "10px", overflow: "hidden", border: "1px solid var(--ma-border)", display: "flex", flexDirection: "column" }}>
                           {/* Cover Image */}
                           <div style={{ width: "100%", aspectRatio: "16/9", background: "var(--ma-bg)", position: "relative" }}>
                             {coverUrl ? (
-                              <img src={coverUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                            ) : (
-                              <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", color: "var(--ma-text-secondary)" }}>
-                                <span className="material-symbols-outlined" style={{ fontSize: "32px" }}>playlist_play</span>
-                              </div>
-                            )}
-                            <div style={{ position: "absolute", bottom: "4px", right: "4px", background: "rgba(0,0,0,0.8)", color: "white", fontSize: "10px", fontWeight: "bold", padding: "2px 6px", borderRadius: "4px", display: "flex", alignItems: "center", gap: "2px" }}>
-                              <span className="material-symbols-outlined" style={{ fontSize: "12px" }}>playlist_play</span>
+                              <img src={coverUrl} alt="" onError={(e) => { e.target.style.display = 'none'; }} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                            ) : null}
+                            {/* Fallback Icon (Always rendered underneath, image covers it) */}
+                            <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--ma-text-secondary)", position: "absolute", top: 0, left: 0, zIndex: -1 }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: "32px" }}>playlist_play</span>
+                            </div>
+                            
+                            <div style={{ position: "absolute", bottom: "6px", right: "6px", background: "rgba(0,0,0,0.8)", color: "white", fontSize: "10px", fontWeight: "bold", padding: "2px 6px", borderRadius: "4px", display: "flex", alignItems: "center", gap: "4px", backdropFilter: "blur(4px)" }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>playlist_play</span>
                               {playlist.playlist_items?.length || 0}
                             </div>
                           </div>
+                          
                           {/* Playlist Info */}
-                          <div style={{ padding: "10px" }}>
-                            <h4 style={{ margin: "0 0 4px 0", fontSize: "13px", fontWeight: "700", color: "var(--ma-text)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{playlist.title}</h4>
+                          <div style={{ padding: "10px", display: "flex", flexDirection: "column", gap: "4px" }}>
+                            <h4 style={{ margin: 0, fontSize: "13px", fontWeight: "700", color: "var(--ma-text)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{playlist.title}</h4>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                               <p style={{ margin: 0, fontSize: "11px", color: "var(--ma-text-secondary)" }}>{channelProfile?.display_name || "Creator"}</p>
                               {channelProfile?.id === session?.user?.id && (
-                                <button onClick={(e) => { e.stopPropagation(); handleDeletePlaylist(playlist.id); }} style={{ background: "transparent", border: 0, color: "#FF4E45", cursor: "pointer", padding: 0, display: "flex" }}>
+                                <button onClick={(e) => { e.stopPropagation(); handleDeletePlaylist(playlist.id); }} style={{ background: "transparent", border: 0, color: "#FF4E45", cursor: "pointer", padding: "4px" }}>
                                   <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>delete</span>
                                 </button>
                               )}
