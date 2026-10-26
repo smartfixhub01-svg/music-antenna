@@ -4971,7 +4971,13 @@ document.body
                         </span>
                       </button>
                       <div className="yt-video-row">
-                        <div className="yt-video-avatar">♫</div>
+                        <div className="yt-video-avatar" style={{ width: "32px", height: "32px", borderRadius: "50%", overflow: "hidden", flexShrink: 0, background: "#ff365f", display: "grid", placeItems: "center", color: "white", fontSize: "14px" }}>
+                          {item.profiles?.avatar_url || channelProfile?.avatar_url ? (
+                            <img loading="lazy" src={item.profiles?.avatar_url || channelProfile?.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          ) : (
+                            "♫"
+                          )}
+                        </div>
                         <div className="yt-video-info">
                           <h3 className="yt-video-title">{item.title}</h3>
                           <p className="yt-video-meta">
