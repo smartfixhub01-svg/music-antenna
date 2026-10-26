@@ -420,6 +420,18 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [comments, setComments] = useState([]);
+
+  // Auto-close Description Modal after 10 seconds
+  useEffect(() => {
+    let timer;
+    if (showDescModal) {
+      timer = setTimeout(() => {
+        setShowDescModal(false);
+      }, 10000); // 10 seconds
+    }
+    return () => clearTimeout(timer);
+  }, [showDescModal]);
+
   const [deletingCommentId, setDeletingCommentId] = useState(null);
   const [likedComments, setLikedComments] = useState([]);
   const [expandedReplies, setExpandedReplies] = useState([]);
@@ -5463,8 +5475,8 @@ document.body
           <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "100%", borderTopLeftRadius: "20px", borderTopRightRadius: "20px", padding: "24px 20px", paddingBottom: "40px", boxShadow: "0 -4px 20px rgba(0,0,0,0.15)", maxHeight: "60vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
               <h3 style={{ margin: 0, fontSize: "14px", fontWeight: "700" }}>Discrip</h3>
-              <button onClick={() => setShowDescModal(false)} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", cursor: "pointer", padding: "4px" }}>
-                <span className="material-symbols-outlined">close</span>
+              <button onClick={() => setShowDescModal(false)} style={{ background: "var(--ma-surface, #f0f0f0)", border: "1px solid var(--ma-border, #e5e5e5)", borderRadius: "50%", width: "32px", height: "32px", display: "grid", placeItems: "center", color: "var(--ma-text, #000)", cursor: "pointer" }}>
+                <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>close</span>
               </button>
             </div>
             <p style={{ margin: 0, fontSize: "13px", lineHeight: "1.5", whiteSpace: "pre-wrap", color: "var(--ma-text, #000)" }}>
