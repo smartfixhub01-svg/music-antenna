@@ -474,6 +474,11 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [channelProfile, setChannelProfile] = useState(null);
   const [channelMedia, setChannelMedia] = useState([]);
   const [channelPlaylists, setChannelPlaylists] = useState([]);
+  const [showCreatePlaylistModal, setShowCreatePlaylistModal] = useState(false);
+  const [newPlaylistTitle, setNewPlaylistTitle] = useState("");
+  const [newPlaylistDesc, setNewPlaylistDesc] = useState("");
+  const [newPlaylistVisibility, setNewPlaylistVisibility] = useState("public");
+  const [isCreatingPlaylist, setIsCreatingPlaylist] = useState(false);
 
   // Fetch Playlists for Channel
   useEffect(() => {
@@ -5006,6 +5011,16 @@ document.body
               
             {channelTab === "Playlists" && (
               <div style={{ padding: "0 16px 20px 16px" }}>
+                
+                {/* Create Playlist Button (Only visible to owner) */}
+                {channelProfile?.id === session?.user?.id && (
+                  <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "16px" }}>
+                    <button onClick={() => setShowCreatePlaylistModal(true)} style={{ display: "flex", alignItems: "center", gap: "6px", background: "#ff365f", color: "white", border: "none", padding: "10px 16px", borderRadius: "10px", fontSize: "14px", fontWeight: "600", cursor: "pointer", boxShadow: "0 4px 12px rgba(255,54,95,0.3)" }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>add</span> Create Playlist
+                    </button>
+                  </div>
+                )}
+
                 {channelPlaylists.length === 0 ? (
                   <p className="yt-you-empty" style={{ textAlign: "center", marginTop: "20px", color: "var(--ma-text-secondary)" }}>No playlists found on this channel.</p>
                 ) : (
@@ -5856,6 +5871,43 @@ document.body
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      
+      {showCreatePlaylistModal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 999999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }} onClick={() => setShowCreatePlaylistModal(false)}>
+          <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "90%", maxWidth: "400px", borderRadius: "16px", padding: "24px", border: "1px solid var(--ma-border, #e5e5e5)", boxShadow: "0 10px 40px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+              <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "700" }}>New Playlist</h3>
+              <button onClick={() => setShowCreatePlaylistModal(false)} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", cursor: "pointer" }}><span className="material-symbols-outlined">close</span></button>
+            </div>
+
+            <form onSubmit={handleCreatePlaylist} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              <div>
+                <label style={{ display: "block", fontSize: "12px", fontWeight: "600", color: "var(--ma-text-secondary, #666)", marginBottom: "6px" }}>Title *</label>
+                <input type="text" value={newPlaylistTitle} onChange={e => setNewPlaylistTitle(e.target.value)} required placeholder="e.g. Best of 2026" style={{ width: "100%", padding: "12px", borderRadius: "10px", background: "var(--ma-surface, #f2f2f2)", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #e5e5e5)", outline: "none" }} />
+              </div>
+              
+              <div>
+                <label style={{ display: "block", fontSize: "12px", fontWeight: "600", color: "var(--ma-text-secondary, #666)", marginBottom: "6px" }}>Description (Optional)</label>
+                <textarea value={newPlaylistDesc} onChange={e => setNewPlaylistDesc(e.target.value)} rows="3" placeholder="What is this playlist about?" style={{ width: "100%", padding: "12px", borderRadius: "10px", background: "var(--ma-surface, #f2f2f2)", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #e5e5e5)", outline: "none", resize: "none" }} />
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "12px", fontWeight: "600", color: "var(--ma-text-secondary, #666)", marginBottom: "6px" }}>Visibility</label>
+                <select value={newPlaylistVisibility} onChange={e => setNewPlaylistVisibility(e.target.value)} style={{ width: "100%", padding: "12px", borderRadius: "10px", background: "var(--ma-surface, #f2f2f2)", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #e5e5e5)", outline: "none" }}>
+                  <option value="public">Public (Everyone can see)</option>
+                  <option value="unlisted">Unlisted (Only people with link)</option>
+                  <option value="private">Private (Only you)</option>
+                </select>
+              </div>
+
+              <button type="submit" disabled={isCreatingPlaylist} style={{ marginTop: "8px", width: "100%", padding: "14px", background: "#ff365f", color: "white", border: "none", borderRadius: "10px", fontSize: "15px", fontWeight: "700", cursor: isCreatingPlaylist ? "not-allowed" : "pointer", opacity: isCreatingPlaylist ? 0.7 : 1 }}>
+                {isCreatingPlaylist ? "Creating..." : "Create Playlist"}
+              </button>
+            </form>
           </div>
         </div>
       )}
