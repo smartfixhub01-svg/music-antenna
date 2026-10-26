@@ -5753,15 +5753,15 @@ document.body
         <section style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: "56px", background: "var(--ma-bg, #fff)", zIndex: 99999, display: "flex", flexDirection: "column", overflowY: "auto" }}>
           
           {/* Top Bar */}
-          <div style={{ display: "flex", alignItems: "center", padding: "16px", borderBottom: "1px solid var(--ma-border, #e5e5e5)", background: "var(--ma-bg, #fff)", position: "sticky", top: 0, zIndex: 10 }}>
-            <button onClick={() => setShowPlaylistDetailPage(false)} style={{ background: "transparent", border: 0, color: "var(--ma-text, #000)", cursor: "pointer", padding: "8px", display: "flex" }}>
-              <span className="material-symbols-outlined">arrow_back</span>
+          <div style={{ display: "flex", alignItems: "center", padding: "12px 16px", borderBottom: "1px solid var(--ma-border, #e5e5e5)", background: "var(--ma-bg, #fff)", position: "sticky", top: 0, zIndex: 10 }}>
+            <button onClick={() => setShowPlaylistDetailPage(false)} style={{ background: "var(--ma-surface, #f2f2f2)", border: "1px solid var(--ma-border, #e5e5e5)", borderRadius: "50%", width: "36px", height: "36px", display: "grid", placeItems: "center", color: "var(--ma-text, #000)", cursor: "pointer", flexShrink: 0 }}>
+              <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>close</span>
             </button>
-            <h2 style={{ margin: 0, fontSize: "18px", fontWeight: "700", color: "var(--ma-text, #000)", marginLeft: "8px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{selectedPlaylist.title}</h2>
+            <h2 style={{ margin: 0, fontSize: "18px", fontWeight: "700", color: "var(--ma-text, #000)", marginLeft: "12px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{selectedPlaylist.title}</h2>
           </div>
 
           {/* Header Content */}
-          <div style={{ padding: "24px 16px", background: "linear-gradient(to bottom, var(--ma-surface), var(--ma-bg))", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
+          <div style={{ padding: "24px 16px", background: "linear-gradient(to bottom, var(--ma-bg), var(--ma-surface))", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
             <h1 style={{ margin: "0 0 8px 0", fontSize: "24px", fontWeight: "800", color: "var(--ma-text, #000)" }}>{selectedPlaylist.title}</h1>
             <p style={{ margin: "0 0 16px 0", fontSize: "13px", color: "var(--ma-text-secondary, #666)" }}>{selectedPlaylist.description || "No description provided."}</p>
             
@@ -5784,7 +5784,7 @@ document.body
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                 {playlistItems.map((item, index) => (
-                  <div key={item.id} onClick={() => openPlayer(item)} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px", background: "var(--ma-surface, #f0f0f0)", borderRadius: "10px", cursor: "pointer", border: "1px solid var(--ma-border, transparent)" }}>
+                  <div key={item.id} onClick={() => openPlayer(item)} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px", background: "var(--ma-surface, #f0f0f0)", borderRadius: "10px", cursor: "pointer", border: "1px solid var(--ma-border, #e5e5e5)" }}>
                     <span style={{ fontSize: "14px", fontWeight: "600", color: "var(--ma-text-secondary)", width: "20px", textAlign: "center" }}>{index + 1}</span>
                     <div style={{ width: "48px", height: "48px", borderRadius: "6px", overflow: "hidden", background: "var(--ma-bg)", flexShrink: 0 }}>
                       {item.thumbnail_path ? (
