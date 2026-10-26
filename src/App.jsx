@@ -3202,6 +3202,7 @@ document.body
                   case "subscribe": icon = "person_add"; message = `subscribed to your channel.`; actionColor = "#FF365F"; break;
                   case "new_video": icon = "video_library"; message = `released a new video. Tap play to watch.`; actionColor = "#F5A623"; break;
                   case "upload": icon = "upload"; message = `Your upload was successful.`; actionColor = "#2BA640"; break;
+                  case "comment_deleted": icon = "delete"; message = `removed your comment.`; actionColor = "#FF4E45"; break;
                   default: icon = "info"; message = `interacted with your content.`;
                 }
 
