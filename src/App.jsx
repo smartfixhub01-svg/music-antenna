@@ -242,6 +242,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [showHistoryPage, setShowHistoryPage] = useState(false);
   const [showPlaylistModal, setShowPlaylistModal] = useState(false);
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
+  const [showPlaylistDetailPage, setShowPlaylistDetailPage] = useState(false);
   const [playlistItems, setPlaylistItems] = useState([]);
   const [playlistLoading, setPlaylistLoading] = useState(false);
   const [showAllPlaylists, setShowAllPlaylists] = useState(false);
@@ -5072,7 +5073,7 @@ document.body
                         : null;
 
                       return (
-                        <div key={playlist.id} style={{ background: "var(--ma-surface)", borderRadius: "12px", overflow: "hidden", border: "1px solid var(--ma-border)", display: "flex", flexDirection: "column" }}>
+                        <div key={playlist.id} onClick={() => openPlaylist(playlist)} style={{ cursor: "pointer", background: "var(--ma-surface)", borderRadius: "12px", overflow: "hidden", border: "1px solid var(--ma-border)", display: "flex", flexDirection: "column" }}>
                           {/* Cover Image */}
                           <div style={{ width: "100%", aspectRatio: "16/9", background: "var(--ma-bg)", position: "relative" }}>
                             {coverUrl ? (
@@ -5747,6 +5748,63 @@ document.body
           <small>You</small>
         </button>
       </nav>
+      
+      {showPlaylistDetailPage && selectedPlaylist && (
+        <section style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: "56px", background: "var(--ma-bg, #fff)", zIndex: 99999, display: "flex", flexDirection: "column", overflowY: "auto" }}>
+          
+          {/* Top Bar */}
+          <div style={{ display: "flex", alignItems: "center", padding: "16px", borderBottom: "1px solid var(--ma-border, #e5e5e5)", background: "var(--ma-bg, #fff)", position: "sticky", top: 0, zIndex: 10 }}>
+            <button onClick={() => setShowPlaylistDetailPage(false)} style={{ background: "transparent", border: 0, color: "var(--ma-text, #000)", cursor: "pointer", padding: "8px", display: "flex" }}>
+              <span className="material-symbols-outlined">arrow_back</span>
+            </button>
+            <h2 style={{ margin: 0, fontSize: "18px", fontWeight: "700", color: "var(--ma-text, #000)", marginLeft: "8px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{selectedPlaylist.title}</h2>
+          </div>
+
+          {/* Header Content */}
+          <div style={{ padding: "24px 16px", background: "linear-gradient(to bottom, var(--ma-surface), var(--ma-bg))", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
+            <h1 style={{ margin: "0 0 8px 0", fontSize: "24px", fontWeight: "800", color: "var(--ma-text, #000)" }}>{selectedPlaylist.title}</h1>
+            <p style={{ margin: "0 0 16px 0", fontSize: "13px", color: "var(--ma-text-secondary, #666)" }}>{selectedPlaylist.description || "No description provided."}</p>
+            
+            <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "20px" }}>
+              <span style={{ fontSize: "12px", color: "var(--ma-text, #000)", fontWeight: "600" }}>{playlistItems.length} tracks</span>
+              <span style={{ fontSize: "12px", color: "var(--ma-text-secondary, #666)", textTransform: "capitalize" }}>{selectedPlaylist.visibility}</span>
+            </div>
+
+            <button onClick={playAllPlaylist} disabled={playlistItems.length === 0} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", width: "100%", padding: "14px", background: "#ff365f", color: "white", border: "none", borderRadius: "12px", fontSize: "16px", fontWeight: "700", cursor: playlistItems.length === 0 ? "not-allowed" : "pointer", opacity: playlistItems.length === 0 ? 0.5 : 1, boxShadow: "0 4px 12px rgba(255,54,95,0.3)" }}>
+              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span> Play All
+            </button>
+          </div>
+
+          {/* Track List */}
+          <div style={{ padding: "16px", flex: 1 }}>
+            {playlistLoading ? (
+              <p style={{ textAlign: "center", color: "var(--ma-text-secondary)" }}>Loading tracks...</p>
+            ) : playlistItems.length === 0 ? (
+              <p style={{ textAlign: "center", color: "var(--ma-text-secondary)" }}>This playlist is empty.</p>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {playlistItems.map((item, index) => (
+                  <div key={item.id} onClick={() => openPlayer(item)} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px", background: "var(--ma-surface, #f0f0f0)", borderRadius: "10px", cursor: "pointer", border: "1px solid var(--ma-border, transparent)" }}>
+                    <span style={{ fontSize: "14px", fontWeight: "600", color: "var(--ma-text-secondary)", width: "20px", textAlign: "center" }}>{index + 1}</span>
+                    <div style={{ width: "48px", height: "48px", borderRadius: "6px", overflow: "hidden", background: "var(--ma-bg)", flexShrink: 0 }}>
+                      {item.thumbnail_path ? (
+                        <img src={supabase.storage.from(BUCKET).getPublicUrl(item.thumbnail_path).data.publicUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      ) : (
+                        <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", color: "var(--ma-text-secondary)" }}>♫</div>
+                      )}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <h4 style={{ margin: "0 0 4px 0", fontSize: "14px", fontWeight: "600", color: "var(--ma-text, #000)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.title}</h4>
+                      <p style={{ margin: 0, fontSize: "12px", color: "var(--ma-text-secondary, #666)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.media_type === "video" ? "Video" : "Audio"}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
       {showPlaylistModal && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }} onClick={() => setShowPlaylistModal(false)}>
           <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "90%", maxWidth: "400px", borderRadius: "16px", padding: "24px", border: "1px solid var(--ma-border, #e5e5e5)", boxShadow: "0 10px 40px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
