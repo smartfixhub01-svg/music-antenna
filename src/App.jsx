@@ -393,6 +393,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
 
   const viewCountedRef = useRef(false);
   const [uploadTitle, setUploadTitle] = useState("");
+  const [uploadBlockedWords, setUploadBlockedWords] = useState("");
   const [uploadDescription, setUploadDescription] = useState("");
   const [uploadFile, setUploadFile] = useState(null);
   const [allowDownload, setAllowDownload] = useState(false);
@@ -1733,7 +1734,7 @@ useEffect(() => {
     if (!newComment.trim() && !commentImage && !commentAudio) return;
 
     // --- CUSTOM WORD FILTER ---
-    const blockedWordsRaw = activeMedia?.profiles?.blocked_words;
+    const blockedWordsRaw = activeMedia?.blocked_words;
     if (blockedWordsRaw && newComment.trim()) {
       const blockedList = blockedWordsRaw.split(',').map(w => w.trim().toLowerCase()).filter(w => w);
       const commentLower = newComment.toLowerCase();
@@ -2211,6 +2212,7 @@ useEffect(() => {
         : null;
 
       const { error: insertError } = await supabase.from("media").insert({
+        blocked_words: uploadBlockedWords.trim(),
         artist_id: session.user.id,
         title: uploadTitle.trim(),
         description: uploadDescription.trim(),
@@ -3722,6 +3724,17 @@ document.body
                     <option>Sports</option>
                     <option>Other</option>
                   </select>
+                </label>
+
+                <label className="yt-upload-field">
+                  <span>Blocked Words (Optional)</span>
+                  <input 
+                    value={uploadBlockedWords} 
+                    onChange={(e) => setUploadBlockedWords(e.target.value)} 
+                    placeholder="E.g. scam, ugly, hate (comma separated)" 
+                    maxLength={100} 
+                  />
+                  <small className="yt-upload-hint">Comments containing these words will be automatically blocked on this video.</small>
                 </label>
 
                 <label className="yt-upload-field">
