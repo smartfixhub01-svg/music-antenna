@@ -5701,7 +5701,7 @@ document.body
               {comments.length === 0 ? (
                 <p style={{ color: "var(--ma-text-secondary, #666)", textAlign: "center", marginTop: "40px" }}>No comments yet. Be the first!</p>
               ) : (
-                comments.map(c => (
+                comments.filter(c => !c.parent_id).map(c => (
                   <div key={c.id} style={{ display: "flex", gap: "10px", marginBottom: "16px", alignItems: "flex-start", textAlign: "left" }}>
                     
                     {/* Avatar - Smaller */}
