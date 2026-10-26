@@ -1792,13 +1792,26 @@ useEffect(() => {
     let imageUrl = null;
     let audioUrl = null;
 
+    // 1. Capture current values into temporary variables
+    const submitComment = newComment;
+    const submitReplyTarget = replyTarget;
+    const submitImage = commentImage;
+    const submitAudio = commentAudio;
+
+    // 2. IMMEDIATELY CLEAR THE UI so a double click hits an empty form
+    setNewComment("");
+    setCommentImage(null);
+    setCommentAudio(null);
+    setReplyTarget(null);
+    setReplyingName("");
+
     try {
       // SAFETY CHECK: Verify the parent comment still exists before replying
-      if (replyTarget) {
+      if (submitReplyTarget) {
         const { data: parentExists } = await supabase
           .from("comments")
           .select("id")
-          .eq("id", replyTarget)
+          .eq("id", submitReplyTarget)
           .single();
           
         if (!parentExists) {
@@ -1809,7 +1822,7 @@ useEffect(() => {
       }
 
       // Upload Image if exists
-      if (commentImage) {
+      if (submitImage) {
         const safeName = commentImage.name.replace(/[^a-zA-Z0-9._-]/g, "_");
         const path = session.user.id + "/" + Date.now() + "-img-" + safeName;
         const { error: imgErr } = await supabase.storage.from("comment-media").upload(path, commentImage);
@@ -1818,7 +1831,7 @@ useEffect(() => {
       }
 
       // Upload Audio if exists
-      if (commentAudio) {
+      if (submitAudio) {
         const path = session.user.id + "/" + Date.now() + "-voice.webm";
         const { error: audErr } = await supabase.storage.from("comment-media").upload(path, commentAudio);
         if (audErr) throw audErr;
@@ -1828,8 +1841,8 @@ useEffect(() => {
       const { data, error } = await supabase.from("comments").insert({
         media_id: activeMedia.id, 
         user_id: session.user.id, 
-        content: newComment.trim(),
-        parent_id: replyTarget ? replyTarget : null,
+        content: submitComment.trim(),
+        parent_id: submitReplyTarget ? submitReplyTarget : null,
         image_url: imageUrl,
         audio_url: audioUrl
       }).select("*, profiles(display_name, avatar_url)").single();
