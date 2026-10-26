@@ -4552,6 +4552,9 @@ document.body
               aria-label="Back"
               onClick={() => {
                 setShowChannelPage(false);
+                if (channelProfile?.id === session?.user?.id) {
+                  setShowAccountPage(true);
+                }
                 setChannelProfile(null);
                 setChannelMedia([]);
               }}
