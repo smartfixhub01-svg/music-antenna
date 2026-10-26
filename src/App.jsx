@@ -1558,7 +1558,7 @@ useEffect(() => {
       
       setMessage("Video updated successfully!");
       setEditingMedia(null);
-      openManagePage(); // Refresh list
+      openManagePage("channel"); // Refresh list
       loadMedia(); // Refresh home feed
     } catch (err) {
       setMessage("Error updating: " + err.message);
@@ -1576,7 +1576,7 @@ useEffect(() => {
       
       setMessage("Video deleted.");
       if (editingMedia?.id === id) setEditingMedia(null);
-      openManagePage();
+      openManagePage("channel");
       loadMedia();
     } catch (err) {
       setMessage("Error deleting: " + err.message);
@@ -4425,7 +4425,7 @@ document.body
                 <p className="yt-watch-channel-sub">{subscriberCount} subscribers</p>
               </div>
               {activeMedia.artist_id === session?.user?.id ? (
-                <button className="yt-watch-subscribe" onClick={() => { setActiveMedia(null); setShowWatchPage(false); openManagePage(); }}>
+                <button className="yt-watch-subscribe" onClick={() => { setActiveMedia(null); setShowWatchPage(false); openManagePage("channel"); }}>
                   Edit video
                 </button>
               ) : (
@@ -4600,7 +4600,7 @@ document.body
                   <button onClick={() => { setShowAccountPage(false); setShowUpload(true); }} style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #e5e5e5)", padding: "10px", borderRadius: "8px", fontSize: "12px", fontWeight: "500", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px", cursor: "pointer" }}>
                     <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>upload</span> Upload
                   </button>
-                  <button onClick={() => { setShowAccountPage(false); openManagePage(); }} style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #e5e5e5)", padding: "10px", borderRadius: "8px", fontSize: "12px", fontWeight: "500", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px", cursor: "pointer" }}>
+                  <button onClick={() => { setShowAccountPage(false); openManagePage("channel"); }} style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #e5e5e5)", padding: "10px", borderRadius: "8px", fontSize: "12px", fontWeight: "500", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px", cursor: "pointer" }}>
                     <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>format_list_bulleted</span> Manage
                   </button>
                   <button onClick={openAnalytics} style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #e5e5e5)", padding: "10px", borderRadius: "8px", fontSize: "12px", fontWeight: "500", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px", cursor: "pointer" }}>
@@ -4969,7 +4969,7 @@ document.body
                     className={"yt-channel-tab" + (channelTab === t ? " yt-channel-tab-active" : "")}
                     onClick={() => {
                       if (t === "Manage") {
-                        openManagePage();
+                        openManagePage("channel");
                       } else {
                         setChannelTab(t);
                       }
