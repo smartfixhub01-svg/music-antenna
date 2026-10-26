@@ -5472,7 +5472,7 @@ document.body
       )}
       {showDescModal && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 100000, display: "flex", alignItems: "flex-end", backdropFilter: "blur(4px)" }} onClick={() => setShowDescModal(false)}>
-          <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "100%", borderTopLeftRadius: "20px", borderTopRightRadius: "20px", padding: "24px 20px", paddingBottom: "40px", boxShadow: "0 -4px 20px rgba(0,0,0,0.15)", maxHeight: "60vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+          <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "100%", borderTopLeftRadius: "20px", borderTopRightRadius: "20px", padding: "24px 20px", paddingBottom: "40px", boxShadow: "0 -10px 40px rgba(0,0,0,0.3)", maxHeight: "60vh", overflowY: "auto", borderTop: "1px solid var(--ma-border, #e5e5e5)" }} onClick={e => e.stopPropagation()}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
               <h3 style={{ margin: 0, fontSize: "14px", fontWeight: "700" }}>Discrip</h3>
               <button onClick={() => setShowDescModal(false)} style={{ background: "var(--ma-surface, #f0f0f0)", border: "1px solid var(--ma-border, #e5e5e5)", borderRadius: "50%", width: "32px", height: "32px", display: "grid", placeItems: "center", color: "var(--ma-text, #000)", cursor: "pointer" }}>
