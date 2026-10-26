@@ -388,6 +388,8 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [selectedNotifs, setSelectedNotifs] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showClearNotifModal, setShowClearNotifModal] = useState(false);
+  const [isPostingComment, setIsPostingComment] = useState(false);
   const [activeNotification, setActiveNotification] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isShortUpload, setIsShortUpload] = useState(false);
@@ -1374,6 +1376,7 @@ useEffect(() => {
       setSelectedPlaylist(null);
       setMessage("Playlist deleted.");
     } catch (err) { setMessage("Error: " + err.message); }
+    finally { setIsPostingComment(false); }
   }
 
   async function removeFromPlaylist(itemId) {
@@ -1382,6 +1385,7 @@ useEffect(() => {
       setPlaylistItems(prev => prev.filter(i => i.id !== itemId));
       setMessage("Removed from playlist.");
     } catch (err) { setMessage("Error: " + err.message); }
+    finally { setIsPostingComment(false); }
   }
 
   async function handleCreatePlaylist(e) {
@@ -1394,6 +1398,7 @@ useEffect(() => {
       setNewPlaylistName("");
       setMessage("Playlist created! Now select it to add the video.");
     } catch (err) { setMessage("Error: " + err.message); }
+    finally { setIsPostingComment(false); }
   }
 
   async function addToPlaylist(playlistId) {
@@ -1403,6 +1408,7 @@ useEffect(() => {
       setMessage(error ? "Video is already in this playlist." : "Added to playlist!");
       setShowPlaylistModal(false);
     } catch (err) { setMessage("Error: " + err.message); }
+    finally { setIsPostingComment(false); }
   }
 
   async function openLikedPage() {
@@ -1748,8 +1754,10 @@ useEffect(() => {
 
   async function handlePostComment(e) {
     e.preventDefault();
+    if (isPostingComment) return;
     if (!session?.user?.id) return setMessage("Sign in to comment.");
     if (!newComment.trim() && !commentImage && !commentAudio) return;
+    setIsPostingComment(true);
 
     // --- CUSTOM WORD FILTER ---
     const blockedWordsRaw = activeMedia?.blocked_words;
@@ -1807,6 +1815,7 @@ useEffect(() => {
       
       
     } catch (err) { setMessage("Error: " + err.message); }
+    finally { setIsPostingComment(false); }
   }
 
     async function checkSubscription(channelId) {
@@ -3175,6 +3184,31 @@ document.body
         </div>
       )}
 
+      
+      {showClearNotifModal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 9999999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }} onClick={() => setShowClearNotifModal(false)}>
+          <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "85%", maxWidth: "320px", borderRadius: "16px", padding: "24px", boxShadow: "0 10px 30px rgba(0,0,0,0.2)", textAlign: "center" }} onClick={e => e.stopPropagation()}>
+            <h3 style={{ margin: "0 0 12px 0", fontSize: "18px", fontWeight: "700" }}>Clear Activity Log</h3>
+            <p style={{ margin: "0 0 24px 0", fontSize: "14px", color: "var(--ma-text-secondary, #666)", lineHeight: "1.4" }}>
+              Are you sure you want to clear all notifications? This cannot be undone.
+            </p>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+              <button onClick={() => setShowClearNotifModal(false)} style={{ flex: 1, padding: "12px", borderRadius: "10px", border: "1px solid var(--ma-border, #e5e5e5)", background: "transparent", color: "var(--ma-text, #000)", fontWeight: "600", fontSize: "14px", cursor: "pointer" }}>
+                Cancel
+              </button>
+              <button onClick={async () => {
+                await supabase.from("notifications").delete().eq("user_id", session.user.id);
+                setNotifications([]);
+                setUnreadCount(0);
+                setShowClearNotifModal(false);
+              }} style={{ flex: 1, padding: "12px", borderRadius: "10px", border: "none", background: "#ff365f", color: "#ffffff", fontWeight: "600", fontSize: "14px", cursor: "pointer", boxShadow: "0 4px 12px rgba(255,54,95,0.3)" }}>
+                Clear All
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {showNotifications && createPortal(
         <section style={{ position: "fixed", inset: 0, zIndex: 21474836479, background: "var(--ma-bg-primary)", display: "flex", flexDirection: "column" }}>
           
