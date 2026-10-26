@@ -1648,14 +1648,7 @@ useEffect(() => {
         const { error } = await supabase.from("comments").delete().eq("id", commentId);
         if (error) throw error;
 
-        alert(`DEBUG INFO:
-Comment Data Found: ${commentData ? 'YES' : 'NO'}
-My ID (Creator): ${session?.user?.id}
-Comment Owner ID: ${commentData?.user_id}
-Condition Met (Different User?): ${commentData && commentData.user_id !== session?.user?.id}`);
-
         if (commentData && commentData.user_id !== session?.user?.id) {
-          alert("Attempting to insert notification...");
           const { error: notifError } = await supabase.from("notifications").insert({
             user_id: commentData.user_id,
             actor_id: session.user.id,
