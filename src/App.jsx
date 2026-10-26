@@ -1643,7 +1643,20 @@ useEffect(() => {
     
     try {
       // 2. Delete ONLY the specific comment ID from the database
-      const { error } = await supabase.from("comments").delete().eq("id", commentId);
+      const { data: commentData } = await supabase.from("comments").select("user_id, media_id").eq("id", commentId).single();
+        
+        const { error } = await supabase.from("comments").delete().eq("id", commentId);
+        if (error) throw error;
+
+        if (commentData && commentData.user_id !== session?.user?.id) {
+          await supabase.from("notifications").insert({
+            user_id: commentData.user_id,
+            actor_id: session.user.id,
+            video_id: commentData.media_id,
+            type: "comment_deleted",
+            message: `Your comment was removed by the creator (${profile?.display_name || "Creator"}).`
+          });
+        }
       if (error) throw error;
       setMessage("Comment deleted.");
     } catch (err) { 
