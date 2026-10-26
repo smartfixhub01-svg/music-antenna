@@ -1263,39 +1263,37 @@ useEffect(() => {
         .order("created_at", { ascending: false });
       setComments(data || []);
 
-      // NEW: Fetch user's liked comments from DB
-      if (session?.user?.id) {
-        const { data: userLikes } = await supabase.from("comment_likes")
-          .select("comment_id")
-          .eq("user_id", session.user.id);
-        if (userLikes) setLikedComments(userLikes.map(l => l.comment_id));
-      } else {
-        setLikedComments([]);
-      }
+      // Load persistent comment likes once for this media.
+      const commentIds = (data || []).map(comment => comment.id);
+      let likeRows = [];
 
-      // NEW: Fetch which comments this user has already liked from the DB
-      if (session?.user?.id) {
-        const { data: userLikes } = await supabase
+      if (commentIds.length > 0) {
+        const { data: rows, error: likesError } = await supabase
           .from("comment_likes")
-          .select("comment_id")
-          .eq("user_id", session.user.id);
-        
-        if (userLikes) {
-          setLikedComments(userLikes.map(l => l.comment_id));
-        }
-      } else {
-        setLikedComments([]);
+          .select("comment_id, user_id")
+          .in("comment_id", commentIds);
+
+        if (likesError) throw likesError;
+        likeRows = rows || [];
       }
 
-      // Fetch which comments THIS user has liked
-      if (session?.user?.id) {
-        const { data: userLikes } = await supabase.from("comment_likes")
-          .select("comment_id")
-          .eq("user_id", session.user.id);
-        if (userLikes) {
-          setLikedComments(userLikes.map(l => l.comment_id));
-        }
+      const likeCounts = {};
+      for (const row of likeRows) {
+        likeCounts[row.comment_id] = (likeCounts[row.comment_id] || 0) + 1;
       }
+
+      setComments((data || []).map(comment => ({
+        ...comment,
+        likes: likeCounts[comment.id] || 0
+      })));
+
+      setLikedComments(
+        session?.user?.id
+          ? likeRows
+              .filter(row => row.user_id === session.user.id)
+              .map(row => row.comment_id)
+          : []
+      );
     } catch (e) { console.error(e); }
     setCommentsLoading(false);
   }
@@ -1606,39 +1604,52 @@ useEffect(() => {
   }
 
   async function handleLikeComment(commentId, currentLikes, e) {
-    if (e) e.preventDefault(); // Stop event bubbling
-    if (!session?.user?.id) return setMessage("Sign in to like comments.");
-    
-    const isLiked = likedComments.includes(commentId);
-    
-    // Optimistic UI update
-    if (isLiked) {
-      setLikedComments(prev => prev.filter(id => id !== commentId));
-      setComments(prev => prev.map(c => c.id === commentId ? { ...c, likes: Math.max(0, (c.likes || 0) - 1) } : c));
-    } else {
-      setLikedComments(prev => [...prev, commentId]);
-      setComments(prev => prev.map(c => c.id === commentId ? { ...c, likes: (c.likes || 0) + 1 } : c));
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    if (!session?.user?.id) {
+      setMessage("Sign in to like comments.");
+      return;
     }
+
+    const userId = session.user.id;
+    const isLiked = likedComments.includes(commentId);
 
     try {
       if (isLiked) {
-        // Remove from real DB table
-        await supabase.from("comment_likes").delete().eq("comment_id", commentId).eq("user_id", session.user.id);
+        const { error } = await supabase
+          .from("comment_likes")
+          .delete()
+          .eq("comment_id", commentId)
+          .eq("user_id", userId);
+        if (error) throw error;
       } else {
-        // Add to real DB table
-        const { error } = await supabase.from("comment_likes").insert({ comment_id: commentId, user_id: session.user.id });
-        if (error && error.code !== '23505') throw error; // Ignore unique violation
+        const { error } = await supabase
+          .from("comment_likes")
+          .insert({ comment_id: commentId, user_id: userId });
+        if (error && error.code !== "23505") throw error;
       }
-    } catch (err) { 
-      // Revert on failure
-      if (isLiked) {
-        setLikedComments(prev => [...prev, commentId]);
-        setComments(prev => prev.map(c => c.id === commentId ? { ...c, likes: (c.likes || 0) + 1 } : c));
-      } else {
-        setLikedComments(prev => prev.filter(id => id !== commentId));
-        setComments(prev => prev.map(c => c.id === commentId ? { ...c, likes: Math.max(0, (c.likes || 0) - 1) } : c));
-      }
-      setMessage(err.message); 
+
+      // Reflect the successful database change immediately.
+      setLikedComments(prev =>
+        isLiked
+          ? prev.filter(id => id !== commentId)
+          : prev.includes(commentId) ? prev : [...prev, commentId]
+      );
+
+      const { count, error: countError } = await supabase
+        .from("comment_likes")
+        .select("*", { count: "exact", head: true })
+        .eq("comment_id", commentId);
+
+      if (countError) throw countError;
+
+      setComments(prev => prev.map(comment =>
+        comment.id === commentId
+          ? { ...comment, likes: count ?? 0 }
+          : comment
+      ));
+    } catch (err) {
+      console.error("Unable to update comment like:", err);
+      setMessage(err.message || "Couldn't update comment like. Please try again.");
     }
   }
 
@@ -5817,7 +5828,7 @@ document.body
                       {/* Action Row - Tighter */}
                       {editingCommentId !== c.id && (
                         <div style={{ display: "flex", gap: "16px", alignItems: "center", width: "100%", marginTop: "8px" }}>
-                          <button onClick={() => handleLikeComment(c.id, c.likes || 0)} style={{ background: "transparent", border: 0, color: likedComments.includes(c.id) ? "#ff365f" : "var(--ma-text-secondary, #666)", display: "flex", alignItems: "center", gap: "3px", fontSize: "11px", padding: 0, cursor: "pointer" }}>
+                          <button onClick={(e) => handleLikeComment(c.id, c.likes || 0, e)} style={{ background: "transparent", border: 0, color: likedComments.includes(c.id) ? "#ff365f" : "var(--ma-text-secondary, #666)", display: "flex", alignItems: "center", gap: "3px", fontSize: "11px", padding: 0, cursor: "pointer" }}>
                             <span className="material-symbols-outlined" style={{ fontSize: "14px", fontVariationSettings: likedComments.includes(c.id) ? "'FILL' 1" : "'FILL' 0" }}>thumb_up</span> {c.likes || 0}
                           </button>
                           
@@ -5859,6 +5870,30 @@ document.body
                                   <span style={{ fontSize: "10px", color: "var(--ma-text-secondary, #666)" }}>{timeAgo(reply.created_at)}</span>
                                 </div>
                                 <p style={{ margin: "2px 0 0 0", fontSize: "13px", color: "var(--ma-text, #000)", lineHeight: 1.3 }}>{reply.content}</p>
+                                <button
+                                  onClick={(e) => handleLikeComment(reply.id, reply.likes || 0, e)}
+                                  style={{
+                                    background: "transparent",
+                                    border: 0,
+                                    color: likedComments.includes(reply.id) ? "#ff365f" : "var(--ma-text-secondary, #666)",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: "3px",
+                                    fontSize: "11px",
+                                    padding: 0,
+                                    marginTop: "6px",
+                                    cursor: "pointer"
+                                  }}
+                                >
+                                  <span
+                                    className="material-symbols-outlined"
+                                    style={{
+                                      fontSize: "14px",
+                                      fontVariationSettings: likedComments.includes(reply.id) ? "'FILL' 1" : "'FILL' 0"
+                                    }}
+                                  >thumb_up</span>
+                                  {reply.likes || 0}
+                                </button>
                               </div>
                             </div>
                           ))}
