@@ -388,6 +388,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [selectedNotifs, setSelectedNotifs] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [activeNotification, setActiveNotification] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isShortUpload, setIsShortUpload] = useState(false);
 
@@ -1656,9 +1657,9 @@ useEffect(() => {
             creator_name: profile?.display_name || "Creator"
           });
           if (notifError) {
-            alert("RPC ERROR: " + notifError.message);
+            console.error("RPC ERROR:", notifError);
           } else {
-            alert("Notification inserted successfully!");
+            console.log("Notification inserted successfully!");
           }
         }
       if (error) throw error;
@@ -3152,7 +3153,29 @@ document.body
               <span className="material-symbols-outlined">notifications</span>
               {unreadCount > 0 && <span className="yt-nav-badge" style={{ position: "absolute", top: 4, right: 4, background: "red", color: "white", borderRadius: "10px", padding: "2px 6px", fontSize: "10px", fontWeight: "bold" }}>{unreadCount}</span>}
             </button>
-            {showNotifications && createPortal(
+            
+      {activeNotification && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 9999999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(2px)" }} onClick={() => setActiveNotification(null)}>
+          <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "85%", maxWidth: "340px", borderRadius: "16px", padding: "24px", border: "1px solid var(--ma-border, #e5e5e5)", boxShadow: "0 10px 40px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
+              <span className="material-symbols-outlined" style={{ color: "#FF4E45", fontSize: "24px" }}>delete</span>
+              <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "700" }}>Comment Removed</h3>
+            </div>
+            <p style={{ margin: "0 0 16px 0", fontSize: "14px", color: "var(--ma-text-secondary, #666)", lineHeight: "1.5" }}>
+              <strong style={{ color: "var(--ma-text, #000)" }}>{activeNotification.actor?.display_name || "Creator"}</strong> removed the comment you posted on their video.
+            </p>
+            <div style={{ padding: "12px", background: "var(--ma-surface, #f0f0f0)", borderRadius: "8px", borderLeft: "3px solid #FF4E45", marginBottom: "20px" }}>
+              <p style={{ margin: "0 0 4px 0", fontSize: "11px", color: "var(--ma-text-secondary, #888)", textTransform: "uppercase", fontWeight: "700" }}>Your Comment:</p>
+              <p style={{ margin: 0, fontSize: "13px", fontStyle: "italic", color: "var(--ma-text, #000)" }}>"{activeNotification.comment_text || "Content not available"}"</p>
+            </div>
+            <button onClick={() => setActiveNotification(null)} style={{ width: "100%", padding: "12px", borderRadius: "10px", background: "var(--ma-surface, #f0f0f0)", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #e5e5e5)", fontWeight: "600", fontSize: "14px", cursor: "pointer" }}>
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showNotifications && createPortal(
         <section style={{ position: "fixed", inset: 0, zIndex: 21474836479, background: "var(--ma-bg-primary)", display: "flex", flexDirection: "column" }}>
           
           {/* HEADER */}
