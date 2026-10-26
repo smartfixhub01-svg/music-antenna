@@ -390,6 +390,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showClearNotifModal, setShowClearNotifModal] = useState(false);
   const [isPostingComment, setIsPostingComment] = useState(false);
+  const isSubmittingRef = useRef(false);
   const [activeNotification, setActiveNotification] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isShortUpload, setIsShortUpload] = useState(false);
@@ -1376,7 +1377,10 @@ useEffect(() => {
       setSelectedPlaylist(null);
       setMessage("Playlist deleted.");
     } catch (err) { setMessage("Error: " + err.message); }
-    finally { setIsPostingComment(false); }
+    finally { 
+      setIsPostingComment(false); 
+      isSubmittingRef.current = false;
+    }
   }
 
   async function removeFromPlaylist(itemId) {
@@ -1385,7 +1389,10 @@ useEffect(() => {
       setPlaylistItems(prev => prev.filter(i => i.id !== itemId));
       setMessage("Removed from playlist.");
     } catch (err) { setMessage("Error: " + err.message); }
-    finally { setIsPostingComment(false); }
+    finally { 
+      setIsPostingComment(false); 
+      isSubmittingRef.current = false;
+    }
   }
 
   async function handleCreatePlaylist(e) {
@@ -1398,7 +1405,10 @@ useEffect(() => {
       setNewPlaylistName("");
       setMessage("Playlist created! Now select it to add the video.");
     } catch (err) { setMessage("Error: " + err.message); }
-    finally { setIsPostingComment(false); }
+    finally { 
+      setIsPostingComment(false); 
+      isSubmittingRef.current = false;
+    }
   }
 
   async function addToPlaylist(playlistId) {
@@ -1408,7 +1418,10 @@ useEffect(() => {
       setMessage(error ? "Video is already in this playlist." : "Added to playlist!");
       setShowPlaylistModal(false);
     } catch (err) { setMessage("Error: " + err.message); }
-    finally { setIsPostingComment(false); }
+    finally { 
+      setIsPostingComment(false); 
+      isSubmittingRef.current = false;
+    }
   }
 
   async function openLikedPage() {
@@ -1754,9 +1767,12 @@ useEffect(() => {
 
   async function handlePostComment(e) {
     e.preventDefault();
-    if (isPostingComment) return;
+    // INSTANT LOCK: Stop double clicks before React even re-renders
+    if (isSubmittingRef.current) return;
     if (!session?.user?.id) return setMessage("Sign in to comment.");
     if (!newComment.trim() && !commentImage && !commentAudio) return;
+    
+    isSubmittingRef.current = true;
     setIsPostingComment(true);
 
     // --- CUSTOM WORD FILTER ---
@@ -1820,7 +1836,8 @@ useEffect(() => {
       
       if (error) throw error;
       
-      setComments(prev => [data, ...prev]);
+      // Only add if it's not already in the list
+      setComments(prev => prev.some(c => c.id === data.id) ? prev : [data, ...prev]);
       setNewComment("");
       setCommentImage(null);
       setCommentAudio(null); setCommentAudioUrl(null); setVoicePreviewPlaying(false); setVoicePreviewProgress(0);
@@ -1830,7 +1847,10 @@ useEffect(() => {
       
       
     } catch (err) { setMessage("Error: " + err.message); }
-    finally { setIsPostingComment(false); }
+    finally { 
+      setIsPostingComment(false); 
+      isSubmittingRef.current = false;
+    }
   }
 
     async function checkSubscription(channelId) {
