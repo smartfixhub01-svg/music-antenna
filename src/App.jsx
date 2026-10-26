@@ -5238,9 +5238,13 @@ document.body
               if (editingMedia) {
                 setEditingMedia(null); 
               } else {
-                setShowManagePage(false); 
-                setShowAccountPage(true); 
-              }
+                  setShowManagePage(false);
+                  if (manageSource === "channel") {
+                    setShowChannelPage(true);
+                  } else {
+                    setShowAccountPage(true);
+                  }
+                }
             }}>
               <span className="material-symbols-outlined">arrow_back</span>
             </button>
