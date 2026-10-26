@@ -473,6 +473,25 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [channelProfile, setChannelProfile] = useState(null);
   const [channelMedia, setChannelMedia] = useState([]);
+  const [channelPlaylists, setChannelPlaylists] = useState([]);
+
+  // Fetch Playlists for Channel
+  useEffect(() => {
+    async function fetchChannelPlaylists() {
+      if (!channelProfile?.id) return;
+      const { data, error } = await supabase
+        .from("playlists")
+        .select("*, playlist_items(media_id, media:media_id(id, thumbnail_path, title))")
+        .eq("user_id", channelProfile.id)
+        .eq("visibility", "public");
+      
+      if (!error && data) {
+        setChannelPlaylists(data);
+      }
+    }
+    fetchChannelPlaylists();
+  }, [channelProfile?.id]);
+
   const [channelLoading, setChannelLoading] = useState(false);
   const [channelTab, setChannelTab] = useState("Videos");
 
@@ -4984,7 +5003,50 @@ document.body
                 ))}
               </div>
 
-              {channelTab === "About" ? (
+              
+            {channelTab === "Playlists" && (
+              <div style={{ padding: "0 16px 20px 16px" }}>
+                {channelPlaylists.length === 0 ? (
+                  <p className="yt-you-empty" style={{ textAlign: "center", marginTop: "20px", color: "var(--ma-text-secondary)" }}>No playlists found on this channel.</p>
+                ) : (
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: "16px" }}>
+                    {channelPlaylists.map(playlist => {
+                      // Find the first item with a thumbnail to use as cover
+                      const firstItemWithThumb = playlist.playlist_items?.find(item => item.media?.thumbnail_path);
+                      const coverUrl = firstItemWithThumb 
+                        ? supabase.storage.from(BUCKET).getPublicUrl(firstItemWithThumb.media.thumbnail_path).data.publicUrl 
+                        : null;
+
+                      return (
+                        <div key={playlist.id} style={{ background: "var(--ma-surface)", borderRadius: "12px", overflow: "hidden", border: "1px solid var(--ma-border)", display: "flex", flexDirection: "column" }}>
+                          {/* Cover Image */}
+                          <div style={{ width: "100%", aspectRatio: "16/9", background: "var(--ma-bg)", position: "relative" }}>
+                            {coverUrl ? (
+                              <img src={coverUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                            ) : (
+                              <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", color: "var(--ma-text-secondary)" }}>
+                                <span className="material-symbols-outlined" style={{ fontSize: "32px" }}>playlist_play</span>
+                              </div>
+                            )}
+                            <div style={{ position: "absolute", bottom: "4px", right: "4px", background: "rgba(0,0,0,0.8)", color: "white", fontSize: "10px", fontWeight: "bold", padding: "2px 6px", borderRadius: "4px", display: "flex", alignItems: "center", gap: "2px" }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: "12px" }}>playlist_play</span>
+                              {playlist.playlist_items?.length || 0}
+                            </div>
+                          </div>
+                          {/* Playlist Info */}
+                          <div style={{ padding: "10px" }}>
+                            <h4 style={{ margin: "0 0 4px 0", fontSize: "13px", fontWeight: "700", color: "var(--ma-text)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{playlist.title}</h4>
+                            <p style={{ margin: 0, fontSize: "11px", color: "var(--ma-text-secondary)" }}>{channelProfile?.display_name || "Creator"}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {channelTab === "About" ? (
                 <div style={{ background: "var(--ma-surface, #f0f0f0)", borderRadius: "16px", border: "1px solid var(--ma-border, #e5e5e5)", padding: "24px", marginBottom: "24px", boxShadow: "0 4px 20px rgba(0,0,0,0.02)" }}>
                   
                   {/* Header */}
@@ -5043,7 +5105,7 @@ document.body
                 let filtered = channelMedia;
                 if (channelTab === "Videos") filtered = channelMedia.filter(i => i.media_type === "video" && !i.is_short);
                 else if (channelTab === "Shorts") filtered = channelMedia.filter(i => i.is_short);
-                else if (channelTab === "Playlists") filtered = []; // Placeholder for now
+                
 
                 if (filtered.length === 0) {
                   return <p className="yt-you-empty">No {channelTab.toLowerCase()} found on this channel.</p>;
