@@ -1792,18 +1792,21 @@ useEffect(() => {
     let imageUrl = null;
     let audioUrl = null;
 
-    // 1. Capture current values into temporary variables
+    // --- BULLETPROOF RATE LIMIT (3 SECONDS) ---
+    const now = Date.now();
+    const lastPost = localStorage.getItem('lastCommentTime');
+    if (lastPost && now - lastPost < 3000) {
+      setIsPostingComment(false);
+      isSubmittingRef.current = false;
+      return setMessage("Please wait a moment before posting again.");
+    }
+    localStorage.setItem('lastCommentTime', now);
+    // ------------------------------------------
+
     const submitComment = newComment;
     const submitReplyTarget = replyTarget;
     const submitImage = commentImage;
     const submitAudio = commentAudio;
-
-    // 2. IMMEDIATELY CLEAR THE UI so a double click hits an empty form
-    setNewComment("");
-    setCommentImage(null);
-    setCommentAudio(null);
-    setReplyTarget(null);
-    setReplyingName("");
 
     try {
       // SAFETY CHECK: Verify the parent comment still exists before replying
