@@ -1906,7 +1906,46 @@ useEffect(() => {
     }
   }
 
-    async function checkSubscription(channelId) {
+    
+  async function handleAddToPlaylist(playlistId) {
+    if (!activeMedia?.id) return;
+    try {
+      const { data: items } = await supabase.from('playlist_items').select('position').eq('playlist_id', playlistId).order('position', { ascending: false }).limit(1);
+      const nextPos = items && items.length > 0 ? items[0].position + 1 : 0;
+      
+      const { error } = await supabase.from('playlist_items').insert({ 
+        playlist_id: playlistId, 
+        media_id: activeMedia.id, 
+        position: nextPos 
+      });
+      
+      if (error) throw error;
+      setMessage("Added to playlist!");
+      setShowPlaylistModal(false);
+    } catch (err) {
+      setMessage("Error adding to playlist: " + err.message);
+    }
+  }
+
+  async function handleDeletePlaylist(playlistId) {
+    if (!window.confirm("Delete this playlist permanently?")) return;
+    try {
+      const { error } = await supabase.from('playlists').delete().eq('id', playlistId);
+      if (error) throw error;
+      setChannelPlaylists(prev => prev.filter(p => p.id !== playlistId));
+      setMessage("Playlist deleted.");
+    } catch (err) {
+      setMessage("Error deleting playlist: " + err.message);
+    }
+  }
+
+  async function fetchUserPlaylistsForModal() {
+    if (!session?.user?.id) return;
+    const { data } = await supabase.from("playlists").select("*").eq("user_id", session.user.id);
+    if (data) setPlaylists(data);
+  }
+
+  async function checkSubscription(channelId) {
     if (!channelId) return;
     try {
       const { count } = await supabase
@@ -4417,7 +4456,7 @@ document.body
                 </a>
               )}
 
-              <button className="yt-watch-action" onClick={(e) => { e.stopPropagation(); fetchPlaylists(); setShowPlaylistModal(true); }}>
+              <button className="yt-watch-action" onClick={(e) => { e.stopPropagation(); fetchUserPlaylistsForModal(); setShowPlaylistModal(true); }}>
                 <span className="material-symbols-outlined">playlist_add</span>
                 <span className="yt-watch-action-label">Save</span>
               </button>
@@ -5051,7 +5090,14 @@ document.body
                           {/* Playlist Info */}
                           <div style={{ padding: "10px" }}>
                             <h4 style={{ margin: "0 0 4px 0", fontSize: "13px", fontWeight: "700", color: "var(--ma-text)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{playlist.title}</h4>
-                            <p style={{ margin: 0, fontSize: "11px", color: "var(--ma-text-secondary)" }}>{channelProfile?.display_name || "Creator"}</p>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                              <p style={{ margin: 0, fontSize: "11px", color: "var(--ma-text-secondary)" }}>{channelProfile?.display_name || "Creator"}</p>
+                              {channelProfile?.id === session?.user?.id && (
+                                <button onClick={(e) => { e.stopPropagation(); handleDeletePlaylist(playlist.id); }} style={{ background: "transparent", border: 0, color: "#FF4E45", cursor: "pointer", padding: 0, display: "flex" }}>
+                                  <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>delete</span>
+                                </button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       );
@@ -5702,212 +5748,48 @@ document.body
         </button>
       </nav>
       {showPlaylistModal && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ background: "#212121", width: "90%", maxWidth: "400px", borderRadius: "12px", padding: "20px", color: "var(--ma-text, #000)", fontFamily: "Roboto, sans-serif", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-              <h3 style={{ margin: 0, fontSize: "18px" }}>Save to playlist</h3>
-              <button onClick={() => setShowPlaylistModal(false)} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", cursor: "pointer", display: "flex" }}>
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }} onClick={() => setShowPlaylistModal(false)}>
+          <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "90%", maxWidth: "400px", borderRadius: "16px", padding: "24px", border: "1px solid var(--ma-border, #e5e5e5)", boxShadow: "0 10px 40px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
             
-            <form onSubmit={handleCreatePlaylist} style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
-              <input 
-                type="text" 
-                placeholder="New playlist name..." 
-                value={newPlaylistName} 
-                onChange={e => setNewPlaylistName(e.target.value)}
-                style={{ flex: 1, padding: "10px", borderRadius: "8px", border: "1px solid #444", background: "#121212", color: "white", outline: "none" }}
-              />
-              <button type="submit" style={{ padding: "10px 16px", borderRadius: "8px", background: "#3ea6ff", color: "#0f0f0f", border: 0, fontWeight: "bold", cursor: "pointer" }}>Create</button>
-            </form>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+              <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "700" }}>Save to playlist</h3>
+              <button onClick={() => setShowPlaylistModal(false)} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", cursor: "pointer" }}><span className="material-symbols-outlined">close</span></button>
+            </div>
 
-            <div style={{ maxHeight: "250px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "8px" }}>
+            {/* List existing playlists */}
+            <div style={{ maxHeight: "200px", overflowY: "auto", marginBottom: "16px", display: "flex", flexDirection: "column", gap: "8px" }}>
               {playlists.length === 0 ? (
-                <p style={{ color: "var(--ma-text-secondary, #666)", fontSize: "14px", textAlign: "center", margin: "20px 0" }}>No playlists yet. Create one above.</p>
+                <p style={{ fontSize: "13px", color: "var(--ma-text-secondary)" }}>No playlists yet. Create one below!</p>
               ) : (
-                playlists.map(pl => (
-                  <button key={pl.id} onClick={() => addToPlaylist(pl.id)} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px", background: "#1c1c1c", border: "1px solid #333", borderRadius: "8px", color: "white", cursor: "pointer", textAlign: "left", fontSize: "14px" }}>
-                    <span className="material-symbols-outlined">playlist_play</span>
-                    {pl.title}
-                  </button>
+                playlists.map(p => (
+                  <div key={p.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--ma-surface)", padding: "12px", borderRadius: "10px", border: "1px solid var(--ma-border)" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary)" }}>playlist_play</span>
+                      <span style={{ fontSize: "14px", fontWeight: "600" }}>{p.title}</span>
+                    </div>
+                    <button onClick={() => handleAddToPlaylist(p.id)} style={{ background: "#ff365f", color: "white", border: "none", padding: "6px 12px", borderRadius: "6px", fontSize: "12px", fontWeight: "bold", cursor: "pointer" }}>Add</button>
+                  </div>
                 ))
               )}
             </div>
-          </div>
-        </div>
-      )}
 
-      {/* COMMENTS MODAL - BULLETPROOF VERSION */}
-      {message && !message.includes("Welcome back") && (
-        <div style={{ 
-          position: "fixed", 
-          bottom: "90px", 
-          left: "50%", 
-          transform: "translateX(-50%)", 
-          background: "#212121", 
-          color: "#FFFFFF", 
-          padding: "14px 24px", 
-          borderRadius: "8px", 
-          zIndex: 2147483647, 
-          boxShadow: "0 8px 24px rgba(0,0,0,0.5)", 
-          fontWeight: "600", 
-          fontSize: "14px", 
-          textAlign: "center", 
-          borderLeft: "4px solid #FF0033",
-          maxWidth: "90%",
-          width: "max-content"
-        }}>
-          {message}
-        </div>
-      )}
+            <div style={{ height: "1px", background: "var(--ma-border)", margin: "16px 0" }} />
 
-
-      {showMoreMenu && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 2147483647, display: "flex", alignItems: "flex-end", backdropFilter: "blur(4px)" }} onClick={() => setShowMoreMenu(false)}>
-          <div style={{ 
-            background: "var(--ma-bg, #ffffff)", 
-            color: "var(--ma-text, #0f0f0f)", 
-            width: "100%", 
-            borderTopLeftRadius: "20px", 
-            borderTopRightRadius: "20px", 
-            padding: "20px", 
-            paddingBottom: "40px",
-            boxShadow: "0 -4px 20px rgba(0,0,0,0.15)"
-          }} onClick={e => e.stopPropagation()}>
-
-            <div style={{ width: "40px", height: "4px", background: "var(--ma-border, #ccc)", borderRadius: "2px", margin: "0 auto 20px" }}></div>
-
-            <p style={{ color: "var(--ma-text-secondary, #606060)", fontSize: "14px", marginBottom: "12px", fontWeight: "bold" }}>Video Quality</p>
-            <div style={{ display: "flex", gap: "10px", marginBottom: "24px", overflowX: "auto", paddingBottom: "4px" }}>
-              {["Auto", "1080p", "720p", "480p", "360p"].map(q => (
-                <button key={q} onClick={() => { setVideoQuality(q); setShowMoreMenu(false); setMessage(`Quality set to ${q}`); }} style={{ padding: "10px 16px", background: videoQuality === q ? "#ff365f" : "var(--ma-surface, #f2f2f2)", color: videoQuality === q ? "#ffffff" : "var(--ma-text, #000)", border: "1px solid " + (videoQuality === q ? "#ff365f" : "var(--ma-border, #e5e5e5)"), borderRadius: "10px", fontSize: "14px", fontWeight: "600", cursor: "pointer", whiteSpace: "nowrap" }}>
-                  {q}
-                </button>
-              ))}
-            </div>
-
-            <p style={{ color: "var(--ma-text-secondary, #606060)", fontSize: "14px", marginBottom: "12px", fontWeight: "bold" }}>Playback Speed</p>
-            <div style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
-              {[1, 1.25, 1.5, 2].map(speed => (
-                <button key={speed} onClick={() => {
-                  const mediaEl = videoRef.current || audioRef.current;
-                  if (mediaEl) {
-                    mediaEl.playbackRate = speed;
-                    setMessage(`Speed set to ${speed}x`);
-                  } else {
-                    setMessage("Player is not ready.");
-                  }
-                  setShowMoreMenu(false);
-                }} style={{ flex: 1, padding: "10px", background: "var(--ma-surface, #f2f2f2)", color: "var(--ma-text, #0f0f0f)", border: "1px solid var(--ma-border, #e5e5e5)", borderRadius: "10px", fontSize: "14px", fontWeight: "600", cursor: "pointer", transition: "all 0.2s" }}>
-                  {speed}x
-                </button>
-              ))}
-            </div>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              <button onClick={() => { fetchPlaylists(); setShowPlaylistModal(true); setShowMoreMenu(false); }} style={{ padding: "16px", background: "transparent", color: "var(--ma-text, #0f0f0f)", border: "none", borderRadius: "10px", fontSize: "15px", display: "flex", alignItems: "center", gap: "16px", cursor: "pointer", textAlign: "left" }}>
-                <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary, #606060)" }}>playlist_add</span> Save to playlist
-              </button>
-
-              <a href={showMoreMenu?.url || showMoreMenu?.media_url} download target="_blank" rel="noopener noreferrer" onClick={() => setShowMoreMenu(false)} style={{ textDecoration: "none", padding: "16px", background: "transparent", color: "var(--ma-text, #0f0f0f)", border: "none", borderRadius: "10px", fontSize: "15px", display: "flex", alignItems: "center", gap: "16px", cursor: "pointer" }}>
-                <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary, #606060)" }}>download</span> Download Media
-              </a>
-
-              <button onClick={() => { handleShare(activeMedia); setShowMoreMenu(false); }} style={{ padding: "16px", background: "transparent", color: "var(--ma-text, #0f0f0f)", border: "none", borderRadius: "10px", fontSize: "15px", display: "flex", alignItems: "center", gap: "16px", cursor: "pointer", textAlign: "left" }}>
-                <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary, #606060)" }}>share</span> Share Link
-              </button>
-
-              <button onClick={() => { handleReportVideo(activeMedia.id); setShowMoreMenu(false); }} style={{ padding: "16px", background: "transparent", color: "var(--ma-text, #0f0f0f)", border: "none", borderRadius: "10px", fontSize: "15px", display: "flex", alignItems: "center", gap: "16px", cursor: "pointer", textAlign: "left" }}>
-                <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary, #606060)" }}>flag</span> Report Video
-              </button>
-
-              {session?.user?.id === showMoreMenu?.artist_id && (
-                <button onClick={() => { setEditingMedia(activeMedia); setShowWatchPage(false); setShowMoreMenu(false); }} style={{ padding: "16px", background: "transparent", color: "var(--ma-text, #0f0f0f)", border: "none", borderRadius: "10px", fontSize: "15px", display: "flex", alignItems: "center", gap: "16px", cursor: "pointer", textAlign: "left" }}>
-                  <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary, #606060)" }}>edit</span> Edit Video
-                </button>
-              )}
-            </div>
-
-            <button onClick={() => setShowMoreMenu(false)} style={{ width: "100%", padding: "16px", background: "var(--ma-surface, #f2f2f2)", color: "var(--ma-text, #0f0f0f)", border: "1px solid var(--ma-border, #e5e5e5)", borderRadius: "10px", marginTop: "16px", fontSize: "15px", cursor: "pointer", fontWeight: "bold" }}>
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-      {showDescModal && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 100000, display: "flex", alignItems: "flex-end", backdropFilter: "blur(4px)" }} onClick={() => setShowDescModal(false)}>
-          <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "100%", borderTopLeftRadius: "20px", borderTopRightRadius: "20px", padding: "24px 20px", paddingBottom: "40px", boxShadow: "0 -10px 40px rgba(0,0,0,0.3)", maxHeight: "60vh", overflowY: "auto", borderTop: "1px solid var(--ma-border, #e5e5e5)" }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-              <h3 style={{ margin: 0, fontSize: "14px", fontWeight: "700" }}>Discrip</h3>
-              <button onClick={() => setShowDescModal(false)} style={{ background: "var(--ma-surface, #f0f0f0)", border: "1px solid var(--ma-border, #e5e5e5)", borderRadius: "50%", width: "32px", height: "32px", display: "grid", placeItems: "center", color: "var(--ma-text, #000)", cursor: "pointer" }}>
-                <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>close</span>
-              </button>
-            </div>
-            <p style={{ margin: 0, fontSize: "13px", lineHeight: "1.5", whiteSpace: "pre-wrap", color: "var(--ma-text, #000)" }}>
-              {activeMedia.description || activeMedia.caption || "No description provided for this track."}
-            </p>
-          </div>
-        </div>
-      )}
-
-      
-      {deletingCommentId && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 999999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }} onClick={() => setDeletingCommentId(null)}>
-          <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "85%", maxWidth: "320px", borderRadius: "16px", padding: "24px", boxShadow: "0 10px 40px rgba(0,0,0,0.3)", display: "flex", flexDirection: "column", gap: "16px", border: "1px solid var(--ma-border, #e5e5e5)" }} onClick={e => e.stopPropagation()}>
-            <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "700", textAlign: "center", color: "var(--ma-text, #000)" }}>Delete Comment</h3>
-            <p style={{ margin: 0, fontSize: "14px", color: "var(--ma-text-secondary, #666)", lineHeight: "1.5", textAlign: "center" }}>
-              Are you sure you want to delete this comment? This action cannot be undone.
-            </p>
-            <div style={{ display: "flex", gap: "10px", width: "100%", marginTop: "8px" }}>
-              <div style={{ flex: 1, display: "flex" }}>
-                <button onClick={() => setDeletingCommentId(null)} style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "1px solid var(--ma-border, #e5e5e5)", backgroundColor: "transparent", color: "var(--ma-text, #000)", fontWeight: "600", fontSize: "14px", cursor: "pointer", display: "block" }}>
-                  Cancel
-                </button>
-              </div>
-              <div style={{ flex: 1, display: "flex", backgroundColor: "#ff365f", borderRadius: "10px", boxShadow: "0 4px 12px rgba(255,54,95,0.3)" }}>
-                <button onClick={() => handleDeleteComment(deletingCommentId)} style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "none", backgroundColor: "transparent", color: "#ffffff", fontWeight: "600", fontSize: "14px", cursor: "pointer", display: "block" }}>
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      
-      {showCreatePlaylistModal && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 999999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }} onClick={() => setShowCreatePlaylistModal(false)}>
-          <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "90%", maxWidth: "400px", borderRadius: "16px", padding: "24px", border: "1px solid var(--ma-border, #e5e5e5)", boxShadow: "0 10px 40px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-              <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "700" }}>New Playlist</h3>
-              <button onClick={() => setShowCreatePlaylistModal(false)} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", cursor: "pointer" }}><span className="material-symbols-outlined">close</span></button>
-            </div>
-
-            <form onSubmit={handleCreatePlaylist} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              <div>
-                <label style={{ display: "block", fontSize: "12px", fontWeight: "600", color: "var(--ma-text-secondary, #666)", marginBottom: "6px" }}>Title *</label>
-                <input type="text" value={newPlaylistTitle} onChange={e => setNewPlaylistTitle(e.target.value)} required placeholder="e.g. Best of 2026" style={{ width: "100%", padding: "12px", borderRadius: "10px", background: "var(--ma-surface, #f2f2f2)", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #e5e5e5)", outline: "none" }} />
-              </div>
-              
-              <div>
-                <label style={{ display: "block", fontSize: "12px", fontWeight: "600", color: "var(--ma-text-secondary, #666)", marginBottom: "6px" }}>Description (Optional)</label>
-                <textarea value={newPlaylistDesc} onChange={e => setNewPlaylistDesc(e.target.value)} rows="3" placeholder="What is this playlist about?" style={{ width: "100%", padding: "12px", borderRadius: "10px", background: "var(--ma-surface, #f2f2f2)", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #e5e5e5)", outline: "none", resize: "none" }} />
-              </div>
-
-              <div>
-                <label style={{ display: "block", fontSize: "12px", fontWeight: "600", color: "var(--ma-text-secondary, #666)", marginBottom: "6px" }}>Visibility</label>
-                <select value={newPlaylistVisibility} onChange={e => setNewPlaylistVisibility(e.target.value)} style={{ width: "100%", padding: "12px", borderRadius: "10px", background: "var(--ma-surface, #f2f2f2)", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #e5e5e5)", outline: "none" }}>
-                  <option value="public">Public (Everyone can see)</option>
-                  <option value="unlisted">Unlisted (Only people with link)</option>
-                  <option value="private">Private (Only you)</option>
-                </select>
-              </div>
-
-              <button type="submit" disabled={isCreatingPlaylist} style={{ marginTop: "8px", width: "100%", padding: "14px", background: "#ff365f", color: "white", border: "none", borderRadius: "10px", fontSize: "15px", fontWeight: "700", cursor: isCreatingPlaylist ? "not-allowed" : "pointer", opacity: isCreatingPlaylist ? 0.7 : 1 }}>
-                {isCreatingPlaylist ? "Creating..." : "Create Playlist"}
-              </button>
+            {/* Create new playlist */}
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              if (!newPlaylistName.trim()) return;
+              const { data, error } = await supabase.from("playlists").insert({ user_id: session.user.id, title: newPlaylistName.trim(), visibility: 'public' }).select().single();
+              if (!error && data) {
+                setPlaylists(prev => [data, ...prev]);
+                setNewPlaylistName("");
+                if (activeMedia?.id) handleAddToPlaylist(data.id);
+              }
+            }} style={{ display: "flex", gap: "8px" }}>
+              <input type="text" placeholder="New playlist name..." value={newPlaylistName} onChange={e => setNewPlaylistName(e.target.value)} style={{ flex: 1, padding: "12px", borderRadius: "10px", background: "var(--ma-surface)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", outline: "none" }} />
+              <button type="submit" style={{ background: "#ff365f", color: "white", border: "none", padding: "0 16px", borderRadius: "10px", fontWeight: "bold", cursor: "pointer" }}>Create</button>
             </form>
+
           </div>
         </div>
       )}
