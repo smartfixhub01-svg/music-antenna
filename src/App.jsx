@@ -4477,8 +4477,8 @@ document.body
 
           {/* 2. PROFILE HEADER (Overlapping the banner) */}
           <style>{`
-            .force-name { color: #ffffff !important; text-shadow: none !important; letter-spacing: -0.5px; }
-            .force-bio { color: var(--ma-text-secondary, #666) !important; font-size: 11px !important; font-weight: 500 !important; margin: 0px !important; line-height: 1.3 !important; text-shadow: none !important; }
+            
+            
             .btn-pink { background-color: #ff365f !important; color: #ffffff !important; padding: 10px !important; border-radius: 8px !important; font-weight: 600 !important; font-size: 14px !important; border: none !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; width: 100% !important; }
             .btn-gray { background-color: var(--ma-surface, #f0f0f0) !important; color: var(--ma-text, #000) !important; padding: 10px !important; border-radius: 8px !important; font-weight: 500 !important; font-size: 14px !important; border: 1px solid var(--ma-border, #e5e5e5) !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; width: 100% !important; }
             .btn-circle { background-color: var(--ma-surface, #f0f0f0) !important; color: var(--ma-text, #000) !important; width: 44px !important; height: 44px !important; border-radius: 50% !important; border: 1px solid var(--ma-border, #e5e5e5) !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; flex-shrink: 0 !important; }
@@ -4496,25 +4496,24 @@ document.body
               <div style={{ paddingBottom: "4px" }}>
                 
 <style>{`
-  .force-name { 
-    text-shadow: 0 2px 10px rgba(0,0,0,0.8) !important; 
-    font-size: 24px !important; 
-  }
-  .force-bio { 
-    text-shadow: 0 1px 4px rgba(0,0,0,0.8) !important; 
-    font-size: 14px !important;
-  }
+  
+  
 `}</style>
 
-            <h2 className="force-name" style={{ margin: 0, fontSize: "20px", fontWeight: "700", display: "flex", alignItems: "center", gap: "4px" }}>
-                  {profile?.display_name || displayUser || "Music listener"}
-                  
-                  {profile?.role === "artist" && media.filter(m => m.artist_id === session?.user?.id).length >= 10 && mySubCount >= 500 && (
-                    <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "#1D9BF0", fontVariationSettings: "'FILL' 1" }} title="Verified Artist">verified</span>
-                  )}
-                </h2>
-                <p className="force-bio" style={{ margin: "2px 0 0 0", fontSize: "11px" }}>@{profile?.username || profile?.display_name || "music-antenna-user"}</p>
-                <p className="force-bio" style={{ margin: "1px 0 0 0", fontSize: "11px" }}>{profile?.bio || "Shadow Boss"}</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px", paddingBottom: "8px" }}>
+                  <h2 style={{ margin: 0, fontSize: "22px", fontWeight: "800", display: "flex", alignItems: "center", gap: "6px", color: "#ffffff", textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}>
+                    {profile?.display_name || displayUser || "Music listener"}
+                    {profile?.role === "artist" && media.filter(m => m.artist_id === session?.user?.id).length >= 10 && mySubCount >= 500 && (
+                      <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "#1D9BF0", fontVariationSettings: "'FILL' 1" }} title="Verified Artist">verified</span>
+                    )}
+                  </h2>
+                  <p style={{ margin: 0, fontSize: "13px", fontWeight: "600", color: "rgba(255, 255, 255, 0.85)", textShadow: "0 1px 2px rgba(0,0,0,0.5)" }}>
+                    @{profile?.username || profile?.display_name || "music-antenna-user"}
+                  </p>
+                  <p style={{ margin: 0, fontSize: "11px", fontWeight: "500", color: "rgba(255, 255, 255, 0.7)", textShadow: "0 1px 2px rgba(0,0,0,0.5)" }}>
+                    {profile?.bio || "Shadow Boss"}
+                  </p>
+                </div>
               </div>
             </div>
 
