@@ -4950,9 +4950,24 @@ document.body
                 ))}
               </div>
 
-              {channelMedia.length > 0 ? (
-                <div className="ma-media-grid">
-                  {channelMedia.map((item) => (
+              {channelTab === "About" ? (
+                <div style={{ padding: "20px", background: "var(--ma-surface)", borderRadius: "12px", border: "1px solid var(--ma-border)" }}>
+                  <h3 style={{ color: "var(--ma-text)", marginTop: 0, fontSize: "16px" }}>About</h3>
+                  <p style={{ color: "var(--ma-text-secondary)", fontSize: "14px", lineHeight: "1.5" }}>{channelProfile?.bio || "No description provided."}</p>
+                </div>
+              ) : (() => {
+                let filtered = channelMedia;
+                if (channelTab === "Videos") filtered = channelMedia.filter(i => i.media_type === "video" && !i.is_short);
+                else if (channelTab === "Shorts") filtered = channelMedia.filter(i => i.is_short);
+                else if (channelTab === "Playlists") filtered = []; // Placeholder for now
+
+                if (filtered.length === 0) {
+                  return <p className="yt-you-empty">No {channelTab.toLowerCase()} found on this channel.</p>;
+                }
+
+                return (
+                  <div className="ma-media-grid">
+                    {filtered.map((item) => (
                     <article className="yt-video" key={item.id}>
                       <button
                         className="yt-thumb"
@@ -4988,9 +5003,8 @@ document.body
                     </article>
                   ))}
                 </div>
-              ) : (
-                <p className="yt-you-empty">This artist hasn't uploaded anything yet.</p>
-              )}
+                );
+              })()}
             </>
           ) : (
             <p className="yt-you-empty">Channel not found.</p>
