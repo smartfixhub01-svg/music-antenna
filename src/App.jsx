@@ -235,6 +235,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
 
   const [mySubCount, setMySubCount] = useState(0);
+  const [profileTab, setProfileTab] = useState("overview");
   const [showUpload, setShowUpload] = useState(false);
   const [showManagePage, setShowManagePage] = useState(false);
   const [showHistoryPage, setShowHistoryPage] = useState(false);
@@ -4370,12 +4371,13 @@ document.body
 
             {/* 5. TABS */}
             <div style={{ display: profile?.role === "artist" ? "flex" : "none", gap: "24px", borderBottom: "1px solid var(--ma-border, #e5e5e5)", marginBottom: "16px" }}>
-              <button style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "#ff365f", fontWeight: "600", fontSize: "14px", borderBottom: "2px solid #ff365f" }}>Overview</button>
+              <button onClick={() => setProfileTab("overview")} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: profileTab === "overview" ? "#ff365f" : "var(--ma-text-secondary, #666)", fontWeight: profileTab === "overview" ? "600" : "500", fontSize: "14px", borderBottom: profileTab === "overview" ? "2px solid #ff365f" : "none", cursor: "pointer" }}>Overview</button>
               <button onClick={() => { setShowAccountPage(false); openManagePage(); }} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "var(--ma-text-secondary, #666)", fontWeight: "500", fontSize: "14px", cursor: "pointer" }}>Content</button>
               <button onClick={openAnalytics} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "var(--ma-text-secondary, #666)", fontWeight: "500", fontSize: "14px", cursor: "pointer" }}>Analytics</button>
-              <button onClick={() => setMessage("About section coming soon.")} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "var(--ma-text-secondary, #666)", fontWeight: "500", fontSize: "14px", cursor: "pointer" }}>About</button>
+              <button onClick={() => setProfileTab("about")} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: profileTab === "about" ? "#ff365f" : "var(--ma-text-secondary, #666)", fontWeight: profileTab === "about" ? "600" : "500", fontSize: "14px", borderBottom: profileTab === "about" ? "2px solid #ff365f" : "none", cursor: "pointer" }}>About</button>
             </div>
 
+            {profileTab === "overview" && (<>
             {/* 6. CREATOR DASHBOARD CARD */}
             {profile?.role === "artist" && (
               <div style={{ background: "var(--ma-surface, #f0f0f0)", borderRadius: "12px", padding: "16px", border: "1px solid var(--ma-border, #e5e5e5)", marginBottom: "24px" }}>
@@ -4426,6 +4428,32 @@ document.body
                   </div>
                 ))}
             </div>
+
+            </>
+            )}
+
+            {profileTab === "about" && (
+              <div style={{ padding: "20px", background: "var(--ma-surface, #f0f0f0)", borderRadius: "12px", border: "1px solid var(--ma-border, #e5e5e5)", marginBottom: "24px" }}>
+                <h3 style={{ margin: "0 0 16px 0", fontSize: "16px", fontWeight: "600", color: "var(--ma-text, #000)" }}>About</h3>
+                <p style={{ margin: "0 0 20px 0", fontSize: "14px", color: "var(--ma-text-secondary, #666)", lineHeight: "1.6" }}>
+                  {profile?.bio || "No bio provided yet."}
+                </p>
+                <div style={{ borderTop: "1px solid var(--ma-border, #e5e5e5)", paddingTop: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
+                  <p style={{ margin: 0, fontSize: "13px", color: "var(--ma-text-secondary, #666)", display: "flex", justifyContent: "space-between" }}>
+                    <strong style={{ color: "var(--ma-text, #000)" }}>Joined:</strong> 
+                    <span>{new Date(profile?.created_at || Date.now()).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
+                  </p>
+                  <p style={{ margin: 0, fontSize: "13px", color: "var(--ma-text-secondary, #666)", display: "flex", justifyContent: "space-between" }}>
+                    <strong style={{ color: "var(--ma-text, #000)" }}>Total Uploads:</strong> 
+                    <span>{media.filter(m => m.artist_id === session?.user?.id).length}</span>
+                  </p>
+                  <p style={{ margin: 0, fontSize: "13px", color: "var(--ma-text-secondary, #666)", display: "flex", justifyContent: "space-between" }}>
+                    <strong style={{ color: "var(--ma-text, #000)" }}>Total Views:</strong> 
+                    <span>{media.filter(m => m.artist_id === session?.user?.id).reduce((sum, m) => sum + (m.views || 0), 0)}</span>
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* EDIT PROFILE FORM */}
 
