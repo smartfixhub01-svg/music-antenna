@@ -4566,7 +4566,7 @@ document.body
             {/* 5. TABS */}
             <div style={{ display: profile?.role === "artist" ? "flex" : "none", gap: "24px", borderBottom: "1px solid var(--ma-border, #e5e5e5)", marginBottom: "16px" }}>
               <button onClick={() => setProfileTab("overview")} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: profileTab === "overview" ? "#ff365f" : "var(--ma-text-secondary, #666)", fontWeight: profileTab === "overview" ? "600" : "500", fontSize: "14px", borderBottom: profileTab === "overview" ? "2px solid #ff365f" : "none", cursor: "pointer" }}>Overview</button>
-              <button onClick={() => { setShowAccountPage(false); openManagePage(); }} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "var(--ma-text-secondary, #666)", fontWeight: "500", fontSize: "14px", cursor: "pointer" }}>Content</button>
+              <button onClick={() => setProfileTab("contents")} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: profileTab === "contents" ? "#ff365f" : "var(--ma-text-secondary, #666)", fontWeight: profileTab === "contents" ? "600" : "500", fontSize: "14px", borderBottom: profileTab === "contents" ? "2px solid #ff365f" : "none", cursor: "pointer" }}>Contents</button>
               <button onClick={openAnalytics} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "var(--ma-text-secondary, #666)", fontWeight: "500", fontSize: "14px", cursor: "pointer" }}>Analytics</button>
               <button onClick={() => setProfileTab("about")} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: profileTab === "about" ? "#ff365f" : "var(--ma-text-secondary, #666)", fontWeight: profileTab === "about" ? "600" : "500", fontSize: "14px", borderBottom: profileTab === "about" ? "2px solid #ff365f" : "none", cursor: "pointer" }}>About</button>
             </div>
@@ -4624,6 +4624,35 @@ document.body
             </div>
 
             </>
+            )}
+
+            {profileTab === "contents" && (
+              <div style={{ padding: "0 0 20px 0" }}>
+                {media.filter(m => m.artist_id === session?.user?.id).length === 0 ? (
+                  <p style={{ textAlign: "center", color: "var(--ma-text-secondary)", marginTop: "40px" }}>No content uploaded yet.</p>
+                ) : (
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: "16px" }}>
+                    {media.filter(m => m.artist_id === session?.user?.id).map(item => (
+                      <div key={item.id} onClick={() => openPlayer(item)} style={{ cursor: "pointer", display: "flex", flexDirection: "column", gap: "6px" }}>
+                        <div style={{ width: "100%", aspectRatio: "16/9", borderRadius: "10px", overflow: "hidden", background: "var(--ma-surface)", position: "relative" }}>
+                          {item.thumbnailUrl ? (
+                            <img src={item.thumbnailUrl} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          ) : (
+                            <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", color: "var(--ma-text-secondary)", fontSize: "24px" }}>♫</div>
+                          )}
+                          <span style={{ position: "absolute", bottom: "4px", right: "4px", background: "rgba(0,0,0,0.7)", color: "white", fontSize: "9px", fontWeight: "bold", padding: "2px 4px", borderRadius: "4px", backdropFilter: "blur(4px)" }}>
+                            {item.media_type === "video" ? (item.is_short ? "SHORT" : "VIDEO") : "AUDIO"}
+                          </span>
+                        </div>
+                        <h4 style={{ margin: 0, fontSize: "12px", fontWeight: "600", color: "var(--ma-text, #000)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.title}</h4>
+                        <p style={{ margin: 0, fontSize: "10px", color: "var(--ma-text-secondary, #666)" }}>
+                          {new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
 
             {profileTab === "about" && (
