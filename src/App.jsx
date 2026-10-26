@@ -1767,8 +1767,8 @@ useEffect(() => {
 
   async function handlePostComment(e) {
     e.preventDefault();
-    // INSTANT LOCK: Stop double clicks before React even re-renders
-    if (isSubmittingRef.current) return;
+    // BULLETPROOF LOCK: Stop double clicks
+    if (isSubmittingRef.current || isPostingComment) return;
     if (!session?.user?.id) return setMessage("Sign in to comment.");
     if (!newComment.trim() && !commentImage && !commentAudio) return;
     
@@ -5951,7 +5951,7 @@ document.body
                             {voicePreviewPlaying ? "Pause" : "Resume"}
                           </button>
 
-                          <button type="submit" style={{ background: "#ff365f", border: 0, borderRadius: "50%", width: "40px", height: "40px", display: "grid", placeItems: "center", color: "#ffffff", cursor: "pointer", flexShrink: 0 }}>
+                          <button type="submit" disabled={isPostingComment} style={{ background: "#ff365f", border: 0, borderRadius: "50%", width: "40px", height: "40px", display: "grid", placeItems: "center", color: "#ffffff", cursor: isPostingComment ? "not-allowed" : "pointer", flexShrink: 0, opacity: isPostingComment ? 0.5 : 1 }}>
                             <span className="material-symbols-outlined" style={{ fontSize: "22px", fontVariationSettings: "'FILL' 1" }}>send</span>
                           </button>
                         </div>
