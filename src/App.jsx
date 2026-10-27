@@ -4361,7 +4361,7 @@ document.body
                         </p>
                       </div>
                       <div style={{ width: "40px", height: "40px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginLeft: "auto" }}>
-                        <button className="yt-video-menu" aria-label="More" onClick={(e) => { e.stopPropagation(); e.preventDefault(); alert("Click Works!"); setShowMoreMenu(item); }} style={{ background: "red", color: "white", padding: "10px", fontSize: "20px", zIndex: 99999, position: "relative" }}>⋮</button>
+                        <button className="yt-video-menu" aria-label="More" onClick={(e) => { e.stopPropagation(); e.preventDefault();  setShowMoreMenu(item); }} style={{ background: "red", color: "white", padding: "10px", fontSize: "20px", zIndex: 99999, position: "relative" }}>⋮</button>
                       </div>
                     </div>
                   </article>
