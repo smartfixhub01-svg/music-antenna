@@ -6140,9 +6140,9 @@ document.body
                       setShowPlaylistDetailPage(true);
                       await openPlaylist(pl);
                     }} style={{
-                      display: "block", minWidth: 0, padding: 0,
+                      display: "flex", flexDirection: "column", gap: "8px", minWidth: 0, padding: 0,
                       textAlign: "left", border: 0, background: "transparent",
-                      color: "var(--ma-text)", cursor: "pointer"
+                      color: "var(--ma-text)", cursor: "pointer", userSelect: "none"
                     }}>
                       <div style={{
                         position: "relative", aspectRatio: "16 / 10",
@@ -6242,16 +6242,16 @@ document.body
               </button>
               
               <div style={{ display: "flex", gap: "12px" }}>
-                <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "var(--ma-surface)", display: "grid", placeItems: "center" }}>
+                <div onClick={() => setShowPlaylistModal(true)} style={{ width: "40px", height: "40px", borderRadius: "50%", background: "var(--ma-surface)", display: "grid", placeItems: "center", cursor: "pointer", border: "1px solid var(--ma-border)" }}>
                   <span className="material-symbols-outlined" style={{ color: "var(--ma-text)" }}>add</span>
                 </div>
-                <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "var(--ma-surface)", display: "grid", placeItems: "center" }}>
+                <div onClick={openEditPlaylistModal} style={{ width: "40px", height: "40px", borderRadius: "50%", background: "var(--ma-surface)", display: "grid", placeItems: "center", cursor: "pointer", border: "1px solid var(--ma-border)" }}>
                   <span className="material-symbols-outlined" style={{ color: "var(--ma-text)" }}>edit</span>
                 </div>
                 <div onClick={() => handleShare(selectedPlaylist)} style={{ width: "40px", height: "40px", borderRadius: "50%", background: "var(--ma-surface)", display: "grid", placeItems: "center", cursor: "pointer" }}>
                   <span className="material-symbols-outlined" style={{ color: "var(--ma-text)" }}>share</span>
                 </div>
-                <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "var(--ma-surface)", display: "grid", placeItems: "center" }}>
+                <div onClick={() => setMessage("Download feature coming soon")} style={{ width: "40px", height: "40px", borderRadius: "50%", background: "var(--ma-surface)", display: "grid", placeItems: "center", cursor: "pointer", border: "1px solid var(--ma-border)" }}>
                   <span className="material-symbols-outlined" style={{ color: "var(--ma-text)" }}>download</span>
                 </div>
               </div>
