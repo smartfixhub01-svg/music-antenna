@@ -5884,6 +5884,66 @@ document.body
         </div>
       )}
 
+      {showMoreMenu && createPortal(
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 2147483647, display: "flex", alignItems: "flex-end", backdropFilter: "blur(4px)" }} onClick={() => setShowMoreMenu(null)}>
+          <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "100%", borderTopLeftRadius: "24px", borderTopRightRadius: "24px", padding: "20px 20px 40px 20px", boxShadow: "0 -10px 40px rgba(0,0,0,0.2)", display: "flex", flexDirection: "column", gap: "16px" }} onClick={e => e.stopPropagation()}>
+            
+            {/* Header */}
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", paddingBottom: "16px", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
+              <div style={{ width: "40px", height: "40px", borderRadius: "8px", overflow: "hidden", flexShrink: 0, background: "var(--ma-surface)" }}>
+                {showMoreMenu.thumbnailUrl ? <img src={showMoreMenu.thumbnailUrl} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center" }}>♫</div>}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <h4 style={{ margin: "0 0 4px 0", fontSize: "14px", fontWeight: "700", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{showMoreMenu.title}</h4>
+                <p style={{ margin: 0, fontSize: "12px", color: "var(--ma-text-secondary, #666)" }}>{showMoreMenu.profiles?.display_name || "Artist"}</p>
+              </div>
+              <button onClick={() => setShowMoreMenu(null)} style={{ background: "var(--ma-surface)", border: 0, borderRadius: "50%", width: "32px", height: "32px", display: "grid", placeItems: "center", color: "var(--ma-text)", cursor: "pointer" }}>
+                <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>close</span>
+              </button>
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+              
+              {/* Playback Speed */}
+              <div style={{ padding: "12px 0", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
+                <p style={{ margin: "0 0 8px 0", fontSize: "12px", fontWeight: "600", color: "var(--ma-text-secondary, #666)", textTransform: "uppercase" }}>Playback Speed</p>
+                <div style={{ display: "flex", gap: "8px" }}>
+                  {[1, 1.25, 1.5, 2].map(speed => (
+                    <button key={speed} onClick={() => {
+                      const mediaEl = document.querySelector('video') || document.querySelector('audio');
+                      if (mediaEl) { mediaEl.playbackRate = speed; setMessage(`Speed: ${speed}x`); }
+                      else { setMessage("Player not ready."); }
+                      setShowMoreMenu(null);
+                    }} style={{ flex: 1, padding: "8px 0", background: "var(--ma-surface)", border: "1px solid var(--ma-border)", borderRadius: "8px", color: "var(--ma-text)", fontSize: "13px", fontWeight: "600", cursor: "pointer" }}>
+                      {speed}x
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Share */}
+              <button onClick={() => { handleShare(showMoreMenu); setShowMoreMenu(null); }} style={{ display: "flex", alignItems: "center", gap: "12px", background: "transparent", border: 0, padding: "16px 0", fontSize: "15px", fontWeight: "600", color: "var(--ma-text)", cursor: "pointer", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
+                <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary)" }}>share</span> Share Link
+              </button>
+
+              {/* Save to Playlist */}
+              {session?.user?.id && (
+                <button onClick={() => { setActiveMedia(showMoreMenu); fetchUserPlaylistsForModal(); setShowPlaylistModal(true); setShowMoreMenu(null); }} style={{ display: "flex", alignItems: "center", gap: "12px", background: "transparent", border: 0, padding: "16px 0", fontSize: "15px", fontWeight: "600", color: "var(--ma-text)", cursor: "pointer", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
+                  <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary)" }}>playlist_add</span> Save to Playlist
+                </button>
+              )}
+
+              {/* Report */}
+              <button onClick={() => { handleReportVideo(showMoreMenu.id); setShowMoreMenu(null); }} style={{ display: "flex", alignItems: "center", gap: "12px", background: "transparent", border: 0, padding: "16px 0", fontSize: "15px", fontWeight: "600", color: "#FF4E45", cursor: "pointer" }}>
+                <span className="material-symbols-outlined" style={{ color: "#FF4E45" }}>flag</span> Report Video
+              </button>
+
+            </div>
+          </div>
+        </div>, document.body
+      )}
+
       {showPlaylistModal && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }} onClick={() => setShowPlaylistModal(false)}>
           <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "90%", maxWidth: "400px", borderRadius: "16px", padding: "24px", border: "1px solid var(--ma-border, #e5e5e5)", boxShadow: "0 10px 40px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
