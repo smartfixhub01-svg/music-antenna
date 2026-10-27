@@ -1936,6 +1936,30 @@ useEffect(() => {
   }
 
   
+  
+  async function handleCreateNewPlaylist() {
+    if (!newPlaylistName.trim()) return;
+    try {
+      const { data, error } = await supabase.from("playlists").insert({ user_id: session.user.id, title: newPlaylistName.trim(), visibility: 'public' }).select().single();
+      if (error) throw error;
+
+      if (activeMedia?.id) {
+        await supabase.from('playlist_items').insert({ playlist_id: data.id, media_id: activeMedia.id, position: 0 });
+      }
+
+      setPlaylists(prev => [data, ...prev]);
+      setNewPlaylistName("");
+      setShowPlaylistModal(false);
+
+      setAddedPlaylistId(data.id);
+      setAddedPlaylistTitle(data.title);
+      setShowAddSuccessModal(true);
+      setMessage("Playlist created successfully!");
+    } catch(err) {
+      setMessage("Error creating playlist: " + err.message);
+    }
+  }
+
   async function handleDeletePlaylistItem(itemId) {
     try {
       const { error } = await supabase.from('playlist_items').delete().eq('id', itemId);
@@ -1964,6 +1988,30 @@ useEffect(() => {
     setSelectedPlaylistItems(prev => 
       prev.includes(itemId) ? prev.filter(id => id !== itemId) : [...prev, itemId]
     );
+  }
+
+  
+  async function handleCreateNewPlaylist() {
+    if (!newPlaylistName.trim()) return;
+    try {
+      const { data, error } = await supabase.from("playlists").insert({ user_id: session.user.id, title: newPlaylistName.trim(), visibility: 'public' }).select().single();
+      if (error) throw error;
+
+      if (activeMedia?.id) {
+        await supabase.from('playlist_items').insert({ playlist_id: data.id, media_id: activeMedia.id, position: 0 });
+      }
+
+      setPlaylists(prev => [data, ...prev]);
+      setNewPlaylistName("");
+      setShowPlaylistModal(false);
+
+      setAddedPlaylistId(data.id);
+      setAddedPlaylistTitle(data.title);
+      setShowAddSuccessModal(true);
+      setMessage("Playlist created successfully!");
+    } catch(err) {
+      setMessage("Error creating playlist: " + err.message);
+    }
   }
 
   async function handleDeletePlaylistItem(itemId, playlistId) {
@@ -5977,39 +6025,37 @@ document.body
             <div style={{ height: "1px", background: "var(--ma-border)", margin: "20px 0" }} />
 
             {/* Create New Playlist Form */}
-            <form onSubmit={async (e) => {
-              e.preventDefault();
-              if (!newPlaylistName.trim()) return;
-              try {
-                const { data, error } = await supabase.from("playlists").insert({ user_id: session.user.id, title: newPlaylistName.trim(), visibility: 'public' }).select().single();
-                if (error) throw error;
-
-                if (activeMedia?.id) {
-                  await supabase.from('playlist_items').insert({ playlist_id: data.id, media_id: activeMedia.id, position: 0 });
-                }
-
-                setPlaylists(prev => [data, ...prev]);
-                setNewPlaylistName("");
-                setShowPlaylistModal(false);
-
-                setAddedPlaylistId(data.id);
-                setAddedPlaylistTitle(data.title);
-                setShowAddSuccessModal(true);
-                setMessage("Playlist created successfully!"); // Small notification
-              } catch(err) {
-                setMessage("Error creating playlist: " + err.message);
-              }
-            }} style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%" }}>
               
-              <input type="text" placeholder="New playlist name..." value={newPlaylistName} onChange={e => setNewPlaylistName(e.target.value)} style={{ width: "100%", padding: "14px", borderRadius: "10px", background: "var(--ma-surface)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", outline: "none", fontSize: "14px" }} />
+              <input 
+                type="text" 
+                placeholder="New playlist name..." 
+                value={newPlaylistName} 
+                onChange={e => setNewPlaylistName(e.target.value)} 
+                style={{ width: "100%", padding: "14px", borderRadius: "10px", background: "var(--ma-surface)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", outline: "none", display: "block" }} 
+              />
               
-              {/* Create Button Failsafe */}
-              <div style={{ width: "100%", backgroundColor: "#ff365f", borderRadius: "10px", display: "flex", justifyContent: "center", boxShadow: "0 4px 12px rgba(255,54,95,0.2)" }}>
-                <button type="submit" style={{ width: "100%", background: "transparent", color: "#ffffff", border: "none", padding: "14px", fontWeight: "bold", fontSize: "14px", cursor: "pointer" }}>
-                  Create Playlist
-                </button>
-              </div>
-            </form>
+              <button 
+                type="button" 
+                onClick={handleCreateNewPlaylist}
+                style={{ 
+                  width: "100%", 
+                  backgroundColor: "#ff365f", 
+                  color: "#ffffff", 
+                  border: "none", 
+                  padding: "14px", 
+                  borderRadius: "10px", 
+                  fontWeight: "bold", 
+                  fontSize: "15px", 
+                  cursor: "pointer", 
+                  display: "flex", 
+                  justifyContent: "center", 
+                  boxShadow: "0 4px 12px rgba(255,54,95,0.3)" 
+                }}
+              >
+                Create Playlist
+              </button>
+            </div>
 
           </div>
         </div>
