@@ -5869,9 +5869,9 @@ document.body
                 setNewPlaylistName("");
                 if (activeMedia?.id) handleAddToPlaylist(data.id);
               }
-            }} style={{ display: "flex", gap: "8px" }}>
-              <input type="text" placeholder="New playlist name..." value={newPlaylistName} onChange={e => setNewPlaylistName(e.target.value)} style={{ flex: 1, padding: "12px", borderRadius: "10px", background: "var(--ma-surface)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", outline: "none" }} />
-              <button type="submit" style={{ background: "#ff365f", color: "white", border: "none", padding: "0 16px", borderRadius: "10px", fontWeight: "bold", cursor: "pointer" }}>Create</button>
+            }} style={{ display: "flex", gap: "8px", width: "100%" }}>
+              <input type="text" placeholder="New playlist name..." value={newPlaylistName} onChange={e => setNewPlaylistName(e.target.value)} style={{ flex: 1, minWidth: 0, padding: "12px", borderRadius: "10px", background: "var(--ma-surface)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", outline: "none" }} />
+              <button type="submit" style={{ flexShrink: 0, background: "#ff365f", color: "white", border: "none", padding: "0 20px", borderRadius: "10px", fontWeight: "bold", fontSize: "14px", cursor: "pointer" }}>Create</button>
             </form>
 
           </div>
