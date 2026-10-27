@@ -249,6 +249,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [playlistItems, setPlaylistItems] = useState([]);
   const [selectedPlaylistItems, setSelectedPlaylistItems] = useState([]);
   const [activePlaylistItemMenu, setActivePlaylistItemMenu] = useState(null);
+  const [videoQueue, setVideoQueue] = useState([]);
   const [playlistLoading, setPlaylistLoading] = useState(false);
   const [showAllPlaylists, setShowAllPlaylists] = useState(false);
 
@@ -1961,6 +1962,40 @@ useEffect(() => {
     }
   }
 
+  
+  function addToQueue(item, position) {
+    if (position === 'next') {
+      setVideoQueue(prev => [item, ...prev]);
+      setMessage("Added to play next.");
+    } else {
+      setVideoQueue(prev => [...prev, item]);
+      setMessage("Added to play last.");
+    }
+  }
+
+  function handleSaveToWatchLater(item) {
+    try {
+      const existing = JSON.parse(localStorage.getItem('watchLater') || '[]');
+      if (!existing.find(i => i.id === item.id)) {
+        existing.push(item);
+        localStorage.setItem('watchLater', JSON.stringify(existing));
+        setMessage("Saved to Watch Later!");
+      } else {
+        setMessage("Already in Watch Later.");
+      }
+    } catch (e) {
+      setMessage("Error saving to Watch Later.");
+    }
+  }
+
+  function handleVideoEnded() {
+    if (videoQueue.length > 0) {
+      const nextVideo = videoQueue[0];
+      setVideoQueue(prev => prev.slice(1));
+      openPlayer(nextVideo);
+    }
+  }
+
   async function handleDeletePlaylistItem(itemId) {
     try {
       const { error } = await supabase.from('playlist_items').delete().eq('id', itemId);
@@ -2012,6 +2047,40 @@ useEffect(() => {
       setMessage("Playlist created successfully!");
     } catch(err) {
       setMessage("Error creating playlist: " + err.message);
+    }
+  }
+
+  
+  function addToQueue(item, position) {
+    if (position === 'next') {
+      setVideoQueue(prev => [item, ...prev]);
+      setMessage("Added to play next.");
+    } else {
+      setVideoQueue(prev => [...prev, item]);
+      setMessage("Added to play last.");
+    }
+  }
+
+  function handleSaveToWatchLater(item) {
+    try {
+      const existing = JSON.parse(localStorage.getItem('watchLater') || '[]');
+      if (!existing.find(i => i.id === item.id)) {
+        existing.push(item);
+        localStorage.setItem('watchLater', JSON.stringify(existing));
+        setMessage("Saved to Watch Later!");
+      } else {
+        setMessage("Already in Watch Later.");
+      }
+    } catch (e) {
+      setMessage("Error saving to Watch Later.");
+    }
+  }
+
+  function handleVideoEnded() {
+    if (videoQueue.length > 0) {
+      const nextVideo = videoQueue[0];
+      setVideoQueue(prev => prev.slice(1));
+      openPlayer(nextVideo);
     }
   }
 
@@ -4504,7 +4573,7 @@ document.body
             {activeMedia.playbackUrl ? (
               activeMedia.media_type === "video" ? (
                 <video
-                  onPlay={handleFirstPlay}
+                  onPlay={handleFirstPlay} onEnded={handleVideoEnded}
                   className="yt-watch-video"
                   src={activeMedia.playbackUrl}
                   poster={activeMedia.thumbnailUrl || undefined}
@@ -4523,7 +4592,7 @@ document.body
                       <img src="/logo.png" alt="" style={{ height: "36px", width: "auto", objectFit: "contain", borderRadius: "6px" }} />
                     )}
                   </div>
-                  <audio src={activeMedia.playbackUrl} controls autoPlay onPlay={handleFirstPlay} />
+                  <audio src={activeMedia.playbackUrl} controls autoPlay onPlay={handleFirstPlay} onEnded={handleVideoEnded} />
                 </div>
               )
             ) : (
@@ -5964,15 +6033,15 @@ document.body
                     {activePlaylistItemMenu === item.playlistItemId && (
                       <div style={{ position: "absolute", right: "0", top: "40px", background: "var(--ma-bg)", border: "1px solid var(--ma-border)", borderRadius: "12px", boxShadow: "0 10px 30px rgba(0,0,0,0.2)", zIndex: 30, display: "flex", flexDirection: "column", width: "260px", padding: "8px 0", backdropFilter: "blur(10px)" }}>
                         
-                        <button onClick={() => { setMessage("Queue feature coming soon"); setActivePlaylistItemMenu(null); }} style={{ padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", color: "var(--ma-text)", fontWeight: "500", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "16px" }}>
+                        <button onClick={() => { addToQueue(item, "next"); setActivePlaylistItemMenu(null); }} style={{ padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", color: "var(--ma-text)", fontWeight: "500", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "16px" }}>
                           <span className="material-symbols-outlined" style={{ fontSize: "22px", color: "var(--ma-text-secondary)" }}>play_circle</span> Play next in queue
                         </button>
                         
-                        <button onClick={() => { setMessage("Queue feature coming soon"); setActivePlaylistItemMenu(null); }} style={{ padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", color: "var(--ma-text)", fontWeight: "500", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "16px" }}>
+                        <button onClick={() => { addToQueue(item, "last"); setActivePlaylistItemMenu(null); }} style={{ padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", color: "var(--ma-text)", fontWeight: "500", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "16px" }}>
                           <span className="material-symbols-outlined" style={{ fontSize: "22px", color: "var(--ma-text-secondary)" }}>playlist_add</span> Play last in queue
                         </button>
 
-                        <button onClick={() => { setMessage("Added to Watch Later"); setActivePlaylistItemMenu(null); }} style={{ padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", color: "var(--ma-text)", fontWeight: "500", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "16px" }}>
+                        <button onClick={() => { handleSaveToWatchLater(item); setActivePlaylistItemMenu(null); }} style={{ padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", color: "var(--ma-text)", fontWeight: "500", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "16px" }}>
                           <span className="material-symbols-outlined" style={{ fontSize: "22px", color: "var(--ma-text-secondary)" }}>schedule</span> Save to Watch later
                         </button>
 
