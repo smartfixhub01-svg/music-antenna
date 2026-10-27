@@ -239,7 +239,13 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
   const [showManagePage, setShowManagePage] = useState(false);
   const [manageSource, setManageSource] = useState("account");
-  const [showHistoryPage, setShowHistoryPage] = useState(false);
+  const [show<div style={{ flex: 1, display: "flex" }}>
+                <button className="btn-gray" onClick={() => { setProfileName(profile?.username || ""); setProfileBio(profile?.bio || ""); setShowProfileEditor(!showProfileEditor); }}>
+                  {showProfileEditor ? "Close Editor" : "Edit profile"}
+                </button>
+              </div>
+
+HistoryPage, setShowHistoryPage] = useState(false);
   const [showPlaylistModal, setShowPlaylistModal] = useState(false);
   const [showAddSuccessModal, setShowAddSuccessModal] = useState(false);
   const [addedPlaylistId, setAddedPlaylistId] = useState(null);
@@ -4874,11 +4880,7 @@ document.body
                   </button>
                 </div>
               )}
-              <div style={{ flex: 1, display: "flex" }}>
-                <button className="btn-gray" onClick={() => { setProfileName(profile?.username || ""); setProfileBio(profile?.bio || ""); setShowProfileEditor(!showProfileEditor); }}>
-                  {showProfileEditor ? "Close Editor" : "Edit profile"}
-                </button>
-              </div>
+              
               <button className="btn-circle" aria-label="Share Profile" onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleShareProfile(); }}>
                 <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>share</span>
               </button>
