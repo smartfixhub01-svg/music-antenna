@@ -249,6 +249,8 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [playlistItems, setPlaylistItems] = useState([]);
   const [selectedPlaylistItems, setSelectedPlaylistItems] = useState([]);
   const [activePlaylistItemMenu, setActivePlaylistItemMenu] = useState(null);
+  const [playlistCoverFile, setPlaylistCoverFile] = useState(null);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [videoQueue, setVideoQueue] = useState([]);
   const [playlistLoading, setPlaylistLoading] = useState(false);
   const [showAllPlaylists, setShowAllPlaylists] = useState(false);
@@ -1996,6 +1998,35 @@ useEffect(() => {
     }
   }
 
+  
+  async function handleUpdatePlaylistCover(e) {
+    const file = e.target.files[0];
+    if (!file || !selectedPlaylist) return;
+    setIsUploadingCover(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `playlist-cover-${selectedPlaylist.id}-${Date.now()}.${fileExt}`;
+      const filePath = `${session.user.id}/${fileName}`;
+      
+      const { error: uploadError } = await supabase.storage.from(BUCKET).upload(filePath, file);
+      if (uploadError) throw uploadError;
+      
+      const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(filePath);
+      
+      const { error: updateError } = await supabase.from('playlists').update({ cover_url: publicUrl }).eq('id', selectedPlaylist.id);
+      if (updateError) throw updateError;
+      
+      setSelectedPlaylist(prev => ({ ...prev, cover_url: publicUrl }));
+      // Update the main grid list too
+      setChannelPlaylists(prev => prev.map(p => p.id === selectedPlaylist.id ? { ...p, cover_url: publicUrl } : p));
+      setMessage("Playlist cover updated!");
+    } catch (err) {
+      setMessage("Error uploading cover: " + err.message);
+    } finally {
+      setIsUploadingCover(false);
+    }
+  }
+
   async function handleDeletePlaylistItem(itemId) {
     try {
       const { error } = await supabase.from('playlist_items').delete().eq('id', itemId);
@@ -2081,6 +2112,35 @@ useEffect(() => {
       const nextVideo = videoQueue[0];
       setVideoQueue(prev => prev.slice(1));
       openPlayer(nextVideo);
+    }
+  }
+
+  
+  async function handleUpdatePlaylistCover(e) {
+    const file = e.target.files[0];
+    if (!file || !selectedPlaylist) return;
+    setIsUploadingCover(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `playlist-cover-${selectedPlaylist.id}-${Date.now()}.${fileExt}`;
+      const filePath = `${session.user.id}/${fileName}`;
+      
+      const { error: uploadError } = await supabase.storage.from(BUCKET).upload(filePath, file);
+      if (uploadError) throw uploadError;
+      
+      const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(filePath);
+      
+      const { error: updateError } = await supabase.from('playlists').update({ cover_url: publicUrl }).eq('id', selectedPlaylist.id);
+      if (updateError) throw updateError;
+      
+      setSelectedPlaylist(prev => ({ ...prev, cover_url: publicUrl }));
+      // Update the main grid list too
+      setChannelPlaylists(prev => prev.map(p => p.id === selectedPlaylist.id ? { ...p, cover_url: publicUrl } : p));
+      setMessage("Playlist cover updated!");
+    } catch (err) {
+      setMessage("Error uploading cover: " + err.message);
+    } finally {
+      setIsUploadingCover(false);
     }
   }
 
@@ -5962,37 +6022,80 @@ document.body
       </nav>
       
       {showPlaylistDetailPage && selectedPlaylist && (
-        <section style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: "56px", background: "var(--ma-bg, #fff)", zIndex: 99999, display: "flex", flexDirection: "column", overflowY: "auto" }}>
+        <section style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: "56px", background: "var(--ma-bg, #fff)", zIndex: 99999, display: "flex", flexDirection: "column", overflowY: "auto", userSelect: "none" }}>
           
           {/* Top Bar */}
-          <div style={{ display: "flex", alignItems: "center", padding: "12px 16px", borderBottom: "1px solid var(--ma-border, #e5e5e5)", background: "var(--ma-bg, #fff)", position: "sticky", top: 0, zIndex: 10 }}>
-            <button onClick={() => { setShowPlaylistDetailPage(false); setActivePlaylistItemMenu(null); setSelectedPlaylistItems([]); }} style={{ background: "transparent", border: 0, color: "var(--ma-text, #000)", cursor: "pointer", padding: "8px", display: "flex" }}>
-              <span className="material-symbols-outlined">arrow_back</span>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", background: "transparent", position: "absolute", top: 0, left: 0, right: 0, zIndex: 20 }}>
+            <button onClick={() => { setShowPlaylistDetailPage(false); setSelectedPlaylistItems([]); }} style={{ background: "transparent", border: 0, color: "#ffffff", cursor: "pointer", padding: "8px", display: "flex", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.8))" }}>
+              <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>arrow_back</span>
             </button>
-            <h2 style={{ margin: 0, fontSize: "18px", fontWeight: "700", color: "var(--ma-text, #000)", marginLeft: "8px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1 }}>{selectedPlaylist.title}</h2>
+            <div style={{ display: "flex", gap: "16px" }}>
+              <span className="material-symbols-outlined" style={{ color: "#fff", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.8))", fontSize: "24px" }}>search</span>
+              <span className="material-symbols-outlined" style={{ color: "#fff", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.8))", fontSize: "24px" }}>more_vert</span>
+            </div>
           </div>
 
-          {/* Compact Playlist Header */}
-          <div style={{ padding: "16px", borderBottom: "1px solid var(--ma-border, #e5e5e5)", display: "flex", alignItems: "center", gap: "16px" }}>
-            <div style={{ width: "120px", height: "68px", borderRadius: "8px", overflow: "hidden", background: "var(--ma-surface)", flexShrink: 0 }}>
-              {playlistItems[0]?.thumbnail_path ? (
-                <img src={supabase.storage.from(BUCKET).getPublicUrl(playlistItems[0].thumbnail_path).data.publicUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              ) : (
-                <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", color: "var(--ma-text-secondary)", fontSize: "24px" }}>♫</div>
-              )}
+          {/* Hero Banner Area */}
+          <div style={{ position: "relative", width: "100%", height: "220px", background: "var(--ma-surface)" }}>
+            <div style={{ width: "100%", height: "100%", backgroundImage: `url(${selectedPlaylist.cover_url || (playlistItems[0]?.thumbnail_path ? supabase.storage.from(BUCKET).getPublicUrl(playlistItems[0].thumbnail_path).data.publicUrl : "")})`, backgroundSize: "cover", backgroundPosition: "center", opacity: 0.9 }} />
+            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, var(--ma-bg) 0%, transparent 100%)" }} />
+            
+            {/* Edit Cover Button (Only for owner) */}
+            {selectedPlaylist.user_id === session?.user?.id && (
+              <label style={{ position: "absolute", bottom: "16px", right: "16px", background: "var(--ma-bg)", width: "40px", height: "40px", borderRadius: "50%", display: "grid", placeItems: "center", cursor: "pointer", boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}>
+                <span className="material-symbols-outlined" style={{ color: "var(--ma-text)", fontSize: "20px" }}>{isUploadingCover ? "sync" : "edit"}</span>
+                <input type="file" accept="image/*" onChange={handleUpdatePlaylistCover} disabled={isUploadingCover} style={{ display: "none" }} />
+              </label>
+            )}
+          </div>
+
+          {/* Playlist Info */}
+          <div style={{ padding: "0 16px 16px 16px", position: "relative", zIndex: 10, marginTop: "-20px" }}>
+            <h1 style={{ margin: "0 0 8px 0", fontSize: "28px", fontWeight: "900", color: "var(--ma-text)", letterSpacing: "-0.5px" }}>{selectedPlaylist.title}</h1>
+            
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "12px" }}>
+              <img src={channelProfile?.avatar_url || "https://via.placeholder.com/32"} style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover" }} />
+              <span style={{ fontSize: "14px", fontWeight: "700", color: "var(--ma-text)" }}>{channelProfile?.display_name || "Creator"}</span>
+              <span style={{ fontSize: "14px", color: "var(--ma-text-secondary)" }}>•</span>
+              <span style={{ fontSize: "14px", color: "var(--ma-text-secondary)" }}>{playlistItems.length} videos</span>
             </div>
-            <div style={{ flex: 1 }}>
-              <h3 style={{ margin: "0 0 4px 0", fontSize: "16px", fontWeight: "700", color: "var(--ma-text)" }}>{selectedPlaylist.title}</h3>
-              <p style={{ margin: "0 0 8px 0", fontSize: "12px", color: "var(--ma-text-secondary)" }}>{channelProfile?.display_name || "Creator"} • {playlistItems.length} videos</p>
-              
-              <button onClick={() => { if (playlistItems.length > 0) openPlayer(playlistItems[0]); }} disabled={playlistItems.length === 0} style={{ padding: "8px 16px", background: "#ff365f", color: "white", border: "none", borderRadius: "20px", fontSize: "13px", fontWeight: "700", cursor: playlistItems.length === 0 ? "not-allowed" : "pointer", opacity: playlistItems.length === 0 ? 0.5 : 1 }}>
-                Play All
+            
+            <p style={{ margin: "0 0 16px 0", fontSize: "13px", color: "var(--ma-text-secondary)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+              {selectedPlaylist.description || "No description provided."}
+            </p>
+
+            {/* Actions Row */}
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", overflowX: "auto", paddingBottom: "8px" }}>
+              <button onClick={() => { if (playlistItems.length > 0) openPlayer(playlistItems[0]); }} disabled={playlistItems.length === 0} style={{ display: "flex", alignItems: "center", gap: "6px", background: "#ffffff", color: "#000000", padding: "10px 20px", borderRadius: "24px", fontSize: "14px", fontWeight: "700", border: "none", cursor: playlistItems.length === 0 ? "not-allowed" : "pointer", opacity: playlistItems.length === 0 ? 0.5 : 1 }}>
+                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span> Play all
               </button>
+              
+              <div style={{ display: "flex", gap: "12px" }}>
+                <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "var(--ma-surface)", display: "grid", placeItems: "center" }}>
+                  <span className="material-symbols-outlined" style={{ color: "var(--ma-text)" }}>add</span>
+                </div>
+                <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "var(--ma-surface)", display: "grid", placeItems: "center" }}>
+                  <span className="material-symbols-outlined" style={{ color: "var(--ma-text)" }}>edit</span>
+                </div>
+                <div onClick={() => handleShare(selectedPlaylist)} style={{ width: "40px", height: "40px", borderRadius: "50%", background: "var(--ma-surface)", display: "grid", placeItems: "center", cursor: "pointer" }}>
+                  <span className="material-symbols-outlined" style={{ color: "var(--ma-text)" }}>share</span>
+                </div>
+                <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "var(--ma-surface)", display: "grid", placeItems: "center" }}>
+                  <span className="material-symbols-outlined" style={{ color: "var(--ma-text)" }}>download</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Clean Video List */}
-          <div style={{ padding: "8px 16px", flex: 1, paddingBottom: "100px" }}>
+          {/* Sort Row */}
+          <div style={{ padding: "0 16px 12px 16px", display: "flex", alignItems: "center", gap: "8px" }}>
+             <div style={{ display: "flex", alignItems: "center", gap: "4px", background: "var(--ma-surface)", padding: "6px 12px", borderRadius: "16px", fontSize: "12px", fontWeight: "600", color: "var(--ma-text)" }}>
+               Top voted <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>keyboard_arrow_down</span>
+             </div>
+          </div>
+
+          {/* Video List */}
+          <div style={{ padding: "0 16px", flex: 1, paddingBottom: "100px" }}>
             {playlistLoading ? (
               <p style={{ textAlign: "center", color: "var(--ma-text-secondary)", marginTop: "20px" }}>Loading videos...</p>
             ) : playlistItems.length === 0 ? (
@@ -6001,62 +6104,59 @@ document.body
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                 {playlistItems.map((item) => {
                   return (
-                  <div key={item.id} style={{ display: "flex", alignItems: "center", gap: "12px", position: "relative" }}>
+                  <div key={item.id} style={{ display: "flex", alignItems: "flex-start", gap: "12px", position: "relative" }}>
                     
                     {/* Thumbnail */}
-                    <div onClick={() => openPlayer(item)} style={{ width: "160px", height: "90px", borderRadius: "10px", overflow: "hidden", background: "var(--ma-surface)", flexShrink: 0, position: "relative", cursor: "pointer" }}>
+                    <div onClick={() => openPlayer(item)} style={{ width: "140px", height: "80px", borderRadius: "8px", overflow: "hidden", background: "var(--ma-surface)", flexShrink: 0, position: "relative", cursor: "pointer" }}>
                       {item.thumbnail_path ? (
                         <img src={supabase.storage.from(BUCKET).getPublicUrl(item.thumbnail_path).data.publicUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       ) : (
                         <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", color: "var(--ma-text-secondary)", fontSize: "24px" }}>♫</div>
                       )}
-                      
-                      {/* Duration / Type Badge */}
-                      <div style={{ position: "absolute", bottom: "6px", right: "6px", background: "rgba(0,0,0,0.8)", color: "white", fontSize: "11px", fontWeight: "bold", padding: "2px 6px", borderRadius: "4px", display: "flex", alignItems: "center", gap: "4px" }}>
-                        <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>{item.media_type === "video" ? "play_arrow" : "music_note"}</span>
-                        {item.media_type === "video" ? "Video" : "Audio"}
+                      <div style={{ position: "absolute", bottom: "4px", right: "4px", background: "rgba(0,0,0,0.8)", color: "white", fontSize: "10px", fontWeight: "bold", padding: "2px 4px", borderRadius: "4px" }}>
+                        {item.media_type === "video" ? "VIDEO" : "AUDIO"}
                       </div>
                     </div>
 
                     {/* Title and Meta */}
-                    <div onClick={() => openPlayer(item)} style={{ flex: 1, minWidth: 0, cursor: "pointer" }}>
-                      <h4 style={{ margin: "0 0 6px 0", fontSize: "14px", fontWeight: "500", color: "var(--ma-text, #000)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: "1.3" }}>{item.title}</h4>
-                      <p style={{ margin: 0, fontSize: "12px", color: "var(--ma-text-secondary, #666)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.profiles?.display_name || "Artist"} • Playlist</p>
+                    <div onClick={() => openPlayer(item)} style={{ flex: 1, minWidth: 0, cursor: "pointer", paddingTop: "4px" }}>
+                      <h4 style={{ margin: "0 0 4px 0", fontSize: "14px", fontWeight: "700", color: "var(--ma-text)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: "1.3" }}>{item.title}</h4>
+                      <p style={{ margin: 0, fontSize: "12px", color: "var(--ma-text-secondary)", fontWeight: "600" }}>{item.profiles?.display_name || "Artist"}</p>
                     </div>
 
                     {/* 3-Dots Menu Trigger */}
-                    <button onClick={(e) => { e.stopPropagation(); setActivePlaylistItemMenu(activePlaylistItemMenu === item.playlistItemId ? null : item.playlistItemId); }} style={{ background: "transparent", border: "none", color: "var(--ma-text)", cursor: "pointer", padding: "8px", flexShrink: 0 }}>
+                    <button onClick={(e) => { e.stopPropagation(); setActivePlaylistItemMenu(activePlaylistItemMenu === item.playlistItemId ? null : item.playlistItemId); }} style={{ background: "transparent", border: "none", color: "var(--ma-text)", cursor: "pointer", padding: "4px", flexShrink: 0 }}>
                       <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>more_vert</span>
                     </button>
 
-                    {/* The Dropdown Menu (Positioned absolutely relative to the row) */}
+                    {/* Dropdown Menu */}
                     {activePlaylistItemMenu === item.playlistItemId && (
-                      <div style={{ position: "absolute", right: "0", top: "40px", background: "var(--ma-bg)", border: "1px solid var(--ma-border)", borderRadius: "12px", boxShadow: "0 10px 30px rgba(0,0,0,0.2)", zIndex: 30, display: "flex", flexDirection: "column", width: "260px", padding: "8px 0", backdropFilter: "blur(10px)" }}>
+                      <div style={{ position: "absolute", right: "0", top: "30px", background: "var(--ma-bg)", border: "1px solid var(--ma-border)", borderRadius: "12px", boxShadow: "0 10px 30px rgba(0,0,0,0.2)", zIndex: 30, display: "flex", flexDirection: "column", width: "220px", padding: "8px 0" }}>
                         
                         <button onClick={() => { addToQueue(item, "next"); setActivePlaylistItemMenu(null); }} style={{ padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", color: "var(--ma-text)", fontWeight: "500", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "16px" }}>
-                          <span className="material-symbols-outlined" style={{ fontSize: "22px", color: "var(--ma-text-secondary)" }}>play_circle</span> Play next in queue
+                          <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "var(--ma-text-secondary)" }}>play_circle</span> Play next in queue
                         </button>
                         
                         <button onClick={() => { addToQueue(item, "last"); setActivePlaylistItemMenu(null); }} style={{ padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", color: "var(--ma-text)", fontWeight: "500", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "16px" }}>
-                          <span className="material-symbols-outlined" style={{ fontSize: "22px", color: "var(--ma-text-secondary)" }}>playlist_add</span> Play last in queue
+                          <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "var(--ma-text-secondary)" }}>playlist_add</span> Play last in queue
                         </button>
 
                         <button onClick={() => { handleSaveToWatchLater(item); setActivePlaylistItemMenu(null); }} style={{ padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", color: "var(--ma-text)", fontWeight: "500", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "16px" }}>
-                          <span className="material-symbols-outlined" style={{ fontSize: "22px", color: "var(--ma-text-secondary)" }}>schedule</span> Save to Watch later
+                          <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "var(--ma-text-secondary)" }}>schedule</span> Save to Watch later
                         </button>
 
                         <button onClick={() => { setActiveMedia(item); setShowPlaylistModal(true); setActivePlaylistItemMenu(null); }} style={{ padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", color: "var(--ma-text)", fontWeight: "500", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "16px" }}>
-                          <span className="material-symbols-outlined" style={{ fontSize: "22px", color: "var(--ma-text-secondary)" }}>playlist_add</span> Save to playlist
+                          <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "var(--ma-text-secondary)" }}>playlist_add</span> Save to playlist
                         </button>
 
                         {selectedPlaylist?.user_id === session?.user?.id && (
                           <button onClick={() => { handleDeletePlaylistItem(item.playlistItemId); setActivePlaylistItemMenu(null); }} style={{ padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", color: "var(--ma-text)", fontWeight: "500", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "16px" }}>
-                            <span className="material-symbols-outlined" style={{ fontSize: "22px", color: "var(--ma-text-secondary)" }}>remove_circle</span> Remove from {selectedPlaylist.title}
+                            <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "var(--ma-text-secondary)" }}>remove_circle</span> Remove from {selectedPlaylist.title}
                           </button>
                         )}
 
                         <button onClick={() => { handleShare(item); setActivePlaylistItemMenu(null); }} style={{ padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", color: "var(--ma-text)", fontWeight: "500", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "16px" }}>
-                          <span className="material-symbols-outlined" style={{ fontSize: "22px", color: "var(--ma-text-secondary)" }}>share</span> Share
+                          <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "var(--ma-text-secondary)" }}>share</span> Share
                         </button>
                         
                       </div>
