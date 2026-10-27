@@ -1391,7 +1391,7 @@ useEffect(() => {
           const { data: thumb } = await supabase.storage.from("track-covers").createSignedUrl(m.thumbnail_path, 31536000);
           thumbnailUrl = thumb?.signedUrl || "";
         }
-        return { ...item, media: { ...m, playbackUrl: pub?.signedUrl || "", thumbnailUrl } };
+        return { ...m, playlistItemId: item.id, media_id: item.media_id, playbackUrl: pub?.signedUrl || "", thumbnailUrl };
       }));
       setPlaylistItems(itemsWithUrls);
     } catch (err) {
@@ -6066,7 +6066,7 @@ document.body
 
             {/* Actions Row */}
             <div style={{ display: "flex", alignItems: "center", gap: "12px", overflowX: "auto", paddingBottom: "8px" }}>
-              <button onClick={() => { if (playlistItems.length > 0) openPlayer(playlistItems[0]); }} disabled={playlistItems.length === 0} style={{ display: "flex", alignItems: "center", gap: "6px", background: "#ffffff", color: "#000000", padding: "10px 20px", borderRadius: "24px", fontSize: "14px", fontWeight: "700", border: "none", cursor: playlistItems.length === 0 ? "not-allowed" : "pointer", opacity: playlistItems.length === 0 ? 0.5 : 1 }}>
+              <button onClick={() => { if (playlistItems.length > 0) { setVideoQueue(playlistItems.slice(1)); openPlayer(playlistItems[0]); } }} disabled={playlistItems.length === 0} style={{ display: "flex", alignItems: "center", gap: "6px", background: "#ffffff", color: "#000000", padding: "10px 20px", borderRadius: "24px", fontSize: "14px", fontWeight: "700", border: "none", cursor: playlistItems.length === 0 ? "not-allowed" : "pointer", opacity: playlistItems.length === 0 ? 0.5 : 1 }}>
                 <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span> Play all
               </button>
               
@@ -6104,7 +6104,7 @@ document.body
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                 {playlistItems.map((item) => {
                   return (
-                  <div key={item.id} style={{ display: "flex", alignItems: "flex-start", gap: "12px", position: "relative" }}>
+                  <div key={item.playlistItemId || item.id} style={{ display: "flex", alignItems: "flex-start", gap: "12px", position: "relative" }}>
                     
                     {/* Thumbnail */}
                     <div onClick={() => openPlayer(item)} style={{ width: "140px", height: "80px", borderRadius: "8px", overflow: "hidden", background: "var(--ma-surface)", flexShrink: 0, position: "relative", cursor: "pointer" }}>
