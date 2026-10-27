@@ -4872,6 +4872,34 @@ document.body
               </button>
             </div>
 
+            {/* MA_PLAYLISTS_LIBRARY_BUTTON */}
+            <button
+              onClick={async () => {
+                setShowAccountPage(false);
+                setShowAllPlaylists(true);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+                await fetchPlaylists();
+              }}
+              style={{
+                width: "100%", display: "flex", alignItems: "center",
+                gap: "14px", padding: "16px", marginBottom: "20px",
+                background: "var(--ma-surface, #f0f0f0)",
+                color: "var(--ma-text, #111)",
+                border: "1px solid var(--ma-border, #e5e5e5)",
+                borderRadius: "12px", cursor: "pointer", textAlign: "left"
+              }}
+            >
+              <span className="material-symbols-outlined"
+                style={{ fontSize: "28px", color: "#ff365f" }}>queue_music</span>
+              <span style={{ flex: 1 }}>
+                <strong style={{ display: "block", fontSize: "15px" }}>Playlists</strong>
+                <small style={{ color: "var(--ma-text-secondary, #666)" }}>
+                  View and play your saved playlists
+                </small>
+              </span>
+              <span className="material-symbols-outlined">chevron_right</span>
+            </button>
+            
             {/* 5. TABS */}
             <div style={{ display: profile?.role === "artist" ? "flex" : "none", gap: "24px", borderBottom: "1px solid var(--ma-border, #e5e5e5)", marginBottom: "16px" }}>
               <button onClick={() => setProfileTab("overview")} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: profileTab === "overview" ? "#ff365f" : "var(--ma-text-secondary, #666)", fontWeight: profileTab === "overview" ? "600" : "500", fontSize: "14px", borderBottom: profileTab === "overview" ? "2px solid #ff365f" : "none", cursor: "pointer" }}>Overview</button>
@@ -6021,6 +6049,93 @@ document.body
         </button>
       </nav>
       
+      
+      {/* MA_PLAYLISTS_LIBRARY_PAGE */}
+      {showAllPlaylists && !showPlaylistDetailPage && (
+        <section style={{
+          position: "fixed", inset: "0 0 56px 0", zIndex: 99990,
+          overflowY: "auto", padding: "16px",
+          background: "var(--ma-bg, #fff)", color: "var(--ma-text, #111)"
+        }}>
+          <header style={{
+            display: "flex", alignItems: "center", gap: "16px",
+            marginBottom: "22px", position: "sticky", top: 0,
+            padding: "8px 0", background: "var(--ma-bg, #fff)", zIndex: 2
+          }}>
+            <button aria-label="Back to account" onClick={() => {
+              setShowAllPlaylists(false);
+              setShowAccountPage(true);
+            }} style={{
+              border: 0, background: "transparent",
+              color: "var(--ma-text, #111)", cursor: "pointer"
+            }}>
+              <span className="material-symbols-outlined">arrow_back</span>
+            </button>
+            <h2 style={{ margin: 0, fontSize: "22px", fontWeight: 800 }}>Your playlists</h2>
+          </header>
+
+          {!session?.user?.id ? (
+            <p>Sign in to view your playlists.</p>
+          ) : playlists.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "56px 16px" }}>
+              <span className="material-symbols-outlined"
+                style={{ fontSize: "52px", color: "var(--ma-text-secondary, #777)" }}>
+                queue_music
+              </span>
+              <h3>No playlists yet</h3>
+              <p style={{ color: "var(--ma-text-secondary, #777)" }}>
+                Playlists you create or save will appear here.
+              </p>
+            </div>
+          ) : (
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(145px, 1fr))",
+              gap: "16px"
+            }}>
+              {playlists.map((pl) => (
+                <button key={pl.id} onClick={async () => {
+                  setSelectedPlaylist(pl);
+                  setShowPlaylistDetailPage(true);
+                  await openPlaylist(pl);
+                }} style={{
+                  display: "block", minWidth: 0, padding: 0,
+                  overflow: "hidden", textAlign: "left", cursor: "pointer",
+                  border: "1px solid var(--ma-border, #e5e5e5)",
+                  borderRadius: "12px", background: "var(--ma-surface, #f0f0f0)",
+                  color: "var(--ma-text, #111)"
+                }}>
+                  <div style={{
+                    width: "100%", aspectRatio: "16/10",
+                    display: "grid", placeItems: "center",
+                    overflow: "hidden", background: "var(--ma-bg, #fff)"
+                  }}>
+                    {pl.cover_url ? (
+                      <img src={pl.cover_url} alt=""
+                        loading="lazy"
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    ) : (
+                      <span className="material-symbols-outlined"
+                        style={{ fontSize: "42px", color: "#ff365f" }}>queue_music</span>
+                    )}
+                  </div>
+                  <div style={{ padding: "12px" }}>
+                    <strong style={{
+                      display: "block", fontSize: "14px",
+                      overflow: "hidden", textOverflow: "ellipsis",
+                      whiteSpace: "nowrap"
+                    }}>{pl.title || "Untitled playlist"}</strong>
+                    <small style={{ color: "var(--ma-text-secondary, #777)" }}>
+                      Open playlist
+                    </small>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
       {showPlaylistDetailPage && selectedPlaylist && (
         <section style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: "56px", background: "var(--ma-bg, #fff)", zIndex: 99999, display: "flex", flexDirection: "column", overflowY: "auto", userSelect: "none" }}>
           
