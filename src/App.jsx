@@ -241,6 +241,9 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [manageSource, setManageSource] = useState("account");
   const [showHistoryPage, setShowHistoryPage] = useState(false);
   const [showPlaylistModal, setShowPlaylistModal] = useState(false);
+  const [showAddSuccessModal, setShowAddSuccessModal] = useState(false);
+  const [addedPlaylistId, setAddedPlaylistId] = useState(null);
+  const [addedPlaylistTitle, setAddedPlaylistTitle] = useState("");
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [showPlaylistDetailPage, setShowPlaylistDetailPage] = useState(false);
   const [playlistItems, setPlaylistItems] = useState([]);
@@ -1908,7 +1911,7 @@ useEffect(() => {
   }
 
     
-  async function handleAddToPlaylist(playlistId) {
+  async function handleAddToPlaylist(playlistId, playlistTitle) {
     if (!activeMedia?.id) return;
     try {
       const { data: items } = await supabase.from('playlist_items').select('position').eq('playlist_id', playlistId).order('position', { ascending: false }).limit(1);
@@ -1921,10 +1924,24 @@ useEffect(() => {
       });
       
       if (error) throw error;
-      setMessage("Added to playlist!");
+      
+      setAddedPlaylistId(playlistId);
+      setAddedPlaylistTitle(playlistTitle);
+      setShowAddSuccessModal(true);
       setShowPlaylistModal(false);
     } catch (err) {
       setMessage("Error adding to playlist: " + err.message);
+    }
+  }
+
+  async function handleDeletePlaylistItem(itemId, playlistId) {
+    try {
+      const { error } = await supabase.from('playlist_items').delete().eq('id', itemId);
+      if (error) throw error;
+      setPlaylistItems(prev => prev.filter(i => i.playlistItemId !== itemId));
+      setMessage("Video removed from playlist.");
+    } catch (err) {
+      setMessage("Error removing video: " + err.message);
     }
   }
 
@@ -5823,12 +5840,39 @@ document.body
                       <h4 style={{ margin: "0 0 4px 0", fontSize: "14px", fontWeight: "600", color: "var(--ma-text, #000)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.title}</h4>
                       <p style={{ margin: 0, fontSize: "12px", color: "var(--ma-text-secondary, #666)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.media_type === "video" ? "Video" : "Audio"}</p>
                     </div>
+                    {selectedPlaylist?.user_id === session?.user?.id && (
+                      <button onClick={(e) => { e.stopPropagation(); handleDeletePlaylistItem(item.playlistItemId, selectedPlaylist.id); }} style={{ background: "transparent", border: 0, color: "#FF4E45", cursor: "pointer", padding: "8px" }}>
+                        <span className="material-symbols-outlined">delete</span>
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
             )}
           </div>
         </section>
+      )}
+
+      
+      {showAddSuccessModal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 999999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }} onClick={() => setShowAddSuccessModal(false)}>
+          <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "85%", maxWidth: "320px", borderRadius: "16px", padding: "24px", boxShadow: "0 10px 40px rgba(0,0,0,0.2)", textAlign: "center" }} onClick={e => e.stopPropagation()}>
+            <div style={{ width: "48px", height: "48px", borderRadius: "50%", background: "rgba(43, 166, 64, 0.1)", display: "grid", placeItems: "center", margin: "0 auto 16px" }}>
+              <span className="material-symbols-outlined" style={{ color: "#2BA640", fontSize: "24px" }}>check_circle</span>
+            </div>
+            <h3 style={{ margin: "0 0 8px 0", fontSize: "18px", fontWeight: "700" }}>Video Added!</h3>
+            <p style={{ margin: "0 0 24px 0", fontSize: "14px", color: "var(--ma-text-secondary, #666)" }}>Successfully added to <strong>{addedPlaylistTitle}</strong>.</p>
+            
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              <button onClick={() => { setShowAddSuccessModal(false); setShowPlaylistDetailPage(false); setTimeout(() => { const pl = channelPlaylists.find(p => p.id === addedPlaylistId) || playlists.find(p => p.id === addedPlaylistId); if (pl) openPlaylist(pl); }, 100); }} style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "none", background: "#ff365f", color: "white", fontWeight: "600", fontSize: "14px", cursor: "pointer", boxShadow: "0 4px 12px rgba(255,54,95,0.3)" }}>
+                View Playlist
+              </button>
+              <button onClick={() => setShowAddSuccessModal(false)} style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "1px solid var(--ma-border)", background: "transparent", color: "var(--ma-text)", fontWeight: "600", fontSize: "14px", cursor: "pointer" }}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {showPlaylistModal && (
@@ -5840,18 +5884,17 @@ document.body
               <button onClick={() => setShowPlaylistModal(false)} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", cursor: "pointer" }}><span className="material-symbols-outlined">close</span></button>
             </div>
 
-            {/* List existing playlists */}
             <div style={{ maxHeight: "200px", overflowY: "auto", marginBottom: "16px", display: "flex", flexDirection: "column", gap: "8px" }}>
               {playlists.length === 0 ? (
                 <p style={{ fontSize: "13px", color: "var(--ma-text-secondary)" }}>No playlists yet. Create one below!</p>
               ) : (
                 playlists.map(p => (
                   <div key={p.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--ma-surface)", padding: "12px", borderRadius: "10px", border: "1px solid var(--ma-border)" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                      <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary)" }}>playlist_play</span>
-                      <span style={{ fontSize: "14px", fontWeight: "600" }}>{p.title}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0, flex: 1 }}>
+                      <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary)", flexShrink: 0 }}>playlist_play</span>
+                      <span style={{ fontSize: "14px", fontWeight: "600", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.title}</span>
                     </div>
-                    <button onClick={() => handleAddToPlaylist(p.id)} style={{ background: "#ff365f", color: "white", border: "none", padding: "6px 12px", borderRadius: "6px", fontSize: "12px", fontWeight: "bold", cursor: "pointer" }}>Add</button>
+                    <button onClick={() => handleAddToPlaylist(p.id, p.title)} style={{ flexShrink: 0, background: "#ff365f", color: "white", border: "none", padding: "6px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: "bold", cursor: "pointer" }}>Add</button>
                   </div>
                 ))
               )}
@@ -5859,15 +5902,26 @@ document.body
 
             <div style={{ height: "1px", background: "var(--ma-border)", margin: "16px 0" }} />
 
-            {/* Create new playlist */}
             <form onSubmit={async (e) => {
               e.preventDefault();
               if (!newPlaylistName.trim()) return;
-              const { data, error } = await supabase.from("playlists").insert({ user_id: session.user.id, title: newPlaylistName.trim(), visibility: 'public' }).select().single();
-              if (!error && data) {
+              try {
+                const { data, error } = await supabase.from("playlists").insert({ user_id: session.user.id, title: newPlaylistName.trim(), visibility: 'public' }).select().single();
+                if (error) throw error;
+                
+                if (activeMedia?.id) {
+                  await supabase.from('playlist_items').insert({ playlist_id: data.id, media_id: activeMedia.id, position: 0 });
+                }
+
                 setPlaylists(prev => [data, ...prev]);
                 setNewPlaylistName("");
-                if (activeMedia?.id) handleAddToPlaylist(data.id);
+                setShowPlaylistModal(false);
+                
+                setAddedPlaylistId(data.id);
+                setAddedPlaylistTitle(data.title);
+                setShowAddSuccessModal(true);
+              } catch(err) {
+                setMessage("Error creating playlist: " + err.message);
               }
             }} style={{ display: "flex", gap: "8px", width: "100%" }}>
               <input type="text" placeholder="New playlist name..." value={newPlaylistName} onChange={e => setNewPlaylistName(e.target.value)} style={{ flex: 1, minWidth: 0, padding: "12px", borderRadius: "10px", background: "var(--ma-surface)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", outline: "none" }} />
