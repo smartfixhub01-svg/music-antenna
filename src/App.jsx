@@ -247,6 +247,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [showPlaylistDetailPage, setShowPlaylistDetailPage] = useState(false);
   const [playlistItems, setPlaylistItems] = useState([]);
+  const [selectedPlaylistItems, setSelectedPlaylistItems] = useState([]);
   const [playlistLoading, setPlaylistLoading] = useState(false);
   const [showAllPlaylists, setShowAllPlaylists] = useState(false);
 
@@ -1932,6 +1933,37 @@ useEffect(() => {
     } catch (err) {
       setMessage("Error adding to playlist: " + err.message);
     }
+  }
+
+  
+  async function handleDeletePlaylistItem(itemId) {
+    try {
+      const { error } = await supabase.from('playlist_items').delete().eq('id', itemId);
+      if (error) throw error;
+      setPlaylistItems(prev => prev.filter(i => i.playlistItemId !== itemId));
+      setSelectedPlaylistItems(prev => prev.filter(id => id !== itemId));
+      setMessage("Video removed.");
+    } catch (err) { setMessage("Error removing video: " + err.message); }
+  }
+
+  async function handleDeleteSelectedPlaylistItems() {
+    if (selectedPlaylistItems.length === 0) return;
+    if (!window.confirm(`Delete ${selectedPlaylistItems.length} videos from this playlist?`)) return;
+    
+    try {
+      const { error } = await supabase.from('playlist_items').delete().in('id', selectedPlaylistItems);
+      if (error) throw error;
+      
+      setPlaylistItems(prev => prev.filter(i => !selectedPlaylistItems.includes(i.playlistItemId)));
+      setSelectedPlaylistItems([]);
+      setMessage("Selected videos removed.");
+    } catch (err) { setMessage("Error removing videos: " + err.message); }
+  }
+
+  function toggleSelectPlaylistItem(itemId) {
+    setSelectedPlaylistItems(prev => 
+      prev.includes(itemId) ? prev.filter(id => id !== itemId) : [...prev, itemId]
+    );
   }
 
   async function handleDeletePlaylistItem(itemId, playlistId) {
@@ -5819,7 +5851,28 @@ document.body
             <button onClick={() => setShowPlaylistDetailPage(false)} style={{ background: "var(--ma-surface, #f2f2f2)", border: "1px solid var(--ma-border, #e5e5e5)", borderRadius: "50%", width: "36px", height: "36px", display: "grid", placeItems: "center", color: "var(--ma-text, #000)", cursor: "pointer", flexShrink: 0 }}>
               <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>close</span>
             </button>
-            <h2 style={{ margin: 0, fontSize: "18px", fontWeight: "700", color: "var(--ma-text, #000)", marginLeft: "12px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{selectedPlaylist.title}</h2>
+            <h2 style={{ margin: 0, fontSize: "18px", fontWeight: "700", color: "var(--ma-text, #000)", marginLeft: "12px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1 }}>{selectedPlaylist.title}</h2>
+            
+            {/* Select All / Delete Selected Controls */}
+            {playlistItems.length > 0 && (
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                {selectedPlaylistItems.length > 0 && (
+                  <button onClick={handleDeleteSelectedPlaylistItems} style={{ background: "rgba(255, 78, 69, 0.1)", color: "#FF4E45", border: "none", padding: "6px 12px", borderRadius: "6px", fontWeight: "600", fontSize: "12px", cursor: "pointer" }}>
+                    Delete ({selectedPlaylistItems.length})
+                  </button>
+                )}
+                <input 
+                  type="checkbox" 
+                  checked={selectedPlaylistItems.length === playlistItems.length && playlistItems.length > 0}
+                  onChange={(e) => {
+                    if (e.target.checked) setSelectedPlaylistItems(playlistItems.map(i => i.playlistItemId));
+                    else setSelectedPlaylistItems([]);
+                  }}
+                  style={{ width: "18px", height: "18px", accentColor: "#ff365f", cursor: "pointer" }}
+                  title="Select All"
+                />
+              </div>
+            )}
           </div>
 
           {/* Header Content */}
@@ -5832,7 +5885,7 @@ document.body
               <span style={{ fontSize: "12px", color: "var(--ma-text-secondary, #666)", textTransform: "capitalize" }}>{selectedPlaylist.visibility}</span>
             </div>
 
-            <button onClick={playAllPlaylist} disabled={playlistItems.length === 0} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", width: "100%", padding: "14px", background: "#ff365f", color: "white", border: "none", borderRadius: "12px", fontSize: "16px", fontWeight: "700", cursor: playlistItems.length === 0 ? "not-allowed" : "pointer", opacity: playlistItems.length === 0 ? 0.5 : 1, boxShadow: "0 4px 12px rgba(255,54,95,0.3)" }}>
+            <button onClick={() => { if (playlistItems.length > 0) openPlayer(playlistItems[0]); }} disabled={playlistItems.length === 0} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", width: "100%", padding: "14px", background: "#ff365f", color: "white", border: "none", borderRadius: "12px", fontSize: "16px", fontWeight: "700", cursor: playlistItems.length === 0 ? "not-allowed" : "pointer", opacity: playlistItems.length === 0 ? 0.5 : 1, boxShadow: "0 4px 12px rgba(255,54,95,0.3)" }}>
               <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span> Play All
             </button>
           </div>
@@ -5845,113 +5898,42 @@ document.body
               <p style={{ textAlign: "center", color: "var(--ma-text-secondary)" }}>This playlist is empty.</p>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                {playlistItems.map((item, index) => (
-                  <div key={item.id} onClick={() => openPlayer(item)} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px", background: "var(--ma-surface, #f0f0f0)", borderRadius: "10px", cursor: "pointer", border: "1px solid var(--ma-border, #e5e5e5)" }}>
-                    <span style={{ fontSize: "14px", fontWeight: "600", color: "var(--ma-text-secondary)", width: "20px", textAlign: "center" }}>{index + 1}</span>
-                    <div style={{ width: "48px", height: "48px", borderRadius: "6px", overflow: "hidden", background: "var(--ma-bg)", flexShrink: 0 }}>
-                      {item.thumbnail_path ? (
-                        <img src={supabase.storage.from(BUCKET).getPublicUrl(item.thumbnail_path).data.publicUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                      ) : (
-                        <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", color: "var(--ma-text-secondary)" }}>♫</div>
-                      )}
+                {playlistItems.map((item, index) => {
+                  const isSelected = selectedPlaylistItems.includes(item.playlistItemId);
+                  return (
+                  <div key={item.id} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px", background: isSelected ? "rgba(255,54,95,0.05)" : "var(--ma-surface, #f0f0f0)", borderRadius: "10px", border: `1px solid ${isSelected ? "#ff365f" : "var(--ma-border, #e5e5e5)"}`, transition: "all 0.2s" }}>
+                    
+                    {/* Checkbox */}
+                    <input type="checkbox" checked={isSelected} onChange={() => toggleSelectPlaylistItem(item.playlistItemId)} style={{ width: "18px", height: "18px", accentColor: "#ff365f", cursor: "pointer" }} />
+                    
+                    {/* Clickable area for playing */}
+                    <div onClick={() => openPlayer(item)} style={{ display: "flex", alignItems: "center", gap: "12px", flex: 1, cursor: "pointer", minWidth: 0 }}>
+                      <span style={{ fontSize: "14px", fontWeight: "600", color: "var(--ma-text-secondary)", width: "20px", textAlign: "center" }}>{index + 1}</span>
+                      <div style={{ width: "48px", height: "48px", borderRadius: "6px", overflow: "hidden", background: "var(--ma-bg)", flexShrink: 0 }}>
+                        {item.thumbnail_path ? (
+                          <img src={supabase.storage.from(BUCKET).getPublicUrl(item.thumbnail_path).data.publicUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        ) : (
+                          <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", color: "var(--ma-text-secondary)" }}>♫</div>
+                        )}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <h4 style={{ margin: "0 0 4px 0", fontSize: "14px", fontWeight: "600", color: "var(--ma-text, #000)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.title}</h4>
+                        <p style={{ margin: 0, fontSize: "12px", color: "var(--ma-text-secondary, #666)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.media_type === "video" ? "Video" : "Audio"}</p>
+                      </div>
                     </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <h4 style={{ margin: "0 0 4px 0", fontSize: "14px", fontWeight: "600", color: "var(--ma-text, #000)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.title}</h4>
-                      <p style={{ margin: 0, fontSize: "12px", color: "var(--ma-text-secondary, #666)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.media_type === "video" ? "Video" : "Audio"}</p>
-                    </div>
+
+                    {/* Individual Delete */}
                     {selectedPlaylist?.user_id === session?.user?.id && (
-                      <button onClick={(e) => { e.stopPropagation(); handleDeletePlaylistItem(item.playlistItemId, selectedPlaylist.id); }} style={{ background: "transparent", border: 0, color: "#FF4E45", cursor: "pointer", padding: "8px" }}>
-                        <span className="material-symbols-outlined">delete</span>
+                      <button onClick={(e) => { e.stopPropagation(); handleDeletePlaylistItem(item.playlistItemId); }} style={{ background: "rgba(255, 78, 69, 0.1)", border: "none", borderRadius: "50%", width: "36px", height: "36px", display: "grid", placeItems: "center", color: "#FF4E45", cursor: "pointer", flexShrink: 0 }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>delete</span>
                       </button>
                     )}
                   </div>
-                ))}
+                )})}
               </div>
             )}
           </div>
         </section>
-      )}
-
-      
-      {showAddSuccessModal && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 999999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }} onClick={() => setShowAddSuccessModal(false)}>
-          <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "85%", maxWidth: "320px", borderRadius: "16px", padding: "24px", boxShadow: "0 10px 40px rgba(0,0,0,0.2)", textAlign: "center" }} onClick={e => e.stopPropagation()}>
-            <div style={{ width: "48px", height: "48px", borderRadius: "50%", background: "rgba(43, 166, 64, 0.1)", display: "grid", placeItems: "center", margin: "0 auto 16px" }}>
-              <span className="material-symbols-outlined" style={{ color: "#2BA640", fontSize: "24px" }}>check_circle</span>
-            </div>
-            <h3 style={{ margin: "0 0 8px 0", fontSize: "18px", fontWeight: "700" }}>Video Added!</h3>
-            <p style={{ margin: "0 0 24px 0", fontSize: "14px", color: "var(--ma-text-secondary, #666)" }}>Successfully added to <strong>{addedPlaylistTitle}</strong>.</p>
-            
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              <button onClick={() => { setShowAddSuccessModal(false); setShowPlaylistDetailPage(false); setTimeout(() => { const pl = channelPlaylists.find(p => p.id === addedPlaylistId) || playlists.find(p => p.id === addedPlaylistId); if (pl) openPlaylist(pl); }, 100); }} style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "none", background: "#ff365f", color: "white", fontWeight: "600", fontSize: "14px", cursor: "pointer", boxShadow: "0 4px 12px rgba(255,54,95,0.3)" }}>
-                View Playlist
-              </button>
-              <button onClick={() => setShowAddSuccessModal(false)} style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "1px solid var(--ma-border)", background: "transparent", color: "var(--ma-text)", fontWeight: "600", fontSize: "14px", cursor: "pointer" }}>
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showMoreMenu && createPortal(
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 2147483647, display: "flex", alignItems: "flex-end", backdropFilter: "blur(4px)" }} onClick={() => setShowMoreMenu(null)}>
-          <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "100%", borderTopLeftRadius: "24px", borderTopRightRadius: "24px", padding: "20px 20px 40px 20px", boxShadow: "0 -10px 40px rgba(0,0,0,0.2)", display: "flex", flexDirection: "column", gap: "16px" }} onClick={e => e.stopPropagation()}>
-            
-            {/* Header */}
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", paddingBottom: "16px", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
-              <div style={{ width: "40px", height: "40px", borderRadius: "8px", overflow: "hidden", flexShrink: 0, background: "var(--ma-surface)" }}>
-                {showMoreMenu.thumbnailUrl ? <img src={showMoreMenu.thumbnailUrl} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center" }}>♫</div>}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <h4 style={{ margin: "0 0 4px 0", fontSize: "14px", fontWeight: "700", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{showMoreMenu.title}</h4>
-                <p style={{ margin: 0, fontSize: "12px", color: "var(--ma-text-secondary, #666)" }}>{showMoreMenu.profiles?.display_name || "Artist"}</p>
-              </div>
-              <button onClick={() => setShowMoreMenu(null)} style={{ background: "var(--ma-surface)", border: 0, borderRadius: "50%", width: "32px", height: "32px", display: "grid", placeItems: "center", color: "var(--ma-text)", cursor: "pointer" }}>
-                <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>close</span>
-              </button>
-            </div>
-
-            {/* Actions */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-              
-              {/* Playback Speed */}
-              <div style={{ padding: "12px 0", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
-                <p style={{ margin: "0 0 8px 0", fontSize: "12px", fontWeight: "600", color: "var(--ma-text-secondary, #666)", textTransform: "uppercase" }}>Playback Speed</p>
-                <div style={{ display: "flex", gap: "8px" }}>
-                  {[1, 1.25, 1.5, 2].map(speed => (
-                    <button key={speed} onClick={() => {
-                      const mediaEl = document.querySelector('video') || document.querySelector('audio');
-                      if (mediaEl) { mediaEl.playbackRate = speed; setMessage(`Speed: ${speed}x`); }
-                      else { setMessage("Player not ready."); }
-                      setShowMoreMenu(null);
-                    }} style={{ flex: 1, padding: "8px 0", background: "var(--ma-surface)", border: "1px solid var(--ma-border)", borderRadius: "8px", color: "var(--ma-text)", fontSize: "13px", fontWeight: "600", cursor: "pointer" }}>
-                      {speed}x
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Share */}
-              <button onClick={() => { handleShare(showMoreMenu); setShowMoreMenu(null); }} style={{ display: "flex", alignItems: "center", gap: "12px", background: "transparent", border: 0, padding: "16px 0", fontSize: "15px", fontWeight: "600", color: "var(--ma-text)", cursor: "pointer", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
-                <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary)" }}>share</span> Share Link
-              </button>
-
-              {/* Save to Playlist */}
-              {session?.user?.id && (
-                <button onClick={() => { setActiveMedia(showMoreMenu); setShowPlaylistModal(true); setShowMoreMenu(null); fetchUserPlaylistsForModal(); }} style={{ display: "flex", alignItems: "center", gap: "12px", background: "transparent", border: 0, padding: "16px 0", fontSize: "15px", fontWeight: "600", color: "var(--ma-text)", cursor: "pointer", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
-                  <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary)" }}>playlist_add</span> Save to Playlist
-                </button>
-              )}
-
-              {/* Report */}
-              <button onClick={() => { handleReportVideo(showMoreMenu.id); setShowMoreMenu(null); }} style={{ display: "flex", alignItems: "center", gap: "12px", background: "transparent", border: 0, padding: "16px 0", fontSize: "15px", fontWeight: "600", color: "#FF4E45", cursor: "pointer" }}>
-                <span className="material-symbols-outlined" style={{ color: "#FF4E45" }}>flag</span> Report Video
-              </button>
-
-            </div>
-          </div>
-        </div>, document.body
       )}
 
       {showPlaylistModal && (
