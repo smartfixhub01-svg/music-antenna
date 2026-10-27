@@ -5341,46 +5341,69 @@ document.body
       {showAnalytics && (
         <section style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: "56px", background: "#0f0f0f", zIndex: 9999, overflowY: "auto", padding: "16px", color: "var(--ma-text, #000)", fontFamily: "Roboto, sans-serif" }}>
           
-          <div style={{ display: "flex", alignItems: "center", marginBottom: "20px", borderBottom: "1px solid #333", paddingBottom: "12px" }}>
-            <button onClick={() => { setShowAnalytics(false); setShowAccountPage(true); }} style={{ background: "transparent", border: 0, color: "white", cursor: "pointer", display: "flex", alignItems: "center" }}>
-              <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>arrow_back</span>
+          {/* Header */}
+          <div style={{ display: "flex", alignItems: "center", marginBottom: "24px", borderBottom: "1px solid var(--ma-border, #e5e5e5)", paddingBottom: "16px" }}>
+            <button onClick={() => { setShowAnalytics(false); setShowAccountPage(true); }} style={{ background: "var(--ma-surface)", border: "1px solid var(--ma-border)", borderRadius: "50%", width: "36px", height: "36px", color: "var(--ma-text)", cursor: "pointer", display: "grid", placeItems: "center" }}>
+              <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>arrow_back</span>
             </button>
-            <h2 style={{ margin: "0 0 0 16px", fontSize: "18px" }}>Channel Analytics</h2>
+            <h2 style={{ margin: "0 0 0 16px", fontSize: "20px", fontWeight: "700", color: "var(--ma-text)" }}>Channel Analytics</h2>
           </div>
 
           {analyticsLoading ? (
             <p style={{ textAlign: "center", marginTop: "40px", color: "var(--ma-text-secondary, #666)" }}>Loading data...</p>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              
-              <div style={{ background: "#212121", padding: "16px", borderRadius: "12px", border: "1px solid #333" }}>
-                <h3 style={{ margin: "0 0 16px", fontSize: "16px", color: "var(--ma-text, #000)" }}>Overview</h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+
+              {/* Overview Card */}
+              <div style={{ background: "var(--ma-surface)", padding: "24px 16px", borderRadius: "16px", border: "1px solid var(--ma-border)", boxShadow: "0 4px 20px rgba(0,0,0,0.03)" }}>
+                <h3 style={{ margin: "0 0 20px", fontSize: "16px", fontWeight: "700", color: "var(--ma-text)", textAlign: "center" }}>Overview</h3>
                 <div style={{ display: "flex", justifyContent: "space-between", textAlign: "center" }}>
-                  <div style={{ flex: 1 }}>
-                    <h2 style={{ margin: 0, color: "var(--ma-accent)", fontSize: "24px" }}>{analyticsData.totalViews}</h2>
-                    <p style={{ margin: 0, fontSize: "12px", color: "var(--ma-text-secondary, #666)" }}>Views</p>
+
+                  <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+                    <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "rgba(62, 166, 255, 0.1)", display: "grid", placeItems: "center" }}>
+                      <span className="material-symbols-outlined" style={{ color: "#3EA6FF", fontSize: "20px" }}>visibility</span>
+                    </div>
+                    <h2 style={{ margin: 0, color: "var(--ma-text)", fontSize: "22px", fontWeight: "800" }}>{analyticsData.totalViews}</h2>
+                    <p style={{ margin: 0, fontSize: "12px", fontWeight: "600", color: "var(--ma-text-secondary, #666)" }}>Views</p>
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <h2 style={{ margin: 0, color: "#ff365f", fontSize: "24px" }}>{analyticsData.totalSubs}</h2>
-                    <p style={{ margin: 0, fontSize: "12px", color: "var(--ma-text-secondary, #666)" }}>Subs</p>
+
+                  <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+                    <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "rgba(255, 54, 95, 0.1)", display: "grid", placeItems: "center" }}>
+                      <span className="material-symbols-outlined" style={{ color: "#ff365f", fontSize: "20px" }}>group</span>
+                    </div>
+                    <h2 style={{ margin: 0, color: "var(--ma-text)", fontSize: "22px", fontWeight: "800" }}>{analyticsData.totalSubs}</h2>
+                    <p style={{ margin: 0, fontSize: "12px", fontWeight: "600", color: "var(--ma-text-secondary, #666)" }}>Subscribers</p>
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <h2 style={{ margin: 0, color: "var(--ma-text-secondary, #666)", fontSize: "24px" }}>{analyticsData.totalComments}</h2>
-                    <p style={{ margin: 0, fontSize: "12px", color: "var(--ma-text-secondary, #666)" }}>Comments</p>
+
+                  <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+                    <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "rgba(43, 166, 64, 0.1)", display: "grid", placeItems: "center" }}>
+                      <span className="material-symbols-outlined" style={{ color: "#2BA640", fontSize: "20px" }}>comment</span>
+                    </div>
+                    <h2 style={{ margin: 0, color: "var(--ma-text)", fontSize: "22px", fontWeight: "800" }}>{analyticsData.totalComments}</h2>
+                    <p style={{ margin: 0, fontSize: "12px", fontWeight: "600", color: "var(--ma-text-secondary, #666)" }}>Comments</p>
                   </div>
                 </div>
               </div>
 
-              <div style={{ background: "#212121", padding: "16px", borderRadius: "12px", border: "1px solid #333" }}>
-                <h3 style={{ margin: "0 0 16px", fontSize: "16px", color: "var(--ma-text, #000)" }}>Last 7 Days</h3>
+              {/* Weekly Card */}
+              <div style={{ background: "var(--ma-surface)", padding: "24px 16px", borderRadius: "16px", border: "1px solid var(--ma-border)", boxShadow: "0 4px 20px rgba(0,0,0,0.03)" }}>
+                <h3 style={{ margin: "0 0 20px", fontSize: "16px", fontWeight: "700", color: "var(--ma-text)", textAlign: "center" }}>Last 7 Days</h3>
                 <div style={{ display: profile?.role === "artist" ? "flex" : "none", justifyContent: "space-around", textAlign: "center" }}>
-                  <div>
-                    <h2 style={{ margin: 0, color: "var(--ma-accent)", fontSize: "24px" }}>+{analyticsData.weeklyViews}</h2>
-                    <p style={{ margin: 0, fontSize: "12px", color: "var(--ma-text-secondary, #666)" }}>New Views</p>
+
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+                    <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "rgba(62, 166, 255, 0.1)", display: "grid", placeItems: "center" }}>
+                      <span className="material-symbols-outlined" style={{ color: "#3EA6FF", fontSize: "20px" }}>trending_up</span>
+                    </div>
+                    <h2 style={{ margin: 0, color: "#3EA6FF", fontSize: "22px", fontWeight: "800" }}>+{analyticsData.weeklyViews}</h2>
+                    <p style={{ margin: 0, fontSize: "12px", fontWeight: "600", color: "var(--ma-text-secondary, #666)" }}>New Views</p>
                   </div>
-                  <div>
-                    <h2 style={{ margin: 0, color: "#ff365f", fontSize: "24px" }}>+{analyticsData.weeklySubs}</h2>
-                    <p style={{ margin: 0, fontSize: "12px", color: "var(--ma-text-secondary, #666)" }}>New Subs</p>
+
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+                    <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "rgba(255, 54, 95, 0.1)", display: "grid", placeItems: "center" }}>
+                      <span className="material-symbols-outlined" style={{ color: "#ff365f", fontSize: "20px" }}>person_add</span>
+                    </div>
+                    <h2 style={{ margin: 0, color: "#ff365f", fontSize: "22px", fontWeight: "800" }}>+{analyticsData.weeklySubs}</h2>
+                    <p style={{ margin: 0, fontSize: "12px", fontWeight: "600", color: "var(--ma-text-secondary, #666)" }}>New Subs</p>
                   </div>
                 </div>
               </div>
