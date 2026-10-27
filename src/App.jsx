@@ -4874,7 +4874,11 @@ document.body
                   </button>
                 </div>
               )}
-              
+              <div style={{ flex: 1, display: "flex" }}>
+                <button className="btn-gray" onClick={() => { setProfileName(profile?.username || ""); setProfileBio(profile?.bio || ""); setShowProfileEditor(!showProfileEditor); }}>
+                  {showProfileEditor ? "Close Editor" : "Edit profile"}
+                </button>
+              </div>
               <button className="btn-circle" aria-label="Share Profile" onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleShareProfile(); }}>
                 <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>share</span>
               </button>
@@ -4924,14 +4928,6 @@ document.body
                   <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "600", color: "var(--ma-text, #000)" }}>Creator dashboard</h3>
                   <span className="material-symbols-outlined" onClick={openAnalytics} style={{ color: "#ff365f", fontSize: "20px", cursor: "pointer" }}>bar_chart</span>
                 </div>
-
-<div style={{ flex: 1, display: "flex" }}>
-                <button className="btn-gray" onClick={() => { setProfileName(profile?.username || ""); setProfileBio(profile?.bio || ""); setShowProfileEditor(!showProfileEditor); }}>
-                  {showProfileEditor ? "Close Editor" : "Edit profile"}
-                </button>
-              </div>
-
-
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", marginBottom: "16px" }}>
                   <div style={{ background: "var(--ma-bg, #fff)", borderRadius: "8px", padding: "12px", textAlign: "center" }}>
                     <span className="material-symbols-outlined" style={{ color: "#ff365f", background: "rgba(255,54,95,0.1)", padding: "6px", borderRadius: "50%", fontSize: "18px", marginBottom: "8px", display: "inline-block" }}>upload</span>
