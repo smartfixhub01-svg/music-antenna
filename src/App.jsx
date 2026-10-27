@@ -2939,11 +2939,11 @@ useEffect(() => {
                   
       {showMoreOptions && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 2147483647, display: "flex", alignItems: "flex-end" }} onClick={() => setShowMoreOptions(false)}>
-          <div style={{ background: "#212121", width: "100%", borderTopLeftRadius: "16px", borderTopRightRadius: "16px", padding: "20px", paddingBottom: "40px" }} onClick={e => e.stopPropagation()}>
+          <div style={{ background: "var(--ma-surface)", width: "100%", borderTopLeftRadius: "16px", borderTopRightRadius: "16px", padding: "20px", paddingBottom: "40px" }} onClick={e => e.stopPropagation()}>
             
             <div style={{ width: "40px", height: "4px", background: "#555", borderRadius: "2px", margin: "0 auto 20px" }}></div>
             
-            <h3 style={{ color: "#fff", margin: "0 0 20px 0", fontSize: "18px" }}>Video Options</h3>
+            <h3 style={{ color: "var(--ma-text)", margin: "0 0 20px 0", fontSize: "18px" }}>Video Options</h3>
             
             {/* Playback Speed */}
             <div style={{ marginBottom: "24px" }}>
@@ -2955,7 +2955,7 @@ useEffect(() => {
                     if (audioRef.current) audioRef.current.playbackRate = speed;
                     setMessage(`Speed set to ${speed}x`);
                     setShowMoreOptions(false);
-                  }} style={{ flex: 1, padding: "12px", background: "#333", color: "#fff", border: "none", borderRadius: "8px", fontSize: "16px", cursor: "pointer", fontWeight: "bold" }}>
+                  }} style={{ flex: 1, padding: "12px", background: "#333", color: "var(--ma-text)", border: "none", borderRadius: "8px", fontSize: "16px", cursor: "pointer", fontWeight: "bold" }}>
                     {speed}x
                   </button>
                 ))}
@@ -2963,11 +2963,11 @@ useEffect(() => {
             </div>
 
             {/* Actions */}
-            <button onClick={() => { handleShare(activeMedia); setShowMoreOptions(false); }} style={{ width: "100%", padding: "16px", background: "#333", color: "#fff", border: "none", borderRadius: "8px", marginBottom: "10px", textAlign: "left", fontSize: "16px", display: "flex", alignItems: "center", gap: "12px" }}>
+            <button onClick={() => { handleShare(activeMedia); setShowMoreOptions(false); }} style={{ width: "100%", padding: "16px", background: "#333", color: "var(--ma-text)", border: "none", borderRadius: "8px", marginBottom: "10px", textAlign: "left", fontSize: "16px", display: "flex", alignItems: "center", gap: "12px" }}>
               🔗 Copy / Share Link
             </button>
             
-            <button onClick={() => { setMessage("Video reported. Thank you."); setShowMoreOptions(false); }} style={{ width: "100%", padding: "16px", background: "#333", color: "#fff", border: "none", borderRadius: "8px", marginBottom: "10px", textAlign: "left", fontSize: "16px", display: "flex", alignItems: "center", gap: "12px" }}>
+            <button onClick={() => { setMessage("Video reported. Thank you."); setShowMoreOptions(false); }} style={{ width: "100%", padding: "16px", background: "#333", color: "var(--ma-text)", border: "none", borderRadius: "8px", marginBottom: "10px", textAlign: "left", fontSize: "16px", display: "flex", alignItems: "center", gap: "12px" }}>
               ⚠️ Report Video
             </button>
             
@@ -3251,21 +3251,21 @@ document.body
 
         {showCreatorResetModal && (
           <div style={{ position: "fixed", inset: 0, zIndex: 21474836479, background: "rgba(15, 15, 15, 0.95)", display: "flex", justifyContent: "center", alignItems: "center", padding: "20px" }}>
-            <div style={{ width: "100%", maxWidth: "400px", padding: "24px", background: "#1C1C1C", borderRadius: "16px", border: "1px solid #303030", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>
+            <div style={{ width: "100%", maxWidth: "400px", padding: "24px", background: "#1C1C1C", borderRadius: "16px", border: "1px solid var(--ma-border)", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>
               <h3 style={{ textAlign: "center", color: "#F1F1F1", marginBottom: "8px", fontSize: "20px" }}>Reset Art ID & Password</h3>
-              <p style={{ textAlign: "center", color: "#AAAAAA", marginBottom: "24px", fontSize: "14px" }}>Enter your Creator email to recover your Art ID and reset your password.</p>
+              <p style={{ textAlign: "center", color: "var(--ma-text-secondary)", marginBottom: "24px", fontSize: "14px" }}>Enter your Creator email to recover your Art ID and reset your password.</p>
               
               <form onSubmit={handleCreatorReset}>
                 <input
                   type="email"
-                  style={{ width: "100%", padding: "14px", borderRadius: "8px", background: "#272727", color: "#fff", border: "1px solid #303030", marginBottom: "20px", boxSizing: "border-box" }}
+                  style={{ width: "100%", padding: "14px", borderRadius: "8px", background: "#272727", color: "var(--ma-text)", border: "1px solid var(--ma-border)", marginBottom: "20px", boxSizing: "border-box" }}
                   placeholder="Creator email address"
                   value={creatorResetEmail}
                   onChange={(e) => setCreatorResetEmail(e.target.value)}
                   required
                 />
                 <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
-                  <button type="button" onClick={() => setShowCreatorResetModal(false)} style={{ padding: "10px 16px", background: "transparent", color: "#AAAAAA", border: "none", fontWeight: "bold", cursor: "pointer" }}>Cancel</button>
+                  <button type="button" onClick={() => setShowCreatorResetModal(false)} style={{ padding: "10px 16px", background: "transparent", color: "var(--ma-text-secondary)", border: "none", fontWeight: "bold", cursor: "pointer" }}>Cancel</button>
                   <button type="submit" style={{ padding: "10px 16px", background: "#FF0033", color: "#FFF", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}>Send Link</button>
                 </div>
               </form>
@@ -3544,7 +3544,7 @@ document.body
           <div style={{ position: "relative" }}>
             <button className="ma-icon-btn" aria-label="Notifications" onClick={() => { setShowNotifications(!showNotifications); if (!showNotifications) fetchNotifications(); }}>
               <span className="material-symbols-outlined">notifications</span>
-              {unreadCount > 0 && <span className="yt-nav-badge" style={{ position: "absolute", top: 4, right: 4, background: "red", color: "white", borderRadius: "10px", padding: "2px 6px", fontSize: "10px", fontWeight: "bold" }}>{unreadCount}</span>}
+              {unreadCount > 0 && <span className="yt-nav-badge" style={{ position: "absolute", top: 4, right: 4, background: "red", color: "var(--ma-text)", borderRadius: "10px", padding: "2px 6px", fontSize: "10px", fontWeight: "bold" }}>{unreadCount}</span>}
             </button>
             
       {activeNotification && (
@@ -3943,7 +3943,7 @@ document.body
 
 
           {showUpload && (
-<div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, background: "#0f0f0f", overflowY: "auto" }}>
+<div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, background: "var(--ma-bg)", overflowY: "auto" }}>
         <style>{`
           .yt-upload-form input, .yt-upload-form textarea, .yt-upload-form select {
             background-color: var(--ma-bg-secondary) !important;
@@ -4569,7 +4569,7 @@ document.body
                       <div 
                         className="yt-video-avatar" 
                         onClick={(e) => { e.stopPropagation(); openChannel(item.artist_id); }} 
-                        style={{ width: "36px", height: "36px", borderRadius: "50%", overflow: "hidden", flexShrink: 0, cursor: "pointer", background: "#ff365f", display: "grid", placeItems: "center", color: "#fff", fontSize: "16px", fontWeight: "bold" }}
+                        style={{ width: "36px", height: "36px", borderRadius: "50%", overflow: "hidden", flexShrink: 0, cursor: "pointer", background: "#ff365f", display: "grid", placeItems: "center", color: "var(--ma-text)", fontSize: "16px", fontWeight: "bold" }}
                       >
                         {item.profiles?.avatar_url ? (
                           <img loading="lazy" src={item.profiles.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -4593,7 +4593,7 @@ document.body
                         </p>
                       </div>
                       <div style={{ width: "40px", height: "40px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginLeft: "auto" }}>
-                        <button className="yt-video-menu" aria-label="More" onClick={(e) => { e.stopPropagation(); e.preventDefault();  setShowMoreMenu(item); }} style={{ background: "red", color: "white", padding: "10px", fontSize: "20px", zIndex: 99999, position: "relative" }}>⋮</button>
+                        <button className="yt-video-menu" aria-label="More" onClick={(e) => { e.stopPropagation(); e.preventDefault();  setShowMoreMenu(item); }} style={{ background: "red", color: "var(--ma-text)", padding: "10px", fontSize: "20px", zIndex: 99999, position: "relative" }}>⋮</button>
                       </div>
                     </div>
                   </article>
@@ -4812,7 +4812,7 @@ document.body
                 {profile?.avatar_url ? (
                   <img src={profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 ) : (
-                  <span style={{ fontSize: "32px", fontWeight: "bold", color: "white", display: "flex", width: "100%", height: "100%", alignItems: "center", justifyContent: "center" }}>{(profile?.display_name || displayUser || "M").charAt(0).toUpperCase()}</span>
+                  <span style={{ fontSize: "32px", fontWeight: "bold", color: "var(--ma-text)", display: "flex", width: "100%", height: "100%", alignItems: "center", justifyContent: "center" }}>{(profile?.display_name || displayUser || "M").charAt(0).toUpperCase()}</span>
                 )}
               </div>
               <div style={{ paddingBottom: "4px" }}>
@@ -4964,7 +4964,7 @@ document.body
             <div style={{ display: "flex", gap: "12px", overflowX: "auto", paddingBottom: "16px", marginBottom: "16px" }}>
                {history.slice(0, 4).map((item) => (
                   <div key={item.id} onClick={() => { const found = media.find(m => m.id === item.id); if (found) openPlayer(found); }} style={{ flexShrink: 0, width: "140px", cursor: "pointer" }}>
-                    <div style={{ width: "140px", height: "80px", background: "#212121", borderRadius: "8px", overflow: "hidden", marginBottom: "6px" }}>
+                    <div style={{ width: "140px", height: "80px", background: "var(--ma-surface)", borderRadius: "8px", overflow: "hidden", marginBottom: "6px" }}>
                       {item.thumbnailUrl ? <img loading="lazy" src={item.thumbnailUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "grid", placeItems: "center", height: "100%", color: "var(--ma-text-secondary, #666)" }}><span className="material-symbols-outlined">movie</span></div>}
                     </div>
                     <p style={{ margin: 0, fontSize: "12px", color: "var(--ma-text, #000)", fontWeight: "500", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.title}</p>
@@ -4989,7 +4989,7 @@ document.body
                           ) : (
                             <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", color: "var(--ma-text-secondary)", fontSize: "24px" }}>♫</div>
                           )}
-                          <span style={{ position: "absolute", bottom: "4px", right: "4px", background: "rgba(0,0,0,0.7)", color: "white", fontSize: "9px", fontWeight: "bold", padding: "2px 4px", borderRadius: "4px", backdropFilter: "blur(4px)" }}>
+                          <span style={{ position: "absolute", bottom: "4px", right: "4px", background: "rgba(0,0,0,0.7)", color: "var(--ma-text)", fontSize: "9px", fontWeight: "bold", padding: "2px 4px", borderRadius: "4px", backdropFilter: "blur(4px)" }}>
                             {item.media_type === "video" ? (item.is_short ? "SHORT" : "VIDEO") : "AUDIO"}
                           </span>
                         </div>
@@ -5088,7 +5088,7 @@ document.body
                         <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", fontSize: "36px", color: "var(--ma-text, #000)", fontWeight: "bold" }}>{displayUser.charAt(0).toUpperCase()}</div>
                       )}
                     </div>
-                    <label style={{ position: "absolute", bottom: "0", right: "0", background: "#ff365f", color: "#fff", width: "40px", height: "40px", borderRadius: "50%", display: "grid", placeItems: "center", cursor: "pointer", border: "3px solid var(--ma-bg, #fff)", boxShadow: "0 4px 12px rgba(255,54,95,0.4)" }}>
+                    <label style={{ position: "absolute", bottom: "0", right: "0", background: "#ff365f", color: "var(--ma-text)", width: "40px", height: "40px", borderRadius: "50%", display: "grid", placeItems: "center", cursor: "pointer", border: "3px solid var(--ma-bg, #fff)", boxShadow: "0 4px 12px rgba(255,54,95,0.4)" }}>
                       <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>photo_camera</span>
                       <input type="file" accept="image/*" onChange={(e) => setProfilePhotoFile(e.target.files[0])} style={{ display: "none" }} />
                     </label>
@@ -5371,7 +5371,7 @@ document.body
                               <span className="material-symbols-outlined" style={{ fontSize: "32px" }}>playlist_play</span>
                             </div>
                             
-                            <div style={{ position: "absolute", bottom: "6px", right: "6px", background: "rgba(0,0,0,0.8)", color: "white", fontSize: "10px", fontWeight: "bold", padding: "2px 6px", borderRadius: "4px", display: "flex", alignItems: "center", gap: "4px", backdropFilter: "blur(4px)" }}>
+                            <div style={{ position: "absolute", bottom: "6px", right: "6px", background: "rgba(0,0,0,0.8)", color: "var(--ma-text)", fontSize: "10px", fontWeight: "bold", padding: "2px 6px", borderRadius: "4px", display: "flex", alignItems: "center", gap: "4px", backdropFilter: "blur(4px)" }}>
                               <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>playlist_play</span>
                               {playlist.playlist_items?.length || 0}
                             </div>
@@ -5483,7 +5483,7 @@ document.body
                         </span>
                       </button>
                       <div className="yt-video-row">
-                        <div className="yt-video-avatar" style={{ width: "32px", height: "32px", borderRadius: "50%", overflow: "hidden", flexShrink: 0, background: "#ff365f", display: "grid", placeItems: "center", color: "white", fontSize: "14px" }}>
+                        <div className="yt-video-avatar" style={{ width: "32px", height: "32px", borderRadius: "50%", overflow: "hidden", flexShrink: 0, background: "#ff365f", display: "grid", placeItems: "center", color: "var(--ma-text)", fontSize: "14px" }}>
                           {item.profiles?.avatar_url || channelProfile?.avatar_url ? (
                             <img loading="lazy" src={item.profiles?.avatar_url || channelProfile?.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                           ) : (
@@ -5894,7 +5894,7 @@ document.body
           
           {/* HEADER */}
           <div style={{ display: "flex", alignItems: "center", padding: "16px 20px", background: "var(--ma-bg-primary)", position: "sticky", top: 0, zIndex: 10, borderBottom: "1px solid var(--ma-border)" }}>
-            <button onClick={() => setShowSubscriptionsPage(false)} style={{ background: "transparent", border: 0, color: "#fff", cursor: "pointer", display: "flex", padding: "8px", marginRight: "8px" }}>
+            <button onClick={() => setShowSubscriptionsPage(false)} style={{ background: "transparent", border: 0, color: "var(--ma-text)", cursor: "pointer", display: "flex", padding: "8px", marginRight: "8px" }}>
               <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>arrow_back</span>
             </button>
             <h2 style={{ margin: 0, fontSize: "20px", fontWeight: 700, color: "var(--ma-text-primary)", flex: 1, textAlign: "center" }}>Subscriptions</h2>
@@ -5973,7 +5973,7 @@ document.body
                       <h3 style={{ color: "var(--ma-text-primary)", fontSize: "18px", margin: "0 0 8px 0" }}>{subsPageTab === 'subbers' ? 'No subscribers yet' : 'Your next favourite creator is waiting.'}</h3>
                       <p style={{ fontSize: "14px", color: "var(--ma-text-secondary)", margin: "0 0 20px 0" }}>{subsPageTab === 'subbers' ? 'When people subscribe to your channel, they will appear here.' : 'Discover music and videos from creators on .'}</p>
                       {subsPageTab === 'subs' && (
-                        <button onClick={() => { setShowSubscriptionsPage(false); setCategory("All"); }} style={{ background: "#FF0033", color: "#fff", border: "none", borderRadius: "8px", padding: "12px 24px", fontWeight: 700, cursor: "pointer" }}>
+                        <button onClick={() => { setShowSubscriptionsPage(false); setCategory("All"); }} style={{ background: "#FF0033", color: "var(--ma-text)", border: "none", borderRadius: "8px", padding: "12px 24px", fontWeight: 700, cursor: "pointer" }}>
                           Discover Creators
                         </button>
                       )}
@@ -6066,20 +6066,20 @@ document.body
       {showAllPlaylists && !showPlaylistDetailPage && (
         <section style={{
           position: "fixed", inset: "0 0 56px 0", zIndex: 99990,
-          overflowY: "auto", background: "#0f0f0f", color: "#f1f1f1",
+          overflowY: "auto", background: "var(--ma-bg)", color: "var(--ma-text)",
           padding: "0 0 28px"
         }}>
           <header style={{
             position: "sticky", top: 0, zIndex: 3,
             display: "flex", alignItems: "center", gap: "18px",
-            padding: "14px 18px", background: "#0f0f0f"
+            padding: "14px 18px", background: "var(--ma-bg)"
           }}>
             <button aria-label="Back" onClick={() => {
               setShowAllPlaylists(false);
               setShowAccountPage(true);
             }} style={{
               border: 0, padding: 0, background: "transparent",
-              color: "#f1f1f1", cursor: "pointer"
+              color: "var(--ma-text)", cursor: "pointer"
             }}>
               <span className="material-symbols-outlined">arrow_back</span>
             </button>
@@ -6105,7 +6105,7 @@ document.body
                   style={{
                     flex: 1, minWidth: 0, padding: "13px 15px",
                     borderRadius: "24px", border: "1px solid #3f3f3f",
-                    background: "#272727", color: "#fff", fontSize: "14px"
+                    background: "#272727", color: "var(--ma-text)", fontSize: "14px"
                   }}
                 />
                 <button type="submit" style={{
@@ -6118,13 +6118,13 @@ document.body
               {playlists.length === 0 ? (
                 <div style={{ textAlign: "center", padding: "44px 24px" }}>
                   <span className="material-symbols-outlined"
-                    style={{ fontSize: "64px", color: "#aaa" }}>
+                    style={{ fontSize: "64px", color: "var(--ma-text-secondary)" }}>
                     video_library
                   </span>
                   <h3 style={{ fontSize: "18px", margin: "16px 0 8px" }}>
                     No playlists yet
                   </h3>
-                  <p style={{ color: "#aaa", fontSize: "14px", lineHeight: 1.5 }}>
+                  <p style={{ color: "var(--ma-text-secondary)", fontSize: "14px", lineHeight: 1.5 }}>
                     Create a playlist to collect the music and videos you want to play.
                   </p>
                 </div>
@@ -6142,7 +6142,7 @@ document.body
                     }} style={{
                       display: "block", minWidth: 0, padding: 0,
                       textAlign: "left", border: 0, background: "transparent",
-                      color: "#f1f1f1", cursor: "pointer"
+                      color: "var(--ma-text)", cursor: "pointer"
                     }}>
                       <div style={{
                         position: "relative", aspectRatio: "16 / 10",
@@ -6159,7 +6159,7 @@ document.body
                             }} />
                         ) : (
                           <span className="material-symbols-outlined"
-                            style={{ fontSize: "48px", color: "#aaa" }}>
+                            style={{ fontSize: "48px", color: "var(--ma-text-secondary)" }}>
                             queue_music
                           </span>
                         )}
@@ -6167,7 +6167,7 @@ document.body
                           position: "absolute", right: 0, bottom: 0,
                           display: "flex", alignItems: "center", gap: "5px",
                           padding: "5px 8px", borderRadius: "7px 0 0 0",
-                          background: "rgba(0,0,0,.82)", color: "#fff",
+                          background: "rgba(0,0,0,.82)", color: "var(--ma-text)",
                           fontSize: "12px"
                         }}>
                           <span className="material-symbols-outlined"
@@ -6181,7 +6181,7 @@ document.body
                         whiteSpace: "nowrap"
                       }}>{pl.title || "Untitled playlist"}</strong>
                       <span style={{
-                        display: "block", color: "#aaa",
+                        display: "block", color: "var(--ma-text-secondary)",
                         fontSize: "12px", marginTop: "5px"
                       }}>Open playlist</span>
                     </button>
@@ -6201,8 +6201,8 @@ document.body
               <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>arrow_back</span>
             </button>
             <div style={{ display: "flex", gap: "16px" }}>
-              <span className="material-symbols-outlined" style={{ color: "#fff", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.8))", fontSize: "24px" }}>search</span>
-              <span className="material-symbols-outlined" style={{ color: "#fff", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.8))", fontSize: "24px" }}>more_vert</span>
+              <span className="material-symbols-outlined" style={{ color: "var(--ma-text)", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.8))", fontSize: "24px" }}>search</span>
+              <span className="material-symbols-outlined" style={{ color: "var(--ma-text)", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.8))", fontSize: "24px" }}>more_vert</span>
             </div>
           </div>
 
@@ -6284,7 +6284,7 @@ document.body
                       ) : (
                         <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", color: "var(--ma-text-secondary)", fontSize: "24px" }}>♫</div>
                       )}
-                      <div style={{ position: "absolute", bottom: "4px", right: "4px", background: "rgba(0,0,0,0.8)", color: "white", fontSize: "10px", fontWeight: "bold", padding: "2px 4px", borderRadius: "4px" }}>
+                      <div style={{ position: "absolute", bottom: "4px", right: "4px", background: "rgba(0,0,0,0.8)", color: "var(--ma-text)", fontSize: "10px", fontWeight: "bold", padding: "2px 4px", borderRadius: "4px" }}>
                         {item.media_type === "video" ? "VIDEO" : "AUDIO"}
                       </div>
                     </div>
@@ -6427,7 +6427,7 @@ document.body
             <p style={{ margin: "0 0 24px 0", fontSize: "14px", color: "var(--ma-text-secondary, #666)" }}>Successfully added to <strong>{addedPlaylistTitle}</strong>.</p>
             
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              <button onClick={() => { setShowAddSuccessModal(false); setShowPlaylistDetailPage(false); setTimeout(() => { const pl = channelPlaylists.find(p => p.id === addedPlaylistId) || playlists.find(p => p.id === addedPlaylistId); if (pl) openPlaylist(pl); }, 100); }} style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "none", background: "#ff365f", color: "white", fontWeight: "600", fontSize: "14px", cursor: "pointer", boxShadow: "0 4px 12px rgba(255,54,95,0.3)" }}>
+              <button onClick={() => { setShowAddSuccessModal(false); setShowPlaylistDetailPage(false); setTimeout(() => { const pl = channelPlaylists.find(p => p.id === addedPlaylistId) || playlists.find(p => p.id === addedPlaylistId); if (pl) openPlaylist(pl); }, 100); }} style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "none", background: "#ff365f", color: "var(--ma-text)", fontWeight: "600", fontSize: "14px", cursor: "pointer", boxShadow: "0 4px 12px rgba(255,54,95,0.3)" }}>
                 View Playlist
               </button>
               <button onClick={() => setShowAddSuccessModal(false)} style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "1px solid var(--ma-border)", background: "transparent", color: "var(--ma-text)", fontWeight: "600", fontSize: "14px", cursor: "pointer" }}>
@@ -6617,7 +6617,7 @@ document.body
             <p style={{ margin: "0 0 24px 0", fontSize: "14px", color: "var(--ma-text-secondary, #666)" }}>Successfully added to <strong>{addedPlaylistTitle}</strong>.</p>
             
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              <button onClick={() => { setShowAddSuccessModal(false); setShowPlaylistDetailPage(false); setTimeout(() => { const pl = channelPlaylists.find(p => p.id === addedPlaylistId) || playlists.find(p => p.id === addedPlaylistId); if (pl) openPlaylist(pl); }, 100); }} style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "none", background: "#ff365f", color: "white", fontWeight: "600", fontSize: "14px", cursor: "pointer", boxShadow: "0 4px 12px rgba(255,54,95,0.3)" }}>
+              <button onClick={() => { setShowAddSuccessModal(false); setShowPlaylistDetailPage(false); setTimeout(() => { const pl = channelPlaylists.find(p => p.id === addedPlaylistId) || playlists.find(p => p.id === addedPlaylistId); if (pl) openPlaylist(pl); }, 100); }} style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "none", background: "#ff365f", color: "var(--ma-text)", fontWeight: "600", fontSize: "14px", cursor: "pointer", boxShadow: "0 4px 12px rgba(255,54,95,0.3)" }}>
                 View Playlist
               </button>
               <button onClick={() => setShowAddSuccessModal(false)} style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "1px solid var(--ma-border)", background: "transparent", color: "var(--ma-text)", fontWeight: "600", fontSize: "14px", cursor: "pointer" }}>
@@ -6759,7 +6759,7 @@ document.body
             <p style={{ margin: "0 0 24px 0", fontSize: "14px", color: "var(--ma-text-secondary, #666)" }}>Successfully added to <strong>{addedPlaylistTitle}</strong>.</p>
             
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              <button onClick={() => { setShowAddSuccessModal(false); setShowPlaylistDetailPage(false); setTimeout(() => { const pl = channelPlaylists.find(p => p.id === addedPlaylistId) || playlists.find(p => p.id === addedPlaylistId); if (pl) openPlaylist(pl); }, 100); }} style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "none", background: "#ff365f", color: "white", fontWeight: "600", fontSize: "14px", cursor: "pointer", boxShadow: "0 4px 12px rgba(255,54,95,0.3)" }}>
+              <button onClick={() => { setShowAddSuccessModal(false); setShowPlaylistDetailPage(false); setTimeout(() => { const pl = channelPlaylists.find(p => p.id === addedPlaylistId) || playlists.find(p => p.id === addedPlaylistId); if (pl) openPlaylist(pl); }, 100); }} style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "none", background: "#ff365f", color: "var(--ma-text)", fontWeight: "600", fontSize: "14px", cursor: "pointer", boxShadow: "0 4px 12px rgba(255,54,95,0.3)" }}>
                 View Playlist
               </button>
               <button onClick={() => setShowAddSuccessModal(false)} style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "1px solid var(--ma-border)", background: "transparent", color: "var(--ma-text)", fontWeight: "600", fontSize: "14px", cursor: "pointer" }}>
@@ -6841,7 +6841,7 @@ document.body
             <p style={{ margin: "0 0 24px 0", fontSize: "14px", color: "var(--ma-text-secondary, #666)" }}>Successfully added to <strong>{addedPlaylistTitle}</strong>.</p>
             
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              <button onClick={() => { setShowAddSuccessModal(false); setShowPlaylistDetailPage(false); setTimeout(() => { const pl = channelPlaylists.find(p => p.id === addedPlaylistId) || playlists.find(p => p.id === addedPlaylistId); if (pl) openPlaylist(pl); }, 100); }} style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "none", background: "#ff365f", color: "white", fontWeight: "600", fontSize: "14px", cursor: "pointer", boxShadow: "0 4px 12px rgba(255,54,95,0.3)" }}>
+              <button onClick={() => { setShowAddSuccessModal(false); setShowPlaylistDetailPage(false); setTimeout(() => { const pl = channelPlaylists.find(p => p.id === addedPlaylistId) || playlists.find(p => p.id === addedPlaylistId); if (pl) openPlaylist(pl); }, 100); }} style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "none", background: "#ff365f", color: "var(--ma-text)", fontWeight: "600", fontSize: "14px", cursor: "pointer", boxShadow: "0 4px 12px rgba(255,54,95,0.3)" }}>
                 View Playlist
               </button>
               <button onClick={() => setShowAddSuccessModal(false)} style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "1px solid var(--ma-border)", background: "transparent", color: "var(--ma-text)", fontWeight: "600", fontSize: "14px", cursor: "pointer" }}>
@@ -6871,7 +6871,7 @@ document.body
                       <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary)", flexShrink: 0 }}>playlist_play</span>
                       <span style={{ fontSize: "14px", fontWeight: "600", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.title}</span>
                     </div>
-                    <button onClick={() => handleAddToPlaylist(p.id, p.title)} style={{ flexShrink: 0, background: "#ff365f", color: "white", border: "none", padding: "6px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: "bold", cursor: "pointer" }}>Add</button>
+                    <button onClick={() => handleAddToPlaylist(p.id, p.title)} style={{ flexShrink: 0, background: "#ff365f", color: "var(--ma-text)", border: "none", padding: "6px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: "bold", cursor: "pointer" }}>Add</button>
                   </div>
                 ))
               )}
@@ -6902,7 +6902,7 @@ document.body
               }
             }} style={{ display: "flex", gap: "8px", width: "100%" }}>
               <input type="text" placeholder="New playlist name..." value={newPlaylistName} onChange={e => setNewPlaylistName(e.target.value)} style={{ flex: 1, minWidth: 0, padding: "12px", borderRadius: "10px", background: "var(--ma-surface)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", outline: "none" }} />
-              <button type="submit" style={{ flexShrink: 0, background: "#ff365f", color: "white", border: "none", padding: "0 20px", borderRadius: "10px", fontWeight: "bold", fontSize: "14px", cursor: "pointer" }}>Create</button>
+              <button type="submit" style={{ flexShrink: 0, background: "#ff365f", color: "var(--ma-text)", border: "none", padding: "0 20px", borderRadius: "10px", fontWeight: "bold", fontSize: "14px", cursor: "pointer" }}>Create</button>
             </form>
 
           </div>
@@ -6935,7 +6935,7 @@ document.body
                   <div key={c.id} style={{ display: "flex", gap: "10px", marginBottom: "16px", alignItems: "flex-start", textAlign: "left" }}>
                     
                     {/* Avatar - Smaller */}
-                    <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "#ff365f", flexShrink: 0, overflow: "hidden", display: "grid", placeItems: "center", color: "white", fontSize: "12px" }}>
+                    <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "#ff365f", flexShrink: 0, overflow: "hidden", display: "grid", placeItems: "center", color: "var(--ma-text)", fontSize: "12px" }}>
                       {c.profiles?.avatar_url ? <img src={c.profiles.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : "♫"}
                     </div>
 
@@ -7081,7 +7081,7 @@ document.body
                           {comments.filter(r => r.parent_id === c.id).map(reply => (
                             <div key={reply.id} style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
                               <div style={{ width: "24px", height: "24px", borderRadius: "50%", overflow: "hidden", flexShrink: 0 }}>
-                                {reply.profiles?.avatar_url ? <img src={reply.profiles.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ width: "100%", height: "100%", background: "#ff365f", color: "white", display: "grid", placeItems: "center", fontSize: "12px" }}>♫</div>}
+                                {reply.profiles?.avatar_url ? <img src={reply.profiles.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ width: "100%", height: "100%", background: "#ff365f", color: "var(--ma-text)", display: "grid", placeItems: "center", fontSize: "12px" }}>♫</div>}
                               </div>
                               <div style={{ flex: 1 }}>
                                 <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -7221,7 +7221,7 @@ document.body
                         value={newComment} 
                         onChange={e => setNewComment(e.target.value)} 
                         placeholder="Add a comment..." 
-                        style={{ flex: 1, padding: "10px", background: "transparent", border: 0, color: "white", outline: "none", fontSize: "14px" }} 
+                        style={{ flex: 1, padding: "10px", background: "transparent", border: 0, color: "var(--ma-text)", outline: "none", fontSize: "14px" }} 
                       />
 
                       <label style={{ cursor: "pointer", display: "flex", alignItems: "center", color: "var(--ma-text-secondary, #666)" }}>
@@ -7230,7 +7230,7 @@ document.body
                       </label>
 
                       {isRecording ? (
-                        <button type="button" onClick={stopRecording} style={{ background: "#ff365f", borderRadius: "50%", border: 0, width: "32px", height: "32px", display: "grid", placeItems: "center", color: "white", marginLeft: "8px", cursor: "pointer" }}>
+                        <button type="button" onClick={stopRecording} style={{ background: "#ff365f", borderRadius: "50%", border: 0, width: "32px", height: "32px", display: "grid", placeItems: "center", color: "var(--ma-text)", marginLeft: "8px", cursor: "pointer" }}>
                           <span style={{ fontSize: "12px", fontWeight: "bold" }}>{recordingTime}s</span>
                         </button>
                       ) : (
@@ -7248,7 +7248,7 @@ document.body
               </form>
 
               {showEmojiPicker && (
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", background: "#212121", padding: "10px", borderRadius: "10px", maxHeight: "100px", overflowY: "auto" }}>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", background: "var(--ma-surface)", padding: "10px", borderRadius: "10px", maxHeight: "100px", overflowY: "auto" }}>
                   {["😀", "😂", "❤️", "🔥", "👍", "🙏", "🎉", "😍", "😭", "🤔", "👏", "💯", "🥰", "😎"].map(emoji => (
                     <button type="button" key={emoji} onClick={() => { setNewComment(prev => prev + emoji); setShowEmojiPicker(false); }} style={{ background: "transparent", border: 0, fontSize: "24px", cursor: "pointer" }}>{emoji}</button>
                   ))}
