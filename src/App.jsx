@@ -3163,6 +3163,16 @@ document.body
     <div className="ma-app">
 
     <style>{`
+      .yt-video-menu {
+        color: #000000 !important;
+      }
+      .dark .yt-video-menu, [data-theme="dark"] .yt-video-menu {
+        color: #ffffff !important;
+      }
+    `}</style>
+
+
+    <style>{`
       * {
         -webkit-tap-highlight-color: transparent !important;
       }
