@@ -239,13 +239,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
   const [showManagePage, setShowManagePage] = useState(false);
   const [manageSource, setManageSource] = useState("account");
-  const [show<div style={{ flex: 1, display: "flex" }}>
-                <button className="btn-gray" onClick={() => { setProfileName(profile?.username || ""); setProfileBio(profile?.bio || ""); setShowProfileEditor(!showProfileEditor); }}>
-                  {showProfileEditor ? "Close Editor" : "Edit profile"}
-                </button>
-              </div>
-
-HistoryPage, setShowHistoryPage] = useState(false);
+  const [showHistoryPage, setShowHistoryPage] = useState(false);
   const [showPlaylistModal, setShowPlaylistModal] = useState(false);
   const [showAddSuccessModal, setShowAddSuccessModal] = useState(false);
   const [addedPlaylistId, setAddedPlaylistId] = useState(null);
@@ -4886,33 +4880,7 @@ document.body
               </button>
             </div>
 
-            {/* MA_PLAYLISTS_LIBRARY_BUTTON */}
-            <button
-              onClick={async () => {
-                setShowAccountPage(false);
-                setShowAllPlaylists(true);
-                window.scrollTo({ top: 0, behavior: "smooth" });
-                await fetchPlaylists();
-              }}
-              style={{
-                width: "100%", display: "flex", alignItems: "center",
-                gap: "14px", padding: "16px", marginBottom: "20px",
-                background: "var(--ma-surface, #f0f0f0)",
-                color: "var(--ma-text, #111)",
-                border: "1px solid var(--ma-border, #e5e5e5)",
-                borderRadius: "12px", cursor: "pointer", textAlign: "left"
-              }}
-            >
-              <span className="material-symbols-outlined"
-                style={{ fontSize: "28px", color: "#ff365f" }}>queue_music</span>
-              <span style={{ flex: 1 }}>
-                <strong style={{ display: "block", fontSize: "15px" }}>Playlists</strong>
-                <small style={{ color: "var(--ma-text-secondary, #666)" }}>
-                  View and play your saved playlists
-                </small>
-              </span>
-              <span className="material-symbols-outlined">chevron_right</span>
-            </button>
+
             
             {/* 5. TABS */}
             <div style={{ display: profile?.role === "artist" ? "flex" : "none", gap: "24px", borderBottom: "1px solid var(--ma-border, #e5e5e5)", marginBottom: "16px" }}>
@@ -4962,7 +4930,29 @@ document.body
             )}
             
             {/* HISTORY */}
-            <h3 style={{ margin: "0 0 12px", fontSize: "16px", fontWeight: "600", color: "var(--ma-text, #000)" }}>History</h3>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", marginBottom: "12px" }}>
+  <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "600", color: "var(--ma-text, #000)" }}>History</h3>
+  <button
+    onClick={async () => {
+      setShowAccountPage(false);
+      setShowAllPlaylists(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      await fetchPlaylists();
+    }}
+    style={{
+      display: "flex", alignItems: "center", justifyContent: "center",
+      gap: "6px", padding: "8px 12px", flexShrink: 0,
+      background: "var(--ma-surface, #f0f0f0)",
+      color: "var(--ma-text, #111)",
+      border: "1px solid var(--ma-border, #e5e5e5)",
+      borderRadius: "10px", cursor: "pointer", fontSize: "13px",
+      fontWeight: "600"
+    }}
+  >
+    <span className="material-symbols-outlined" style={{ fontSize: "19px", color: "#ff365f" }}>queue_music</span>
+    Playlists
+  </button>
+</div>
             <div style={{ display: "flex", gap: "12px", overflowX: "auto", paddingBottom: "16px", marginBottom: "16px" }}>
                {history.slice(0, 4).map((item) => (
                   <div key={item.id} onClick={() => { const found = media.find(m => m.id === item.id); if (found) openPlayer(found); }} style={{ flexShrink: 0, width: "140px", cursor: "pointer" }}>
