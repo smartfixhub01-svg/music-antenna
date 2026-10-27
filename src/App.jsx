@@ -5973,9 +5973,11 @@ document.body
                       <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary)" }}>playlist_play</span>
                       <span style={{ fontSize: "14px", fontWeight: "600", color: "var(--ma-text)" }}>{p.title}</span>
                     </div>
-                    <button onClick={() => handleAddToPlaylist(p.id, p.title)} style={{ width: "100% !important", display: "flex !important", justifyContent: "center", background: "#ff365f !important", color: "white !important", border: "none !important", padding: "12px !important", borderRadius: "8px", fontSize: "14px", fontWeight: "bold", cursor: "pointer", boxShadow: "0 2px 8px rgba(255,54,95,0.2)", minHeight: "44px" }}>
-                      Add to this playlist
-                    </button>
+                    <div style={{ width: "100%", backgroundColor: "#ff365f", borderRadius: "8px", boxShadow: "0 4px 12px rgba(255,54,95,0.3)", marginTop: "10px", display: "block" }}>
+                      <button onClick={() => handleAddToPlaylist(p.id, p.title)} style={{ width: "100%", display: "flex", justifyContent: "center", background: "transparent", color: "#ffffff", border: "none", padding: "12px", fontSize: "14px", fontWeight: "bold", cursor: "pointer" }}>
+                        Add to this playlist
+                      </button>
+                    </div>
                   </div>
                 ))
               )}
@@ -6053,9 +6055,11 @@ document.body
                       <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary)" }}>playlist_play</span>
                       <span style={{ fontSize: "14px", fontWeight: "600", color: "var(--ma-text)" }}>{p.title}</span>
                     </div>
-                    <button onClick={() => handleAddToPlaylist(p.id, p.title)} style={{ width: "100% !important", display: "flex !important", justifyContent: "center", background: "#ff365f !important", color: "white !important", border: "none !important", padding: "12px !important", borderRadius: "8px", fontSize: "14px", fontWeight: "bold", cursor: "pointer", boxShadow: "0 2px 8px rgba(255,54,95,0.2)", minHeight: "44px" }}>
-                      Add to this playlist
-                    </button>
+                    <div style={{ width: "100%", backgroundColor: "#ff365f", borderRadius: "8px", boxShadow: "0 4px 12px rgba(255,54,95,0.3)", marginTop: "10px", display: "block" }}>
+                      <button onClick={() => handleAddToPlaylist(p.id, p.title)} style={{ width: "100%", display: "flex", justifyContent: "center", background: "transparent", color: "#ffffff", border: "none", padding: "12px", fontSize: "14px", fontWeight: "bold", cursor: "pointer" }}>
+                        Add to this playlist
+                      </button>
+                    </div>
                   </div>
                 ))
               )}
