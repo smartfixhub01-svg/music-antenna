@@ -4360,7 +4360,9 @@ document.body
                           {item.views || 0} views • {new Date(item.created_at).toLocaleDateString()}
                         </p>
                       </div>
-                      <button className="yt-video-menu" aria-label="More" onClick={(e) => { e.stopPropagation(); e.preventDefault(); alert("3-Dots Clicked!"); setShowMoreMenu(item); }} style={{ WebkitTapHighlightColor: "transparent", pointerEvents: "auto", background: "red", border: 0, color: "white", cursor: "pointer", padding: "8px", position: "relative", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center" }}>⋮</button>
+                      <div style={{ width: "40px", height: "40px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginLeft: "auto" }}>
+                        <button className="yt-video-menu" aria-label="More" onClick={(e) => { e.stopPropagation(); e.preventDefault(); setShowMoreMenu(item); }} style={{ WebkitTapHighlightColor: "transparent", background: "transparent", border: 0, color: "var(--ma-text, #000)", cursor: "pointer", padding: "0", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%", fontSize: "24px", fontWeight: "bold" }}>⋮</button>
+                      </div>
                     </div>
                   </article>
                 ))}
