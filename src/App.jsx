@@ -1366,11 +1366,23 @@ useEffect(() => {
   }
 
   async function fetchPlaylists() {
-    if (!session?.user?.id) return;
-    const { data } = await supabase.from("playlists").select("*").eq("user_id", session.user.id).order("created_at", { ascending: false });
-    setPlaylists(data || []);
-  }
+    if (!session?.user?.id) {
+      setPlaylists([]);
+      return;
+    }
+    try {
+      const { data, error } = await supabase
+        .from("playlists")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .order("created_at", { ascending: false });
 
+      if (error) throw error;
+      setPlaylists(data || []);
+    } catch (err) {
+      setMessage("Could not load playlists: " + err.message);
+    }
+  }
 
   async function openPlaylist(pl) {
     setSelectedPlaylist(pl);
@@ -6054,88 +6066,132 @@ document.body
       {showAllPlaylists && !showPlaylistDetailPage && (
         <section style={{
           position: "fixed", inset: "0 0 56px 0", zIndex: 99990,
-          overflowY: "auto", padding: "16px",
-          background: "var(--ma-bg, #fff)", color: "var(--ma-text, #111)"
+          overflowY: "auto", background: "#0f0f0f", color: "#f1f1f1",
+          padding: "0 0 28px"
         }}>
           <header style={{
-            display: "flex", alignItems: "center", gap: "16px",
-            marginBottom: "22px", position: "sticky", top: 0,
-            padding: "8px 0", background: "var(--ma-bg, #fff)", zIndex: 2
+            position: "sticky", top: 0, zIndex: 3,
+            display: "flex", alignItems: "center", gap: "18px",
+            padding: "14px 18px", background: "#0f0f0f"
           }}>
-            <button aria-label="Back to account" onClick={() => {
+            <button aria-label="Back" onClick={() => {
               setShowAllPlaylists(false);
               setShowAccountPage(true);
             }} style={{
-              border: 0, background: "transparent",
-              color: "var(--ma-text, #111)", cursor: "pointer"
+              border: 0, padding: 0, background: "transparent",
+              color: "#f1f1f1", cursor: "pointer"
             }}>
               <span className="material-symbols-outlined">arrow_back</span>
             </button>
-            <h2 style={{ margin: 0, fontSize: "22px", fontWeight: 800 }}>Your playlists</h2>
+            <h2 style={{ margin: 0, fontSize: "22px", fontWeight: 700 }}>
+              Playlists
+            </h2>
           </header>
 
           {!session?.user?.id ? (
-            <p>Sign in to view your playlists.</p>
-          ) : playlists.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "56px 16px" }}>
-              <span className="material-symbols-outlined"
-                style={{ fontSize: "52px", color: "var(--ma-text-secondary, #777)" }}>
-                queue_music
-              </span>
-              <h3>No playlists yet</h3>
-              <p style={{ color: "var(--ma-text-secondary, #777)" }}>
-                Playlists you create or save will appear here.
-              </p>
-            </div>
+            <p style={{ padding: "20px" }}>Sign in to view your playlists.</p>
           ) : (
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(145px, 1fr))",
-              gap: "16px"
-            }}>
-              {playlists.map((pl) => (
-                <button key={pl.id} onClick={async () => {
-                  setSelectedPlaylist(pl);
-                  setShowPlaylistDetailPage(true);
-                  await openPlaylist(pl);
-                }} style={{
-                  display: "block", minWidth: 0, padding: 0,
-                  overflow: "hidden", textAlign: "left", cursor: "pointer",
-                  border: "1px solid var(--ma-border, #e5e5e5)",
-                  borderRadius: "12px", background: "var(--ma-surface, #f0f0f0)",
-                  color: "var(--ma-text, #111)"
+            <>
+              <form onSubmit={handleCreatePlaylist} style={{
+                display: "flex", gap: "10px", alignItems: "center",
+                margin: "8px 16px 24px"
+              }}>
+                <input
+                  aria-label="New playlist name"
+                  value={newPlaylistName}
+                  onChange={(e) => setNewPlaylistName(e.target.value)}
+                  placeholder="Create a playlist"
+                  required
+                  style={{
+                    flex: 1, minWidth: 0, padding: "13px 15px",
+                    borderRadius: "24px", border: "1px solid #3f3f3f",
+                    background: "#272727", color: "#fff", fontSize: "14px"
+                  }}
+                />
+                <button type="submit" style={{
+                  border: 0, borderRadius: "22px", padding: "12px 17px",
+                  background: "#f1f1f1", color: "#0f0f0f",
+                  fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap"
+                }}>Create</button>
+              </form>
+
+              {playlists.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "44px 24px" }}>
+                  <span className="material-symbols-outlined"
+                    style={{ fontSize: "64px", color: "#aaa" }}>
+                    video_library
+                  </span>
+                  <h3 style={{ fontSize: "18px", margin: "16px 0 8px" }}>
+                    No playlists yet
+                  </h3>
+                  <p style={{ color: "#aaa", fontSize: "14px", lineHeight: 1.5 }}>
+                    Create a playlist to collect the music and videos you want to play.
+                  </p>
+                </div>
+              ) : (
+                <div style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(155px, 1fr))",
+                  gap: "24px 14px", padding: "0 16px"
                 }}>
-                  <div style={{
-                    width: "100%", aspectRatio: "16/10",
-                    display: "grid", placeItems: "center",
-                    overflow: "hidden", background: "var(--ma-bg, #fff)"
-                  }}>
-                    {pl.cover_url ? (
-                      <img src={pl.cover_url} alt=""
-                        loading="lazy"
-                        style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    ) : (
-                      <span className="material-symbols-outlined"
-                        style={{ fontSize: "42px", color: "#ff365f" }}>queue_music</span>
-                    )}
-                  </div>
-                  <div style={{ padding: "12px" }}>
-                    <strong style={{
-                      display: "block", fontSize: "14px",
-                      overflow: "hidden", textOverflow: "ellipsis",
-                      whiteSpace: "nowrap"
-                    }}>{pl.title || "Untitled playlist"}</strong>
-                    <small style={{ color: "var(--ma-text-secondary, #777)" }}>
-                      Open playlist
-                    </small>
-                  </div>
-                </button>
-              ))}
-            </div>
+                  {playlists.map((pl) => (
+                    <button key={pl.id} onClick={async () => {
+                      setSelectedPlaylist(pl);
+                      setShowPlaylistDetailPage(true);
+                      await openPlaylist(pl);
+                    }} style={{
+                      display: "block", minWidth: 0, padding: 0,
+                      textAlign: "left", border: 0, background: "transparent",
+                      color: "#f1f1f1", cursor: "pointer"
+                    }}>
+                      <div style={{
+                        position: "relative", aspectRatio: "16 / 10",
+                        overflow: "hidden", borderRadius: "10px",
+                        background: "#272727", display: "grid",
+                        placeItems: "center", marginBottom: "11px"
+                      }}>
+                        {pl.cover_url ? (
+                          <img src={pl.cover_url} alt=""
+                            loading="lazy"
+                            style={{
+                              width: "100%", height: "100%",
+                              objectFit: "cover"
+                            }} />
+                        ) : (
+                          <span className="material-symbols-outlined"
+                            style={{ fontSize: "48px", color: "#aaa" }}>
+                            queue_music
+                          </span>
+                        )}
+                        <span style={{
+                          position: "absolute", right: 0, bottom: 0,
+                          display: "flex", alignItems: "center", gap: "5px",
+                          padding: "5px 8px", borderRadius: "7px 0 0 0",
+                          background: "rgba(0,0,0,.82)", color: "#fff",
+                          fontSize: "12px"
+                        }}>
+                          <span className="material-symbols-outlined"
+                            style={{ fontSize: "16px" }}>playlist_play</span>
+                          Playlist
+                        </span>
+                      </div>
+                      <strong style={{
+                        display: "block", fontSize: "14px", lineHeight: 1.4,
+                        overflow: "hidden", textOverflow: "ellipsis",
+                        whiteSpace: "nowrap"
+                      }}>{pl.title || "Untitled playlist"}</strong>
+                      <span style={{
+                        display: "block", color: "#aaa",
+                        fontSize: "12px", marginTop: "5px"
+                      }}>Open playlist</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </section>
       )}
-
       {showPlaylistDetailPage && selectedPlaylist && (
         <section style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: "56px", background: "var(--ma-bg, #fff)", zIndex: 99999, display: "flex", flexDirection: "column", overflowY: "auto", userSelect: "none" }}>
           
