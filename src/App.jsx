@@ -5339,7 +5339,7 @@ document.body
       )}
 
       {showAnalytics && (
-        <section style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: "56px", background: "#0f0f0f", zIndex: 9999, overflowY: "auto", padding: "16px", color: "var(--ma-text, #000)", fontFamily: "Roboto, sans-serif" }}>
+        <section style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: "56px", background: "var(--ma-bg, #fff)", zIndex: 9999, overflowY: "auto", padding: "16px", color: "var(--ma-text, #000)", fontFamily: "Roboto, sans-serif" }}>
           
           {/* Header */}
           <div style={{ display: "flex", alignItems: "center", marginBottom: "24px", borderBottom: "1px solid var(--ma-border, #e5e5e5)", paddingBottom: "16px" }}>
