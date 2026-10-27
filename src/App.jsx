@@ -5938,7 +5938,7 @@ document.body
 
       {showPlaylistModal && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }} onClick={() => setShowPlaylistModal(false)}>
-          <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "90%", maxWidth: "400px", borderRadius: "16px", padding: "24px", border: "1px solid var(--ma-border, #e5e5e5)", boxShadow: "0 10px 40px rgba(0,0,0,0.2)", maxHeight: "85vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+          <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "90%", maxWidth: "400px", borderRadius: "16px", padding: "24px", border: "1px solid var(--ma-border, #e5e5e5)", boxShadow: "0 10px 40px rgba(0,0,0,0.2)", maxHeight: "85vh", overflowY: "auto", userSelect: "none", WebkitUserSelect: "none" }} onClick={e => e.stopPropagation()}>
             
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
               <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "700" }}>Save to playlist</h3>
@@ -6098,7 +6098,7 @@ document.body
 
       {showPlaylistModal && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }} onClick={() => setShowPlaylistModal(false)}>
-          <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "90%", maxWidth: "400px", borderRadius: "16px", padding: "24px", border: "1px solid var(--ma-border, #e5e5e5)", boxShadow: "0 10px 40px rgba(0,0,0,0.2)", maxHeight: "85vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+          <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "90%", maxWidth: "400px", borderRadius: "16px", padding: "24px", border: "1px solid var(--ma-border, #e5e5e5)", boxShadow: "0 10px 40px rgba(0,0,0,0.2)", maxHeight: "85vh", overflowY: "auto", userSelect: "none", WebkitUserSelect: "none" }} onClick={e => e.stopPropagation()}>
             
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
               <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "700" }}>Save to playlist</h3>
@@ -6297,8 +6297,8 @@ document.body
               } catch(err) {
                 setMessage("Error creating playlist: " + err.message);
               }
-            }} style={{ display: "flex", gap: "8px", width: "100%", alignItems: "stretch" }}>
-              <input type="text" placeholder="New playlist name..." value={newPlaylistName} onChange={e => setNewPlaylistName(e.target.value)} style={{ flex: 1, minWidth: 0, padding: "12px", borderRadius: "10px", background: "var(--ma-surface)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", outline: "none", display: "block" }} />
+            }} style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%" }}>
+              <input type="text" placeholder="New playlist name..." value={newPlaylistName} onChange={e => setNewPlaylistName(e.target.value)} style={{ width: "100%", padding: "14px", borderRadius: "10px", background: "var(--ma-surface)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", outline: "none", display: "block" }} />
               <button type="submit" style={{ flexShrink: 0, background: "#ff365f !important", color: "white !important", border: "none !important", padding: "0 20px", borderRadius: "10px", fontWeight: "bold", fontSize: "14px", cursor: "pointer", display: "flex !important", alignItems: "center", justifyContent: "center", minHeight: "44px" }}>Create</button>
             </form>
 
@@ -6379,8 +6379,8 @@ document.body
               } catch(err) {
                 setMessage("Error creating playlist: " + err.message);
               }
-            }} style={{ display: "flex", gap: "8px", width: "100%", alignItems: "stretch" }}>
-              <input type="text" placeholder="New playlist name..." value={newPlaylistName} onChange={e => setNewPlaylistName(e.target.value)} style={{ flex: 1, minWidth: 0, padding: "12px", borderRadius: "10px", background: "var(--ma-surface)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", outline: "none", display: "block" }} />
+            }} style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%" }}>
+              <input type="text" placeholder="New playlist name..." value={newPlaylistName} onChange={e => setNewPlaylistName(e.target.value)} style={{ width: "100%", padding: "14px", borderRadius: "10px", background: "var(--ma-surface)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", outline: "none", display: "block" }} />
               <button type="submit" style={{ flexShrink: 0, background: "#ff365f !important", color: "white !important", border: "none !important", padding: "0 20px", borderRadius: "10px", fontWeight: "bold", fontSize: "14px", cursor: "pointer", display: "flex !important", alignItems: "center", justifyContent: "center", minHeight: "44px" }}>Create</button>
             </form>
 
