@@ -248,6 +248,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [showPlaylistDetailPage, setShowPlaylistDetailPage] = useState(false);
   const [playlistItems, setPlaylistItems] = useState([]);
   const [selectedPlaylistItems, setSelectedPlaylistItems] = useState([]);
+  const [activePlaylistItemMenu, setActivePlaylistItemMenu] = useState(null);
   const [playlistLoading, setPlaylistLoading] = useState(false);
   const [showAllPlaylists, setShowAllPlaylists] = useState(false);
 
@@ -5896,85 +5897,100 @@ document.body
           
           {/* Top Bar */}
           <div style={{ display: "flex", alignItems: "center", padding: "12px 16px", borderBottom: "1px solid var(--ma-border, #e5e5e5)", background: "var(--ma-bg, #fff)", position: "sticky", top: 0, zIndex: 10 }}>
-            <button onClick={() => setShowPlaylistDetailPage(false)} style={{ background: "var(--ma-surface, #f2f2f2)", border: "1px solid var(--ma-border, #e5e5e5)", borderRadius: "50%", width: "36px", height: "36px", display: "grid", placeItems: "center", color: "var(--ma-text, #000)", cursor: "pointer", flexShrink: 0 }}>
-              <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>close</span>
+            <button onClick={() => { setShowPlaylistDetailPage(false); setActivePlaylistItemMenu(null); setSelectedPlaylistItems([]); }} style={{ background: "transparent", border: 0, color: "var(--ma-text, #000)", cursor: "pointer", padding: "8px", display: "flex" }}>
+              <span className="material-symbols-outlined">arrow_back</span>
             </button>
-            <h2 style={{ margin: 0, fontSize: "18px", fontWeight: "700", color: "var(--ma-text, #000)", marginLeft: "12px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1 }}>{selectedPlaylist.title}</h2>
-            
-            {/* Select All / Delete Selected Controls */}
-            {playlistItems.length > 0 && (
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                {selectedPlaylistItems.length > 0 && (
-                  <button onClick={handleDeleteSelectedPlaylistItems} style={{ background: "rgba(255, 78, 69, 0.1)", color: "#FF4E45", border: "none", padding: "6px 12px", borderRadius: "6px", fontWeight: "600", fontSize: "12px", cursor: "pointer" }}>
-                    Delete ({selectedPlaylistItems.length})
-                  </button>
-                )}
-                <input 
-                  type="checkbox" 
-                  checked={selectedPlaylistItems.length === playlistItems.length && playlistItems.length > 0}
-                  onChange={(e) => {
-                    if (e.target.checked) setSelectedPlaylistItems(playlistItems.map(i => i.playlistItemId));
-                    else setSelectedPlaylistItems([]);
-                  }}
-                  style={{ width: "18px", height: "18px", accentColor: "#ff365f", cursor: "pointer" }}
-                  title="Select All"
-                />
-              </div>
-            )}
+            <h2 style={{ margin: 0, fontSize: "18px", fontWeight: "700", color: "var(--ma-text, #000)", marginLeft: "8px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1 }}>{selectedPlaylist.title}</h2>
           </div>
 
-          {/* Header Content */}
-          <div style={{ padding: "24px 16px", background: "linear-gradient(to bottom, var(--ma-bg), var(--ma-surface))", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
-            <h1 style={{ margin: "0 0 8px 0", fontSize: "24px", fontWeight: "800", color: "var(--ma-text, #000)" }}>{selectedPlaylist.title}</h1>
-            <p style={{ margin: "0 0 16px 0", fontSize: "13px", color: "var(--ma-text-secondary, #666)" }}>{selectedPlaylist.description || "No description provided."}</p>
-            
-            <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "20px" }}>
-              <span style={{ fontSize: "12px", color: "var(--ma-text, #000)", fontWeight: "600" }}>{playlistItems.length} tracks</span>
-              <span style={{ fontSize: "12px", color: "var(--ma-text-secondary, #666)", textTransform: "capitalize" }}>{selectedPlaylist.visibility}</span>
+          {/* Compact Playlist Header */}
+          <div style={{ padding: "16px", borderBottom: "1px solid var(--ma-border, #e5e5e5)", display: "flex", alignItems: "center", gap: "16px" }}>
+            <div style={{ width: "120px", height: "68px", borderRadius: "8px", overflow: "hidden", background: "var(--ma-surface)", flexShrink: 0 }}>
+              {playlistItems[0]?.thumbnail_path ? (
+                <img src={supabase.storage.from(BUCKET).getPublicUrl(playlistItems[0].thumbnail_path).data.publicUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : (
+                <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", color: "var(--ma-text-secondary)", fontSize: "24px" }}>♫</div>
+              )}
             </div>
-
-            <button onClick={() => { if (playlistItems.length > 0) openPlayer(playlistItems[0]); }} disabled={playlistItems.length === 0} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", width: "100%", padding: "14px", background: "#ff365f", color: "white", border: "none", borderRadius: "12px", fontSize: "16px", fontWeight: "700", cursor: playlistItems.length === 0 ? "not-allowed" : "pointer", opacity: playlistItems.length === 0 ? 0.5 : 1, boxShadow: "0 4px 12px rgba(255,54,95,0.3)" }}>
-              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span> Play All
-            </button>
+            <div style={{ flex: 1 }}>
+              <h3 style={{ margin: "0 0 4px 0", fontSize: "16px", fontWeight: "700", color: "var(--ma-text)" }}>{selectedPlaylist.title}</h3>
+              <p style={{ margin: "0 0 8px 0", fontSize: "12px", color: "var(--ma-text-secondary)" }}>{channelProfile?.display_name || "Creator"} • {playlistItems.length} videos</p>
+              
+              <button onClick={() => { if (playlistItems.length > 0) openPlayer(playlistItems[0]); }} disabled={playlistItems.length === 0} style={{ padding: "8px 16px", background: "#ff365f", color: "white", border: "none", borderRadius: "20px", fontSize: "13px", fontWeight: "700", cursor: playlistItems.length === 0 ? "not-allowed" : "pointer", opacity: playlistItems.length === 0 ? 0.5 : 1 }}>
+                Play All
+              </button>
+            </div>
           </div>
 
-          {/* Track List */}
-          <div style={{ padding: "16px", flex: 1 }}>
+          {/* Clean Video List */}
+          <div style={{ padding: "8px 16px", flex: 1, paddingBottom: "100px" }}>
             {playlistLoading ? (
-              <p style={{ textAlign: "center", color: "var(--ma-text-secondary)" }}>Loading tracks...</p>
+              <p style={{ textAlign: "center", color: "var(--ma-text-secondary)", marginTop: "20px" }}>Loading videos...</p>
             ) : playlistItems.length === 0 ? (
-              <p style={{ textAlign: "center", color: "var(--ma-text-secondary)" }}>This playlist is empty.</p>
+              <p style={{ textAlign: "center", color: "var(--ma-text-secondary)", marginTop: "20px" }}>This playlist is empty.</p>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                {playlistItems.map((item, index) => {
-                  const isSelected = selectedPlaylistItems.includes(item.playlistItemId);
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                {playlistItems.map((item) => {
                   return (
-                  <div key={item.id} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px", background: isSelected ? "rgba(255,54,95,0.05)" : "var(--ma-surface, #f0f0f0)", borderRadius: "10px", border: `1px solid ${isSelected ? "#ff365f" : "var(--ma-border, #e5e5e5)"}`, transition: "all 0.2s" }}>
+                  <div key={item.id} style={{ display: "flex", alignItems: "center", gap: "12px", position: "relative" }}>
                     
-                    {/* Checkbox */}
-                    <input type="checkbox" checked={isSelected} onChange={() => toggleSelectPlaylistItem(item.playlistItemId)} style={{ width: "18px", height: "18px", accentColor: "#ff365f", cursor: "pointer" }} />
-                    
-                    {/* Clickable area for playing */}
-                    <div onClick={() => openPlayer(item)} style={{ display: "flex", alignItems: "center", gap: "12px", flex: 1, cursor: "pointer", minWidth: 0 }}>
-                      <span style={{ fontSize: "14px", fontWeight: "600", color: "var(--ma-text-secondary)", width: "20px", textAlign: "center" }}>{index + 1}</span>
-                      <div style={{ width: "48px", height: "48px", borderRadius: "6px", overflow: "hidden", background: "var(--ma-bg)", flexShrink: 0 }}>
-                        {item.thumbnail_path ? (
-                          <img src={supabase.storage.from(BUCKET).getPublicUrl(item.thumbnail_path).data.publicUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                        ) : (
-                          <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", color: "var(--ma-text-secondary)" }}>♫</div>
-                        )}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <h4 style={{ margin: "0 0 4px 0", fontSize: "14px", fontWeight: "600", color: "var(--ma-text, #000)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.title}</h4>
-                        <p style={{ margin: 0, fontSize: "12px", color: "var(--ma-text-secondary, #666)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.media_type === "video" ? "Video" : "Audio"}</p>
+                    {/* Thumbnail */}
+                    <div onClick={() => openPlayer(item)} style={{ width: "160px", height: "90px", borderRadius: "10px", overflow: "hidden", background: "var(--ma-surface)", flexShrink: 0, position: "relative", cursor: "pointer" }}>
+                      {item.thumbnail_path ? (
+                        <img src={supabase.storage.from(BUCKET).getPublicUrl(item.thumbnail_path).data.publicUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      ) : (
+                        <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", color: "var(--ma-text-secondary)", fontSize: "24px" }}>♫</div>
+                      )}
+                      
+                      {/* Duration / Type Badge */}
+                      <div style={{ position: "absolute", bottom: "6px", right: "6px", background: "rgba(0,0,0,0.8)", color: "white", fontSize: "11px", fontWeight: "bold", padding: "2px 6px", borderRadius: "4px", display: "flex", alignItems: "center", gap: "4px" }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>{item.media_type === "video" ? "play_arrow" : "music_note"}</span>
+                        {item.media_type === "video" ? "Video" : "Audio"}
                       </div>
                     </div>
 
-                    {/* Individual Delete */}
-                    {selectedPlaylist?.user_id === session?.user?.id && (
-                      <button onClick={(e) => { e.stopPropagation(); handleDeletePlaylistItem(item.playlistItemId); }} style={{ background: "rgba(255, 78, 69, 0.1)", border: "none", borderRadius: "50%", width: "36px", height: "36px", display: "grid", placeItems: "center", color: "#FF4E45", cursor: "pointer", flexShrink: 0 }}>
-                        <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>delete</span>
-                      </button>
+                    {/* Title and Meta */}
+                    <div onClick={() => openPlayer(item)} style={{ flex: 1, minWidth: 0, cursor: "pointer" }}>
+                      <h4 style={{ margin: "0 0 6px 0", fontSize: "14px", fontWeight: "500", color: "var(--ma-text, #000)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: "1.3" }}>{item.title}</h4>
+                      <p style={{ margin: 0, fontSize: "12px", color: "var(--ma-text-secondary, #666)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.profiles?.display_name || "Artist"} • Playlist</p>
+                    </div>
+
+                    {/* 3-Dots Menu Trigger */}
+                    <button onClick={(e) => { e.stopPropagation(); setActivePlaylistItemMenu(activePlaylistItemMenu === item.playlistItemId ? null : item.playlistItemId); }} style={{ background: "transparent", border: "none", color: "var(--ma-text)", cursor: "pointer", padding: "8px", flexShrink: 0 }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>more_vert</span>
+                    </button>
+
+                    {/* The Dropdown Menu (Positioned absolutely relative to the row) */}
+                    {activePlaylistItemMenu === item.playlistItemId && (
+                      <div style={{ position: "absolute", right: "0", top: "40px", background: "var(--ma-bg)", border: "1px solid var(--ma-border)", borderRadius: "12px", boxShadow: "0 10px 30px rgba(0,0,0,0.2)", zIndex: 30, display: "flex", flexDirection: "column", width: "260px", padding: "8px 0", backdropFilter: "blur(10px)" }}>
+                        
+                        <button onClick={() => { setMessage("Queue feature coming soon"); setActivePlaylistItemMenu(null); }} style={{ padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", color: "var(--ma-text)", fontWeight: "500", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "16px" }}>
+                          <span className="material-symbols-outlined" style={{ fontSize: "22px", color: "var(--ma-text-secondary)" }}>play_circle</span> Play next in queue
+                        </button>
+                        
+                        <button onClick={() => { setMessage("Queue feature coming soon"); setActivePlaylistItemMenu(null); }} style={{ padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", color: "var(--ma-text)", fontWeight: "500", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "16px" }}>
+                          <span className="material-symbols-outlined" style={{ fontSize: "22px", color: "var(--ma-text-secondary)" }}>playlist_add</span> Play last in queue
+                        </button>
+
+                        <button onClick={() => { setMessage("Added to Watch Later"); setActivePlaylistItemMenu(null); }} style={{ padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", color: "var(--ma-text)", fontWeight: "500", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "16px" }}>
+                          <span className="material-symbols-outlined" style={{ fontSize: "22px", color: "var(--ma-text-secondary)" }}>schedule</span> Save to Watch later
+                        </button>
+
+                        <button onClick={() => { setActiveMedia(item); setShowPlaylistModal(true); setActivePlaylistItemMenu(null); }} style={{ padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", color: "var(--ma-text)", fontWeight: "500", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "16px" }}>
+                          <span className="material-symbols-outlined" style={{ fontSize: "22px", color: "var(--ma-text-secondary)" }}>playlist_add</span> Save to playlist
+                        </button>
+
+                        {selectedPlaylist?.user_id === session?.user?.id && (
+                          <button onClick={() => { handleDeletePlaylistItem(item.playlistItemId); setActivePlaylistItemMenu(null); }} style={{ padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", color: "var(--ma-text)", fontWeight: "500", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "16px" }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: "22px", color: "var(--ma-text-secondary)" }}>remove_circle</span> Remove from {selectedPlaylist.title}
+                          </button>
+                        )}
+
+                        <button onClick={() => { handleShare(item); setActivePlaylistItemMenu(null); }} style={{ padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", color: "var(--ma-text)", fontWeight: "500", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "16px" }}>
+                          <span className="material-symbols-outlined" style={{ fontSize: "22px", color: "var(--ma-text-secondary)" }}>share</span> Share
+                        </button>
+                        
+                      </div>
                     )}
                   </div>
                 )})}
