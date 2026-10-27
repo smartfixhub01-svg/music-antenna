@@ -3162,6 +3162,13 @@ document.body
   return (
     <div className="ma-app">
 
+    <style>{`
+      * {
+        -webkit-tap-highlight-color: transparent !important;
+      }
+    `}</style>
+
+
 <style>{`/* PREMIUM_MEDIA_BADGES */
   .yt-duration {
     position: absolute !important;
@@ -5894,7 +5901,7 @@ document.body
                       <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary)" }}>playlist_play</span>
                       <span style={{ fontSize: "14px", fontWeight: "600", color: "var(--ma-text)" }}>{p.title}</span>
                     </div>
-                    <button onClick={() => handleAddToPlaylist(p.id, p.title)} style={{ width: "100%", display: "flex", justifyContent: "center", background: "#ff365f", color: "white", border: "none", padding: "10px", borderRadius: "8px", fontSize: "13px", fontWeight: "bold", cursor: "pointer", boxShadow: "0 2px 8px rgba(255,54,95,0.2)" }}>
+                    <button onClick={() => handleAddToPlaylist(p.id, p.title)} style={{ width: "100% !important", display: "flex !important", justifyContent: "center", background: "#ff365f !important", color: "white !important", border: "none !important", padding: "12px !important", borderRadius: "8px", fontSize: "14px", fontWeight: "bold", cursor: "pointer", boxShadow: "0 2px 8px rgba(255,54,95,0.2)", minHeight: "44px" }}>
                       Add to this playlist
                     </button>
                   </div>
@@ -5927,7 +5934,7 @@ document.body
               }
             }} style={{ display: "flex", gap: "8px", width: "100%", alignItems: "stretch" }}>
               <input type="text" placeholder="New playlist name..." value={newPlaylistName} onChange={e => setNewPlaylistName(e.target.value)} style={{ flex: 1, minWidth: 0, padding: "12px", borderRadius: "10px", background: "var(--ma-surface)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", outline: "none", display: "block" }} />
-              <button type="submit" style={{ flexShrink: 0, background: "#ff365f", color: "white", border: "none", padding: "0 20px", borderRadius: "10px", fontWeight: "bold", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>Create</button>
+              <button type="submit" style={{ flexShrink: 0, background: "#ff365f !important", color: "white !important", border: "none !important", padding: "0 20px", borderRadius: "10px", fontWeight: "bold", fontSize: "14px", cursor: "pointer", display: "flex !important", alignItems: "center", justifyContent: "center", minHeight: "44px" }}>Create</button>
             </form>
 
           </div>
@@ -5955,7 +5962,7 @@ document.body
         </div>
       )}
 
-      {showPlaylistModal && (
+      {false && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }} onClick={() => setShowPlaylistModal(false)}>
           <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "90%", maxWidth: "400px", borderRadius: "16px", padding: "24px", border: "1px solid var(--ma-border, #e5e5e5)", boxShadow: "0 10px 40px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
             
@@ -5974,7 +5981,7 @@ document.body
                       <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary)" }}>playlist_play</span>
                       <span style={{ fontSize: "14px", fontWeight: "600", color: "var(--ma-text)" }}>{p.title}</span>
                     </div>
-                    <button onClick={() => handleAddToPlaylist(p.id, p.title)} style={{ width: "100%", display: "flex", justifyContent: "center", background: "#ff365f", color: "white", border: "none", padding: "10px", borderRadius: "8px", fontSize: "13px", fontWeight: "bold", cursor: "pointer", boxShadow: "0 2px 8px rgba(255,54,95,0.2)" }}>
+                    <button onClick={() => handleAddToPlaylist(p.id, p.title)} style={{ width: "100% !important", display: "flex !important", justifyContent: "center", background: "#ff365f !important", color: "white !important", border: "none !important", padding: "12px !important", borderRadius: "8px", fontSize: "14px", fontWeight: "bold", cursor: "pointer", boxShadow: "0 2px 8px rgba(255,54,95,0.2)", minHeight: "44px" }}>
                       Add to this playlist
                     </button>
                   </div>
@@ -6007,7 +6014,7 @@ document.body
               }
             }} style={{ display: "flex", gap: "8px", width: "100%", alignItems: "stretch" }}>
               <input type="text" placeholder="New playlist name..." value={newPlaylistName} onChange={e => setNewPlaylistName(e.target.value)} style={{ flex: 1, minWidth: 0, padding: "12px", borderRadius: "10px", background: "var(--ma-surface)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", outline: "none", display: "block" }} />
-              <button type="submit" style={{ flexShrink: 0, background: "#ff365f", color: "white", border: "none", padding: "0 20px", borderRadius: "10px", fontWeight: "bold", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>Create</button>
+              <button type="submit" style={{ flexShrink: 0, background: "#ff365f !important", color: "white !important", border: "none !important", padding: "0 20px", borderRadius: "10px", fontWeight: "bold", fontSize: "14px", cursor: "pointer", display: "flex !important", alignItems: "center", justifyContent: "center", minHeight: "44px" }}>Create</button>
             </form>
 
           </div>
@@ -6035,7 +6042,7 @@ document.body
         </div>
       )}
 
-      {showPlaylistModal && (
+      {false && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }} onClick={() => setShowPlaylistModal(false)}>
           <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "90%", maxWidth: "400px", borderRadius: "16px", padding: "24px", border: "1px solid var(--ma-border, #e5e5e5)", boxShadow: "0 10px 40px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
             
