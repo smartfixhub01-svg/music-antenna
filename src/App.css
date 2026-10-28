@@ -6056,3 +6056,42 @@ p
   color: var(--ma-text);
   border-color: var(--ma-border);
 }
+
+
+/* Playlist picker: enforce visible Add buttons in both themes. */
+.ma-playlist-detail-page .ma-add-video-row {
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  gap: 12px !important;
+}
+.ma-playlist-detail-page .ma-add-video-row > span {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+.ma-playlist-detail-page .ma-add-video-row > .ma-add-video-button {
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  z-index: 2 !important;
+  width: auto !important;
+  min-width: 58px !important;
+  min-height: 38px !important;
+  padding: 0 14px !important;
+  background: #e11d48 !important;
+  background-color: #e11d48 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+}

@@ -6551,10 +6551,10 @@ document.body
       ) : (
         <div style={{ display: "grid", gap: "10px" }}>
           {mediaPickerItems.map((item) => (
-            <div key={item.id} role="button" tabIndex={0} onClick={() => addMediaToSelectedPlaylist(item)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); addMediaToSelectedPlaylist(item); } }} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px", border: "1px solid var(--ma-border)", borderRadius: "12px", cursor: "pointer" }}>
+            <div key={item.id} className="ma-add-video-row" onClick={() => addMediaToSelectedPlaylist(item)} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px", border: "1px solid var(--ma-border)", borderRadius: "12px", cursor: "pointer", width: "100%", minWidth: 0, boxSizing: "border-box" }}>
               {item.thumbnail_path ? <img src={supabase.storage.from("track-covers").getPublicUrl(item.thumbnail_path).data.publicUrl} alt="" onError={(e) => { e.currentTarget.style.display = "none"; }} style={{ width: "76px", height: "54px", objectFit: "cover", borderRadius: "8px", flexShrink: 0 }} /> : null}
               <span style={{ flex: 1, minWidth: 0, overflowWrap: "anywhere" }}>{item.title || "Untitled media"}</span>
-              <button type="button" onClick={(e) => { e.stopPropagation(); addMediaToSelectedPlaylist(item); }} style={{ background: "#e11d48", color: "#ffffff", WebkitTextFillColor: "#ffffff", border: "0", borderRadius: "10px", padding: "9px 12px", cursor: "pointer", flexShrink: 0, fontWeight: 700, opacity: 1, visibility: "visible" }}>Add</button>
+              <button type="button" className="ma-add-video-button" onClick={(e) => { e.stopPropagation(); addMediaToSelectedPlaylist(item); }} style={{ background: "#e11d48", color: "#ffffff", WebkitTextFillColor: "#ffffff", border: "0", borderRadius: "10px", padding: "9px 12px", cursor: "pointer", flexShrink: 0, fontWeight: 700, opacity: 1, visibility: "visible" }}>Add</button>
             </div>
           ))}
         </div>
