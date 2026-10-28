@@ -6463,10 +6463,10 @@ document.body
       ) : (
         <div style={{ display: "grid", gap: "10px" }}>
           {mediaPickerItems.map((item) => (
-            <div key={item.id} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px", border: "1px solid var(--ma-border)", borderRadius: "12px" }}>
-              {item.thumbnail_path ? <img src={item.thumbnail_path} alt="" style={{ width: "76px", height: "54px", objectFit: "cover", borderRadius: "8px" }} /> : null}
+            <div key={item.id} role="button" tabIndex={0} onClick={() => addMediaToSelectedPlaylist(item)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); addMediaToSelectedPlaylist(item); } }} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px", border: "1px solid var(--ma-border)", borderRadius: "12px", cursor: "pointer" }}>
+              {item.thumbnail_path ? <img src={supabase.storage.from("track-covers").getPublicUrl(item.thumbnail_path).data.publicUrl} alt="" onError={(e) => { e.currentTarget.style.display = "none"; }} style={{ width: "76px", height: "54px", objectFit: "cover", borderRadius: "8px", flexShrink: 0 }} /> : null}
               <span style={{ flex: 1, minWidth: 0, overflowWrap: "anywhere" }}>{item.title || "Untitled media"}</span>
-              <button type="button" onClick={() => addMediaToSelectedPlaylist(item)} style={{ background: "var(--ma-accent, #e11d48)", color: "#fff", border: 0, borderRadius: "10px", padding: "9px 12px", cursor: "pointer" }}>Add</button>
+              <button type="button" onClick={(e) => { e.stopPropagation(); addMediaToSelectedPlaylist(item); }} style={{ background: "var(--ma-accent, #e11d48)", color: "#fff", border: 0, borderRadius: "10px", padding: "9px 12px", cursor: "pointer" }}>Add</button>
             </div>
           ))}
         </div>
@@ -6489,7 +6489,7 @@ document.body
 
           {/* Hero Banner Area */}
           <div style={{ position: "relative", width: "100%", height: "220px", background: "var(--ma-surface)" }}>
-            <div style={{ width: "100%", height: "100%", backgroundImage: `url(${selectedPlaylist.cover_url || (playlistItems[0]?.thumbnail_path ? supabase.storage.from(BUCKET).getPublicUrl(playlistItems[0].thumbnail_path).data.publicUrl : "")})`, backgroundSize: "cover", backgroundPosition: "center", opacity: 0.9 }} />
+            <div style={{ width: "100%", height: "100%", backgroundImage: `url(${selectedPlaylist.cover_url || (playlistItems[0]?.thumbnail_path ? supabase.storage.from("track-covers").getPublicUrl(playlistItems[0].thumbnail_path).data.publicUrl : "")})`, backgroundSize: "cover", backgroundPosition: "center", opacity: 0.9 }} />
             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, var(--ma-bg) 0%, transparent 100%)" }} />
             
             {/* Edit Cover Button (Only for owner) */}
@@ -6561,7 +6561,7 @@ document.body
                     {/* Thumbnail */}
                     <div onClick={() => openPlayer(item)} style={{ width: "140px", height: "80px", borderRadius: "8px", overflow: "hidden", background: "var(--ma-surface)", flexShrink: 0, position: "relative", cursor: "pointer" }}>
                       {item.thumbnail_path ? (
-                        <img src={supabase.storage.from(BUCKET).getPublicUrl(item.thumbnail_path).data.publicUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        <img src={item.thumbnailUrl || supabase.storage.from("track-covers").getPublicUrl(item.thumbnail_path).data.publicUrl} alt="" onError={(e) => { e.currentTarget.style.display = "none"; }} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       ) : (
                         <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", color: "var(--ma-text-secondary)", fontSize: "24px" }}>♫</div>
                       )}
