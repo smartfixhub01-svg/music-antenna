@@ -6505,17 +6505,6 @@ document.body
                             queue_music
                           </span>
                         )}
-                        <span style={{
-                          position: "absolute", right: 0, bottom: 0,
-                          display: "flex", alignItems: "center", gap: "5px",
-                          padding: "5px 8px", borderRadius: "7px 0 0 0",
-                          background: "rgba(0,0,0,.82)", color: "var(--ma-text)",
-                          fontSize: "12px"
-                        }}>
-                          <span className="material-symbols-outlined"
-                            style={{ fontSize: "16px" }}>playlist_play</span>
-                          Playlist
-                        </span>
                       </div>
                       <strong style={{
                         display: "block", fontSize: "14px", lineHeight: 1.4,
@@ -6565,7 +6554,7 @@ document.body
             <div key={item.id} role="button" tabIndex={0} onClick={() => addMediaToSelectedPlaylist(item)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); addMediaToSelectedPlaylist(item); } }} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px", border: "1px solid var(--ma-border)", borderRadius: "12px", cursor: "pointer" }}>
               {item.thumbnail_path ? <img src={supabase.storage.from("track-covers").getPublicUrl(item.thumbnail_path).data.publicUrl} alt="" onError={(e) => { e.currentTarget.style.display = "none"; }} style={{ width: "76px", height: "54px", objectFit: "cover", borderRadius: "8px", flexShrink: 0 }} /> : null}
               <span style={{ flex: 1, minWidth: 0, overflowWrap: "anywhere" }}>{item.title || "Untitled media"}</span>
-              <button type="button" onClick={(e) => { e.stopPropagation(); addMediaToSelectedPlaylist(item); }} style={{ background: "var(--ma-accent, #e11d48)", color: "#fff", border: 0, borderRadius: "10px", padding: "9px 12px", cursor: "pointer" }}>Add</button>
+              <button type="button" onClick={(e) => { e.stopPropagation(); addMediaToSelectedPlaylist(item); }} style={{ background: "#e11d48", color: "#ffffff", WebkitTextFillColor: "#ffffff", border: "0", borderRadius: "10px", padding: "9px 12px", cursor: "pointer", flexShrink: 0, fontWeight: 700, opacity: 1, visibility: "visible" }}>Add</button>
             </div>
           ))}
         </div>
