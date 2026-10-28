@@ -6115,3 +6115,29 @@ p
   position: relative !important;
   z-index: 2 !important;
 }
+
+
+/* Music Antenna: professional playlist controls in light and dark themes */
+.ma-channel-playlist-create {
+  background: #ff365f !important;
+  color: #ffffff !important;
+  border: 1px solid #ff365f !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  font-weight: 700 !important;
+  -webkit-tap-highlight-color: transparent;
+}
+.ma-channel-playlist-create:hover {
+  filter: brightness(0.94);
+}
+.ma-playlist-library-page form button.ma-playlist-create-submit {
+  background: #ff365f !important;
+  color: #ffffff !important;
+  border-color: #ff365f !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+.ma-playlist-library-page button,
+.ma-playlist-detail-page button {
+  -webkit-tap-highlight-color: transparent;
+}

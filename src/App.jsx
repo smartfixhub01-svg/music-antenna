@@ -5561,7 +5561,7 @@ document.body
                 {channelProfile?.id === session?.user?.id && (
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
                     <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "700", color: "var(--ma-text)" }}>Channel Playlists</h3>
-                    <button onClick={() => setShowCreatePlaylistModal(true)} style={{ display: "flex", alignItems: "center", gap: "4px", background: "var(--ma-surface)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", padding: "8px 14px", borderRadius: "20px", fontSize: "13px", fontWeight: "600", cursor: "pointer" }}>
+                    <button onClick={() => setShowCreatePlaylistModal(true)} className="ma-channel-playlist-create" style={{ display: "flex", alignItems: "center", gap: "4px", background: "#ff365f", color: "#ffffff", border: "1px solid #ff365f", padding: "8px 14px", borderRadius: "20px", fontSize: "13px", fontWeight: "700", cursor: "pointer", opacity: 1, visibility: "visible", flexShrink: 0 }}>
                       <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>add</span> Create
                     </button>
                   </div>
@@ -5586,11 +5586,11 @@ document.body
                               <img src={coverUrl} alt="" onError={(e) => { e.target.style.display = 'none'; }} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                             ) : null}
                             {/* Fallback Icon (Always rendered underneath, image covers it) */}
-                            <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--ma-text-secondary)", position: "absolute", top: 0, left: 0, zIndex: -1 }}>
+                            <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--ma-text-secondary)", position: "absolute", top: 0, left: 0, zIndex: 0, pointerEvents: "none" }}>
                               <span className="material-symbols-outlined" style={{ fontSize: "32px" }}>playlist_play</span>
                             </div>
                             
-                            <div style={{ position: "absolute", bottom: "6px", right: "6px", background: "rgba(0,0,0,0.8)", color: "var(--ma-text)", fontSize: "10px", fontWeight: "bold", padding: "2px 6px", borderRadius: "4px", display: "flex", alignItems: "center", gap: "4px", backdropFilter: "blur(4px)" }}>
+                            <div style={{ position: "absolute", bottom: "6px", right: "6px", background: "rgba(0,0,0,0.82)", color: "#ffffff", fontSize: "11px", lineHeight: 1.4, fontWeight: "700", padding: "3px 7px", borderRadius: "4px", display: "flex", alignItems: "center", gap: "4px", backdropFilter: "blur(4px)", zIndex: 2, pointerEvents: "none" }}>
                               <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>playlist_play</span>
                               {playlist.playlist_items?.length || 0}
                             </div>
@@ -6685,7 +6685,7 @@ document.body
                       ) : (
                         <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", color: "var(--ma-text-secondary)", fontSize: "24px" }}>♫</div>
                       )}
-                      <div style={{ position: "absolute", bottom: "4px", right: "4px", background: "rgba(0,0,0,0.8)", color: "var(--ma-text)", fontSize: "10px", fontWeight: "bold", padding: "2px 4px", borderRadius: "4px" }}>
+                      <div style={{ position: "absolute", bottom: "4px", right: "4px", background: "rgba(0,0,0,0.82)", color: "#ffffff", fontSize: "10px", lineHeight: 1.4, fontWeight: "700", padding: "3px 5px", borderRadius: "4px", zIndex: 2, pointerEvents: "none" }}>
                         {item.media_type === "video" ? "VIDEO" : "AUDIO"}
                       </div>
                     </div>
