@@ -241,6 +241,9 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [manageSource, setManageSource] = useState("account");
   const [showHistoryPage, setShowHistoryPage] = useState(false);
   const [showPlaylistModal, setShowPlaylistModal] = useState(false);
+  const [showAddVideoToPlaylistModal, setShowAddVideoToPlaylistModal] = useState(false);
+  const [mediaPickerItems, setMediaPickerItems] = useState([]);
+  const [mediaPickerLoading, setMediaPickerLoading] = useState(false);
   const [showAddSuccessModal, setShowAddSuccessModal] = useState(false);
   const [addedPlaylistId, setAddedPlaylistId] = useState(null);
   const [addedPlaylistTitle, setAddedPlaylistTitle] = useState("");
@@ -257,6 +260,21 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
 
   const [playlists, setPlaylists] = useState([]);
   const [newPlaylistName, setNewPlaylistName] = useState("");
+  const [playlistSearch, setPlaylistSearch] = useState("");
+  const [playlistSort, setPlaylistSort] = useState("newest");
+  const [showEditPlaylistModal, setShowEditPlaylistModal] = useState(false);
+  const [editPlaylistTitle, setEditPlaylistTitle] = useState("");
+  const [editPlaylistDescription, setEditPlaylistDescription] = useState("");
+  const [editPlaylistVisibility, setEditPlaylistVisibility] = useState("public");
+  const [isSavingPlaylistEdit, setIsSavingPlaylistEdit] = useState(false);
+
+  const visiblePlaylists = playlists
+    .filter((pl) => (pl.title || "").toLowerCase().includes(playlistSearch.trim().toLowerCase()))
+    .sort((a, b) => {
+      if (playlistSort === "title") return (a.title || "").localeCompare(b.title || "");
+      if (playlistSort === "oldest") return new Date(a.created_at || 0) - new Date(b.created_at || 0);
+      return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+    });
 
   const [showLikedPage, setShowLikedPage] = useState(false);
   const [likedMedia, setLikedMedia] = useState([]);
@@ -1365,7 +1383,59 @@ useEffect(() => {
     }
   }
 
-  async function fetchPlaylists() {
+  function openEditPlaylistModal() {
+  if (!selectedPlaylist || selectedPlaylist.user_id !== session?.user?.id) {
+    setMessage("Only the playlist owner can edit this playlist.");
+    return;
+  }
+  setEditPlaylistTitle(selectedPlaylist.title || "");
+  setEditPlaylistDescription(selectedPlaylist.description || "");
+  setEditPlaylistVisibility(selectedPlaylist.visibility || "public");
+  setShowEditPlaylistModal(true);
+}
+
+async function saveEditedPlaylist(e) {
+  e.preventDefault();
+  if (!selectedPlaylist || selectedPlaylist.user_id !== session?.user?.id) {
+    setMessage("Only the playlist owner can edit this playlist.");
+    return;
+  }
+
+  const title = editPlaylistTitle.trim();
+  if (!title) {
+    setMessage("Enter a playlist title.");
+    return;
+  }
+
+  setIsSavingPlaylistEdit(true);
+  try {
+    const { data, error } = await supabase
+      .from("playlists")
+      .update({
+        title,
+        description: editPlaylistDescription.trim(),
+        visibility: editPlaylistVisibility
+      })
+      .eq("id", selectedPlaylist.id)
+      .eq("user_id", session.user.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    setSelectedPlaylist(data);
+    setPlaylists((old) => old.map((pl) => pl.id === data.id ? { ...pl, ...data } : pl));
+    setChannelPlaylists((old) => old.map((pl) => pl.id === data.id ? { ...pl, ...data } : pl));
+    setShowEditPlaylistModal(false);
+    setMessage("Playlist updated successfully.");
+  } catch (err) {
+    setMessage("Could not update playlist: " + (err?.message || "Unknown error"));
+  } finally {
+    setIsSavingPlaylistEdit(false);
+  }
+}
+
+async function fetchPlaylists() {
     if (!session?.user?.id) {
       setPlaylists([]);
       return;
@@ -1386,6 +1456,7 @@ useEffect(() => {
 
   async function openPlaylist(pl) {
     setSelectedPlaylist(pl);
+    setShowPlaylistDetailPage(true);
     setPlaylistLoading(true);
     setShowAllPlaylists(false);
     try {
@@ -1411,6 +1482,24 @@ useEffect(() => {
     } finally {
       setPlaylistLoading(false);
     }
+  }
+
+
+  async function openAddVideoToPlaylistPicker() {
+    if (!session?.user?.id || !selectedPlaylist?.id) { setMessage(!session?.user?.id ? "Please sign in first." : "Open a playlist first."); return; }
+    setMediaPickerLoading(true); setShowAddVideoToPlaylistModal(true);
+    try { const {data,error}=await supabase.from("media").select("*").eq("status","published").order("created_at",{ascending:false}).limit(100); if(error) throw error; setMediaPickerItems(data||[]); }
+    catch(err) { setMediaPickerItems([]); setMessage("Could not load published media: "+(err?.message||"Unknown error")); }
+    finally { setMediaPickerLoading(false); }
+  }
+
+  async function addMediaToSelectedPlaylist(m) {
+    const pl=selectedPlaylist; if(!session?.user?.id||!pl?.id||!m?.id) return;
+    try { const {data:found,error:checkError}=await supabase.from("playlist_items").select("id").eq("playlist_id",pl.id).eq("media_id",m.id).maybeSingle(); if(checkError) throw checkError; if(found) { setMessage("This video is already in the playlist."); return; }
+      const {data:positions,error:posError}=await supabase.from("playlist_items").select("position").eq("playlist_id",pl.id).order("position",{ascending:false}).limit(1); if(posError) throw posError;
+      const position=positions?.length?(Number(positions[0].position)||0)+1:0; const {error}=await supabase.from("playlist_items").insert({playlist_id:pl.id,media_id:m.id,position}); if(error) throw error;
+      setShowAddVideoToPlaylistModal(false); await openPlaylist(pl); setMessage("Video added to playlist.");
+    } catch(err) { setMessage("Could not add video: "+(err?.message||"Unknown error")); }
   }
 
   async function deletePlaylist(id) {
@@ -1929,30 +2018,79 @@ useEffect(() => {
 
     
   async function handleAddToPlaylist(playlistId, playlistTitle) {
-    if (!activeMedia?.id) return;
+    const mediaId = activeMedia?.id;
+
+    console.log("Save to playlist attempt:", {
+      playlistId,
+      mediaId,
+      mediaTitle: activeMedia?.title,
+      userId: session?.user?.id
+    });
+
+    if (!session?.user?.id) {
+      setMessage("Please sign in to save videos to playlists.");
+      return;
+    }
+
+    if (!mediaId) {
+      setMessage("Could not identify this video. Close the menu, reopen it, and try again.");
+      console.error("Save failed: activeMedia has no ID", activeMedia);
+      return;
+    }
+
+    if (!playlistId) {
+      setMessage("Playlist ID is missing. Please reopen the playlist menu.");
+      return;
+    }
+
     try {
-      const { data: items } = await supabase.from('playlist_items').select('position').eq('playlist_id', playlistId).order('position', { ascending: false }).limit(1);
-      const nextPos = items && items.length > 0 ? items[0].position + 1 : 0;
-      
-      const { error } = await supabase.from('playlist_items').insert({ 
-        playlist_id: playlistId, 
-        media_id: activeMedia.id, 
-        position: nextPos 
-      });
-      
-      if (error) throw error;
-      
-      setAddedPlaylistId(playlistId);
-      setAddedPlaylistTitle(playlistTitle);
-      setShowAddSuccessModal(true);
+      const { data: items, error: positionError } = await supabase
+        .from("playlist_items")
+        .select("position")
+        .eq("playlist_id", playlistId)
+        .order("position", { ascending: false })
+        .limit(1);
+
+      if (positionError) throw positionError;
+
+      const nextPos = items?.length
+        ? (Number(items[0].position) || 0) + 1
+        : 0;
+
+      const { error: insertError } = await supabase
+        .from("playlist_items")
+        .insert({
+          playlist_id: playlistId,
+          media_id: mediaId,
+          position: nextPos
+        });
+
+      if (insertError) {
+        if (insertError.code === "23505") {
+          setMessage("This video is already in that playlist.");
+          return;
+        }
+        throw insertError;
+      }
+
       setShowPlaylistModal(false);
+      setAddedPlaylistId(playlistId);
+      setAddedPlaylistTitle(playlistTitle || "Playlist");
+      setShowAddSuccessModal(true);
+      setMessage("Video saved to playlist.");
     } catch (err) {
-      setMessage("Error adding to playlist: " + err.message);
+      console.error("Save to playlist failed:", {
+        message: err?.message,
+        code: err?.code,
+        details: err?.details,
+        hint: err?.hint,
+        playlistId,
+        mediaId
+      });
+      setMessage("Could not save video: " + (err?.message || "Unknown error"));
     }
   }
 
-  
-  
   async function handleCreateNewPlaylist() {
     if (!newPlaylistName.trim()) return;
     try {
@@ -4715,7 +4853,7 @@ document.body
                 </a>
               )}
 
-              <button className="yt-watch-action" onClick={(e) => { e.stopPropagation(); fetchUserPlaylistsForModal(); setShowPlaylistModal(true); }}>
+              <button className="yt-watch-action" onClick={async (e) => { e.stopPropagation(); if (!session?.user?.id) { setMessage("Please sign in to save media."); return; } if (!activeMedia?.id) { setMessage("Select media before saving to a playlist."); return; } await fetchUserPlaylistsForModal(); setShowPlaylistModal(true); }}>
                 <span className="material-symbols-outlined">playlist_add</span>
                 <span className="yt-watch-action-label">Save</span>
               </button>
@@ -6054,6 +6192,94 @@ document.body
       </nav>
       
       
+      {showEditPlaylistModal && selectedPlaylist && (
+        <div
+          onClick={() => !isSavingPlaylistEdit && setShowEditPlaylistModal(false)}
+          style={{
+            position: "fixed", inset: 0, zIndex: 100100,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "20px", background: "rgba(0,0,0,.65)"
+          }}
+        >
+          <form
+            onSubmit={saveEditedPlaylist}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "100%", maxWidth: "440px", maxHeight: "90vh", overflowY: "auto",
+              padding: "22px", borderRadius: "16px",
+              background: "var(--ma-bg-primary, var(--ma-bg, #fff))",
+              color: "var(--ma-text-primary, var(--ma-text, #111))",
+              border: "1px solid var(--ma-border, #ddd)",
+              display: "grid", gap: "14px"
+            }}
+          >
+            <h2 style={{ margin: 0, fontSize: "20px" }}>Edit playlist</h2>
+            <label style={{ display: "grid", gap: "6px", fontSize: "13px" }}>
+              Playlist title
+              <input
+                value={editPlaylistTitle}
+                onChange={(e) => setEditPlaylistTitle(e.target.value)}
+                maxLength={150}
+                required
+                style={{
+                  width: "100%", boxSizing: "border-box", padding: "12px",
+                  borderRadius: "8px", border: "1px solid var(--ma-border, #ccc)",
+                  background: "var(--ma-bg-secondary, var(--ma-surface, #f5f5f5))",
+                  color: "inherit"
+                }}
+              />
+            </label>
+            <label style={{ display: "grid", gap: "6px", fontSize: "13px" }}>
+              Description
+              <textarea
+                value={editPlaylistDescription}
+                onChange={(e) => setEditPlaylistDescription(e.target.value)}
+                rows={4}
+                maxLength={2000}
+                style={{
+                  width: "100%", boxSizing: "border-box", padding: "12px",
+                  borderRadius: "8px", border: "1px solid var(--ma-border, #ccc)",
+                  background: "var(--ma-bg-secondary, var(--ma-surface, #f5f5f5))",
+                  color: "inherit", resize: "vertical"
+                }}
+              />
+            </label>
+            <label style={{ display: "grid", gap: "6px", fontSize: "13px" }}>
+              Visibility
+              <select
+                value={editPlaylistVisibility}
+                onChange={(e) => setEditPlaylistVisibility(e.target.value)}
+                style={{
+                  padding: "12px", borderRadius: "8px",
+                  border: "1px solid var(--ma-border, #ccc)",
+                  background: "var(--ma-bg-secondary, var(--ma-surface, #f5f5f5))",
+                  color: "inherit"
+                }}
+              >
+                <option value="public">Public</option>
+                <option value="unlisted">Unlisted</option>
+                <option value="private">Private</option>
+              </select>
+            </label>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+              <button type="button" disabled={isSavingPlaylistEdit}
+                onClick={() => setShowEditPlaylistModal(false)}
+                style={{
+                  padding: "10px 16px", borderRadius: "22px",
+                  border: "1px solid var(--ma-border, #ccc)",
+                  background: "transparent", color: "inherit"
+                }}>Cancel</button>
+              <button type="submit" disabled={isSavingPlaylistEdit}
+                style={{
+                  padding: "10px 18px", borderRadius: "22px", border: 0,
+                  background: "var(--ma-accent, #ff0033)", color: "#fff",
+                  fontWeight: 700
+                }}>{isSavingPlaylistEdit ? "Saving…" : "Save changes"}</button>
+            </div>
+          </form>
+        </div>
+      )}
+
       {/* MA_PLAYLISTS_LIBRARY_PAGE */}
       {showAllPlaylists && !showPlaylistDetailPage && (
         <section style={{
@@ -6096,16 +6322,51 @@ document.body
                   required
                   style={{
                     flex: 1, minWidth: 0, padding: "13px 15px",
-                    borderRadius: "24px", border: "1px solid #3f3f3f",
-                    background: "#272727", color: "var(--ma-text)", fontSize: "14px"
+                    borderRadius: "24px", border: "1px solid var(--ma-border, #ccc)",
+                    background: "var(--ma-bg-secondary, var(--ma-surface, #f5f5f5))",
+                    color: "var(--ma-text-primary, var(--ma-text, #111))", fontSize: "14px"
                   }}
                 />
                 <button type="submit" style={{
                   border: 0, borderRadius: "22px", padding: "12px 17px",
-                  background: "#f1f1f1", color: "#0f0f0f",
+                  background: "var(--ma-accent, #ff0033)", color: "#ffffff",
                   fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap"
                 }}>Create</button>
               </form>
+
+              <div style={{
+                display: "flex", flexWrap: "wrap", gap: "10px",
+                margin: "0 16px 20px", alignItems: "center"
+              }}>
+                <input
+                  type="search"
+                  value={playlistSearch}
+                  onChange={(e) => setPlaylistSearch(e.target.value)}
+                  placeholder="Search your playlists"
+                  aria-label="Search your playlists"
+                  style={{
+                    flex: "1 1 190px", minWidth: 0, padding: "12px 15px",
+                    borderRadius: "22px", border: "1px solid var(--ma-border, #ccc)",
+                    background: "var(--ma-bg-secondary, var(--ma-surface, #f5f5f5))",
+                    color: "var(--ma-text-primary, var(--ma-text, #111))"
+                  }}
+                />
+                <select
+                  aria-label="Sort playlists"
+                  value={playlistSort}
+                  onChange={(e) => setPlaylistSort(e.target.value)}
+                  style={{
+                    padding: "12px", borderRadius: "22px",
+                    border: "1px solid var(--ma-border, #ccc)",
+                    background: "var(--ma-bg-secondary, var(--ma-surface, #f5f5f5))",
+                    color: "var(--ma-text-primary, var(--ma-text, #111))"
+                  }}
+                >
+                  <option value="newest">Newest first</option>
+                  <option value="oldest">Oldest first</option>
+                  <option value="title">Title A–Z</option>
+                </select>
+              </div>
 
               {playlists.length === 0 ? (
                 <div style={{ textAlign: "center", padding: "44px 24px" }}>
@@ -6126,7 +6387,7 @@ document.body
                   gridTemplateColumns: "repeat(auto-fill, minmax(155px, 1fr))",
                   gap: "24px 14px", padding: "0 16px"
                 }}>
-                  {playlists.map((pl) => (
+                  {visiblePlaylists.map((pl) => (
                     <button key={pl.id} onClick={async () => {
                       setSelectedPlaylist(pl);
                       setShowPlaylistDetailPage(true);
@@ -6139,7 +6400,7 @@ document.body
                       <div style={{
                         position: "relative", aspectRatio: "16 / 10",
                         overflow: "hidden", borderRadius: "10px",
-                        background: "#272727", display: "grid",
+                        background: "var(--ma-bg-secondary, var(--ma-surface, #f5f5f5))", display: "grid",
                         placeItems: "center", marginBottom: "11px"
                       }}>
                         {pl.cover_url ? (
@@ -6185,11 +6446,39 @@ document.body
         </section>
       )}
       {showPlaylistDetailPage && selectedPlaylist && (
+
+
         <section style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: "56px", background: "var(--ma-bg, #fff)", zIndex: 99999, display: "flex", flexDirection: "column", overflowY: "auto", userSelect: "none" }}>
+{showAddVideoToPlaylistModal && (
+  <div style={{ position: "fixed", inset: 0, zIndex: 10000, background: "rgba(0,0,0,.65)", display: "grid", placeItems: "center", padding: "16px" }}>
+    <section role="dialog" aria-modal="true" aria-label="Add video to playlist" style={{ width: "100%", maxWidth: "520px", maxHeight: "80vh", overflowY: "auto", background: "var(--ma-bg)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", borderRadius: "16px", padding: "18px" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", marginBottom: "16px" }}>
+        <h2 style={{ margin: 0, fontSize: "18px" }}>Add video to playlist</h2>
+        <button type="button" onClick={() => setShowAddVideoToPlaylistModal(false)} style={{ background: "var(--ma-surface)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", borderRadius: "10px", padding: "8px 12px", cursor: "pointer" }}>Close</button>
+      </div>
+      {mediaPickerLoading ? (
+        <p>Loading published media…</p>
+      ) : mediaPickerItems.length === 0 ? (
+        <p>No published media found.</p>
+      ) : (
+        <div style={{ display: "grid", gap: "10px" }}>
+          {mediaPickerItems.map((item) => (
+            <div key={item.id} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px", border: "1px solid var(--ma-border)", borderRadius: "12px" }}>
+              {item.thumbnail_path ? <img src={item.thumbnail_path} alt="" style={{ width: "76px", height: "54px", objectFit: "cover", borderRadius: "8px" }} /> : null}
+              <span style={{ flex: 1, minWidth: 0, overflowWrap: "anywhere" }}>{item.title || "Untitled media"}</span>
+              <button type="button" onClick={() => addMediaToSelectedPlaylist(item)} style={{ background: "var(--ma-accent, #e11d48)", color: "#fff", border: 0, borderRadius: "10px", padding: "9px 12px", cursor: "pointer" }}>Add</button>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  </div>
+)}
+
           
           {/* Top Bar */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", background: "transparent", position: "absolute", top: 0, left: 0, right: 0, zIndex: 20 }}>
-            <button onClick={() => { setShowPlaylistDetailPage(false); setSelectedPlaylistItems([]); }} style={{ background: "transparent", border: 0, color: "#ffffff", cursor: "pointer", padding: "8px", display: "flex", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.8))" }}>
+            <button onClick={() => { setShowPlaylistDetailPage(false); setSelectedPlaylistItems([]); setShowAllPlaylists(true); }} style={{ background: "var(--ma-surface)", border: "1px solid var(--ma-border)", borderRadius: "50%", color: "var(--ma-text)", cursor: "pointer", padding: "8px", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>arrow_back</span>
             </button>
             <div style={{ display: "flex", gap: "16px" }}>
@@ -6234,7 +6523,7 @@ document.body
               </button>
               
               <div style={{ display: "flex", gap: "12px" }}>
-                <div onClick={() => setShowPlaylistModal(true)} style={{ width: "40px", height: "40px", borderRadius: "50%", background: "var(--ma-surface)", display: "grid", placeItems: "center", cursor: "pointer", border: "1px solid var(--ma-border)" }}>
+                <div role="button" tabIndex={0} aria-label="Add video to playlist" onClick={openAddVideoToPlaylistPicker} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") openAddVideoToPlaylistPicker(); }} style={{ width: "40px", height: "40px", borderRadius: "50%", background: "var(--ma-surface)", display: "grid", placeItems: "center", cursor: "pointer", border: "1px solid var(--ma-border)" }}>
                   <span className="material-symbols-outlined" style={{ color: "var(--ma-text)" }}>add</span>
                 </div>
                 <div onClick={openEditPlaylistModal} style={{ width: "40px", height: "40px", borderRadius: "50%", background: "var(--ma-surface)", display: "grid", placeItems: "center", cursor: "pointer", border: "1px solid var(--ma-border)" }}>
