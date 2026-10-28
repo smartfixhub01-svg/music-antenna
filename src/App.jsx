@@ -6813,7 +6813,7 @@ document.body
       )}
 
       {showPlaylistModal && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }} onClick={() => setShowPlaylistModal(false)}>
+        <div className="ma-home-save-playlist-modal" style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }} onClick={() => setShowPlaylistModal(false)}>
           <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "90%", maxWidth: "400px", borderRadius: "16px", padding: "24px", border: "1px solid var(--ma-border, #e5e5e5)", boxShadow: "0 10px 40px rgba(0,0,0,0.2)", maxHeight: "85vh", overflowY: "auto", userSelect: "none", WebkitUserSelect: "none" }} onClick={e => e.stopPropagation()}>
             
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
@@ -6863,7 +6863,7 @@ document.body
                 style={{ width: "100%", padding: "14px", borderRadius: "10px", background: "var(--ma-surface)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", outline: "none", display: "block" }} 
               />
               
-              <button 
+              <button className="ma-create-playlist-button" 
                 type="button" 
                 onClick={handleCreateNewPlaylist}
                 style={{ 
@@ -6955,7 +6955,7 @@ document.body
 
               {/* Save to Playlist */}
               {session?.user?.id && (
-                <button onClick={async () => { const mediaToSave = showMoreMenu; setActiveMedia(mediaToSave); setShowMoreMenu(null); await fetchUserPlaylistsForModal(); setShowPlaylistModal(true); }} style={{ display: "flex", alignItems: "center", gap: "12px", background: "transparent", border: 0, padding: "16px 0", fontSize: "15px", fontWeight: "600", color: "var(--ma-text)", cursor: "pointer", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
+                <button onClick={async (e) => { e.preventDefault(); e.stopPropagation(); const mediaToSave = showMoreMenu; setActiveMedia(mediaToSave); setShowMoreMenu(null); await fetchUserPlaylistsForModal(); setShowPlaylistModal(true); }} style={{ display: "flex", alignItems: "center", gap: "12px", background: "transparent", border: 0, padding: "16px 0", fontSize: "15px", fontWeight: "600", color: "var(--ma-text)", cursor: "pointer", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
                   <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary)" }}>playlist_add</span> Save to Playlist
                 </button>
               )}
@@ -6970,7 +6970,7 @@ document.body
         </div>, document.body
       )}
 
-      {showPlaylistModal && (
+      {false && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }} onClick={() => setShowPlaylistModal(false)}>
           <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "90%", maxWidth: "400px", borderRadius: "16px", padding: "24px", border: "1px solid var(--ma-border, #e5e5e5)", boxShadow: "0 10px 40px rgba(0,0,0,0.2)", maxHeight: "85vh", overflowY: "auto", userSelect: "none", WebkitUserSelect: "none" }} onClick={e => e.stopPropagation()}>
             
@@ -7145,7 +7145,7 @@ document.body
 
               {/* Save to Playlist */}
               {session?.user?.id && (
-                <button onClick={async () => { const mediaToSave = showMoreMenu; setActiveMedia(mediaToSave); setShowMoreMenu(null); await fetchUserPlaylistsForModal(); setShowPlaylistModal(true); }} style={{ display: "flex", alignItems: "center", gap: "12px", background: "transparent", border: 0, padding: "16px 0", fontSize: "15px", fontWeight: "600", color: "var(--ma-text)", cursor: "pointer", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
+                <button onClick={async (e) => { e.preventDefault(); e.stopPropagation(); const mediaToSave = showMoreMenu; setActiveMedia(mediaToSave); setShowMoreMenu(null); await fetchUserPlaylistsForModal(); setShowPlaylistModal(true); }} style={{ display: "flex", alignItems: "center", gap: "12px", background: "transparent", border: 0, padding: "16px 0", fontSize: "15px", fontWeight: "600", color: "var(--ma-text)", cursor: "pointer", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
                   <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary)" }}>playlist_add</span> Save to Playlist
                 </button>
               )}
@@ -7160,7 +7160,7 @@ document.body
         </div>, document.body
       )}
 
-      {showPlaylistModal && (
+      {false && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }} onClick={() => setShowPlaylistModal(false)}>
           <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "90%", maxWidth: "400px", borderRadius: "16px", padding: "24px", border: "1px solid var(--ma-border, #e5e5e5)", boxShadow: "0 10px 40px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
             

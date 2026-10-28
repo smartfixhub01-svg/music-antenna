@@ -6209,3 +6209,16 @@ p
     padding: 10px 12px !important;
   }
 }
+
+
+/* MA HOME SAVE PLAYLIST CREATE BUTTON FIX */
+.ma-home-save-playlist-modal .ma-create-playlist-button {
+  background: #ff365f !important;
+  background-color: #ff365f !important;
+  color: #ffffff !important;
+  border: 1px solid #ff365f !important;
+}
+.ma-home-save-playlist-modal .ma-create-playlist-button:focus-visible {
+  outline: 2px solid var(--ma-text) !important;
+  outline-offset: 3px;
+}
