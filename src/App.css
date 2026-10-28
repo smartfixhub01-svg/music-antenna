@@ -6141,3 +6141,71 @@ p
 .ma-playlist-detail-page button {
   -webkit-tap-highlight-color: transparent;
 }
+
+
+
+/* Edit Playlist modal: scoped theme-safe button fix */
+.ma-edit-playlist-form .ma-edit-playlist-actions {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  width: 100%;
+  padding-top: 4px;
+}
+
+.ma-edit-playlist-form .ma-edit-playlist-actions button {
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 42px !important;
+  padding: 10px 16px !important;
+  border-radius: 22px !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  box-sizing: border-box !important;
+}
+
+.ma-edit-playlist-form .ma-edit-playlist-cancel {
+  background: var(--ma-surface-elevated, #f2f2f2) !important;
+  background-color: var(--ma-surface-elevated, #f2f2f2) !important;
+  color: var(--ma-text, #111) !important;
+  -webkit-text-fill-color: var(--ma-text, #111) !important;
+  border: 1px solid var(--ma-border, #ccc) !important;
+}
+
+.ma-edit-playlist-form .ma-edit-playlist-save {
+  background: #e91e4d !important;
+  background-color: #e91e4d !important;
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  border: 1px solid #e91e4d !important;
+  cursor: pointer !important;
+}
+
+.ma-edit-playlist-form .ma-edit-playlist-save:hover:not(:disabled) {
+  background: #c9153e !important;
+  background-color: #c9153e !important;
+  border-color: #c9153e !important;
+}
+
+.ma-edit-playlist-form .ma-edit-playlist-actions button:disabled {
+  opacity: .65 !important;
+  cursor: wait !important;
+}
+
+@media (max-width: 360px) {
+  .ma-edit-playlist-form .ma-edit-playlist-actions {
+    gap: 8px !important;
+  }
+
+  .ma-edit-playlist-form .ma-edit-playlist-actions button {
+    padding: 10px 12px !important;
+  }
+}

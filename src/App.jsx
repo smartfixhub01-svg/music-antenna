@@ -6333,6 +6333,7 @@ document.body
       
       {showEditPlaylistModal && selectedPlaylist && (
         <div
+          className="ma-edit-playlist-overlay"
           onClick={() => !isSavingPlaylistEdit && setShowEditPlaylistModal(false)}
           style={{
             position: "fixed", inset: 0, zIndex: 100100,
@@ -6341,6 +6342,7 @@ document.body
           }}
         >
           <form
+            className="ma-edit-playlist-form"
             onSubmit={saveEditedPlaylist}
             onClick={(e) => e.stopPropagation()}
             style={{
@@ -6400,15 +6402,15 @@ document.body
                 <option value="private">Private</option>
               </select>
             </label>
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
-              <button type="button" disabled={isSavingPlaylistEdit}
+            <div className="ma-edit-playlist-actions">
+              <button className="ma-edit-playlist-cancel" type="button" disabled={isSavingPlaylistEdit}
                 onClick={() => setShowEditPlaylistModal(false)}
                 style={{
                   padding: "10px 16px", borderRadius: "22px",
                   border: "1px solid var(--ma-border, #ccc)",
                   background: "transparent", color: "inherit"
                 }}>Cancel</button>
-              <button type="submit" disabled={isSavingPlaylistEdit}
+              <button className="ma-edit-playlist-save" type="submit" disabled={isSavingPlaylistEdit}
                 style={{
                   padding: "10px 18px", borderRadius: "22px", border: 0,
                   background: "var(--ma-accent, #ff0033)", color: "#fff",
