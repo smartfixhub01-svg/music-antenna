@@ -263,6 +263,30 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [playlists, setPlaylists] = useState([]);
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const [playlistSearch, setPlaylistSearch] = useState("");
+  const [playlistDetailSearch, setPlaylistDetailSearch] = useState("");
+  const [showPlaylistDetailMenu, setShowPlaylistDetailMenu] = useState(false);
+  const [playlistDetailSort, setPlaylistDetailSort] = useState("newest");
+
+  const visiblePlaylistItems = [...playlistItems]
+    .filter((item) => {
+      const query = playlistDetailSearch.trim().toLowerCase();
+      if (!query) return true;
+      return [
+        item.title,
+        item.description,
+        item.profiles?.display_name,
+        item.media_type
+      ].some((value) => String(value || "").toLowerCase().includes(query));
+    })
+    .sort((a, b) => {
+      if (playlistDetailSort === "title") {
+        return String(a.title || "").localeCompare(String(b.title || ""));
+      }
+      if (playlistDetailSort === "oldest") {
+        return new Date(a.created_at || 0) - new Date(b.created_at || 0);
+      }
+      return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+    });
   const [playlistSort, setPlaylistSort] = useState("newest");
   const [showEditPlaylistModal, setShowEditPlaylistModal] = useState(false);
   const [editPlaylistTitle, setEditPlaylistTitle] = useState("");
@@ -614,6 +638,11 @@ useEffect(() => {
     setShowAnalytics(false);
     setShowAccountPage(false);
     setShowChannelPage(false);
+    setShowPlaylistDetailPage(false);
+    setShowAllPlaylists(false);
+    setShowAddVideoToPlaylistModal(false);
+    setShowPlaylistDetailMenu(false);
+    setActivePlaylistItemMenu(null);
     setActiveMedia({ ...item, playbackUrl, thumbnailUrl });
     setShowWatchPage(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -6551,9 +6580,22 @@ document.body
             <button onClick={() => { setShowPlaylistDetailPage(false); setSelectedPlaylistItems([]); setShowAllPlaylists(true); }} style={{ background: "var(--ma-surface)", border: "1px solid var(--ma-border)", borderRadius: "50%", color: "var(--ma-text)", cursor: "pointer", padding: "8px", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>arrow_back</span>
             </button>
-            <div style={{ display: "flex", gap: "16px" }}>
-              <span className="material-symbols-outlined" style={{ color: "var(--ma-text)", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.8))", fontSize: "24px" }}>search</span>
-              <span className="material-symbols-outlined" style={{ color: "var(--ma-text)", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.8))", fontSize: "24px" }}>more_vert</span>
+            <div style={{ position: "relative" }}>
+              <button type="button"
+                aria-label="Playlist options"
+                aria-expanded={showPlaylistDetailMenu}
+                onClick={() => setShowPlaylistDetailMenu((open) => !open)}
+                style={{ width: "40px", height: "40px", display: "grid", placeItems: "center", background: "var(--ma-surface)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", borderRadius: "50%", cursor: "pointer" }}>
+                <span className="material-symbols-outlined">more_vert</span>
+              </button>
+              {showPlaylistDetailMenu && (
+                <div role="menu" style={{ position: "absolute", top: "46px", right: 0, width: "210px", padding: "6px 0", background: "var(--ma-bg)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", borderRadius: "12px", boxShadow: "0 8px 24px rgba(0,0,0,.2)", zIndex: 100020 }}>
+                  <button type="button" role="menuitem" onClick={() => { setShowPlaylistDetailMenu(false); openAddVideoToPlaylistPicker(); }} style={{ width: "100%", padding: "12px 14px", textAlign: "left", background: "transparent", color: "var(--ma-text)", border: 0, cursor: "pointer" }}>Add videos</button>
+                  <button type="button" role="menuitem" onClick={() => { setShowPlaylistDetailMenu(false); openEditPlaylistModal(); }} style={{ width: "100%", padding: "12px 14px", textAlign: "left", background: "transparent", color: "var(--ma-text)", border: 0, cursor: "pointer" }}>Edit playlist</button>
+                  <button type="button" role="menuitem" onClick={() => { setShowPlaylistDetailMenu(false); handleShare(selectedPlaylist); }} style={{ width: "100%", padding: "12px 14px", textAlign: "left", background: "transparent", color: "var(--ma-text)", border: 0, cursor: "pointer" }}>Share playlist</button>
+                  <button type="button" role="menuitem" onClick={() => setPlaylistDetailSort((sort) => sort === "newest" ? "oldest" : sort === "oldest" ? "title" : "newest")} style={{ width: "100%", padding: "12px 14px", textAlign: "left", background: "transparent", color: "var(--ma-text)", border: 0, cursor: "pointer" }}>Change sort order</button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -6588,7 +6630,7 @@ document.body
 
             {/* Actions Row */}
             <div style={{ display: "flex", alignItems: "center", gap: "12px", overflowX: "auto", paddingBottom: "8px" }}>
-              <button onClick={() => { if (playlistItems.length > 0) { setVideoQueue(playlistItems.slice(1)); openPlayer(playlistItems[0]); } }} disabled={playlistItems.length === 0} style={{ display: "flex", alignItems: "center", gap: "6px", background: "#ffffff", color: "#000000", padding: "10px 20px", borderRadius: "24px", fontSize: "14px", fontWeight: "700", border: "none", cursor: playlistItems.length === 0 ? "not-allowed" : "pointer", opacity: playlistItems.length === 0 ? 0.5 : 1 }}>
+              <button onClick={() => { if (playlistItems.length > 0) { setVideoQueue(playlistItems.slice(1)); openPlayer(playlistItems[0]); } }} disabled={playlistItems.length === 0} style={{ display: "flex", alignItems: "center", gap: "6px", background: "var(--ma-surface)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", padding: "10px 20px", borderRadius: "24px", fontSize: "14px", fontWeight: "700", border: "none", cursor: playlistItems.length === 0 ? "not-allowed" : "pointer", opacity: playlistItems.length === 0 ? 0.5 : 1 }}>
                 <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span> Play all
               </button>
               
@@ -6609,22 +6651,40 @@ document.body
             </div>
           </div>
 
-          {/* Sort Row */}
-          <div style={{ padding: "0 16px 12px 16px", display: "flex", alignItems: "center", gap: "8px" }}>
-             <div style={{ display: "flex", alignItems: "center", gap: "4px", background: "var(--ma-surface)", padding: "6px 12px", borderRadius: "16px", fontSize: "12px", fontWeight: "600", color: "var(--ma-text)" }}>
-               Top voted <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>keyboard_arrow_down</span>
-             </div>
+          {/* Search and sort playlist items */}
+          <div style={{ padding: "0 16px 12px", display: "flex", alignItems: "center", gap: "10px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", flex: 1, minWidth: 0, padding: "0 12px", background: "var(--ma-surface)", border: "1px solid var(--ma-border)", borderRadius: "12px", color: "var(--ma-text)" }}>
+              <span className="material-symbols-outlined" aria-hidden="true">search</span>
+              <input
+                type="search"
+                aria-label="Search videos in this playlist"
+                placeholder="Search this playlist"
+                value={playlistDetailSearch}
+                onChange={(e) => setPlaylistDetailSearch(e.target.value)}
+                style={{ width: "100%", minWidth: 0, padding: "11px 0", background: "transparent", color: "var(--ma-text)", border: 0, outline: "none", fontSize: "14px" }}
+              />
+              {playlistDetailSearch && (
+                <button type="button" aria-label="Clear playlist search" onClick={() => setPlaylistDetailSearch("")} style={{ background: "transparent", color: "var(--ma-text)", border: 0, cursor: "pointer" }}>×</button>
+              )}
+            </div>
+            <select aria-label="Sort playlist videos" value={playlistDetailSort} onChange={(e) => setPlaylistDetailSort(e.target.value)} style={{ maxWidth: "120px", padding: "10px 6px", background: "var(--ma-surface)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", borderRadius: "10px" }}>
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+              <option value="title">Title A–Z</option>
+            </select>
           </div>
 
           {/* Video List */}
           <div style={{ padding: "0 16px", flex: 1, paddingBottom: "100px" }}>
             {playlistLoading ? (
               <p style={{ textAlign: "center", color: "var(--ma-text-secondary)", marginTop: "20px" }}>Loading videos...</p>
-            ) : playlistItems.length === 0 ? (
-              <p style={{ textAlign: "center", color: "var(--ma-text-secondary)", marginTop: "20px" }}>This playlist is empty.</p>
+            ) : visiblePlaylistItems.length === 0 ? (
+              <p style={{ textAlign: "center", color: "var(--ma-text-secondary)", marginTop: "20px" }}>
+                {playlistItems.length === 0 ? "This playlist is empty." : "No videos match your search."}
+              </p>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                {playlistItems.map((item) => {
+                {visiblePlaylistItems.map((item) => {
                   return (
                   <div key={item.playlistItemId || item.id} style={{ display: "flex", alignItems: "flex-start", gap: "12px", position: "relative" }}>
                     
