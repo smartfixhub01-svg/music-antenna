@@ -4759,7 +4759,36 @@ document.body
             </div>
           )}
           
-          {message && message.includes("Welcome back") && <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 px-4 mt-2 mb-2">{message}</p>}
+          {message && (
+        <div
+          role="status"
+          aria-live="polite"
+          style={{
+            position: "fixed",
+            left: "50%",
+            bottom: "calc(76px + env(safe-area-inset-bottom, 0px))",
+            transform: "translateX(-50%)",
+            zIndex: 100000,
+            width: "max-content",
+            maxWidth: "calc(100vw - 32px)",
+            boxSizing: "border-box",
+            padding: "7px 11px",
+            borderRadius: "8px",
+            border: "1px solid var(--ma-border)",
+            background: "var(--ma-surface)",
+            color: "var(--ma-text)",
+            boxShadow: "0 3px 12px rgba(0,0,0,0.18)",
+            fontSize: "12px",
+            lineHeight: 1.35,
+            textAlign: "center",
+            overflowWrap: "anywhere",
+            pointerEvents: "none"
+          }}
+        >
+          {message}
+        </div>
+      )}
+      {message && message.includes("Welcome back") && <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 px-4 mt-2 mb-2">{message}</p>}
           
 <style>{`
   /* Force the active filter chip to be brand pink */
