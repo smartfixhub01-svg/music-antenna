@@ -6810,7 +6810,7 @@ document.body
                           <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "var(--ma-text-secondary)" }}>schedule</span> Save to Watch later
                         </button>
 
-                        <button onClick={() => { setActiveMedia(item); setShowPlaylistModal(true); setActivePlaylistItemMenu(null); }} style={{ padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", color: "var(--ma-text)", fontWeight: "500", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "16px" }}>
+                        <button onClick={() => { setMediaToAddToPlaylist(item); setActivePlaylistItemMenu(null); setShowPlaylistModal(true); }} style={{ padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", color: "var(--ma-text)", fontWeight: "500", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "16px" }}>
                           <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "var(--ma-text-secondary)" }}>playlist_add</span> Save to playlist
                         </button>
 
@@ -6863,7 +6863,7 @@ document.body
 
                     {/* Add Button Failsafe */}
                     <div style={{ width: "100%", backgroundColor: "#ff365f", borderRadius: "10px", display: "flex", justifyContent: "center", boxShadow: "0 4px 12px rgba(255,54,95,0.2)" }}>
-                      <button onClick={() => handleAddToPlaylist(p.id, p.title)} style={{ width: "100%", background: "transparent", color: "#ffffff", border: "none", padding: "12px", fontSize: "14px", fontWeight: "bold", cursor: "pointer" }}>
+                      <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAddToPlaylist(p.id, p.title); }} style={{ width: "100%", background: "transparent", color: "#ffffff", border: "none", padding: "12px", fontSize: "14px", fontWeight: "bold", cursor: "pointer" }}>
                         Add to this playlist
                       </button>
                     </div>
@@ -7013,7 +7013,7 @@ document.body
                       <span style={{ fontSize: "14px", fontWeight: "600", color: "var(--ma-text)" }}>{p.title}</span>
                     </div>
                     <div style={{ width: "100%", backgroundColor: "#ff365f", borderRadius: "8px", boxShadow: "0 4px 12px rgba(255,54,95,0.3)", display: "flex", justifyContent: "center" }}>
-                      <button onClick={() => handleAddToPlaylist(p.id, p.title)} style={{ width: "100%", background: "transparent", color: "#ffffff", border: "none", padding: "10px", fontSize: "13px", fontWeight: "bold", cursor: "pointer" }}>
+                      <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAddToPlaylist(p.id, p.title); }} style={{ width: "100%", background: "transparent", color: "#ffffff", border: "none", padding: "10px", fontSize: "13px", fontWeight: "bold", cursor: "pointer" }}>
                         Add to this playlist
                       </button>
                     </div>
@@ -7202,7 +7202,7 @@ document.body
                       <span style={{ fontSize: "14px", fontWeight: "600", color: "var(--ma-text)" }}>{p.title}</span>
                     </div>
                     <div style={{ width: "100%", backgroundColor: "#ff365f", borderRadius: "8px", boxShadow: "0 4px 12px rgba(255,54,95,0.3)", marginTop: "10px", display: "block" }}>
-                      <button onClick={() => handleAddToPlaylist(p.id, p.title)} style={{ width: "100%", display: "flex", justifyContent: "center", background: "transparent", color: "#ffffff", border: "none", padding: "12px", fontSize: "14px", fontWeight: "bold", cursor: "pointer" }}>
+                      <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAddToPlaylist(p.id, p.title); }} style={{ width: "100%", display: "flex", justifyContent: "center", background: "transparent", color: "#ffffff", border: "none", padding: "12px", fontSize: "14px", fontWeight: "bold", cursor: "pointer" }}>
                         Add to this playlist
                       </button>
                     </div>
@@ -7284,7 +7284,7 @@ document.body
                       <span style={{ fontSize: "14px", fontWeight: "600", color: "var(--ma-text)" }}>{p.title}</span>
                     </div>
                     <div style={{ width: "100%", backgroundColor: "#ff365f", borderRadius: "8px", boxShadow: "0 4px 12px rgba(255,54,95,0.3)", marginTop: "10px", display: "block" }}>
-                      <button onClick={() => handleAddToPlaylist(p.id, p.title)} style={{ width: "100%", display: "flex", justifyContent: "center", background: "transparent", color: "#ffffff", border: "none", padding: "12px", fontSize: "14px", fontWeight: "bold", cursor: "pointer" }}>
+                      <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAddToPlaylist(p.id, p.title); }} style={{ width: "100%", display: "flex", justifyContent: "center", background: "transparent", color: "#ffffff", border: "none", padding: "12px", fontSize: "14px", fontWeight: "bold", cursor: "pointer" }}>
                         Add to this playlist
                       </button>
                     </div>
@@ -7365,7 +7365,7 @@ document.body
                       <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary)", flexShrink: 0 }}>playlist_play</span>
                       <span style={{ fontSize: "14px", fontWeight: "600", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.title}</span>
                     </div>
-                    <button onClick={() => handleAddToPlaylist(p.id, p.title)} style={{ flexShrink: 0, background: "#ff365f", color: "var(--ma-text)", border: "none", padding: "6px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: "bold", cursor: "pointer" }}>Add</button>
+                    <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAddToPlaylist(p.id, p.title); }} style={{ flexShrink: 0, background: "#ff365f", color: "var(--ma-text)", border: "none", padding: "6px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: "bold", cursor: "pointer" }}>Add</button>
                   </div>
                 ))
               )}
