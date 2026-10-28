@@ -145,6 +145,8 @@ export default function App() {
   const [category, setCategory] = useState("All");
   const [activeMedia, setActiveMedia] = useState(null);
   const [showWatchPage, setShowWatchPage] = useState(false);
+  const playerHistoryRef = useRef(false);
+  const playerReturnRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [miniPlayerPos, setMiniPlayerPos] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -635,6 +637,20 @@ useEffect(() => {
       thumbnailUrl = data?.publicUrl || "";
     }
 
+    // Remember the page that launched the player so Back can restore it.
+    if (selectedPlaylist && showPlaylistDetailPage) {
+      playerReturnRef.current = { type: "playlist", playlist: selectedPlaylist };
+    }
+
+    // Add one browser-history entry for the player, including Android Back support.
+    if (!playerHistoryRef.current) {
+      window.history.pushState(
+        { ...(window.history.state || {}), musicAntennaPlayer: true },
+        ""
+      );
+      playerHistoryRef.current = true;
+    }
+
     setShowAnalytics(false);
     setShowAccountPage(false);
     setShowChannelPage(false);
@@ -647,6 +663,40 @@ useEffect(() => {
     setShowWatchPage(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
+
+  function restorePlayerReturnPage() {
+    const returnTo = playerReturnRef.current;
+    setShowWatchPage(false);
+
+    if (returnTo?.type === "playlist" && returnTo.playlist) {
+      setSelectedPlaylist(returnTo.playlist);
+      setShowPlaylistDetailPage(true);
+      setShowAllPlaylists(false);
+    }
+
+    playerReturnRef.current = null;
+  }
+
+  function closePlayerView() {
+    if (playerHistoryRef.current) {
+      window.history.back();
+      return;
+    }
+    restorePlayerReturnPage();
+  }
+
+  useEffect(() => {
+    if (!showWatchPage) return;
+
+    const handlePlayerBack = () => {
+      if (!playerHistoryRef.current) return;
+      playerHistoryRef.current = false;
+      restorePlayerReturnPage();
+    };
+
+    window.addEventListener("popstate", handlePlayerBack);
+    return () => window.removeEventListener("popstate", handlePlayerBack);
+  }, [showWatchPage]);
 
   function toggleLike(id) {
     setLikedIds((prev) => {
@@ -4853,7 +4903,7 @@ document.body
         <section className={"yt-watch" + (!showWatchPage ? " yt-watch-minimized" : "")}>
           <div className="yt-watch-topbar">
             <button className="yt-icon-btn yt-watch-back" aria-label="Back"
-              onClick={() => setShowWatchPage(false)}>
+              onClick={closePlayerView}>
               <span className="material-symbols-outlined">arrow_back</span>
             </button>
             <div className="yt-watch-topbar-right">
