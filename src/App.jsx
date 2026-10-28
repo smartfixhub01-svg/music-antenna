@@ -6416,10 +6416,11 @@ document.body
                     color: "var(--ma-text-primary, var(--ma-text, #111))", fontSize: "14px"
                   }}
                 />
-                <button type="submit" style={{
+                <button type="submit" className="ma-playlist-create-submit" style={{
                   border: 0, borderRadius: "22px", padding: "12px 17px",
-                  background: "var(--ma-accent, #ff0033)", color: "#ffffff",
-                  fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap"
+                  background: "#ff365f", color: "#ffffff",
+                  fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap",
+                  flexShrink: 0, opacity: 1, visibility: "visible"
                 }}>Create</button>
               </form>
 

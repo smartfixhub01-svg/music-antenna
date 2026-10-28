@@ -6095,3 +6095,23 @@ p
   border-radius: 10px !important;
   box-shadow: none !important;
 }
+
+
+/* Playlist library Create button: visible in both light and dark themes. */
+.ma-playlist-library-page form button.ma-playlist-create-submit {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 auto !important;
+  min-height: 42px !important;
+  background: #ff365f !important;
+  background-color: #ff365f !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  border: 0 !important;
+  white-space: nowrap !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
