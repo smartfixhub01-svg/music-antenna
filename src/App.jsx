@@ -2185,6 +2185,20 @@ async function fetchPlaylists() {
     }
 
     try {
+      const { data: existingItems, error: existingError } = await supabase
+        .from("playlist_items")
+        .select("id")
+        .eq("playlist_id", playlistId)
+        .eq("media_id", mediaId)
+        .limit(1);
+
+      if (existingError) throw existingError;
+
+      if (existingItems?.length) {
+        setMessage("Already added");
+        return;
+      }
+
       const { data: items, error: positionError } = await supabase
         .from("playlist_items")
         .select("position")
