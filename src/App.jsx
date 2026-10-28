@@ -263,6 +263,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [showAllPlaylists, setShowAllPlaylists] = useState(false);
 
   const [playlists, setPlaylists] = useState([]);
+  const [mediaToAddToPlaylist, setMediaToAddToPlaylist] = useState(null);
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const [playlistSearch, setPlaylistSearch] = useState("");
   const [playlistDetailSearch, setPlaylistDetailSearch] = useState("");
@@ -2157,12 +2158,13 @@ async function fetchPlaylists() {
 
     
   async function handleAddToPlaylist(playlistId, playlistTitle) {
-    const mediaId = activeMedia?.id;
+    const mediaToSave = mediaToAddToPlaylist || activeMedia;
+    const mediaId = mediaToSave?.id;
 
     console.log("Save to playlist attempt:", {
       playlistId,
       mediaId,
-      mediaTitle: activeMedia?.title,
+      mediaTitle: mediaToSave?.title,
       userId: session?.user?.id
     });
 
@@ -2173,7 +2175,7 @@ async function fetchPlaylists() {
 
     if (!mediaId) {
       setMessage("Could not identify this video. Close the menu, reopen it, and try again.");
-      console.error("Save failed: activeMedia has no ID", activeMedia);
+      console.error("Save failed: selected media has no ID", mediaToSave);
       return;
     }
 
@@ -2213,6 +2215,7 @@ async function fetchPlaylists() {
       }
 
       setShowPlaylistModal(false);
+      setMediaToAddToPlaylist(null);
       setAddedPlaylistId(playlistId);
       setAddedPlaylistTitle(playlistTitle || "Playlist");
       setShowAddSuccessModal(true);
@@ -2236,13 +2239,20 @@ async function fetchPlaylists() {
       const { data, error } = await supabase.from("playlists").insert({ user_id: session.user.id, title: newPlaylistName.trim(), visibility: 'public' }).select().single();
       if (error) throw error;
 
-      if (activeMedia?.id) {
-        await supabase.from('playlist_items').insert({ playlist_id: data.id, media_id: activeMedia.id, position: 0 });
+      const playlistMedia = mediaToAddToPlaylist || activeMedia;
+      if (playlistMedia?.id) {
+        const { error: itemError } = await supabase.from('playlist_items').insert({
+          playlist_id: data.id,
+          media_id: playlistMedia.id,
+          position: 0
+        });
+        if (itemError) throw itemError;
       }
 
       setPlaylists(prev => [data, ...prev]);
       setNewPlaylistName("");
       setShowPlaylistModal(false);
+      setMediaToAddToPlaylist(null);
 
       setAddedPlaylistId(data.id);
       setAddedPlaylistTitle(data.title);
@@ -2353,13 +2363,20 @@ async function fetchPlaylists() {
       const { data, error } = await supabase.from("playlists").insert({ user_id: session.user.id, title: newPlaylistName.trim(), visibility: 'public' }).select().single();
       if (error) throw error;
 
-      if (activeMedia?.id) {
-        await supabase.from('playlist_items').insert({ playlist_id: data.id, media_id: activeMedia.id, position: 0 });
+      const playlistMedia = mediaToAddToPlaylist || activeMedia;
+      if (playlistMedia?.id) {
+        const { error: itemError } = await supabase.from('playlist_items').insert({
+          playlist_id: data.id,
+          media_id: playlistMedia.id,
+          position: 0
+        });
+        if (itemError) throw itemError;
       }
 
       setPlaylists(prev => [data, ...prev]);
       setNewPlaylistName("");
       setShowPlaylistModal(false);
+      setMediaToAddToPlaylist(null);
 
       setAddedPlaylistId(data.id);
       setAddedPlaylistTitle(data.title);
@@ -2463,6 +2480,7 @@ async function fetchPlaylists() {
     }
 
     try {
+      console.info("[Save to Playlist] fetching for signed-in user");
       const { data, error } = await supabase
         .from("playlists")
         .select("*")
@@ -2471,6 +2489,10 @@ async function fetchPlaylists() {
 
       if (error) throw error;
 
+      console.info("[Save to Playlist] result:", {
+        count: data?.length ?? 0,
+        titles: (data || []).map((playlist) => playlist.title)
+      });
       setPlaylists(data || []);
       return true;
     } catch (err) {
@@ -6813,12 +6835,12 @@ document.body
       )}
 
       {showPlaylistModal && (
-        <div className="ma-home-save-playlist-modal" style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }} onClick={() => setShowPlaylistModal(false)}>
+        <div className="ma-home-save-playlist-modal" style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }} onClick={() => { setShowPlaylistModal(false); setMediaToAddToPlaylist(null); }}>
           <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "90%", maxWidth: "400px", borderRadius: "16px", padding: "24px", border: "1px solid var(--ma-border, #e5e5e5)", boxShadow: "0 10px 40px rgba(0,0,0,0.2)", maxHeight: "85vh", overflowY: "auto", userSelect: "none", WebkitUserSelect: "none" }} onClick={e => e.stopPropagation()}>
             
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
               <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "700" }}>Save to playlist</h3>
-              <button onClick={() => setShowPlaylistModal(false)} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", cursor: "pointer", display: "flex" }}><span className="material-symbols-outlined">close</span></button>
+              <button onClick={() => { setShowPlaylistModal(false); setMediaToAddToPlaylist(null); }} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", cursor: "pointer", display: "flex" }}><span className="material-symbols-outlined">close</span></button>
             </div>
 
             {/* List of Playlists */}
@@ -6955,7 +6977,7 @@ document.body
 
               {/* Save to Playlist */}
               {session?.user?.id && (
-                <button onClick={async (e) => { e.preventDefault(); e.stopPropagation(); const mediaToSave = showMoreMenu; setActiveMedia(mediaToSave); setShowMoreMenu(null); await fetchUserPlaylistsForModal(); setShowPlaylistModal(true); }} style={{ display: "flex", alignItems: "center", gap: "12px", background: "transparent", border: 0, padding: "16px 0", fontSize: "15px", fontWeight: "600", color: "var(--ma-text)", cursor: "pointer", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
+                <button onClick={async (e) => { e.preventDefault(); e.stopPropagation(); const mediaToSave = showMoreMenu; setMediaToAddToPlaylist(mediaToSave); setShowMoreMenu(null); await fetchUserPlaylistsForModal(); setShowPlaylistModal(true); }} style={{ display: "flex", alignItems: "center", gap: "12px", background: "transparent", border: 0, padding: "16px 0", fontSize: "15px", fontWeight: "600", color: "var(--ma-text)", cursor: "pointer", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
                   <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary)" }}>playlist_add</span> Save to Playlist
                 </button>
               )}
@@ -7145,7 +7167,7 @@ document.body
 
               {/* Save to Playlist */}
               {session?.user?.id && (
-                <button onClick={async (e) => { e.preventDefault(); e.stopPropagation(); const mediaToSave = showMoreMenu; setActiveMedia(mediaToSave); setShowMoreMenu(null); await fetchUserPlaylistsForModal(); setShowPlaylistModal(true); }} style={{ display: "flex", alignItems: "center", gap: "12px", background: "transparent", border: 0, padding: "16px 0", fontSize: "15px", fontWeight: "600", color: "var(--ma-text)", cursor: "pointer", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
+                <button onClick={async (e) => { e.preventDefault(); e.stopPropagation(); const mediaToSave = showMoreMenu; setMediaToAddToPlaylist(mediaToSave); setShowMoreMenu(null); await fetchUserPlaylistsForModal(); setShowPlaylistModal(true); }} style={{ display: "flex", alignItems: "center", gap: "12px", background: "transparent", border: 0, padding: "16px 0", fontSize: "15px", fontWeight: "600", color: "var(--ma-text)", cursor: "pointer", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
                   <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary)" }}>playlist_add</span> Save to Playlist
                 </button>
               )}
