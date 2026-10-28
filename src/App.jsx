@@ -244,6 +244,8 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [showAddVideoToPlaylistModal, setShowAddVideoToPlaylistModal] = useState(false);
   const [mediaPickerItems, setMediaPickerItems] = useState([]);
   const [mediaPickerLoading, setMediaPickerLoading] = useState(false);
+  const [playlistActionMessage, setPlaylistActionMessage] = useState("");
+  const [addingMediaId, setAddingMediaId] = useState(null);
   const [showAddSuccessModal, setShowAddSuccessModal] = useState(false);
   const [addedPlaylistId, setAddedPlaylistId] = useState(null);
   const [addedPlaylistTitle, setAddedPlaylistTitle] = useState("");
@@ -1494,12 +1496,70 @@ async function fetchPlaylists() {
   }
 
   async function addMediaToSelectedPlaylist(m) {
-    const pl=selectedPlaylist; if(!session?.user?.id||!pl?.id||!m?.id) return;
-    try { const {data:found,error:checkError}=await supabase.from("playlist_items").select("id").eq("playlist_id",pl.id).eq("media_id",m.id).maybeSingle(); if(checkError) throw checkError; if(found) { setMessage("This video is already in the playlist."); return; }
-      const {data:positions,error:posError}=await supabase.from("playlist_items").select("position").eq("playlist_id",pl.id).order("position",{ascending:false}).limit(1); if(posError) throw posError;
-      const position=positions?.length?(Number(positions[0].position)||0)+1:0; const {error}=await supabase.from("playlist_items").insert({playlist_id:pl.id,media_id:m.id,position}); if(error) throw error;
-      setShowAddVideoToPlaylistModal(false); await openPlaylist(pl); setMessage("Video added to playlist.");
-    } catch(err) { setMessage("Could not add video: "+(err?.message||"Unknown error")); }
+    const pl = selectedPlaylist;
+
+    if (!session?.user?.id || !pl?.id || !m?.id) {
+      const reason = !session?.user?.id
+        ? "Please sign in first."
+        : !pl?.id
+          ? "Open a playlist first."
+          : "This video has no valid media ID.";
+      setPlaylistActionMessage(reason);
+      setMessage(reason);
+      return;
+    }
+
+    if (addingMediaId) return;
+
+    setAddingMediaId(m.id);
+    setPlaylistActionMessage("Adding video…");
+
+    try {
+      const { data: found, error: checkError } = await supabase
+        .from("playlist_items")
+        .select("id")
+        .eq("playlist_id", pl.id)
+        .eq("media_id", m.id)
+        .maybeSingle();
+
+      if (checkError) throw checkError;
+
+      if (found) {
+        const reason = "This video is already in the playlist.";
+        setPlaylistActionMessage(reason);
+        setMessage(reason);
+        return;
+      }
+
+      const { data: positions, error: posError } = await supabase
+        .from("playlist_items")
+        .select("position")
+        .eq("playlist_id", pl.id)
+        .order("position", { ascending: false })
+        .limit(1);
+
+      if (posError) throw posError;
+
+      const position = positions?.length
+        ? (Number(positions[0].position) || 0) + 1
+        : 0;
+
+      const { error: insertError } = await supabase
+        .from("playlist_items")
+        .insert({ playlist_id: pl.id, media_id: m.id, position });
+
+      if (insertError) throw insertError;
+
+      setPlaylistActionMessage("Video added to playlist successfully.");
+      setMessage("Video added to playlist successfully.");
+      await openPlaylist(pl);
+    } catch (err) {
+      const reason = "Could not add video: " + (err?.message || "Unknown error");
+      setPlaylistActionMessage(reason);
+      setMessage(reason);
+    } finally {
+      setAddingMediaId(null);
+    }
   }
 
   async function deletePlaylist(id) {
@@ -6456,6 +6516,16 @@ document.body
         <h2 style={{ margin: 0, fontSize: "18px" }}>Add video to playlist</h2>
         <button type="button" onClick={() => setShowAddVideoToPlaylistModal(false)} style={{ background: "var(--ma-surface)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", borderRadius: "10px", padding: "8px 12px", cursor: "pointer" }}>Close</button>
       </div>
+      {playlistActionMessage && (
+        <div role="status" aria-live="polite" style={{
+          marginBottom: "12px", padding: "12px",
+          border: "1px solid var(--ma-border)",
+          borderRadius: "10px", background: "var(--ma-surface)",
+          color: "var(--ma-text)", overflowWrap: "anywhere"
+        }}>
+          {playlistActionMessage}
+        </div>
+      )}
       {mediaPickerLoading ? (
         <p>Loading published media…</p>
       ) : mediaPickerItems.length === 0 ? (
