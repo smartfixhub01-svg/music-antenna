@@ -5990,3 +5990,69 @@ p
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
 }
+
+
+/* MUSIC ANTENNA PLAYLIST SCREENS THEME FIX */
+.ma-playlist-library-page,
+.ma-playlist-detail-page {
+  background-color: var(--ma-bg) !important;
+  color: var(--ma-text) !important;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] .ma-playlist-library-page,
+:root[data-theme="dark"] .ma-playlist-detail-page {
+  color-scheme: dark;
+}
+
+/* Override global forced input colors only within playlist screens. */
+.ma-playlist-library-page input,
+.ma-playlist-library-page textarea,
+.ma-playlist-library-page select,
+.ma-playlist-detail-page input,
+.ma-playlist-detail-page textarea,
+.ma-playlist-detail-page select {
+  background-color: var(--ma-surface) !important;
+  color: var(--ma-text) !important;
+  border-color: var(--ma-border) !important;
+}
+
+.ma-playlist-library-page input::placeholder,
+.ma-playlist-detail-page input::placeholder,
+.ma-playlist-detail-page textarea::placeholder {
+  color: var(--ma-text-secondary) !important;
+  opacity: 1;
+}
+
+.ma-playlist-library-page select option,
+.ma-playlist-detail-page select option {
+  background-color: var(--ma-bg);
+  color: var(--ma-text);
+}
+
+/* Keep ordinary playlist buttons readable in both themes. */
+.ma-playlist-library-page button,
+.ma-playlist-detail-page button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ma-playlist-library-page button:focus-visible,
+.ma-playlist-library-page input:focus-visible,
+.ma-playlist-library-page select:focus-visible,
+.ma-playlist-detail-page button:focus-visible,
+.ma-playlist-detail-page input:focus-visible,
+.ma-playlist-detail-page select:focus-visible,
+.ma-playlist-detail-page textarea:focus-visible {
+  outline: 2px solid var(--ma-accent) !important;
+  outline-offset: 2px;
+}
+
+/* Theme-aware surfaces for playlist menus and dialogs. */
+.ma-playlist-library-page [role="menu"],
+.ma-playlist-library-page [role="dialog"],
+.ma-playlist-detail-page [role="menu"],
+.ma-playlist-detail-page [role="dialog"] {
+  background-color: var(--ma-bg);
+  color: var(--ma-text);
+  border-color: var(--ma-border);
+}

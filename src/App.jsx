@@ -6371,7 +6371,7 @@ document.body
 
       {/* MA_PLAYLISTS_LIBRARY_PAGE */}
       {showAllPlaylists && !showPlaylistDetailPage && (
-        <section style={{
+        <section className="ma-playlist-library-page" style={{
           position: "fixed", inset: "0 0 56px 0", zIndex: 99990,
           overflowY: "auto", background: "var(--ma-bg)", color: "var(--ma-text)",
           padding: "0 0 28px"
@@ -6537,7 +6537,7 @@ document.body
       {showPlaylistDetailPage && selectedPlaylist && (
 
 
-        <section style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: "56px", background: "var(--ma-bg, #fff)", zIndex: 99999, display: "flex", flexDirection: "column", overflowY: "auto", userSelect: "none" }}>
+        <section className="ma-playlist-detail-page" style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: "56px", background: "var(--ma-bg, #fff)", zIndex: 99999, display: "flex", flexDirection: "column", overflowY: "auto", userSelect: "none" }}>
 {showAddVideoToPlaylistModal && (
   <div style={{ position: "fixed", inset: 0, zIndex: 10000, background: "rgba(0,0,0,.65)", display: "grid", placeItems: "center", padding: "16px" }}>
     <section role="dialog" aria-modal="true" aria-label="Add video to playlist" style={{ width: "100%", maxWidth: "520px", maxHeight: "80vh", overflowY: "auto", background: "var(--ma-bg)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", borderRadius: "16px", padding: "18px" }}>
