@@ -6234,3 +6234,17 @@ p
   align-items: center !important;
   justify-content: center !important;
 }
+
+/* Fix the actual Clear History action: it has no "primary" class */
+.ma-modal-card .ma-modal-actions > button.ma-modal-btn:not(.cancel) {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  background: #FF365F !important;
+  background-color: #FF365F !important;
+  color: #FFFFFF !important;
+  border: 1px solid #FF365F !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
