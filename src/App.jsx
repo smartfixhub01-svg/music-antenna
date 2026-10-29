@@ -854,6 +854,16 @@ useEffect(() => {
       alive = false;
     };
   }, [session?.user?.id]);
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetchNotifications();
+    } else {
+      setNotifications([]);
+      setUnreadCount(0);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.user?.id]);
+
 
   async function fetchNotifications() {
     if (!session?.user?.id) return;
@@ -3947,13 +3957,7 @@ document.body
             
             <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
               {notifications.length > 0 && (
-                <button onClick={async () => {
-                  if(window.confirm("Clear all notifications?")) {
-                    await supabase.from("notifications").delete().eq("user_id", session.user.id);
-                    setNotifications([]);
-                    setUnreadCount(0);
-                  }
-                }} style={{ background: "transparent", border: "none", color: "#FF4E45", cursor: "pointer", fontSize: "12px", fontWeight: "600" }}>
+                <button onClick={() => setShowClearNotifModal(true)} style={{ background: "transparent", border: "none", color: "#FF4E45", cursor: "pointer", fontSize: "12px", fontWeight: "600" }}>
                   Clear All
                 </button>
               )}
