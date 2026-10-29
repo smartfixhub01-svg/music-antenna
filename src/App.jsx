@@ -4016,8 +4016,27 @@ document.body
                   >
                     Cancel
                   </button>
-                  <button
+                  <style>{`
+                  #root button.activity-clear-all-confirm {
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    min-width: 0 !important;
+                    min-height: 46px !important;
+                    background: #dc2626 !important;
+                    background-color: #dc2626 !important;
+                    color: #ffffff !important;
+                    border: 1px solid #dc2626 !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    font-size: 14px !important;
+                    font-weight: 700 !important;
+                    cursor: pointer !important;
+                  }
+                `}</style>
+                <button
                     type="button"
+                    className="activity-clear-all-confirm"
                     onClick={async () => {
                       const { error } = await supabase
                         .from("notifications")
