@@ -3941,28 +3941,123 @@ document.body
           </div>
 
           {showClearNotifModal && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 9999999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }} onClick={() => setShowClearNotifModal(false)}>
-          <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "85%", maxWidth: "320px", borderRadius: "16px", padding: "24px", boxShadow: "0 10px 30px rgba(0,0,0,0.2)", textAlign: "center" }} onClick={e => e.stopPropagation()}>
-            <h3 style={{ margin: "0 0 12px 0", fontSize: "18px", fontWeight: "700" }}>Clear Activity Log</h3>
-            <p style={{ margin: "0 0 24px 0", fontSize: "14px", color: "var(--ma-text-secondary, #666)", lineHeight: "1.4" }}>
-              Are you sure you want to clear all notifications? This cannot be undone.
-            </p>
-            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-              <button onClick={() => setShowClearNotifModal(false)} style={{ flex: 1, padding: "12px", borderRadius: "10px", border: "1px solid var(--ma-border, #e5e5e5)", background: "transparent", color: "var(--ma-text, #000)", fontWeight: "600", fontSize: "14px", cursor: "pointer" }}>
-                Cancel
-              </button>
-              <button onClick={async () => {
-                await supabase.from("notifications").delete().eq("user_id", session.user.id);
-                setNotifications([]);
-                setUnreadCount(0);
-                setShowClearNotifModal(false);
-              }} style={{ flex: 1, padding: "12px", borderRadius: "10px", border: "none", background: "#ff365f", color: "#ffffff", fontWeight: "600", fontSize: "14px", cursor: "pointer", boxShadow: "0 4px 12px rgba(255,54,95,0.3)" }}>
-                Clear All
-              </button>
+            <div
+              onClick={() => setShowClearNotifModal(false)}
+              style={{
+                position: "fixed",
+                inset: 0,
+                zIndex: 2147483647,
+                background: "rgba(0,0,0,0.62)",
+                backdropFilter: "blur(4px)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "20px",
+                boxSizing: "border-box"
+              }}
+            >
+              <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="clear-notifications-title"
+                onClick={e => e.stopPropagation()}
+                style={{
+                  width: "100%",
+                  maxWidth: "360px",
+                  boxSizing: "border-box",
+                  padding: "24px",
+                  borderRadius: "18px",
+                  background: "var(--ma-bg-primary, var(--ma-bg, #ffffff))",
+                  color: "var(--ma-text-primary, var(--ma-text, inherit))",
+                  border: "1px solid var(--ma-border, rgba(128,128,128,0.35))",
+                  boxShadow: "0 18px 55px rgba(0,0,0,0.3)",
+                  textAlign: "center"
+                }}
+              >
+                <h3
+                  id="clear-notifications-title"
+                  style={{ margin: "0 0 12px", fontSize: "20px", fontWeight: 700 }}
+                >
+                  Clear Activity Log?
+                </h3>
+                <p style={{
+                  margin: "0 0 24px",
+                  fontSize: "14px",
+                  lineHeight: 1.55,
+                  opacity: 0.9
+                }}>
+                  Are you sure you want to clear all notifications? This cannot be undone.
+                </p>
+                <div style={{
+                  display: "grid",
+                  gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
+                  gap: "12px",
+                  width: "100%"
+                }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowClearNotifModal(false)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      minWidth: 0,
+                      minHeight: "46px",
+                      padding: "10px 8px",
+                      borderRadius: "12px",
+                      border: "1px solid var(--ma-border, rgba(128,128,128,0.5))",
+                      background: "transparent",
+                      color: "inherit",
+                      fontSize: "14px",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      whiteSpace: "nowrap"
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const { error } = await supabase
+                        .from("notifications")
+                        .delete()
+                        .eq("user_id", session.user.id);
+
+                      if (error) {
+                        console.error("Failed to clear notifications:", error);
+                        alert("Could not clear notifications. Please try again.");
+                        return;
+                      }
+
+                      setNotifications([]);
+                      setSelectedNotifs([]);
+                      setUnreadCount(0);
+                      setShowClearNotifModal(false);
+                    }}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      minWidth: 0,
+                      minHeight: "46px",
+                      padding: "10px 8px",
+                      borderRadius: "12px",
+                      border: "1px solid #dc2626",
+                      background: "#dc2626",
+                      color: "#ffffff",
+                      fontSize: "14px",
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      whiteSpace: "nowrap"
+                    }}
+                  >
+                    Clear All
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          )}
 
           {/* COMPACT LIST */}
           <div style={{ flex: 1, overflowY: "auto", padding: "12px", paddingBottom: "160px" }}>
