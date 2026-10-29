@@ -805,14 +805,29 @@ useEffect(() => {
 
         if (error) throw error;
 
+        const requestedRole =
+          ["artist", "creator"].includes(user.user_metadata?.account_type)
+            ? "artist"
+            : "listener";
+
         if (!data) {
           const result = await supabase
             .from("profiles")
             .insert({
               id: user.id,
               display_name: name,
-              role: user.user_metadata?.account_type === "creator" ? "artist" : (user.user_metadata?.account_type || "listener"),
+              role: requestedRole,
             })
+            .select("id,display_name,role,created_at,username,bio,avatar_url,cover_url,updated_at")
+            .single();
+
+          if (result.error) throw result.error;
+          data = result.data;
+        } else if (requestedRole === "artist" && data.role !== "artist") {
+          const result = await supabase
+            .from("profiles")
+            .update({ role: "artist" })
+            .eq("id", user.id)
             .select("id,display_name,role,created_at,username,bio,avatar_url,cover_url,updated_at")
             .single();
 
