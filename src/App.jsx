@@ -5320,10 +5320,59 @@ document.body
     Playlists
   </button>
 </div>
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "-4px", marginBottom: "10px" }}>
+              <button
+                type="button"
+                disabled={history.length === 0}
+                onClick={() => {
+                  if (!history.length) return;
+                  if (!window.confirm("Clear all watch history? This cannot be undone.")) return;
+                  setHistory([]);
+                  try { localStorage.setItem("ma_history", "[]"); } catch {}
+                }}
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: "6px",
+                  padding: "8px 12px", borderRadius: "10px",
+                  border: "1px solid var(--ma-border, #e5e5e5)",
+                  background: "var(--ma-bg, #fff)",
+                  color: "var(--ma-text, #111)",
+                  opacity: history.length ? 1 : 0.55,
+                  cursor: history.length ? "pointer" : "not-allowed",
+                  fontSize: "12px", fontWeight: 600
+                }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: "17px" }}>delete_sweep</span>
+                Clear history
+              </button>
+            </div>
             <div style={{ display: "flex", gap: "12px", overflowX: "auto", paddingBottom: "16px", marginBottom: "16px" }}>
                {history.slice(0, 4).map((item) => (
                   <div key={item.id} onClick={() => { const found = media.find(m => m.id === item.id); if (found) openPlayer(found); }} style={{ flexShrink: 0, width: "140px", cursor: "pointer" }}>
-                    <div style={{ width: "140px", height: "80px", background: "var(--ma-surface)", borderRadius: "8px", overflow: "hidden", marginBottom: "6px" }}>
+                    <div style={{ width: "140px", height: "80px", background: "var(--ma-surface)", borderRadius: "8px", overflow: "hidden", marginBottom: "6px", position: "relative" }}>
+                      <button
+                        type="button"
+                        aria-label="Remove from watch history"
+                        title="Remove from watch history"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setHistory((prev) => {
+                            const next = prev.filter((entry) => entry.id !== item.id);
+                            try { localStorage.setItem("ma_history", JSON.stringify(next)); } catch {}
+                            return next;
+                          });
+                        }}
+                        style={{
+                          position: "absolute", top: "5px", right: "5px", zIndex: 2,
+                          display: "grid", placeItems: "center",
+                          width: "28px", height: "28px", padding: 0,
+                          borderRadius: "50%",
+                          border: "1px solid rgba(255,255,255,0.35)",
+                          background: "rgba(0,0,0,0.78)", color: "#fff",
+                          cursor: "pointer"
+                        }}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>close</span>
+                      </button>
                       {item.thumbnailUrl ? <img loading="lazy" src={item.thumbnailUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "grid", placeItems: "center", height: "100%", color: "var(--ma-text-secondary, #666)" }}><span className="material-symbols-outlined">movie</span></div>}
                     </div>
                     <p style={{ margin: 0, fontSize: "12px", color: "var(--ma-text, #000)", fontWeight: "500", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.title}</p>
