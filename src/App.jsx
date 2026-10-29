@@ -6199,7 +6199,7 @@ document.body
               } else {
                   setShowManagePage(false);
                   if (manageSource === "channel") {
-                    setShowChannelPage(true);
+                    openChannel(session?.user?.id);
                   } else {
                     setShowAccountPage(true);
                   }
