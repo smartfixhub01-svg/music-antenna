@@ -6248,3 +6248,98 @@ p
   justify-content: center !important;
   flex-shrink: 0 !important;
 }
+
+
+/* Music Antenna — Activity Log responsive theme polish */
+.ma-activity-log {
+  color: var(--ma-text-primary, var(--ma-text, #171717)) !important;
+  background: var(--ma-bg-primary, var(--ma-bg, #ffffff)) !important;
+  color-scheme: light dark;
+}
+
+:root[data-theme="light"] .ma-activity-log {
+  --ma-activity-card: #ffffff;
+  --ma-activity-border: #e2e5e9;
+  --ma-activity-muted: #606770;
+}
+
+:root[data-theme="dark"] .ma-activity-log {
+  --ma-activity-card: #1b1b1b;
+  --ma-activity-border: #353535;
+  --ma-activity-muted: #b8b8b8;
+}
+
+.ma-activity-header {
+  border-bottom-color: var(--ma-activity-border, var(--ma-border)) !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+
+.ma-activity-header button {
+  min-height: 40px;
+  border-radius: 9px;
+  transition: background-color .18s ease, opacity .18s ease;
+}
+
+.ma-activity-header button:hover {
+  background: var(--ma-bg-hover, var(--ma-hover, rgba(128,128,128,.12))) !important;
+}
+
+.ma-activity-list {
+  scrollbar-width: thin;
+}
+
+.ma-activity-list > div {
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+.ma-activity-list > div:has(button:hover) {
+  border-color: var(--ma-activity-border, var(--ma-border)) !important;
+}
+
+.ma-activity-log button:focus-visible,
+.ma-activity-log [role="button"]:focus-visible {
+  outline: 2px solid var(--ma-accent, #ff365f);
+  outline-offset: 3px;
+}
+
+.ma-activity-danger-button {
+  background: #b42318 !important;
+  background-color: #b42318 !important;
+  color: #ffffff !important;
+  border: 1px solid #b42318 !important;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+  min-height: 46px !important;
+}
+
+:root[data-theme="dark"] .ma-activity-danger-button {
+  background: #ff6b63 !important;
+  background-color: #ff6b63 !important;
+  color: #24100f !important;
+  border-color: #ff6b63 !important;
+}
+
+.ma-activity-danger-button:hover {
+  filter: brightness(.94);
+}
+
+@media (max-width: 480px) {
+  .ma-activity-header {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .ma-activity-list {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ma-activity-log *,
+  .ma-activity-log *::before,
+  .ma-activity-log *::after {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}

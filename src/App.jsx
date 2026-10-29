@@ -3920,10 +3920,10 @@ document.body
 
 
 {showNotifications && createPortal(
-        <section style={{ position: "fixed", inset: 0, zIndex: 21474836479, background: "var(--ma-bg-primary)", display: "flex", flexDirection: "column" }}>
+        <section className="ma-activity-log" style={{ position: "fixed", inset: 0, zIndex: 21474836479, background: "var(--ma-bg-primary)", display: "flex", flexDirection: "column" }}>
 
           {/* HEADER */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid var(--ma-border)", background: "var(--ma-bg-primary)", zIndex: 10 }}>
+          <div className="ma-activity-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid var(--ma-border)", background: "var(--ma-bg-primary)", zIndex: 10 }}>
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <button onClick={() => setShowNotifications(false)} style={{ background: "transparent", border: "none", color: "var(--ma-text-primary)", cursor: "pointer", display: "flex", padding: "4px" }}>
                 <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>arrow_back</span>
@@ -3976,6 +3976,7 @@ document.body
               >
                 <h3
                   id="clear-notifications-title"
+                  className="ma-activity-confirm-title"
                   style={{ margin: "0 0 12px", fontSize: "20px", fontWeight: 700 }}
                 >
                   Clear Activity Log?
@@ -4017,7 +4018,7 @@ document.body
                     Cancel
                   </button>
                   <style>{`
-                  #root button.activity-clear-all-confirm {
+                  body button.activity-clear-all-confirm {
                     display: flex !important;
                     align-items: center !important;
                     justify-content: center !important;
@@ -4036,7 +4037,7 @@ document.body
                 `}</style>
                 <button
                     type="button"
-                    className="activity-clear-all-confirm"
+                    className="activity-clear-all-confirm ma-activity-danger-button"
                     onClick={async () => {
                       const { error } = await supabase
                         .from("notifications")
@@ -4079,7 +4080,7 @@ document.body
           )}
 
           {/* COMPACT LIST */}
-          <div style={{ flex: 1, overflowY: "auto", padding: "12px", paddingBottom: "160px" }}>
+          <div className="ma-activity-list" style={{ flex: 1, overflowY: "auto", padding: "12px", paddingBottom: "160px" }}>
             {notifications.length === 0 ? (
               <div style={{ textAlign: "center", padding: "40px 20px" }}>
                 <span className="material-symbols-outlined" style={{ fontSize: "40px", color: "var(--ma-text-secondary)", marginBottom: "12px" }}>history</span>
