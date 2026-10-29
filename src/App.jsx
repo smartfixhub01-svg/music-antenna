@@ -46,31 +46,31 @@ export default function App() {
   const [creatorResetEmail, setCreatorResetEmail] = useState("");
 
   const [showResetPasswordScreen, setShowResetPasswordScreen] = useState(false);
-  
-  
-  
-  
+
+
+
+
 
   useEffect(() => {
-    
-  
+
+
 
   }, [showResetPasswordScreen]);
 
 
   // Force stop all media when the password reset screen is active
   useEffect(() => {
-    
+
   }, [showResetPasswordScreen]);
 
   const [resetEmail, setResetEmail] = useState("");
   const [theme, setTheme] = useState("device");
-  
+
   // Dynamically update the mobile status bar color based on the theme
   useEffect(() => {
     const isDark = theme === 'dark' || (theme === 'device' && window.matchMedia('(prefers-color-scheme: dark)').matches);
     const color = isDark ? '#0f0f0f' : '#ffffff'; // Black for dark, White for light
-    
+
     let meta = document.querySelector('meta[name="theme-color"]');
     if (!meta) {
       meta = document.createElement('meta');
@@ -90,7 +90,7 @@ export default function App() {
       }
       document.documentElement.setAttribute('data-theme', activeTheme);
     };
-    
+
     applyTheme();
     localStorage.setItem('ma_theme', theme);
 
@@ -151,7 +151,7 @@ export default function App() {
   const [miniPlayerPos, setMiniPlayerPos] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
-  
+
   useEffect(() => {
     let scrollTimeout;
     const handleScroll = () => {
@@ -193,7 +193,7 @@ export default function App() {
       // Force a hard 0px boundary so it never goes off-screen
       const maxLeft = window.innerWidth - el.offsetWidth;
       const maxTop = window.innerHeight - el.offsetHeight;
-      
+
       newLeft = Math.max(0, Math.min(maxLeft, newLeft));
       newTop = Math.max(0, Math.min(maxTop, newTop));
 
@@ -204,10 +204,10 @@ export default function App() {
   const handlePointerUp = (e) => {
     setIsDragging(false);
     e.currentTarget.releasePointerCapture(e.pointerId);
-    
+
     const dx = e.clientX - dragRef.current.startX;
     const dy = e.clientY - dragRef.current.startY;
-    
+
     let newLeft = dragRef.current.initialLeft + dx;
     let newTop = dragRef.current.initialTop + dy;
 
@@ -217,8 +217,8 @@ export default function App() {
       const maxTop = window.innerHeight - el.offsetHeight;
       newLeft = Math.max(0, Math.min(maxLeft, newLeft));
       newTop = Math.max(0, Math.min(maxTop, newTop));
-      
-      el.style.transform = ''; 
+
+      el.style.transform = '';
       setMiniPlayerPos({ left: newLeft, top: newTop });
     }
   };
@@ -313,7 +313,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [manageSearch, setManageSearch] = useState("");
   const [manageLoading, setManageLoading] = useState(false);
   const [editingMedia, setEditingMedia] = useState(null);
-  
+
   // Edit Form States
   const [editTitle, setEditTitle] = useState("");
   const [editDesc, setEditDesc] = useState("");
@@ -339,7 +339,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
     if (!showSubscriptionsPage || !session?.user?.id) return;
     setSubsPageLoading(true);
     setSubsPageError("");
-    
+
     const fetchData = async () => {
       try {
         const { data: subbersData, error: subbersErr } = await supabase.from("subscriptions")
@@ -354,12 +354,12 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
           const { data: profiles, error: pErr } = await supabase.from("profiles")
             .select("id, username, display_name, avatar_url, role")
             .in("id", subberIds);
-          
+
           if (pErr) throw pErr;
-          
+
           const profileMap = {};
           (profiles || []).forEach(p => { profileMap[p.id] = p; });
-          
+
           setSubbersList(subbersData.map(d => ({
             created_at: d.created_at,
             profile: profileMap[d.subscriber_id] || null
@@ -380,12 +380,12 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
           const { data: profiles, error: pErr } = await supabase.from("profiles")
             .select("id, username, display_name, avatar_url, role")
             .in("id", channelIds);
-          
+
           if (pErr) throw pErr;
-          
+
           const profileMap = {};
           (profiles || []).forEach(p => { profileMap[p.id] = p; });
-          
+
           setSubsList(subsData.map(d => ({
             created_at: d.created_at,
             profile: profileMap[d.channel_id] || null
@@ -536,7 +536,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
         .select("*, playlist_items(media_id, media:media_id(id, thumbnail_path, title))")
         .eq("user_id", channelProfile.id)
         .eq("visibility", "public");
-      
+
       if (!error && data) {
         setChannelPlaylists(data);
       }
@@ -608,7 +608,7 @@ useEffect(() => {
     setShowSubscriptionsFeed(false);
     setShowSubscriptionsPage(false);
     setSubsTab("feed");
-    
+
     // CRITICAL FIX: Only hide the watch page, DO NOT delete the video from memory!
     // This allows the Mini Player to keep playing in the background.
     setShowWatchPage(false);
@@ -616,7 +616,7 @@ useEffect(() => {
 
   function openPlayer(item) {
     if (!item) return;
-    
+
     // Auto-generate URLs if they are missing (fixes Manage Page Play button)
     let playbackUrl = item.playbackUrl;
     if (!playbackUrl && item.storage_path) {
@@ -758,7 +758,7 @@ useEffect(() => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, newSession) => {
-      
+
       setSession(newSession);
     });
 
@@ -882,7 +882,7 @@ useEffect(() => {
       console.log("Silent action: Password change notification blocked.");
       return;
     }
-    
+
     if (!session?.user?.id || session.user.id === targetUserId) return;
     await supabase.from("notifications").insert({
       user_id: targetUserId,
@@ -892,21 +892,21 @@ useEffect(() => {
     });
   }
 
-  
-  
-      
-  
+
+
+
+
   async function handleUpdatePassword(e) {
     e.preventDefault();
     if (newPassword !== confirmNewPassword) return setMessage("Passwords do not match.");
     if (newPassword.length < 6) return setMessage("Password must be at least 6 characters.");
-    
+
     setBusy(true);
     setMessage("Updating...");
     try {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
-      
+
       setMessage("Success! Redirecting...");
       await supabase.auth.signOut();
       localStorage.removeItem('ma_is_resetting_password');
@@ -921,8 +921,8 @@ useEffect(() => {
 
 
 
-  
-  
+
+
   async function handleCreatorReset(e) {
     e.preventDefault();
     if (!creatorResetEmail) return;
@@ -1009,8 +1009,8 @@ useEffect(() => {
     } else { window.prompt("Copy this link to share:", profileUrl); }
   };
 
-  
-  
+
+
   function handleVoiceSearch() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -1018,7 +1018,7 @@ useEffect(() => {
       setTimeout(() => setSearchStatusMsg(""), 3000);
       return;
     }
-    
+
     const recognition = new SpeechRecognition();
     recognition.lang = 'en-US';
     recognition.interimResults = false;
@@ -1045,7 +1045,7 @@ useEffect(() => {
 
 
   async function loadMedia() {
-    
+
     setFeedLoading(true);
     if (search.trim()) setSearchLoading(true);
     setMessage("");
@@ -1057,7 +1057,7 @@ useEffect(() => {
         .select("*")
         .eq("status", "published")
         .order("created_at", { ascending: false });
-        
+
       // ONLY limit the feed if the user is NOT searching
       if (!search.trim()) {
         query = query.limit(feedLimit);
@@ -1072,7 +1072,7 @@ useEffect(() => {
           setMedia([]);
           setFeedLoading(false);
           setSearchLoading(false);
-          
+
           return;
         }
       }
@@ -1088,7 +1088,7 @@ useEffect(() => {
       const { data: profilesData, error: profilesError } = await supabase
         .from("profiles")
         .select("id, display_name, avatar_url");
-      
+
       if (profilesError) throw profilesError;
 
       // 3. Create a lookup map for profiles
@@ -1104,9 +1104,9 @@ useEffect(() => {
             const { data: thumb } = supabase.storage.from("track-covers").getPublicUrl(item.thumbnail_path);
             thumbnailUrl = thumb?.publicUrl || "";
           }
-          return { 
-             ...item, 
-             playbackUrl: pub?.publicUrl || "", 
+          return {
+             ...item,
+             playbackUrl: pub?.publicUrl || "",
              thumbnailUrl,
              profiles: profileMap[item.artist_id] || null
           };
@@ -1116,13 +1116,13 @@ useEffect(() => {
       // 5. LOCAL SEARCH & SORT
       if (search.trim()) {
         const term = search.trim().toLowerCase();
-        
+
         items = items.filter(item => {
           const title = (item.title || "").toLowerCase();
           const desc = (item.description || "").toLowerCase();
           const thumb = (item.thumbnail_path || "").toLowerCase();
           const artist = (item.profiles?.display_name || "").toLowerCase();
-          
+
           return title.includes(term) || desc.includes(term) || artist.includes(term) || thumb.includes(term);
         });
 
@@ -1320,7 +1320,7 @@ useEffect(() => {
 
         // Check the profile role
         const { data: prof } = await supabase.from("profiles").select("role").eq("id", data.user.id).single();
-        
+
         if (prof?.role !== accountTypeVal) {
           await supabase.auth.signOut();
           throw new Error(`This is a ${prof?.role || 'Listener'} account. Please go back and use the correct sign-in page.`);
@@ -1386,7 +1386,7 @@ useEffect(() => {
 
   async function fetchWatchDetails(mediaId) {
     if (!mediaId) return;
-    
+
     // FETCH SUBSCRIBER COUNT FOR WATCH PAGE
     if (activeMedia?.artist_id) {
       const { count: watchSubs } = await supabase.from("subscriptions").select("*", { count: "exact", head: true }).eq("channel_id", activeMedia.artist_id);
@@ -1565,7 +1565,7 @@ async function fetchPlaylists() {
         .eq("playlist_id", pl.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      
+
       const itemsWithUrls = await Promise.all((data || []).map(async (item) => {
         const m = item.media;
         const { data: pub } = await supabase.storage.from(BUCKET).createSignedUrl(m.storage_path, 31536000);
@@ -1668,7 +1668,7 @@ async function fetchPlaylists() {
       setSelectedPlaylist(null);
       setMessage("Playlist deleted.");
     } catch (err) { setMessage("Error: " + err.message); }
-    finally { 
+    finally {
       // KEEP BUTTON LOCKED FOR 3 SECONDS
       setTimeout(() => {
         setIsPostingComment(false);
@@ -1683,7 +1683,7 @@ async function fetchPlaylists() {
       setPlaylistItems(prev => prev.filter(i => i.id !== itemId));
       setMessage("Removed from playlist.");
     } catch (err) { setMessage("Error: " + err.message); }
-    finally { 
+    finally {
       // KEEP BUTTON LOCKED FOR 3 SECONDS
       setTimeout(() => {
         setIsPostingComment(false);
@@ -1702,7 +1702,7 @@ async function fetchPlaylists() {
       setNewPlaylistName("");
       setMessage("Playlist created! Now select it to add the video.");
     } catch (err) { setMessage("Error: " + err.message); }
-    finally { 
+    finally {
       // KEEP BUTTON LOCKED FOR 3 SECONDS
       setTimeout(() => {
         setIsPostingComment(false);
@@ -1714,11 +1714,11 @@ async function fetchPlaylists() {
   async function addToPlaylist(playlistId) {
     try {
       const { error } = await supabase.from("playlist_items").insert({ playlist_id: playlistId, media_id: activeMedia.id });
-      if (error && error.code !== "23505") throw error; 
+      if (error && error.code !== "23505") throw error;
       setMessage(error ? "Video is already in this playlist." : "Added to playlist!");
       setShowPlaylistModal(false);
     } catch (err) { setMessage("Error: " + err.message); }
-    finally { 
+    finally {
       // KEEP BUTTON LOCKED FOR 3 SECONDS
       setTimeout(() => {
         setIsPostingComment(false);
@@ -1763,7 +1763,7 @@ async function fetchPlaylists() {
       setMessage("Please sign in to manage content.");
       return;
     }
-    
+
     setManageSource(source);
     setShowManagePage(true);
     setShowAccountPage(false);
@@ -1830,7 +1830,7 @@ async function fetchPlaylists() {
     setEditSaving(true);
     try {
       let newThumbPath = editingMedia.thumbnail_path;
-      
+
       if (editThumbnailFile) {
         const safe = editThumbnailFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
         const path = session.user.id + "/" + Date.now() + "-thumb-" + safe;
@@ -1847,7 +1847,7 @@ async function fetchPlaylists() {
       }).eq("id", editingMedia.id);
 
       if (error) throw error;
-      
+
       setMessage("Video updated successfully!");
       setEditingMedia(null);
       openManagePage("channel"); // Refresh list
@@ -1865,7 +1865,7 @@ async function fetchPlaylists() {
       await supabase.from("media").delete().eq("id", id);
       await supabase.storage.from(BUCKET).remove([storagePath]);
       if (thumbPath) await supabase.storage.from("track-covers").remove([thumbPath]);
-      
+
       setMessage("Video deleted.");
       if (editingMedia?.id === id) setEditingMedia(null);
       openManagePage("channel");
@@ -1875,7 +1875,7 @@ async function fetchPlaylists() {
     }
   }
 
-  
+
 
   async function handlePinComment(commentId, currentPinned) {
     try {
@@ -1891,9 +1891,9 @@ async function fetchPlaylists() {
     setComments(prev => prev.map(c => c.id === commentId ? { ...c, has_creator_heart: !currentHeart } : c));
     try {
       await supabase.from("comments").update({ has_creator_heart: !currentHeart }).eq("id", commentId);
-    } catch (err) { 
+    } catch (err) {
       setComments(prev => prev.map(c => c.id === commentId ? { ...c, has_creator_heart: currentHeart } : c));
-      setMessage(err.message); 
+      setMessage(err.message);
     }
   }
 
@@ -1956,17 +1956,17 @@ async function fetchPlaylists() {
     } catch (err) { setMessage(err.message); }
   }
 
-  
+
   async function handleReportVideo(mediaId) {
     try {
       const { data } = await supabase.from("media").select("report_count").eq("id", mediaId).single();
       const newCount = (data?.report_count || 0) + 1;
-      
-      await supabase.from("media").update({ 
+
+      await supabase.from("media").update({
         report_count: newCount,
-        status: newCount >= 3 ? "under_review" : "published" 
+        status: newCount >= 3 ? "under_review" : "published"
       }).eq("id", mediaId);
-      
+
       setMessage(newCount >= 3 ? "Video reported. It has been hidden for review." : "Video reported. Thank you.");
     } catch (err) {
       setMessage("Could not report video.");
@@ -1977,11 +1977,11 @@ async function fetchPlaylists() {
     // 1. Instantly close the modal and remove the comment from the UI
     setDeletingCommentId(null);
     setComments(prev => prev.filter(c => c.id !== commentId));
-    
+
     try {
       // 2. Delete ONLY the specific comment ID from the database
       const { data: commentData } = await supabase.from("comments").select("user_id, media_id").eq("id", commentId).single();
-        
+
         const { error } = await supabase.from("comments").delete().eq("id", commentId);
         if (error) throw error;
 
@@ -2000,9 +2000,9 @@ async function fetchPlaylists() {
         }
       if (error) throw error;
       setMessage("Comment deleted.");
-    } catch (err) { 
-      setMessage("Error deleting comment: " + err.message); 
-      // If it fails, you might want to refetch comments to restore it, 
+    } catch (err) {
+      setMessage("Error deleting comment: " + err.message);
+      // If it fails, you might want to refetch comments to restore it,
       // but for now, the UI stays clean.
     }
   }
@@ -2011,7 +2011,7 @@ async function fetchPlaylists() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       return setMessage("Microphone not supported on this browser.");
     }
-    
+
     try {
       // Pause ALL audio and video tags on the page (Main + Mini Player)
       window._wasPlayingBeforeRecord = false;
@@ -2024,41 +2024,41 @@ async function fetchPlaylists() {
 
       setMessage("Requesting microphone...");
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      
+
       let mimeType = 'audio/webm';
       if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'audio/mp4';
 
       mediaRecorderRef.current = new MediaRecorder(stream, { mimeType });
       audioChunksRef.current = [];
-      
+
       mediaRecorderRef.current.ondataavailable = (e) => {
         if (e.data.size > 0) audioChunksRef.current.push(e.data);
       };
-      
+
       mediaRecorderRef.current.onstop = () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
         setCommentAudio(audioBlob);
         setCommentAudioUrl(URL.createObjectURL(audioBlob));
         stream.getTracks().forEach(track => track.stop());
       };
-      
+
       mediaRecorderRef.current.start();
       setIsRecording(true);
       setRecordingTime(0);
       setMessage("Recording started...");
-      
+
       timerRef.current = setInterval(() => {
         setRecordingTime(prev => {
           if (prev >= 35) {
             stopRecording();
             setMessage("Recording stopped at 35 seconds max.");
-            
+
             return 35;
           }
           return prev + 1;
         });
       }, 1000);
-      
+
     } catch (err) {
       console.log("Mic Error:", err);
       setMessage("Error: " + err.message);
@@ -2070,7 +2070,7 @@ async function fetchPlaylists() {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
       clearInterval(timerRef.current);
-      
+
       // Resume the main player if it was playing before
       if (window._wasPlayingBeforeRecord) {
         setTimeout(() => {
@@ -2087,7 +2087,7 @@ async function fetchPlaylists() {
 
     // LAYER 1: SYNCHRONOUS LOCK (Blocks double clicks instantly)
     if (isSubmittingRef.current) return;
-    
+
     if (!session?.user?.id) return setMessage("Sign in to comment.");
     if (!newComment.trim() && !commentImage && !commentAudio) return;
 
@@ -2110,7 +2110,7 @@ async function fetchPlaylists() {
 
     let imageUrl = null;
     let audioUrl = null;
-    
+
     const submitComment = newComment;
     const submitReplyTarget = replyTarget;
     const submitImage = commentImage;
@@ -2154,7 +2154,7 @@ async function fetchPlaylists() {
 
       // LAYER 3: DISPLAY CORRECTION (React deduplication)
       setComments(prev => prev.some(c => c.id === data.id) ? prev : [data, ...prev]);
-      
+
       setNewComment("");
       setCommentImage(null);
       setCommentAudio(null);
@@ -2174,7 +2174,7 @@ async function fetchPlaylists() {
     }
   }
 
-    
+
   async function handleAddToPlaylist(playlistId, playlistTitle) {
     const mediaToSave = mediaToAddToPlaylist || activeMedia;
     const mediaId = mediaToSave?.id;
@@ -2295,7 +2295,7 @@ async function fetchPlaylists() {
     }
   }
 
-  
+
   function addToQueue(item, position) {
     if (position === 'next') {
       setVideoQueue(prev => [item, ...prev]);
@@ -2329,7 +2329,7 @@ async function fetchPlaylists() {
     }
   }
 
-  
+
   async function handleUpdatePlaylistCover(e) {
     const file = e.target.files[0];
     if (!file || !selectedPlaylist) return;
@@ -2338,15 +2338,15 @@ async function fetchPlaylists() {
       const fileExt = file.name.split('.').pop();
       const fileName = `playlist-cover-${selectedPlaylist.id}-${Date.now()}.${fileExt}`;
       const filePath = `${session.user.id}/${fileName}`;
-      
+
       const { error: uploadError } = await supabase.storage.from(BUCKET).upload(filePath, file);
       if (uploadError) throw uploadError;
-      
+
       const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(filePath);
-      
+
       const { error: updateError } = await supabase.from('playlists').update({ cover_url: publicUrl }).eq('id', selectedPlaylist.id);
       if (updateError) throw updateError;
-      
+
       setSelectedPlaylist(prev => ({ ...prev, cover_url: publicUrl }));
       // Update the main grid list too
       setChannelPlaylists(prev => prev.map(p => p.id === selectedPlaylist.id ? { ...p, cover_url: publicUrl } : p));
@@ -2371,11 +2371,11 @@ async function fetchPlaylists() {
   async function handleDeleteSelectedPlaylistItems() {
     if (selectedPlaylistItems.length === 0) return;
     if (!window.confirm(`Delete ${selectedPlaylistItems.length} videos from this playlist?`)) return;
-    
+
     try {
       const { error } = await supabase.from('playlist_items').delete().in('id', selectedPlaylistItems);
       if (error) throw error;
-      
+
       setPlaylistItems(prev => prev.filter(i => !selectedPlaylistItems.includes(i.playlistItemId)));
       setSelectedPlaylistItems([]);
       setMessage("Selected videos removed.");
@@ -2383,12 +2383,12 @@ async function fetchPlaylists() {
   }
 
   function toggleSelectPlaylistItem(itemId) {
-    setSelectedPlaylistItems(prev => 
+    setSelectedPlaylistItems(prev =>
       prev.includes(itemId) ? prev.filter(id => id !== itemId) : [...prev, itemId]
     );
   }
 
-  
+
   async function handleCreateNewPlaylist() {
     if (!newPlaylistName.trim()) return;
     try {
@@ -2419,7 +2419,7 @@ async function fetchPlaylists() {
     }
   }
 
-  
+
   function addToQueue(item, position) {
     if (position === 'next') {
       setVideoQueue(prev => [item, ...prev]);
@@ -2453,7 +2453,7 @@ async function fetchPlaylists() {
     }
   }
 
-  
+
   async function handleUpdatePlaylistCover(e) {
     const file = e.target.files[0];
     if (!file || !selectedPlaylist) return;
@@ -2462,15 +2462,15 @@ async function fetchPlaylists() {
       const fileExt = file.name.split('.').pop();
       const fileName = `playlist-cover-${selectedPlaylist.id}-${Date.now()}.${fileExt}`;
       const filePath = `${session.user.id}/${fileName}`;
-      
+
       const { error: uploadError } = await supabase.storage.from(BUCKET).upload(filePath, file);
       if (uploadError) throw uploadError;
-      
+
       const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(filePath);
-      
+
       const { error: updateError } = await supabase.from('playlists').update({ cover_url: publicUrl }).eq('id', selectedPlaylist.id);
       if (updateError) throw updateError;
-      
+
       setSelectedPlaylist(prev => ({ ...prev, cover_url: publicUrl }));
       // Update the main grid list too
       setChannelPlaylists(prev => prev.map(p => p.id === selectedPlaylist.id ? { ...p, cover_url: publicUrl } : p));
@@ -2542,10 +2542,10 @@ async function fetchPlaylists() {
         .from("subscriptions")
         .select("*", { count: "exact", head: true })
         .eq("channel_id", channelId);
-      
+
       const finalCount = count || 0;
       setSubscriberCount(finalCount);
-      
+
       // If this is my own channel, update the You Tab count too
       if (channelId === session?.user?.id) {
         setMySubCount(finalCount);
@@ -2569,7 +2569,7 @@ async function fetchPlaylists() {
 
   async function handleToggleSubscribe(channelId) {
     if (!session?.user?.id) return setMessage("Please sign in to subscribe.");
-    
+
     // OPTIMISTIC UPDATE: Change the UI instantly so it feels fast
     const wasSubscribed = isSubscribed;
     const oldCount = subscriberCount;
@@ -2597,7 +2597,7 @@ async function fetchPlaylists() {
       setIsSubscribed(wasSubscribed);
       setSubscriberCount(oldCount);
       setMySubCount(oldMyCount);
-      
+
       // Handle duplicate errors gracefully
       if (err.message.includes("duplicate key")) {
         setIsSubscribed(true);
@@ -2624,13 +2624,13 @@ async function fetchPlaylists() {
       // 2. Use the subscriber count we ALREADY know is correct from the Dashboard
       // We check mySubCount first. If it's 0, we do a fresh query just in case.
       let finalSubs = mySubCount;
-      
+
       if (finalSubs === 0) {
         const { count: freshSubs, error: subsError } = await supabase
           .from("subscriptions")
           .select("*", { count: "exact", head: true })
           .eq("channel_id", session.user.id);
-          
+
         if (!subsError && freshSubs !== null) {
           finalSubs = freshSubs;
         }
@@ -2655,7 +2655,7 @@ async function fetchPlaylists() {
       // 4. Update BOTH the Dashboard state and Analytics state to match perfectly
       setMySubCount(finalSubs);
       setSubscriberCount(finalSubs);
-      
+
       setAnalyticsData({
         totalViews: totalViews,
         totalSubs: finalSubs,
@@ -2663,7 +2663,7 @@ async function fetchPlaylists() {
         weeklyViews: weeklyViews,
         weeklySubs: weeklySubs || 0
       });
-      
+
     } catch (err) {
       setMessage("Error loading analytics: " + err.message);
     } finally {
@@ -2680,7 +2680,7 @@ async function fetchPlaylists() {
     setChannelMedia([]);
     setSubscriberCount(0);
     window.scrollTo({ top: 0, behavior: "smooth" });
-    
+
     // CRITICAL FIX: Fetch the subscription status immediately
     checkSubscription(artistId);
 
@@ -3031,76 +3031,76 @@ async function fetchPlaylists() {
     return matchesSearch && matchesCategory;
   });
 
-  
-  
+
+
 
 
 
   if (loading) {
     return (
-      <main style={{ 
-        position: "fixed", inset: 0, zIndex: 99999, 
+      <main style={{
+        position: "fixed", inset: 0, zIndex: 99999,
         background: "var(--ma-bg-primary)", // Automatically dark/light
-        display: "flex", flexDirection: "column", 
-        justifyContent: "center", alignItems: "center", 
-        padding: "20px" 
+        display: "flex", flexDirection: "column",
+        justifyContent: "center", alignItems: "center",
+        padding: "20px"
       }}>
-        
-        <div style={{ 
+
+        <div style={{
           display: "flex", flexDirection: "column", alignItems: "center",
-          animation: "fadeIn 0.5s ease-out", textAlign: "center" 
+          animation: "fadeIn 0.5s ease-out", textAlign: "center"
         }}>
-          
+
           {/* OFFICIAL LOGO CARD */}
           <div style={{
             background: "#ffffff", // Always white so black text in logo is visible
-            padding: "16px", 
-            borderRadius: "20px", 
+            padding: "16px",
+            borderRadius: "20px",
             boxShadow: "0 10px 30px rgba(0,0,0,0.2)", // Stronger shadow for dark mode
             marginBottom: "32px",
             border: "1px solid var(--ma-border)" // Subtle border in light mode
           }}>
-            <img 
-              src="/music-antenna-logo.png" 
-              alt="Music Antenna" 
-              style={{ width: "200px", maxWidth: "75vw", height: "auto", display: "block" }} 
+            <img
+              src="/music-antenna-logo.png"
+              alt="Music Antenna"
+              style={{ width: "200px", maxWidth: "75vw", height: "auto", display: "block" }}
             />
           </div>
 
           {/* WELCOME MESSAGE */}
-          <h1 style={{ 
+          <h1 style={{
             color: "var(--ma-text-primary)", // Black in Light, White in Dark
-            fontSize: "28px", 
-            fontWeight: "800", 
-            margin: "0 0 8px 0", 
-            letterSpacing: "-0.5px" 
+            fontSize: "28px",
+            fontWeight: "800",
+            margin: "0 0 8px 0",
+            letterSpacing: "-0.5px"
           }}>
             Welcome to Music Antenna
           </h1>
-          
-          <p style={{ 
+
+          <p style={{
             color: "var(--ma-text-secondary)", // Grey in both modes
-            fontSize: "15px", 
-            margin: "0 0 40px 0" 
+            fontSize: "15px",
+            margin: "0 0 40px 0"
           }}>
             Your sound. Your world.
           </p>
 
           {/* PREMIUM SPINNER (High contrast in both modes) */}
-          <div style={{ 
-            width: "36px", height: "36px", 
+          <div style={{
+            width: "36px", height: "36px",
             border: "3px solid rgba(150, 150, 150, 0.2)", // Visible grey track
             borderTop: "3px solid var(--ma-accent)", // Your pink brand color
-            borderRadius: "50%", 
+            borderRadius: "50%",
             animation: "spin 1s linear infinite",
             marginBottom: "16px"
           }}></div>
-          
-          <p style={{ 
-            color: "var(--ma-text-secondary)", 
-            fontSize: "13px", 
-            margin: 0, 
-            fontWeight: "600" 
+
+          <p style={{
+            color: "var(--ma-text-secondary)",
+            fontSize: "13px",
+            margin: 0,
+            fontWeight: "600"
           }}>
             Connecting securely...
           </p>
@@ -3121,13 +3121,13 @@ async function fetchPlaylists() {
         <section className="auth-screen-card">
           <div className="auth-screen-brand">
             <img src="/music-antenna-logo.png" alt="Music Antenna" style={{ width: "100%", maxWidth: "180px", height: "auto", objectFit: "contain", margin: "0 auto 16px" }} />
-            
+
           </div>
-          
 
 
-          
-          
+
+
+
 
 
           {message && (
@@ -3140,7 +3140,7 @@ async function fetchPlaylists() {
 {authTab === "listener" ? (
             <>
               {/* ===================== LISTENER SCREEN ===================== */}
-              
+
 
               {mode === "login" ? (
                 <form onSubmit={handleListenerLogin} className="auth-screen-form">
@@ -3196,16 +3196,16 @@ async function fetchPlaylists() {
                 </form>
               ) : (
                 <form onSubmit={handleAuth} className="auth-screen-form">
-                  
 
-                  
 
-                  
 
-                  
-                  
-                  
-                  
+
+
+
+
+
+
+
                   {message && (
                     <div className={`auth-message-box ${message.toLowerCase().includes("error") || message.toLowerCase().includes("invalid") ? "error" : "success"}`}>
                       {message}
@@ -3286,15 +3286,15 @@ async function fetchPlaylists() {
                     >
                       Reset password
                     </button>
-                  
+
       {showMoreOptions && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 2147483647, display: "flex", alignItems: "flex-end" }} onClick={() => setShowMoreOptions(false)}>
           <div style={{ background: "var(--ma-surface)", width: "100%", borderTopLeftRadius: "16px", borderTopRightRadius: "16px", padding: "20px", paddingBottom: "40px" }} onClick={e => e.stopPropagation()}>
-            
+
             <div style={{ width: "40px", height: "4px", background: "#555", borderRadius: "2px", margin: "0 auto 20px" }}></div>
-            
+
             <h3 style={{ color: "var(--ma-text)", margin: "0 0 20px 0", fontSize: "18px" }}>Video Options</h3>
-            
+
             {/* Playback Speed */}
             <div style={{ marginBottom: "24px" }}>
               <p style={{ color: "var(--ma-text-secondary, #666)", fontSize: "14px", marginBottom: "8px" }}>Playback Speed</p>
@@ -3316,24 +3316,24 @@ async function fetchPlaylists() {
             <button onClick={() => { handleShare(activeMedia); setShowMoreOptions(false); }} style={{ width: "100%", padding: "16px", background: "#333", color: "var(--ma-text)", border: "none", borderRadius: "8px", marginBottom: "10px", textAlign: "left", fontSize: "16px", display: "flex", alignItems: "center", gap: "12px" }}>
               🔗 Copy / Share Link
             </button>
-            
+
             <button onClick={() => { setMessage("Video reported. Thank you."); setShowMoreOptions(false); }} style={{ width: "100%", padding: "16px", background: "#333", color: "var(--ma-text)", border: "none", borderRadius: "8px", marginBottom: "10px", textAlign: "left", fontSize: "16px", display: "flex", alignItems: "center", gap: "12px" }}>
               ⚠️ Report Video
             </button>
-            
+
             <button onClick={() => setShowMoreOptions(false)} style={{ width: "100%", padding: "16px", background: "transparent", color: "#ff365f", border: "1px solid #ff365f", borderRadius: "8px", marginTop: "10px", fontSize: "16px", cursor: "pointer", fontWeight: "bold" }}>
               Cancel
             </button>
-            
+
           </div>
         </div>
       )}
 
-    
-      
 
-    
-      
+
+
+
+
 
       {showResetModal && createPortal(
 
@@ -3386,10 +3386,10 @@ document.body
 document.body
 )}
 
-    
-      
 
-    
+
+
+
       {showResetModal && createPortal(
         <div className="ma-modal-backdrop" onClick={() => setShowResetModal(false)}>
           <div className="ma-modal-card" onClick={e => e.stopPropagation()}>
@@ -3518,11 +3518,11 @@ document.body
                 </form>
               ) : (
                 <form onSubmit={handleAuth} className="auth-screen-form">
-                  
 
-                  
 
-                  
+
+
+
 
                   <label>
                     <span>Artist name</span>
@@ -3594,9 +3594,9 @@ document.body
                     >
                       New creator? Sign up
                     </button>
-                    <button  
+                    <button
                       type="button"
-                      
+
                       onClick={() => setShowCreatorResetModal(true)}>Reset Art ID</button>
 
         {showCreatorResetModal && (
@@ -3604,7 +3604,7 @@ document.body
             <div style={{ width: "100%", maxWidth: "400px", padding: "24px", background: "#1C1C1C", borderRadius: "16px", border: "1px solid var(--ma-border)", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>
               <h3 style={{ textAlign: "center", color: "#F1F1F1", marginBottom: "8px", fontSize: "20px" }}>Reset Art ID & Password</h3>
               <p style={{ textAlign: "center", color: "var(--ma-text-secondary)", marginBottom: "24px", fontSize: "14px" }}>Enter your Creator email to recover your Art ID and reset your password.</p>
-              
+
               <form onSubmit={handleCreatorReset}>
                 <input
                   type="email"
@@ -3624,10 +3624,10 @@ document.body
         )}
 
 
-        
 
 
-        
+
+
 
                   </>
                 ) : (
@@ -3663,7 +3663,7 @@ document.body
             </>
           )}
 
-          
+
 
           <p className="auth-screen-footnote">Secure accounts powered by Supabase.</p>
         </section>
@@ -3683,16 +3683,16 @@ document.body
 
   function handleFirstPlay(e) {
     if (viewCountedRef.current || !activeMedia?.id) return;
-    
+
     // 1. Don't count if the creator is watching their own video
     if (session?.user?.id === activeMedia.artist_id) return;
 
     // 2. Mark as triggered locally so multiple onPlay events don't stack
     viewCountedRef.current = true;
-    
+
     // 3. Generate a unique session ID for this playback
     const sessionId = crypto.randomUUID();
-    
+
     // 4. YouTube-style delay: Only count the view if they watch for 10 seconds
     const mediaEl = e.target;
     let viewTimer = setTimeout(async () => {
@@ -3704,7 +3704,7 @@ document.body
             p_media_id: activeMedia.id,
             p_session_id: sessionId
           });
-          
+
           if (error) {
             console.warn("View not recorded:", error.message);
           } else {
@@ -3798,32 +3798,32 @@ document.body
 
 
 <style>{`
-  
+
 `}</style>
 
 
 <style>{`
   /* Watch Page Main Container */
   .yt-watch { background: var(--ma-bg, #fff) !important; color: var(--ma-text, #000) !important; }
-  
+
   /* Video Title & Meta */
   .yt-watch-title { color: var(--ma-text, #000) !important; font-size: 20px !important; font-weight: 700 !important; margin: 8px 0 !important; line-height: 1.3 !important; }
   .yt-watch-meta { color: var(--ma-text-secondary, #666) !important; font-size: 13px !important; margin-bottom: 16px !important; }
-  
+
   /* Action Buttons (Like, Share, Download) */
   .yt-watch-actions { display: flex !important; gap: 8px !important; overflow-x: auto !important; padding-bottom: 16px !important; border-bottom: 1px solid var(--ma-border, #e5e5e5) !important; margin-bottom: 16px !important; }
   .yt-watch-actions button { background: var(--ma-surface, #f2f2f2) !important; color: var(--ma-text, #000) !important; border: 1px solid var(--ma-border, #e5e5e5) !important; border-radius: 10px !important; padding: 8px 16px !important; font-weight: 600 !important; display: flex !important; align-items: center !important; gap: 6px !important; font-size: 14px !important; cursor: pointer !important; }
-  
+
   /* Channel Row */
   .yt-watch-channel { display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 12px 0 !important; border-bottom: 1px solid var(--ma-border, #e5e5e5) !important; margin-bottom: 24px !important; }
   .yt-watch-channel-name { color: var(--ma-text, #000) !important; font-weight: 700 !important; font-size: 16px !important; }
   .yt-watch-channel-sub { color: var(--ma-text-secondary, #666) !important; font-size: 13px !important; }
-  
+
   /* Inline Comments Section */
   .yt-watch-comments-wrapper { background: var(--ma-surface, #f2f2f2) !important; border-radius: 16px !important; padding: 16px !important; }
   .yt-watch-comments-wrapper h3 { color: var(--ma-text, #000) !important; font-size: 15px !important; font-weight: 600 !important; }
   .yt-watch-comment-text { color: var(--ma-text, #000) !important; font-size: 14px !important; }
-  
+
   /* Comment Input Box */
   .yt-watch-comment-input { background: var(--ma-bg, #fff) !important; color: var(--ma-text, #000) !important; border: 1px solid var(--ma-border, #e5e5e5) !important; border-radius: 12px !important; padding: 12px !important; }
 `}</style>
@@ -3852,13 +3852,13 @@ document.body
 `}</style>
 
 
-      
 
 
-      
+
+
 
         {/* PERMANENT AUDIO PLAYER (Never stops on tab change) */}
-        
+
       <header className="ma-header">
         <div className="ma-brand" style={{ display: "flex", alignItems: "center", cursor: "pointer", padding: "4px" }} onClick={() => { closeAllOverlays(); setCategory("All"); setSearch(""); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
               <img src="/music-antenna-logo.png" alt="" style={{ height: "36px", width: "auto", objectFit: "contain" }} />
@@ -3869,14 +3869,14 @@ document.body
             <span className="material-symbols-outlined ma-search-icon">search</span>
             <input aria-label="Search" placeholder="Search..." value={search}
               onChange={(e) => { setSearch(e.target.value); setSearchStatusMsg(""); }} />
-            
+
             {/* THE ROLLING SPINNER */}
             {searchLoading && (
               <span className="material-symbols-outlined ma-search-spinner" style={{ animation: "spin 1s linear infinite" }}>
                 sync
               </span>
             )}
-            
+
             {/* CLEAR BUTTON */}
             {search && !searchLoading && (
               <button className="ma-search-clear" onClick={() => setSearch("")} aria-label="Clear">
@@ -3884,7 +3884,7 @@ document.body
               </button>
             )}
           </div>
-          
+
           <button className="ma-mic-btn" aria-label="Voice search" onClick={handleVoiceSearch}>
             <span className="material-symbols-outlined">mic</span>
           </button>
@@ -3896,7 +3896,7 @@ document.body
               <span className="material-symbols-outlined">notifications</span>
               {unreadCount > 0 && <span className="yt-nav-badge" style={{ position: "absolute", top: 4, right: 4, background: "red", color: "var(--ma-text)", borderRadius: "10px", padding: "2px 6px", fontSize: "10px", fontWeight: "bold" }}>{unreadCount}</span>}
             </button>
-            
+
       {activeNotification && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 9999999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(2px)" }} onClick={() => setActiveNotification(null)}>
           <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "85%", maxWidth: "340px", borderRadius: "16px", padding: "24px", border: "1px solid var(--ma-border, #e5e5e5)", boxShadow: "0 10px 40px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
@@ -3918,8 +3918,29 @@ document.body
         </div>
       )}
 
-      
-      {showClearNotifModal && (
+
+{showNotifications && createPortal(
+        <section style={{ position: "fixed", inset: 0, zIndex: 21474836479, background: "var(--ma-bg-primary)", display: "flex", flexDirection: "column" }}>
+
+          {/* HEADER */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid var(--ma-border)", background: "var(--ma-bg-primary)", zIndex: 10 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <button onClick={() => setShowNotifications(false)} style={{ background: "transparent", border: "none", color: "var(--ma-text-primary)", cursor: "pointer", display: "flex", padding: "4px" }}>
+                <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>arrow_back</span>
+              </button>
+              <h2 style={{ fontSize: "16px", margin: 0, fontWeight: "700", color: "var(--ma-text-primary)" }}>Activity Log</h2>
+            </div>
+
+            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+              {notifications.length > 0 && (
+                <button onClick={() => setShowClearNotifModal(true)} style={{ background: "transparent", border: "none", color: "#FF4E45", cursor: "pointer", fontSize: "12px", fontWeight: "600" }}>
+                  Clear All
+                </button>
+              )}
+            </div>
+          </div>
+
+          {showClearNotifModal && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 9999999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }} onClick={() => setShowClearNotifModal(false)}>
           <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "85%", maxWidth: "320px", borderRadius: "16px", padding: "24px", boxShadow: "0 10px 30px rgba(0,0,0,0.2)", textAlign: "center" }} onClick={e => e.stopPropagation()}>
             <h3 style={{ margin: "0 0 12px 0", fontSize: "18px", fontWeight: "700" }}>Clear Activity Log</h3>
@@ -3942,27 +3963,6 @@ document.body
           </div>
         </div>
       )}
-      
-      {showNotifications && createPortal(
-        <section style={{ position: "fixed", inset: 0, zIndex: 21474836479, background: "var(--ma-bg-primary)", display: "flex", flexDirection: "column" }}>
-          
-          {/* HEADER */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid var(--ma-border)", background: "var(--ma-bg-primary)", zIndex: 10 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <button onClick={() => setShowNotifications(false)} style={{ background: "transparent", border: "none", color: "var(--ma-text-primary)", cursor: "pointer", display: "flex", padding: "4px" }}>
-                <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>arrow_back</span>
-              </button>
-              <h2 style={{ fontSize: "16px", margin: 0, fontWeight: "700", color: "var(--ma-text-primary)" }}>Activity Log</h2>
-            </div>
-            
-            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-              {notifications.length > 0 && (
-                <button onClick={() => setShowClearNotifModal(true)} style={{ background: "transparent", border: "none", color: "#FF4E45", cursor: "pointer", fontSize: "12px", fontWeight: "600" }}>
-                  Clear All
-                </button>
-              )}
-            </div>
-          </div>
 
           {/* COMPACT LIST */}
           <div style={{ flex: 1, overflowY: "auto", padding: "12px", paddingBottom: "160px" }}>
@@ -3997,7 +3997,7 @@ document.body
 
                 return (
                   <div key={n.id} style={{ display: "flex", alignItems: "center", background: isSelected ? "rgba(255,54,95,0.1)" : "var(--ma-bg-secondary)", border: `1px solid ${isSelected ? "var(--ma-accent)" : "transparent"}`, borderLeft: !n.is_read ? "3px solid var(--ma-accent)" : "3px solid transparent", borderRadius: "8px", marginBottom: "8px", padding: "10px 12px" }}>
-                    
+
                     {/* Checkbox */}
                     <div onClick={() => {
                       setSelectedNotifs(prev => isSelected ? prev.filter(id => id !== n.id) : [...prev, n.id]);
@@ -4015,7 +4015,7 @@ document.body
                         setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, is_read: true } : x));
                       }
                     }} style={{ flex: 1, display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", minWidth: 0 }}>
-                      
+
                       <div style={{ width: "32px", height: "32px", borderRadius: "50%", overflow: "hidden", border: `1.5px solid ${actionColor}`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--ma-bg-hover)" }}>
                         {n.actor?.avatar_url ? <img src={n.actor.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="" /> : <span className="material-symbols-outlined" style={{ color: actionColor, fontSize: "16px" }}>person</span>}
                       </div>
@@ -4059,7 +4059,7 @@ document.body
           {/* 🎵 INJECTED MINI PLAYER */}
           <div onClick={(e) => e.stopPropagation()}>
              {activeMedia && !showWatchPage && (
-        <div 
+        <div
           className={"yt-mini-player" + (navVisible || isDragging || miniPlayerPos ? "" : " yt-mini-hidden") + ((!isPlaying || !isScrolling) && !isDragging ? " is-hidden" : "") + (isDragging ? " yt-mini-dragging" : "")}
           style={{
             bottom: miniPlayerPos ? 'auto' : '72px',
@@ -4070,7 +4070,7 @@ document.body
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
         >
-          
+
           <div className="yt-mini-cover" onClick={() => setShowWatchPage(true)}>
             {activeMedia.thumbnailUrl ? (
               <img loading="lazy" src={activeMedia.thumbnailUrl} alt="" style={{ pointerEvents: "none" }} />
@@ -4080,23 +4080,23 @@ document.body
           </div>
 
           <div className="yt-mini-controls">
-            <button 
-              onClick={(e) => { 
-                e.stopPropagation(); 
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
                 const mediaEl = activeMedia.media_type === "audio" ? audioRef.current : videoRef.current;
                 if (mediaEl) {
                   if (mediaEl.paused) mediaEl.play();
                   else mediaEl.pause();
                 }
-              }} 
+              }}
               className="yt-mini-play-btn"
             >
               <span className="material-symbols-outlined" style={{ fontSize: "22px", fontVariationSettings: "'FILL' 1", pointerEvents: "none" }}>
                 {isPlaying ? "pause" : "play_arrow"}
               </span>
             </button>
-            
-            
+
+
           </div>
 
         </div>
@@ -4143,7 +4143,7 @@ document.body
                   <button onClick={() => { setShowAnalytics(false);  setMenuOpen(false); setProfileName(profile?.username || profile?.display_name || ""); setProfileBio(profile?.bio || ""); setShowAccountPage(true); setShowProfileEditor(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
                     <span className="material-symbols-outlined">edit</span> Edit profile
                   </button>
-                  
+
                   <div className="ma-avatar-menu-line" />
                   <div style={{ padding: "8px 16px" }}>
                     <div style={{ fontSize: "12px", color: "var(--ma-text-secondary)", marginBottom: "8px", fontWeight: "bold" }}>APPEARANCE</div>
@@ -4308,21 +4308,21 @@ document.body
           }
         `}</style>
 
-            
+
 <style>{`
   /* Main Upload Screen Background */
   .yt-upload { background: var(--ma-bg, #fff) !important; color: var(--ma-text, #000) !important; }
   .yt-upload-heading { color: var(--ma-text, #000) !important; }
-  
+
   /* Dropzone */
-  .yt-upload-dropzone { 
-    background: var(--ma-surface, #f9f9f9) !important; 
-    border: 2px dashed var(--ma-border, #e5e5e5) !important; 
-    color: var(--ma-text, #000) !important; 
+  .yt-upload-dropzone {
+    background: var(--ma-surface, #f9f9f9) !important;
+    border: 2px dashed var(--ma-border, #e5e5e5) !important;
+    color: var(--ma-text, #000) !important;
   }
   .yt-upload-dropzone p { color: var(--ma-text, #000) !important; }
   .yt-upload-dropzone-sub { color: var(--ma-text-secondary, #666) !important; }
-  
+
   /* The 'Select Files' Button (Turn it pink) */
   .yt-upload-select {
     background: #ff365f !important;
@@ -4330,22 +4330,22 @@ document.body
     border: none !important;
     box-shadow: 0 4px 12px rgba(255,54,95,0.3) !important;
   }
-  
+
   /* Input Fields (Title, Description, Category, Artist) */
-  .yt-upload-field input, 
-  .yt-upload-field textarea, 
+  .yt-upload-field input,
+  .yt-upload-field textarea,
   .yt-upload-field select {
     background: var(--ma-surface, #f2f2f2) !important;
     color: var(--ma-text, #000) !important;
     border: 1px solid var(--ma-border, #e5e5e5) !important;
     outline: none !important;
   }
-  
+
   /* Input Labels */
   .yt-upload-field span {
     color: var(--ma-text, #000) !important;
   }
-  
+
   /* Top Bar Close Button */
   .yt-upload-topbar .yt-icon-btn {
     color: var(--ma-text, #000) !important;
@@ -4365,7 +4365,7 @@ document.body
                 <div className="yt-upload-topbar-right" />
               </div>
 
-              
+
 <style>{`/* V2_UPLOAD_OVERRIDES */
   /* 1. Fix the weird blue Select Files button */
   label.yt-upload-select {
@@ -4418,7 +4418,7 @@ document.body
   }
 `}</style>
 
-          
+
 <style>{`/* V3_DROPZONE_RESIZE */
   /* 1. Shrink the overall dashed box */
   div.yt-upload-dropzone {
@@ -4430,7 +4430,7 @@ document.body
     justify-content: center !important;
     border-radius: 12px !important;
   }
-  
+
   /* 2. Shrink the upload icon */
   div.yt-upload-dropzone > .material-symbols-outlined {
     font-size: 32px !important;
@@ -4531,11 +4531,11 @@ document.body
 
                 <label className="yt-upload-field">
                   <span>Blocked Words (Optional)</span>
-                  <input 
-                    value={uploadBlockedWords} 
-                    onChange={(e) => setUploadBlockedWords(e.target.value)} 
-                    placeholder="E.g. scam, ugly, hate (comma separated)" 
-                    maxLength={100} 
+                  <input
+                    value={uploadBlockedWords}
+                    onChange={(e) => setUploadBlockedWords(e.target.value)}
+                    placeholder="E.g. scam, ugly, hate (comma separated)"
+                    maxLength={100}
                   />
                   <small className="yt-upload-hint">Comments containing these words will be automatically blocked on this video.</small>
                 </label>
@@ -4660,7 +4660,7 @@ document.body
                 </div>
               </form>
             </section>
-          
+
 </div>
 )}
 
@@ -4741,7 +4741,7 @@ document.body
               </button>
             </div>
 
-            
+
         {showSubscriptionsFeed && profile?.role === 'artist' && (
           <div style={{ display: 'flex', gap: '10px', margin: '10px 20px', paddingBottom: '10px', borderBottom: '1px solid #333' }}>
             <button onClick={() => setSubsTab('feed')} style={{ flex: 1, padding: '10px', background: subsTab === 'feed' ? '#ff365f' : '#212121', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>My Feed</button>
@@ -4749,13 +4749,13 @@ document.body
           </div>
         )}
 
-        
-          
-          
-          
-          
-          
-          
+
+
+
+
+
+
+
           {(searchStatusMsg || search.trim() !== "") && (
             <div className="ma-inline-message">
               <span className="material-symbols-outlined">
@@ -4763,14 +4763,14 @@ document.body
               </span>
               <span>
                 {searchStatusMsg || (
-                  visibleMedia.length === 0 
-                    ? `No results found for "${search}"` 
+                  visibleMedia.length === 0
+                    ? `No results found for "${search}"`
                     : `Found ${visibleMedia.filter(i => i.media_type === 'audio').length} audio and ${visibleMedia.filter(i => i.media_type === 'video').length} video${visibleMedia.filter(i => i.media_type === 'video').length > 1 ? 's' : ''} for "${search}"`
                 )}
               </span>
             </div>
           )}
-          
+
           {message && (
         <div
           role="status"
@@ -4801,7 +4801,7 @@ document.body
         </div>
       )}
       {message && message.includes("Welcome back") && <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 px-4 mt-2 mb-2">{message}</p>}
-          
+
 <style>{`
   /* Force the active filter chip to be brand pink */
   .yt-chip.yt-chip-active {
@@ -4811,7 +4811,7 @@ document.body
     font-weight: 600 !important;
     box-shadow: 0 4px 12px rgba(255, 54, 95, 0.3) !important;
   }
-  
+
   /* Ensure the inactive chips have a clean, theme-aware background */
   .yt-chip:not(.yt-chip-active) {
     background-color: var(--ma-surface, #f2f2f2) !important;
@@ -4827,7 +4827,7 @@ document.body
                   className={"yt-chip" + (category === c ? " yt-chip-active" : "")}
                   onClick={() => {
                     setCategory(c);
-                    
+
                   }}
                 >
                   {c}
@@ -4835,9 +4835,9 @@ document.body
               ))}
             </div>
 
-            
 
-            
+
+
         {showSubscriptionsFeed && subsTab === 'subscribers' ? (
           <div style={{ padding: '20px', paddingBottom: '100px' }}>
             {mySubscribers.length === 0 ? (
@@ -4885,7 +4885,7 @@ document.body
                   <div key={i} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                     {/* Thumbnail Skeleton */}
                     <div className="ma-skeleton" style={{ width: "100%", height: "220px", borderRadius: "12px" }}></div>
-                    
+
                     {/* Info Skeleton */}
                     <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
                       <div className="ma-skeleton" style={{ width: "48px", height: "48px", borderRadius: "50%", flexShrink: 0 }}></div>
@@ -4939,9 +4939,9 @@ document.body
                     </button>
 
                     <div className="yt-video-row" style={{ display: "flex", gap: "12px", alignItems: "flex-start", marginTop: "12px" }}>
-                      <div 
-                        className="yt-video-avatar" 
-                        onClick={(e) => { e.stopPropagation(); openChannel(item.artist_id); }} 
+                      <div
+                        className="yt-video-avatar"
+                        onClick={(e) => { e.stopPropagation(); openChannel(item.artist_id); }}
                         style={{ width: "36px", height: "36px", borderRadius: "50%", overflow: "hidden", flexShrink: 0, cursor: "pointer", background: "#ff365f", display: "grid", placeItems: "center", color: "var(--ma-text)", fontSize: "16px", fontWeight: "bold" }}
                       >
                         {item.profiles?.avatar_url ? (
@@ -4954,9 +4954,9 @@ document.body
                         <h3 className="yt-video-title" style={{ margin: "0 0 4px 0", fontSize: "14px", fontWeight: "600", color: "var(--ma-text, #000)", lineHeight: "1.3", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                           {item.title}
                         </h3>
-                        <p 
-                          className="yt-video-channel" 
-                          onClick={(e) => { e.stopPropagation(); openChannel(item.artist_id); }} 
+                        <p
+                          className="yt-video-channel"
+                          onClick={(e) => { e.stopPropagation(); openChannel(item.artist_id); }}
                           style={{ margin: "0 0 2px 0", fontSize: "12px", color: "var(--ma-text-secondary, #666)", cursor: "pointer", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
                         >
                           {item.profiles?.display_name || "Unknown Artist"}
@@ -4971,12 +4971,12 @@ document.body
                     </div>
                   </article>
                 ))}
-                
+
                 {/* Load More Button */}
                 {visibleMedia.length >= feedLimit && (
                   <div style={{ display: "flex", justifyContent: "center", padding: "20px 0", width: "100%" }}>
-                    <button 
-                      onClick={() => setFeedLimit(prev => prev + 15)} 
+                    <button
+                      onClick={() => setFeedLimit(prev => prev + 15)}
                       style={{ padding: "12px 24px", background: "var(--ma-surface, #f0f0f0)", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #e5e5e5)", borderRadius: "24px", fontWeight: "600", cursor: "pointer", fontSize: "14px" }}
                     >
                       Load More Videos
@@ -5014,7 +5014,7 @@ document.body
           </div>
 
           <div className="yt-watch-player">
-            
+
             {activeMedia.playbackUrl ? (
               activeMedia.media_type === "video" ? (
                 <video
@@ -5047,8 +5047,8 @@ document.body
 
           <div className="yt-watch-body">
             <h1 className="yt-watch-title">{activeMedia.title}</h1>
-            <div 
-              onClick={() => setShowDescModal(true)} 
+            <div
+              onClick={() => setShowDescModal(true)}
               style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "6px", marginBottom: "12px", cursor: "pointer", width: "fit-content" }}
             >
               <span style={{ fontSize: "13px", fontWeight: "700", color: "var(--ma-text-secondary, #666)" }}>Discrip</span>
@@ -5072,7 +5072,7 @@ document.body
               <button className="yt-watch-action" onClick={() => {
                   localStorage.setItem(`disliked_${activeMedia.id}`, "true");
                   setMessage("Video disliked.");
-                  
+
                 }}>
                 <span className="material-symbols-outlined">thumb_down</span>
               </button>
@@ -5080,7 +5080,7 @@ document.body
                 <span className="material-symbols-outlined">share</span>
                 <span className="yt-watch-action-label">Share</span>
               </button>
-              
+
               {activeMedia.allow_download && (
                 <a href={activeMedia.playbackUrl} download={activeMedia.title} target="_blank" rel="noopener noreferrer" className="yt-watch-action" style={{ textDecoration: "none", color: "var(--ma-text, #000)" }}>
                   <span className="material-symbols-outlined">download</span>
@@ -5092,7 +5092,7 @@ document.body
                 <span className="material-symbols-outlined">playlist_add</span>
                 <span className="yt-watch-action-label">Save</span>
               </button>
-              
+
               <button className="yt-watch-action" onClick={(e) => { e.stopPropagation(); setShowMoreMenu(activeMedia); }}>
                 <span className="material-symbols-outlined">more_vert</span>
               </button>
@@ -5124,7 +5124,7 @@ document.body
                   Edit video
                 </button>
               ) : (
-                <button 
+                <button
                   className={"yt-watch-subscribe" + (isSubscribed ? " subscribed" : "")}
                   onClick={() => handleToggleSubscribe(activeMedia.artist_id)}
                 >
@@ -5133,9 +5133,9 @@ document.body
               )}
             </div>
 
-            
 
-            <div 
+
+            <div
               onClick={(e) => { e.stopPropagation(); setShowCommentsModal(true); }}
               style={{ width: "100%", padding: "8px 10px", background: "var(--ma-surface, #f2f2f2)", borderRadius: "10px", color: "var(--ma-text, #000)", marginTop: "0px", display: "flex", flexDirection: "column", gap: "8px", cursor: "pointer", border: "1px solid var(--ma-border, #e5e5e5)" }}
             >
@@ -5143,7 +5143,7 @@ document.body
                 <span style={{ fontWeight: "600", fontSize: "14px" }}>Comments <span style={{ color: "var(--ma-text-secondary, #666)" }}>{comments.length}</span></span>
                 <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>expand_more</span>
               </div>
-              
+
               {comments.length > 0 && (
                 <div style={{ display: "flex", gap: "8px", alignItems: "center", width: "100%", minWidth: 0 }}>
                   <div className="yt-video-avatar" style={{ width: "24px", height: "24px", flexShrink: 0 }}>
@@ -5156,7 +5156,7 @@ document.body
               )}
             </div>
 
-            
+
           </div>
         </section>
       )}
@@ -5164,16 +5164,16 @@ document.body
       {showAccountPage && (
         <section className="yt-you" style={{ padding: "0 0 120px", background: "var(--ma-bg, #fff)", minHeight: "100vh" }}>
           <style>{`button { min-height: 44px !important; min-width: 44px !important; }`}</style>
-          
+
           {/* 1. BANNER */}
           <div style={{ width: "100%", height: "140px", background: "radial-gradient(circle at 50% -20%, #ff365f 0%, rgba(255, 54, 95, 0.6) 60%, var(--ma-bg, #fff) 100%)", position: "relative" }}>
-            
+
           </div>
 
           {/* 2. PROFILE HEADER (Overlapping the banner) */}
           <style>{`
-            
-            
+
+
             .btn-pink { background-color: #ff365f !important; color: #ffffff !important; padding: 10px !important; border-radius: 8px !important; font-weight: 600 !important; font-size: 14px !important; border: none !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; width: 100% !important; }
             .btn-gray { background-color: var(--ma-surface, #f0f0f0) !important; color: var(--ma-text, #000) !important; padding: 10px !important; border-radius: 8px !important; font-weight: 500 !important; font-size: 14px !important; border: 1px solid var(--ma-border, #e5e5e5) !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; width: 100% !important; }
             .btn-circle { background-color: var(--ma-surface, #f0f0f0) !important; color: var(--ma-text, #000) !important; width: 44px !important; height: 44px !important; border-radius: 50% !important; border: 1px solid var(--ma-border, #e5e5e5) !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; flex-shrink: 0 !important; }
@@ -5189,10 +5189,10 @@ document.body
                 )}
               </div>
               <div style={{ paddingBottom: "4px" }}>
-                
+
 <style>{`
-  
-  
+
+
 `}</style>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: "4px", paddingBottom: "8px" }}>
@@ -5212,7 +5212,7 @@ document.body
               </div>
             </div>
 
-            
+
 
             {profile?.role === "artist" && (
               <p style={{ margin: "8px 0 16px", fontSize: "13px", color: "var(--ma-text-secondary, #666)", fontWeight: "600", display: "flex", alignItems: "center", gap: "4px" }}>
@@ -5247,14 +5247,14 @@ document.body
                   </button>
                 </div>
               )}
-              
+
               <button className="btn-circle" aria-label="Share Profile" onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleShareProfile(); }}>
                 <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>share</span>
               </button>
             </div>
 
 
-            
+
             {/* 5. TABS */}
             <div style={{ display: profile?.role === "artist" ? "flex" : "none", gap: "24px", borderBottom: "1px solid var(--ma-border, #e5e5e5)", marginBottom: "16px" }}>
               <button onClick={() => setProfileTab("overview")} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: profileTab === "overview" ? "#ff365f" : "var(--ma-text-secondary, #666)", fontWeight: profileTab === "overview" ? "600" : "500", fontSize: "14px", borderBottom: profileTab === "overview" ? "2px solid #ff365f" : "none", cursor: "pointer" }}>Overview</button>
@@ -5301,7 +5301,7 @@ document.body
                 </div>
               </div>
             )}
-            
+
             {/* HISTORY */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", marginBottom: "12px" }}>
   <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "600", color: "var(--ma-text, #000)" }}>History</h3>
@@ -5501,7 +5501,7 @@ document.body
 
             {profileTab === "about" && (
               <div style={{ background: "var(--ma-surface, #f0f0f0)", borderRadius: "16px", border: "1px solid var(--ma-border, #e5e5e5)", padding: "24px", marginBottom: "24px", boxShadow: "0 4px 20px rgba(0,0,0,0.02)" }}>
-                
+
                 {/* Header */}
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "20px" }}>
                   <span className="material-symbols-outlined" style={{ color: "#ff365f", fontSize: "22px" }}>info</span>
@@ -5517,7 +5517,7 @@ document.body
 
                 {/* Premium Stats Grid */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                  
+
                   {/* Joined Date */}
                   <div style={{ background: "var(--ma-bg, #fff)", padding: "16px", borderRadius: "12px", border: "1px solid var(--ma-border, #e5e5e5)", display: "flex", flexDirection: "column", gap: "6px" }}>
                     <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "var(--ma-text-secondary, #888)" }}>calendar_month</span>
@@ -5560,7 +5560,7 @@ document.body
 
             {showProfileEditor && (
               <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", background: "var(--ma-bg, #fff)", zIndex: 999999, display: "flex", flexDirection: "column", overflowY: "auto" }}>
-                
+
                 {/* Top Header */}
                 <div style={{ display: "flex", alignItems: "center", padding: "16px", borderBottom: "1px solid var(--ma-border, #e5e5e5)", background: "var(--ma-bg, #fff)", position: "sticky", top: 0, zIndex: 10 }}>
                   <button type="button" onClick={() => setShowProfileEditor(false)} style={{ background: "transparent", border: 0, color: "var(--ma-text, #000)", cursor: "pointer", display: "flex", padding: "8px", marginRight: "8px" }}>
@@ -5571,7 +5571,7 @@ document.body
 
                 {/* Form Container */}
                 <form onSubmit={handleSaveProfile} style={{ padding: "32px 24px", display: "flex", flexDirection: "column", alignItems: "center", gap: "32px", flex: 1 }}>
-                  
+
                   {/* Avatar Upload */}
                   <div style={{ position: "relative", width: "120px", height: "120px" }}>
                     <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: "var(--ma-surface, #f0f0f0)", overflow: "hidden", border: "3px solid var(--ma-bg, #fff)", boxShadow: "0 4px 20px rgba(0,0,0,0.1)" }}>
@@ -5599,10 +5599,10 @@ document.body
                       <label style={{ display: "block", fontSize: "12px", color: "var(--ma-text-secondary, #666)", marginBottom: "8px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px" }}>Bio</label>
                       <textarea value={profileBio} onChange={(e) => setProfileBio(e.target.value)} placeholder="Tell people about yourself..." rows="4" style={{ width: "100%", padding: "16px", borderRadius: "14px", background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", border: "1px solid var(--ma-border, #e5e5e5)", outline: "none", fontSize: "15px", resize: "none", display: "block" }} />
                     </div>
-                    
+
                     {/* Action Buttons (Failsafe Wrappers) */}
                     <div style={{ marginTop: "16px", display: "flex", flexDirection: "column", gap: "16px" }}>
-                      
+
                       {/* SAVE BUTTON WRAPPER */}
                       <div style={{ width: "100%", backgroundColor: "#ff365f", borderRadius: "14px", boxShadow: "0 8px 24px rgba(255, 54, 95, 0.3)", display: "block" }}>
                         <button type="submit" disabled={profileSaving} style={{ width: "100%", padding: "16px", backgroundColor: "transparent", color: "#ffffff", border: "none", fontWeight: "700", fontSize: "16px", cursor: profileSaving ? "not-allowed" : "pointer", display: "block" }}>
@@ -5647,8 +5647,8 @@ document.body
             .yt-channel-meta h1 {
               color: var(--ma-text, #000) !important;
             }
-            .yt-channel-sub, 
-            .yt-channel-subscribers, 
+            .yt-channel-sub,
+            .yt-channel-subscribers,
             .yt-channel-bio {
               color: var(--ma-text-secondary, #666) !important;
             }
@@ -5805,11 +5805,11 @@ document.body
 
               <div className="yt-channel-tabs">
                 {[
-                  "Home", 
-                  "Videos", 
-                  "Shorts", 
-                  "Playlists", 
-                  ...(channelProfile?.id === session?.user?.id ? ["Manage"] : []), 
+                  "Home",
+                  "Videos",
+                  "Shorts",
+                  "Playlists",
+                  ...(channelProfile?.id === session?.user?.id ? ["Manage"] : []),
                   "About"
                 ].map((t) => (
                   <button
@@ -5829,10 +5829,10 @@ document.body
                 ))}
               </div>
 
-              
+
             {channelTab === "Playlists" && (
               <div style={{ padding: "0 16px 20px 16px" }}>
-                
+
                 {/* Create Playlist Button (Only visible to owner) */}
                 {channelProfile?.id === session?.user?.id && (
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
@@ -5850,8 +5850,8 @@ document.body
                     {channelPlaylists.map(playlist => {
                       // Find the first item with a thumbnail to use as cover
                       const firstItemWithThumb = playlist.playlist_items?.find(item => item.media?.thumbnail_path);
-                      const coverUrl = firstItemWithThumb 
-                        ? supabase.storage.from(BUCKET).getPublicUrl(firstItemWithThumb.media.thumbnail_path).data.publicUrl 
+                      const coverUrl = firstItemWithThumb
+                        ? supabase.storage.from(BUCKET).getPublicUrl(firstItemWithThumb.media.thumbnail_path).data.publicUrl
                         : null;
 
                       return (
@@ -5865,13 +5865,13 @@ document.body
                             <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--ma-text-secondary)", position: "absolute", top: 0, left: 0, zIndex: 0, pointerEvents: "none" }}>
                               <span className="material-symbols-outlined" style={{ fontSize: "32px" }}>playlist_play</span>
                             </div>
-                            
+
                             <div style={{ position: "absolute", bottom: "6px", right: "6px", background: "rgba(0,0,0,0.82)", color: "#ffffff", fontSize: "11px", lineHeight: 1.4, fontWeight: "700", padding: "3px 7px", borderRadius: "4px", display: "flex", alignItems: "center", gap: "4px", backdropFilter: "blur(4px)", zIndex: 2, pointerEvents: "none" }}>
                               <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>playlist_play</span>
                               {playlist.playlist_items?.length || 0}
                             </div>
                           </div>
-                          
+
                           {/* Playlist Info */}
                           <div style={{ padding: "10px", display: "flex", flexDirection: "column", gap: "4px" }}>
                             <h4 style={{ margin: 0, fontSize: "13px", fontWeight: "700", color: "var(--ma-text)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{playlist.title}</h4>
@@ -5894,7 +5894,7 @@ document.body
 
             {channelTab === "About" ? (
                 <div style={{ background: "var(--ma-surface, #f0f0f0)", borderRadius: "16px", border: "1px solid var(--ma-border, #e5e5e5)", padding: "24px", marginBottom: "24px", boxShadow: "0 4px 20px rgba(0,0,0,0.02)" }}>
-                  
+
                   {/* Header */}
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "20px" }}>
                     <span className="material-symbols-outlined" style={{ color: "#ff365f", fontSize: "22px" }}>info</span>
@@ -5910,7 +5910,7 @@ document.body
 
                   {/* Premium Stats Grid */}
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                    
+
                     {/* Joined Date */}
                     <div style={{ background: "var(--ma-bg, #fff)", padding: "16px", borderRadius: "12px", border: "1px solid var(--ma-border, #e5e5e5)", display: "flex", flexDirection: "column", gap: "6px" }}>
                       <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "var(--ma-text-secondary, #888)" }}>calendar_month</span>
@@ -5951,7 +5951,7 @@ document.body
                 let filtered = channelMedia;
                 if (channelTab === "Videos") filtered = channelMedia.filter(i => i.media_type === "video" && !i.is_short);
                 else if (channelTab === "Shorts") filtered = channelMedia.filter(i => i.is_short);
-                
+
 
                 if (filtered.length === 0) {
                   return <p className="yt-you-empty">No {channelTab.toLowerCase()} found on this channel.</p>;
@@ -6121,7 +6121,7 @@ document.body
 
       {showAnalytics && (
         <section style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: "56px", background: "var(--ma-bg, #fff)", zIndex: 9999, overflowY: "auto", padding: "16px", color: "var(--ma-text, #000)", fontFamily: "Roboto, sans-serif" }}>
-          
+
           {/* Header */}
           <div style={{ display: "flex", alignItems: "center", marginBottom: "24px", borderBottom: "1px solid var(--ma-border, #e5e5e5)", paddingBottom: "16px" }}>
             <button onClick={() => { setShowAnalytics(false); setShowAccountPage(true); }} style={{ background: "var(--ma-surface)", border: "1px solid var(--ma-border)", borderRadius: "50%", width: "36px", height: "36px", color: "var(--ma-text)", cursor: "pointer", display: "grid", placeItems: "center" }}>
@@ -6197,9 +6197,9 @@ document.body
       {showManagePage && (
         <section className="yt-manage-page">
           <div className="yt-manage-topbar">
-            <button className="yt-icon-btn" onClick={() => { 
+            <button className="yt-icon-btn" onClick={() => {
               if (editingMedia) {
-                setEditingMedia(null); 
+                setEditingMedia(null);
               } else {
                   setShowManagePage(false);
                   if (manageSource === "channel") {
@@ -6264,9 +6264,9 @@ document.body
               <div className="ma-manage-controls">
                 <div className="ma-search-box">
                   <span className="material-symbols-outlined">search</span>
-                  <input 
-                    type="text" 
-                    placeholder="Search your uploads..." 
+                  <input
+                    type="text"
+                    placeholder="Search your uploads..."
                     value={manageSearch}
                     onChange={(e) => setManageSearch(e.target.value)}
                   />
@@ -6300,7 +6300,7 @@ document.body
                             </div>
                           )}
                         </div>
-                        
+
                         <div className="ma-manage-info">
                           <h4>{item.title}</h4>
                           <div className="ma-manage-meta">
@@ -6336,7 +6336,7 @@ document.body
       )}
 
       {activeMedia && !showWatchPage && (
-        <div 
+        <div
           className={"yt-mini-player" + (navVisible || isDragging || miniPlayerPos ? "" : " yt-mini-hidden") + ((!isPlaying || !isScrolling) && !isDragging ? " is-hidden" : "") + (isDragging ? " yt-mini-dragging" : "")}
           style={{
             bottom: miniPlayerPos ? 'auto' : '72px',
@@ -6347,7 +6347,7 @@ document.body
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
         >
-          
+
           <div className="yt-mini-cover" onClick={() => setShowWatchPage(true)}>
             {activeMedia.thumbnailUrl ? (
               <img loading="lazy" src={activeMedia.thumbnailUrl} alt="" style={{ pointerEvents: "none" }} />
@@ -6357,36 +6357,36 @@ document.body
           </div>
 
           <div className="yt-mini-controls">
-            <button 
-              onClick={(e) => { 
-                e.stopPropagation(); 
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
                 const mediaEl = activeMedia.media_type === "audio" ? audioRef.current : videoRef.current;
                 if (mediaEl) {
                   if (mediaEl.paused) mediaEl.play();
                   else mediaEl.pause();
                 }
-              }} 
+              }}
               className="yt-mini-play-btn"
             >
               <span className="material-symbols-outlined" style={{ fontSize: "22px", fontVariationSettings: "'FILL' 1", pointerEvents: "none" }}>
                 {isPlaying ? "pause" : "play_arrow"}
               </span>
             </button>
-            
-            
+
+
           </div>
 
         </div>
       )}
 
-    
-      
-      
-      
-      
+
+
+
+
+
       {showSubscriptionsPage && (
         <section style={{ position: "fixed", inset: 0, zIndex: 9999, background: "var(--ma-bg-primary)", overflowY: "auto", paddingBottom: "80px", color: "var(--ma-text-primary)", fontFamily: "Roboto, sans-serif" }}>
-          
+
           {/* HEADER */}
           <div style={{ display: "flex", alignItems: "center", padding: "16px 20px", background: "var(--ma-bg-primary)", position: "sticky", top: 0, zIndex: 10, borderBottom: "1px solid var(--ma-border)" }}>
             <button onClick={() => setShowSubscriptionsPage(false)} style={{ background: "transparent", border: 0, color: "var(--ma-text)", cursor: "pointer", display: "flex", padding: "8px", marginRight: "8px" }}>
@@ -6412,16 +6412,16 @@ document.body
           <div style={{ display: "flex", gap: "8px", padding: "16px", alignItems: "center", width: "100%", boxSizing: "border-box" }}>
             <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", background: "var(--ma-bg-secondary)", border: "1px solid var(--ma-border)", borderRadius: "12px", padding: "0 12px", height: "44px" }}>
               <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary)", fontSize: "20px", marginRight: "8px" }}>search</span>
-              <input 
-                type="text" 
-                placeholder="Search..." 
+              <input
+                type="text"
+                placeholder="Search..."
                 value={subsSearch}
                 onChange={(e) => setSubsSearch(e.target.value)}
                 style={{ flex: 1, minWidth: 0, background: "transparent", border: "none", color: "var(--ma-text-primary)", outline: "none", fontSize: "14px" }}
               />
             </div>
-            <select 
-              value={subsSort} 
+            <select
+              value={subsSort}
               onChange={(e) => setSubsSort(e.target.value)}
               style={{ flexShrink: 0, height: "44px", padding: "0 12px", borderRadius: "12px", background: "var(--ma-bg-secondary)", border: "1px solid var(--ma-border)", color: "var(--ma-text-primary)", outline: "none", fontSize: "14px", appearance: "none" }}
             >
@@ -6440,14 +6440,14 @@ document.body
             ) : (
               (() => {
                 const currentList = subsPageTab === 'subbers' ? subbersList : subsList;
-                
+
                 const filtered = currentList.filter(item => {
                   const p = item.profile;
                   if (!p) return false;
                   const term = subsSearch.toLowerCase();
                   return (p.username || "").toLowerCase().includes(term) || (p.display_name || "").toLowerCase().includes(term);
                 });
-                
+
                 const sorted = filtered.sort((a, b) => {
                   if (subsSort === "newest") return new Date(b.created_at) - new Date(a.created_at);
                   if (subsSort === "oldest") return new Date(a.created_at) - new Date(b.created_at);
@@ -6479,7 +6479,7 @@ document.body
                 return sorted.map((item, idx) => {
                   const p = item.profile;
                   if (!p) return null;
-                  
+
                   return (
                     <div key={idx} onClick={() => { setShowSubscriptionsPage(false); openChannel(p.id); }} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--ma-bg-secondary)", border: "1px solid var(--ma-border)", borderRadius: "12px", padding: "16px", marginBottom: "12px", cursor: "pointer" }}>
                       <div style={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
@@ -6502,7 +6502,7 @@ document.body
                           </span>
                         </div>
                       </div>
-                      
+
                       {subsPageTab === 'subs' && (
                         <button onClick={async (e) => {
                             e.stopPropagation();
@@ -6519,7 +6519,7 @@ document.body
                                 setUnsubscribingId(null);
                               }
                             }
-                          }} 
+                          }}
                           disabled={unsubscribingId === p.id}
                           style={{ background: "rgba(255, 0, 51, 0.1)", border: "1px solid #FF0033", color: "#FF0033", borderRadius: "12px", padding: "8px 16px", fontSize: "13px", fontWeight: 700, cursor: "pointer", flexShrink: 0, marginLeft: "12px", opacity: unsubscribingId === p.id ? 0.5 : 1 }}
                         >
@@ -6555,8 +6555,8 @@ document.body
           <small>You</small>
         </button>
       </nav>
-      
-      
+
+
       {showEditPlaylistModal && selectedPlaylist && (
         <div
           className="ma-edit-playlist-overlay"
@@ -6842,7 +6842,7 @@ document.body
   </div>
 )}
 
-          
+
           {/* Top Bar */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", background: "transparent", position: "absolute", top: 0, left: 0, right: 0, zIndex: 20 }}>
             <button onClick={() => { setShowPlaylistDetailPage(false); setSelectedPlaylistItems([]); setShowAllPlaylists(true); }} style={{ background: "var(--ma-surface)", border: "1px solid var(--ma-border)", borderRadius: "50%", color: "var(--ma-text)", cursor: "pointer", padding: "8px", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -6871,7 +6871,7 @@ document.body
           <div style={{ position: "relative", width: "100%", height: "220px", background: "var(--ma-surface)" }}>
             <div style={{ width: "100%", height: "100%", backgroundImage: `url(${selectedPlaylist.cover_url || (playlistItems[0]?.thumbnail_path ? supabase.storage.from("track-covers").getPublicUrl(playlistItems[0].thumbnail_path).data.publicUrl : "")})`, backgroundSize: "cover", backgroundPosition: "center", opacity: 0.9 }} />
             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, var(--ma-bg) 0%, transparent 100%)" }} />
-            
+
             {/* Edit Cover Button (Only for owner) */}
             {selectedPlaylist.user_id === session?.user?.id && (
               <label style={{ position: "absolute", bottom: "16px", right: "16px", background: "var(--ma-bg)", width: "40px", height: "40px", borderRadius: "50%", display: "grid", placeItems: "center", cursor: "pointer", boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}>
@@ -6884,14 +6884,14 @@ document.body
           {/* Playlist Info */}
           <div style={{ padding: "0 16px 16px 16px", position: "relative", zIndex: 10, marginTop: "-20px" }}>
             <h1 style={{ margin: "0 0 8px 0", fontSize: "28px", fontWeight: "900", color: "var(--ma-text)", letterSpacing: "-0.5px" }}>{selectedPlaylist.title}</h1>
-            
+
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "12px" }}>
               <img src={channelProfile?.avatar_url || "https://via.placeholder.com/32"} style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover" }} />
               <span style={{ fontSize: "14px", fontWeight: "700", color: "var(--ma-text)" }}>{channelProfile?.display_name || "Creator"}</span>
               <span style={{ fontSize: "14px", color: "var(--ma-text-secondary)" }}>•</span>
               <span style={{ fontSize: "14px", color: "var(--ma-text-secondary)" }}>{playlistItems.length} videos</span>
             </div>
-            
+
             <p style={{ margin: "0 0 16px 0", fontSize: "13px", color: "var(--ma-text-secondary)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
               {selectedPlaylist.description || "No description provided."}
             </p>
@@ -6901,7 +6901,7 @@ document.body
               <button onClick={() => { if (playlistItems.length > 0) { setVideoQueue(playlistItems.slice(1)); openPlayer(playlistItems[0]); } }} disabled={playlistItems.length === 0} style={{ display: "flex", alignItems: "center", gap: "6px", background: "var(--ma-surface)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", padding: "10px 20px", borderRadius: "24px", fontSize: "14px", fontWeight: "700", border: "none", cursor: playlistItems.length === 0 ? "not-allowed" : "pointer", opacity: playlistItems.length === 0 ? 0.5 : 1 }}>
                 <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span> Play all
               </button>
-              
+
               <div style={{ display: "flex", gap: "12px" }}>
                 <div role="button" tabIndex={0} aria-label="Add video to playlist" onClick={openAddVideoToPlaylistPicker} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") openAddVideoToPlaylistPicker(); }} style={{ width: "40px", height: "40px", borderRadius: "50%", background: "var(--ma-surface)", display: "grid", placeItems: "center", cursor: "pointer", border: "1px solid var(--ma-border)" }}>
                   <span className="material-symbols-outlined" style={{ color: "var(--ma-text)" }}>add</span>
@@ -6955,7 +6955,7 @@ document.body
                 {visiblePlaylistItems.map((item) => {
                   return (
                   <div key={item.playlistItemId || item.id} style={{ display: "flex", alignItems: "flex-start", gap: "12px", position: "relative" }}>
-                    
+
                     {/* Thumbnail */}
                     <div onClick={() => openPlayer(item)} style={{ width: "140px", height: "80px", borderRadius: "8px", overflow: "hidden", background: "var(--ma-surface)", flexShrink: 0, position: "relative", cursor: "pointer" }}>
                       {item.thumbnail_path ? (
@@ -6982,11 +6982,11 @@ document.body
                     {/* Dropdown Menu */}
                     {activePlaylistItemMenu === item.playlistItemId && (
                       <div style={{ position: "absolute", right: "0", top: "30px", background: "var(--ma-bg)", border: "1px solid var(--ma-border)", borderRadius: "12px", boxShadow: "0 10px 30px rgba(0,0,0,0.2)", zIndex: 30, display: "flex", flexDirection: "column", width: "220px", padding: "8px 0" }}>
-                        
+
                         <button onClick={() => { addToQueue(item, "next"); setActivePlaylistItemMenu(null); }} style={{ padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", color: "var(--ma-text)", fontWeight: "500", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "16px" }}>
                           <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "var(--ma-text-secondary)" }}>play_circle</span> Play next in queue
                         </button>
-                        
+
                         <button onClick={() => { addToQueue(item, "last"); setActivePlaylistItemMenu(null); }} style={{ padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", color: "var(--ma-text)", fontWeight: "500", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "16px" }}>
                           <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "var(--ma-text-secondary)" }}>playlist_add</span> Play last in queue
                         </button>
@@ -7008,7 +7008,7 @@ document.body
                         <button onClick={() => { handleShare(item); setActivePlaylistItemMenu(null); }} style={{ padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", color: "var(--ma-text)", fontWeight: "500", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "16px" }}>
                           <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "var(--ma-text-secondary)" }}>share</span> Share
                         </button>
-                        
+
                       </div>
                     )}
                   </div>
@@ -7022,7 +7022,7 @@ document.body
       {showPlaylistModal && (
         <div className="ma-home-save-playlist-modal" style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }} onClick={() => { setShowPlaylistModal(false); setMediaToAddToPlaylist(null); }}>
           <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "90%", maxWidth: "400px", borderRadius: "16px", padding: "24px", border: "1px solid var(--ma-border, #e5e5e5)", boxShadow: "0 10px 40px rgba(0,0,0,0.2)", maxHeight: "85vh", overflowY: "auto", userSelect: "none", WebkitUserSelect: "none" }} onClick={e => e.stopPropagation()}>
-            
+
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
               <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "700" }}>Save to playlist</h3>
               <button onClick={() => { setShowPlaylistModal(false); setMediaToAddToPlaylist(null); }} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", cursor: "pointer", display: "flex" }}><span className="material-symbols-outlined">close</span></button>
@@ -7035,10 +7035,10 @@ document.body
               ) : (
                 playlists.map(p => (
                   <div key={p.id} style={{ display: "flex", flexDirection: "column", gap: "10px", background: "var(--ma-surface)", padding: "14px", borderRadius: "12px", border: "1px solid var(--ma-border)" }}>
-                    
+
                     {/* Clickable Title to View Playlist */}
-                    <div 
-                      onClick={() => { openPlaylist(p); setShowPlaylistModal(false); }} 
+                    <div
+                      onClick={() => { openPlaylist(p); setShowPlaylistModal(false); }}
                       style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}
                     >
                       <span className="material-symbols-outlined" style={{ color: "var(--ma-text-secondary)" }}>playlist_play</span>
@@ -7061,31 +7061,31 @@ document.body
 
             {/* Create New Playlist Form */}
             <div style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%" }}>
-              
-              <input 
-                type="text" 
-                placeholder="New playlist name..." 
-                value={newPlaylistName} 
-                onChange={e => setNewPlaylistName(e.target.value)} 
-                style={{ width: "100%", padding: "14px", borderRadius: "10px", background: "var(--ma-surface)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", outline: "none", display: "block" }} 
+
+              <input
+                type="text"
+                placeholder="New playlist name..."
+                value={newPlaylistName}
+                onChange={e => setNewPlaylistName(e.target.value)}
+                style={{ width: "100%", padding: "14px", borderRadius: "10px", background: "var(--ma-surface)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", outline: "none", display: "block" }}
               />
-              
-              <button className="ma-create-playlist-button" 
-                type="button" 
+
+              <button className="ma-create-playlist-button"
+                type="button"
                 onClick={handleCreateNewPlaylist}
-                style={{ 
-                  width: "100%", 
-                  backgroundColor: "#ff365f", 
-                  color: "#ffffff", 
-                  border: "none", 
-                  padding: "14px", 
-                  borderRadius: "10px", 
-                  fontWeight: "bold", 
-                  fontSize: "15px", 
-                  cursor: "pointer", 
-                  display: "flex", 
-                  justifyContent: "center", 
-                  boxShadow: "0 4px 12px rgba(255,54,95,0.3)" 
+                style={{
+                  width: "100%",
+                  backgroundColor: "#ff365f",
+                  color: "#ffffff",
+                  border: "none",
+                  padding: "14px",
+                  borderRadius: "10px",
+                  fontWeight: "bold",
+                  fontSize: "15px",
+                  cursor: "pointer",
+                  display: "flex",
+                  justifyContent: "center",
+                  boxShadow: "0 4px 12px rgba(255,54,95,0.3)"
                 }}
               >
                 Create Playlist
@@ -7104,7 +7104,7 @@ document.body
             </div>
             <h3 style={{ margin: "0 0 8px 0", fontSize: "18px", fontWeight: "700" }}>Video Added!</h3>
             <p style={{ margin: "0 0 24px 0", fontSize: "14px", color: "var(--ma-text-secondary, #666)" }}>Successfully added to <strong>{addedPlaylistTitle}</strong>.</p>
-            
+
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               <button onClick={() => { setShowAddSuccessModal(false); setShowPlaylistDetailPage(false); setTimeout(() => { const pl = channelPlaylists.find(p => p.id === addedPlaylistId) || playlists.find(p => p.id === addedPlaylistId); if (pl) openPlaylist(pl); }, 100); }} style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "none", background: "#ff365f", color: "var(--ma-text)", fontWeight: "600", fontSize: "14px", cursor: "pointer", boxShadow: "0 4px 12px rgba(255,54,95,0.3)" }}>
                 View Playlist
@@ -7120,7 +7120,7 @@ document.body
       {showMoreMenu && createPortal(
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 2147483647, display: "flex", alignItems: "flex-end", backdropFilter: "blur(4px)" }} onClick={() => setShowMoreMenu(null)}>
           <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "100%", borderTopLeftRadius: "24px", borderTopRightRadius: "24px", padding: "20px 20px 40px 20px", boxShadow: "0 -10px 40px rgba(0,0,0,0.2)", display: "flex", flexDirection: "column", gap: "16px" }} onClick={e => e.stopPropagation()}>
-            
+
             {/* Header */}
             <div style={{ display: "flex", alignItems: "center", gap: "12px", paddingBottom: "16px", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
               <div style={{ width: "40px", height: "40px", borderRadius: "8px", overflow: "hidden", flexShrink: 0, background: "var(--ma-surface)" }}>
@@ -7137,7 +7137,7 @@ document.body
 
             {/* Actions */}
             <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-              
+
               {/* Playback Speed */}
               <div style={{ padding: "12px 0", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
                 <p style={{ margin: "0 0 8px 0", fontSize: "12px", fontWeight: "600", color: "var(--ma-text-secondary, #666)", textTransform: "uppercase" }}>Playback Speed</p>
@@ -7180,7 +7180,7 @@ document.body
       {false && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }} onClick={() => setShowPlaylistModal(false)}>
           <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "90%", maxWidth: "400px", borderRadius: "16px", padding: "24px", border: "1px solid var(--ma-border, #e5e5e5)", boxShadow: "0 10px 40px rgba(0,0,0,0.2)", maxHeight: "85vh", overflowY: "auto", userSelect: "none", WebkitUserSelect: "none" }} onClick={e => e.stopPropagation()}>
-            
+
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
               <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "700" }}>Save to playlist</h3>
               <button onClick={() => setShowPlaylistModal(false)} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", cursor: "pointer", display: "flex" }}><span className="material-symbols-outlined">close</span></button>
@@ -7211,11 +7211,11 @@ document.body
 
             {/* Create New Playlist Form */}
             <div style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%" }}>
-              <input 
-                type="text" 
-                placeholder="New playlist name..." 
-                value={newPlaylistName} 
-                onChange={e => setNewPlaylistName(e.target.value)} 
+              <input
+                type="text"
+                placeholder="New playlist name..."
+                value={newPlaylistName}
+                onChange={e => setNewPlaylistName(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
@@ -7240,10 +7240,10 @@ document.body
                     })();
                   }
                 }}
-                style={{ width: "100%", padding: "14px", borderRadius: "10px", background: "var(--ma-surface)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", outline: "none", display: "block", fontSize: "14px" }} 
+                style={{ width: "100%", padding: "14px", borderRadius: "10px", background: "var(--ma-surface)", color: "var(--ma-text)", border: "1px solid var(--ma-border)", outline: "none", display: "block", fontSize: "14px" }}
               />
-              
-              <div 
+
+              <div
                 onClick={async () => {
                   if (!newPlaylistName.trim()) return;
                   try {
@@ -7294,7 +7294,7 @@ document.body
             </div>
             <h3 style={{ margin: "0 0 8px 0", fontSize: "18px", fontWeight: "700" }}>Video Added!</h3>
             <p style={{ margin: "0 0 24px 0", fontSize: "14px", color: "var(--ma-text-secondary, #666)" }}>Successfully added to <strong>{addedPlaylistTitle}</strong>.</p>
-            
+
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               <button onClick={() => { setShowAddSuccessModal(false); setShowPlaylistDetailPage(false); setTimeout(() => { const pl = channelPlaylists.find(p => p.id === addedPlaylistId) || playlists.find(p => p.id === addedPlaylistId); if (pl) openPlaylist(pl); }, 100); }} style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "none", background: "#ff365f", color: "var(--ma-text)", fontWeight: "600", fontSize: "14px", cursor: "pointer", boxShadow: "0 4px 12px rgba(255,54,95,0.3)" }}>
                 View Playlist
@@ -7310,7 +7310,7 @@ document.body
       {showMoreMenu && createPortal(
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 2147483647, display: "flex", alignItems: "flex-end", backdropFilter: "blur(4px)" }} onClick={() => setShowMoreMenu(null)}>
           <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "100%", borderTopLeftRadius: "24px", borderTopRightRadius: "24px", padding: "20px 20px 40px 20px", boxShadow: "0 -10px 40px rgba(0,0,0,0.2)", display: "flex", flexDirection: "column", gap: "16px" }} onClick={e => e.stopPropagation()}>
-            
+
             {/* Header */}
             <div style={{ display: "flex", alignItems: "center", gap: "12px", paddingBottom: "16px", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
               <div style={{ width: "40px", height: "40px", borderRadius: "8px", overflow: "hidden", flexShrink: 0, background: "var(--ma-surface)" }}>
@@ -7327,7 +7327,7 @@ document.body
 
             {/* Actions */}
             <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-              
+
               {/* Playback Speed */}
               <div style={{ padding: "12px 0", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
                 <p style={{ margin: "0 0 8px 0", fontSize: "12px", fontWeight: "600", color: "var(--ma-text-secondary, #666)", textTransform: "uppercase" }}>Playback Speed</p>
@@ -7370,7 +7370,7 @@ document.body
       {false && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }} onClick={() => setShowPlaylistModal(false)}>
           <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "90%", maxWidth: "400px", borderRadius: "16px", padding: "24px", border: "1px solid var(--ma-border, #e5e5e5)", boxShadow: "0 10px 40px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
-            
+
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
               <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "700" }}>Save to playlist</h3>
               <button onClick={() => setShowPlaylistModal(false)} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", cursor: "pointer", display: "flex" }}><span className="material-symbols-outlined">close</span></button>
@@ -7436,7 +7436,7 @@ document.body
             </div>
             <h3 style={{ margin: "0 0 8px 0", fontSize: "18px", fontWeight: "700" }}>Video Added!</h3>
             <p style={{ margin: "0 0 24px 0", fontSize: "14px", color: "var(--ma-text-secondary, #666)" }}>Successfully added to <strong>{addedPlaylistTitle}</strong>.</p>
-            
+
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               <button onClick={() => { setShowAddSuccessModal(false); setShowPlaylistDetailPage(false); setTimeout(() => { const pl = channelPlaylists.find(p => p.id === addedPlaylistId) || playlists.find(p => p.id === addedPlaylistId); if (pl) openPlaylist(pl); }, 100); }} style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "none", background: "#ff365f", color: "var(--ma-text)", fontWeight: "600", fontSize: "14px", cursor: "pointer", boxShadow: "0 4px 12px rgba(255,54,95,0.3)" }}>
                 View Playlist
@@ -7452,7 +7452,7 @@ document.body
       {false && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }} onClick={() => setShowPlaylistModal(false)}>
           <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "90%", maxWidth: "400px", borderRadius: "16px", padding: "24px", border: "1px solid var(--ma-border, #e5e5e5)", boxShadow: "0 10px 40px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
-            
+
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
               <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "700" }}>Save to playlist</h3>
               <button onClick={() => setShowPlaylistModal(false)} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", cursor: "pointer", display: "flex" }}><span className="material-symbols-outlined">close</span></button>
@@ -7518,7 +7518,7 @@ document.body
             </div>
             <h3 style={{ margin: "0 0 8px 0", fontSize: "18px", fontWeight: "700" }}>Video Added!</h3>
             <p style={{ margin: "0 0 24px 0", fontSize: "14px", color: "var(--ma-text-secondary, #666)" }}>Successfully added to <strong>{addedPlaylistTitle}</strong>.</p>
-            
+
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               <button onClick={() => { setShowAddSuccessModal(false); setShowPlaylistDetailPage(false); setTimeout(() => { const pl = channelPlaylists.find(p => p.id === addedPlaylistId) || playlists.find(p => p.id === addedPlaylistId); if (pl) openPlaylist(pl); }, 100); }} style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "none", background: "#ff365f", color: "var(--ma-text)", fontWeight: "600", fontSize: "14px", cursor: "pointer", boxShadow: "0 4px 12px rgba(255,54,95,0.3)" }}>
                 View Playlist
@@ -7534,7 +7534,7 @@ document.body
       {false && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }} onClick={() => setShowPlaylistModal(false)}>
           <div style={{ background: "var(--ma-bg, #fff)", color: "var(--ma-text, #000)", width: "90%", maxWidth: "400px", borderRadius: "16px", padding: "24px", border: "1px solid var(--ma-border, #e5e5e5)", boxShadow: "0 10px 40px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
-            
+
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
               <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "700" }}>Save to playlist</h3>
               <button onClick={() => setShowPlaylistModal(false)} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", cursor: "pointer" }}><span className="material-symbols-outlined">close</span></button>
@@ -7564,7 +7564,7 @@ document.body
               try {
                 const { data, error } = await supabase.from("playlists").insert({ user_id: session.user.id, title: newPlaylistName.trim(), visibility: 'public' }).select().single();
                 if (error) throw error;
-                
+
                 if (activeMedia?.id) {
                   await supabase.from('playlist_items').insert({ playlist_id: data.id, media_id: activeMedia.id, position: 0 });
                 }
@@ -7572,7 +7572,7 @@ document.body
                 setPlaylists(prev => [data, ...prev]);
                 setNewPlaylistName("");
                 setShowPlaylistModal(false);
-                
+
                 setAddedPlaylistId(data.id);
                 setAddedPlaylistTitle(data.title);
                 setShowAddSuccessModal(true);
@@ -7681,11 +7681,11 @@ document.body
       )}
 
       {showCommentsModal && (
-        <div 
+        <div
           style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.8)", zIndex: 9999, display: "flex", flexDirection: "column", justifyContent: "flex-end" }}
           onClick={() => setShowCommentsModal(false)}
         >
-          <div 
+          <div
             style={{ background: "var(--ma-bg, #fff)", height: "85vh", borderTopLeftRadius: "16px", borderTopRightRadius: "16px", display: "flex", flexDirection: "column" }}
             onClick={e => e.stopPropagation()}
           >
@@ -7704,14 +7704,14 @@ document.body
               ) : (
                 comments.filter(c => !c.parent_id).map(c => (
                   <div key={c.id} style={{ display: "flex", gap: "10px", marginBottom: "16px", alignItems: "flex-start", textAlign: "left" }}>
-                    
+
                     {/* Avatar - Smaller */}
                     <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "#ff365f", flexShrink: 0, overflow: "hidden", display: "grid", placeItems: "center", color: "var(--ma-text)", fontSize: "12px" }}>
                       {c.profiles?.avatar_url ? <img src={c.profiles.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : "♫"}
                     </div>
 
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "flex-start", minWidth: 0 }}>
-                      
+
                       {/* Name & Time - Compact */}
                       <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "2px" }}>
                         <span style={{ fontSize: "12px", fontWeight: "bold", color: "var(--ma-text, #000)" }}>
@@ -7742,7 +7742,7 @@ document.body
                           {c.image_url && <img src={c.image_url} style={{ maxWidth: "100%", maxHeight: "160px", borderRadius: "6px", marginTop: "6px" }} />}
                           {c.audio_url && (
                           <div style={{ display: "flex", alignItems: "center", gap: "12px", background: "var(--ma-surface, #f2f2f2)", padding: "10px 14px", borderRadius: "16px", border: "1px solid var(--ma-border, #e5e5e5)", marginTop: "10px", width: "100%", maxWidth: "340px", boxShadow: "0 2px 8px rgba(0,0,0,0.03)" }}>
-                            <button 
+                            <button
                               onClick={() => {
                                 if (playingCommentId === c.id) {
                                   if (playingCommentRef.current.paused) playingCommentRef.current.play();
@@ -7756,7 +7756,7 @@ document.body
                                   setPlayingCommentId(c.id);
                                   setPlayingCommentSpeed(1);
                                 }
-                              }} 
+                              }}
                               style={{ background: "transparent", border: 0, color: "var(--ma-text, #000)", cursor: "pointer", display: "flex", padding: 0 }}
                             >
                               <span className="material-symbols-outlined" style={{ fontSize: "28px" }}>
@@ -7776,20 +7776,20 @@ document.body
                               })}
                             </div>
 
-                            <button 
+                            <button
                               onClick={() => {
                                 const speeds = [1, 1.5, 2];
                                 const nextSpeed = speeds[(speeds.indexOf(playingCommentSpeed) + 1) % speeds.length];
                                 setPlayingCommentSpeed(nextSpeed);
                                 if (playingCommentRef.current) playingCommentRef.current.playbackRate = nextSpeed;
-                              }} 
+                              }}
                               style={{ background: "var(--ma-bg, #fff)", border: "1px solid var(--ma-border, #e5e5e5)", borderRadius: "6px", color: "var(--ma-text, #000)", width: "28px", height: "22px", display: "grid", placeItems: "center", fontSize: "10px", fontWeight: "700", cursor: "pointer" }}
                             >
                               {playingCommentId === c.id ? `${playingCommentSpeed}x` : "1x"}
                             </button>
 
                             {/* Hidden Audio for playback */}
-                            <audio 
+                            <audio
                               ref={playingCommentId === c.id ? playingCommentRef : null}
                               src={c.audio_url}
                               preload="metadata"
@@ -7805,7 +7805,7 @@ document.body
                             />
                           </div>
                         )}
-                          
+
                           {/* Creator Heart inline with text */}
                           {c.has_creator_heart && (
                             <span style={{ display: "inline-flex", alignItems: "center", gap: "2px", marginTop: "2px", fontSize: "11px", color: "#ff365f" }}>
@@ -7821,7 +7821,7 @@ document.body
                           <button onClick={(e) => handleLikeComment(c.id, c.likes || 0, e)} style={{ background: "transparent", border: 0, color: likedComments.includes(c.id) ? "#ff365f" : "var(--ma-text-secondary, #666)", display: "flex", alignItems: "center", gap: "3px", fontSize: "11px", padding: 0, cursor: "pointer" }}>
                             <span className="material-symbols-outlined" style={{ fontSize: "14px", fontVariationSettings: likedComments.includes(c.id) ? "'FILL' 1" : "'FILL' 0" }}>thumb_up</span> {c.likes || 0}
                           </button>
-                          
+
                           <button onClick={() => { setExpandedReplies(prev => prev.includes(c.id) ? prev.filter(id => id !== c.id) : [...prev, c.id]); setReplyTarget(c.id); setReplyingToName(c.profiles?.display_name || "user"); }} style={{ background: "transparent", border: 0, color: expandedReplies.includes(c.id) ? "var(--ma-text, #000)" : "var(--ma-text-secondary, #666)", display: "flex", alignItems: "center", gap: "3px", fontSize: "11px", padding: 0, cursor: "pointer", fontWeight: expandedReplies.includes(c.id) ? "600" : "normal" }}>
                             <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>chat_bubble</span> Reply {comments.filter(r => r.parent_id === c.id).length > 0 && `(${comments.filter(r => r.parent_id === c.id).length})`}
                           </button>
@@ -7898,7 +7898,7 @@ document.body
 
             {/* Input Area */}
             <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "var(--ma-bg, #fff)", borderTop: "1px solid var(--ma-border, #e5e5e5)", padding: "12px 16px", display: "flex", flexDirection: "column", gap: "8px", boxShadow: "0 -4px 12px rgba(0,0,0,0.03)", zIndex: 10 }}>
-              
+
               {replyTarget && (
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px", fontSize: "12px", color: "var(--ma-text-secondary, #666)" }}>
                   <span>Replying to <strong>@{replyingToName}</strong></span>
@@ -7907,10 +7907,10 @@ document.body
               )}
 
               <form onSubmit={handlePostComment} style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%" }}>
-                
+
                 {(commentImage || commentAudioUrl) ? (
                   <div style={{ display: "flex", flexDirection: "column", gap: "10px", padding: "12px", background: "var(--ma-surface, #f0f0f0)", borderRadius: "12px", border: "1px solid var(--ma-border, #e5e5e5)" }}>
-                    
+
                     {commentImage && (
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                         <img src={URL.createObjectURL(commentImage)} style={{ height: "60px", borderRadius: "6px" }} />
@@ -7920,16 +7920,16 @@ document.body
 
                     {commentAudioUrl && (
                       <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                        
-                        <audio 
+
+                        <audio
                           ref={voicePreviewRef}
                           src={commentAudioUrl}
                           onTimeUpdate={(e) => setVoicePreviewProgress(e.target.currentTime)}
                           onLoadedMetadata={(e) => setVoicePreviewDuration(e.target.duration)}
                           onEnded={() => setVoicePreviewPlaying(false)}
-                          onPlay={() => { 
-                            document.querySelectorAll('audio, video').forEach(el => { if (el !== voicePreviewRef.current) el.pause(); }); 
-                            setVoicePreviewPlaying(true); 
+                          onPlay={() => {
+                            document.querySelectorAll('audio, video').forEach(el => { if (el !== voicePreviewRef.current) el.pause(); });
+                            setVoicePreviewPlaying(true);
                           }}
                           onPause={() => setVoicePreviewPlaying(false)}
                         />
@@ -7983,16 +7983,16 @@ document.body
                 ) : (
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <div className="premium-comment-input-wrap" style={{ flex: 1, display: "flex", alignItems: "center", background: "var(--ma-surface, #f0f0f0)", borderRadius: "24px", padding: "4px 12px", border: "1px solid var(--ma-border, #e5e5e5)" }}>
-                      
+
                       <button type="button" onClick={() => setShowEmojiPicker(!showEmojiPicker)} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", padding: 0, display: "flex", cursor: "pointer" }}>
                         <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>sentiment_satisfied</span>
                       </button>
 
-                      <input 
-                        value={newComment} 
-                        onChange={e => setNewComment(e.target.value)} 
-                        placeholder="Add a comment..." 
-                        style={{ flex: 1, padding: "10px", background: "transparent", border: 0, color: "var(--ma-text)", outline: "none", fontSize: "14px" }} 
+                      <input
+                        value={newComment}
+                        onChange={e => setNewComment(e.target.value)}
+                        placeholder="Add a comment..."
+                        style={{ flex: 1, padding: "10px", background: "transparent", border: 0, color: "var(--ma-text)", outline: "none", fontSize: "14px" }}
                       />
 
                       <label style={{ cursor: "pointer", display: "flex", alignItems: "center", color: "var(--ma-text-secondary, #666)" }}>
@@ -8010,7 +8010,7 @@ document.body
                         </button>
                       )}
                     </div>
-                    
+
                     <button type="submit" style={{ background: newComment.trim() ? "#3ea6ff" : "#212121", border: 0, borderRadius: "50%", width: "44px", height: "44px", display: "grid", placeItems: "center", color: newComment.trim() ? "#0f0f0f" : "#555", transition: "background 0.2s", cursor: "pointer" }}>
                       <span className="material-symbols-outlined">send</span>
                     </button>
