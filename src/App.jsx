@@ -483,16 +483,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [comments, setComments] = useState([]);
 
-  // Auto-close Description Modal after 10 seconds
-  useEffect(() => {
-    let timer;
-    if (showDescModal) {
-      timer = setTimeout(() => {
-        setShowDescModal(false);
-      }, 10000); // 10 seconds
-    }
-    return () => clearTimeout(timer);
-  }, [showDescModal]);
+
 
   const [deletingCommentId, setDeletingCommentId] = useState(null);
   const [likedComments, setLikedComments] = useState([]);
@@ -7458,6 +7449,98 @@ document.body
             </form>
 
           </div>
+        </div>
+      )}
+
+      {showDescModal && activeMedia && (
+        <div
+          onClick={() => setShowDescModal(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 1000000,
+            background: "rgba(0,0,0,0.68)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "16px",
+            backdropFilter: "blur(4px)"
+          }}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-label="Video description"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "100%",
+              maxWidth: "640px",
+              maxHeight: "80vh",
+              overflowY: "auto",
+              background: "var(--ma-bg-elevated, var(--ma-bg-primary, #fff))",
+              color: "var(--ma-text-primary, #111)",
+              border: "1px solid var(--ma-border, #ccc)",
+              borderRadius: "16px",
+              padding: "20px",
+              boxSizing: "border-box",
+              boxShadow: "0 16px 48px rgba(0,0,0,0.28)"
+            }}
+          >
+            <div style={{
+              display: "flex",
+              alignItems: "flex-start",
+              justifyContent: "space-between",
+              gap: "16px",
+              marginBottom: "16px"
+            }}>
+              <div style={{ minWidth: 0 }}>
+                <h2 style={{
+                  margin: 0,
+                  fontSize: "18px",
+                  lineHeight: 1.4,
+                  overflowWrap: "anywhere"
+                }}>
+                  Description
+                </h2>
+                <p style={{
+                  margin: "5px 0 0",
+                  fontSize: "13px",
+                  color: "var(--ma-text-secondary, #666)",
+                  overflowWrap: "anywhere"
+                }}>
+                  {activeMedia.title || "Selected video"}
+                </p>
+              </div>
+              <button
+                type="button"
+                aria-label="Close description"
+                onClick={() => setShowDescModal(false)}
+                style={{
+                  flexShrink: 0,
+                  border: "1px solid var(--ma-border, #ccc)",
+                  borderRadius: "10px",
+                  padding: "8px 12px",
+                  background: "var(--ma-bg-secondary, #f2f2f2)",
+                  color: "var(--ma-text-primary, #111)",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  fontWeight: 600
+                }}
+              >
+                Close
+              </button>
+            </div>
+            <div style={{
+              borderTop: "1px solid var(--ma-border, #ccc)",
+              paddingTop: "16px",
+              fontSize: "14px",
+              lineHeight: 1.7,
+              whiteSpace: "pre-wrap",
+              overflowWrap: "anywhere"
+            }}>
+              {activeMedia.description || "No description provided."}
+            </div>
+          </section>
         </div>
       )}
 
