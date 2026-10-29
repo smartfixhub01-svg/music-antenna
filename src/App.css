@@ -6222,3 +6222,15 @@ p
   outline: 2px solid var(--ma-text) !important;
   outline-offset: 3px;
 }
+
+/* Clear Watch History: keep the primary action visible in both themes */
+.ma-modal-card .ma-modal-btn.primary {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  background-color: #FF365F !important;
+  color: #FFFFFF !important;
+  border: 1px solid #FF365F !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
