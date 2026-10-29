@@ -702,6 +702,8 @@ useEffect(() => {
     });
   }
 
+  const [showClearHistoryModal, setShowClearHistoryModal] = useState(false);
+
   const [history, setHistory] = useState(() => {
     try {
       const raw = localStorage.getItem("ma_history");
@@ -5326,7 +5328,7 @@ document.body
                 disabled={history.length === 0}
                 onClick={() => {
                   if (!history.length) return;
-                  if (!window.confirm("Clear all watch history? This cannot be undone.")) return;
+                  setShowClearHistoryModal(true);
                   setHistory([]);
                   try { localStorage.setItem("ma_history", "[]"); } catch {}
                 }}
@@ -5345,6 +5347,87 @@ document.body
                 Clear history
               </button>
             </div>
+
+            {showClearHistoryModal && createPortal(
+              <div
+                className="ma-modal-backdrop"
+                onClick={() => setShowClearHistoryModal(false)}
+              >
+                <div
+                  className="ma-modal-card"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="ma-clear-history-title"
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    maxWidth: "380px",
+                    width: "100%",
+                    color: "var(--ma-text-primary)"
+                  }}
+                >
+                  <div style={{
+                    width: "48px",
+                    height: "48px",
+                    borderRadius: "14px",
+                    display: "grid",
+                    placeItems: "center",
+                    marginBottom: "16px",
+                    background: "var(--ma-bg-secondary)",
+                    color: "#d92727"
+                  }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: "27px" }}>
+                      delete_sweep
+                    </span>
+                  </div>
+
+                  <h3
+                    id="ma-clear-history-title"
+                    className="ma-modal-title"
+                    style={{ color: "var(--ma-text-primary)" }}
+                  >
+                    Clear watch history?
+                  </h3>
+
+                  <p className="ma-modal-desc">
+                    This removes all videos from your Watch History on this device.
+                    You cannot undo this action.
+                  </p>
+
+                  <div className="ma-modal-actions">
+                    <button
+                      type="button"
+                      className="ma-modal-btn cancel"
+                      onClick={() => setShowClearHistoryModal(false)}
+                    >
+                      Cancel
+                    </button>
+
+                    <button
+                      type="button"
+                      className="ma-modal-btn"
+                      style={{
+                        background: "#d92727",
+                        border: "1px solid #d92727",
+                        color: "#ffffff",
+                        opacity: 1,
+                        cursor: "pointer"
+                      }}
+                      onClick={() => {
+                        setHistory([]);
+                        try {
+                          localStorage.setItem("ma_history", "[]");
+                        } catch {}
+                        setShowClearHistoryModal(false);
+                      }}
+                    >
+                      Clear history
+                    </button>
+                  </div>
+                </div>
+              </div>,
+              document.body
+            )}
+
             <div style={{ display: "flex", gap: "12px", overflowX: "auto", paddingBottom: "16px", marginBottom: "16px" }}>
                {history.slice(0, 4).map((item) => (
                   <div key={item.id} onClick={() => { const found = media.find(m => m.id === item.id); if (found) openPlayer(found); }} style={{ flexShrink: 0, width: "140px", cursor: "pointer" }}>
