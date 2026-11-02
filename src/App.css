@@ -6343,3 +6343,378 @@ p
     animation-duration: .01ms !important;
   }
 }
+
+/* MUSIC ANTENNA CREATOR REGISTRATION WIZARD */
+
+
+/* MUSIC ANTENNA CREATOR REGISTRATION WIZARD */
+.creator-registration {
+  width: 100%;
+  gap: 16px;
+}
+
+.creator-registration-heading h2 {
+  margin: 9px 0 6px;
+  font-size: 23px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.creator-registration-heading p,
+.creator-step-content > p {
+  margin: 0 0 12px;
+  color: #aaa;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.creator-registration-eyebrow {
+  color: #ff5275;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.1px;
+}
+
+.creator-stepper {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+  margin: 5px 0 0;
+}
+
+.creator-step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  color: #888;
+  text-align: center;
+}
+
+.creator-step-item span {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #45404a;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.creator-step-item small {
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.creator-step-item.is-active {
+  color: #ff5275;
+}
+
+.creator-step-item.is-active span {
+  color: #fff;
+  background: #ff365f;
+  border-color: #ff365f;
+}
+
+.creator-step-count {
+  color: #ff5275;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.creator-step-content {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.creator-step-content h3 {
+  margin: 3px 0 -8px;
+  color: #fff;
+  font-size: 18px;
+}
+
+.creator-registration .creator-step-content label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.creator-registration .creator-step-content label > span {
+  color: #c7c1c8;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.creator-registration .creator-step-content input,
+.creator-registration .creator-step-content select,
+.creator-registration .creator-step-content textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 45px;
+  padding: 12px 13px;
+  border: 1px solid #403842;
+  border-radius: 9px;
+  outline: none;
+  background: #171319;
+  color: #f5f1f5;
+  font: inherit;
+  font-size: 13px;
+}
+
+.creator-registration .creator-step-content textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.creator-registration .creator-step-content input:focus,
+.creator-registration .creator-step-content select:focus,
+.creator-registration .creator-step-content textarea:focus {
+  border-color: #ff5275;
+  box-shadow: 0 0 0 2px rgba(255, 54, 95, .12);
+}
+
+.creator-review-card {
+  display: grid;
+  gap: 12px;
+  padding: 15px;
+  border: 1px solid #423641;
+  border-radius: 11px;
+  background: #1d1720;
+}
+
+.creator-review-card div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-wrap: anywhere;
+}
+
+.creator-review-card small {
+  color: #ff7793;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .8px;
+}
+
+.creator-review-card strong {
+  color: #f5f1f5;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.creator-pending-note {
+  padding: 13px;
+  border: 1px solid rgba(255, 174, 76, .35);
+  border-radius: 9px;
+  background: rgba(255, 174, 76, .08);
+}
+
+.creator-pending-note strong {
+  color: #ffbf70;
+  font-size: 12px;
+}
+
+.creator-pending-note p {
+  margin: 6px 0 0;
+  color: #d3c6b8;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.creator-registration-message {
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 82, 117, .35);
+  border-radius: 8px;
+  background: rgba(255, 54, 95, .09);
+  color: #ff91a8;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.creator-registration-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 5px;
+}
+
+.creator-registration-actions button {
+  min-height: 43px;
+  padding: 11px 18px;
+  border-radius: 22px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.creator-registration-actions .creator-next-button,
+.creator-registration-actions .auth-screen-submit {
+  flex: 1;
+}
+
+.creator-registration-actions .creator-next-button {
+  border: 0;
+  background: #ff365f;
+  color: #fff;
+}
+
+.creator-registration-actions .creator-back-button {
+  border: 1px solid #51434e;
+  background: transparent;
+  color: #eee5ec;
+}
+
+.creator-registration-actions button:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+/* Light theme: registration controls only */
+:root[data-theme="light"] .creator-registration-heading h2,
+:root[data-theme="light"] .creator-step-content h3 {
+  color: #24202a;
+}
+
+:root[data-theme="light"] .creator-registration-heading p,
+:root[data-theme="light"] .creator-step-content > p {
+  color: #68616d;
+}
+
+:root[data-theme="light"] .creator-registration .creator-step-content label > span {
+  color: #48414d;
+}
+
+:root[data-theme="light"] .creator-registration .creator-step-content input,
+:root[data-theme="light"] .creator-registration .creator-step-content select,
+:root[data-theme="light"] .creator-registration .creator-step-content textarea {
+  background: #fff;
+  color: #211d26;
+  border-color: #d9d1dc;
+}
+
+:root[data-theme="light"] .creator-review-card {
+  background: #faf6fa;
+  border-color: #e6d9e2;
+}
+
+:root[data-theme="light"] .creator-review-card strong {
+  color: #29232c;
+}
+
+:root[data-theme="light"] .creator-pending-note p {
+  color: #594a3c;
+}
+
+:root[data-theme="light"] .creator-registration-actions .creator-back-button {
+  color: #352b38;
+  border-color: #cfc3d0;
+}
+
+@media (max-width: 420px) {
+  .creator-step-item small {
+    font-size: 9px;
+  }
+
+  .creator-registration-heading h2 {
+    font-size: 20px;
+  }
+
+  .creator-registration-actions button {
+    padding: 10px 13px;
+  }
+}
+
+/* Creator Continue button: clear contrast in both themes */
+.creator-registration-actions .creator-next-button {
+  background: #ff365f !important;
+  color: #ffffff !important;
+  border: 1px solid #ff365f !important;
+  font-weight: 800;
+  box-shadow: 0 3px 10px rgba(255, 54, 95, 0.2);
+  transition: background .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+.creator-registration-actions .creator-next-button:hover {
+  background: #e02250 !important;
+  border-color: #e02250 !important;
+}
+
+:root[data-theme="light"] .creator-registration-actions .creator-next-button {
+  background: #c21843 !important;
+  color: #ffffff !important;
+  border-color: #c21843 !important;
+  box-shadow: 0 3px 10px rgba(194, 24, 67, 0.18);
+}
+
+:root[data-theme="light"] .creator-registration-actions .creator-next-button:hover {
+  background: #a91539 !important;
+  border-color: #a91539 !important;
+}
+
+.creator-registration-actions .creator-next-button:focus-visible {
+  outline: 3px solid #ff91a8;
+  outline-offset: 3px;
+}
+
+.creator-registration-actions .creator-next-button:disabled {
+  opacity: .55 !important;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+
+/* Music Antenna owner dashboard: override global transparent button rule */
+.ma-admin-verification button.ma-admin-approve,
+.ma-admin-verification button.ma-admin-reject,
+.ma-admin-verification button.ma-admin-pending {
+  min-height: 42px !important;
+  padding: 10px 16px !important;
+  border-radius: 9px !important;
+  border: 1px solid transparent !important;
+  box-shadow: none !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  cursor: pointer !important;
+  transition: opacity .18s ease, filter .18s ease !important;
+}
+
+.ma-admin-verification button.ma-admin-approve {
+  color: #ffffff !important;
+  background-color: #16803c !important;
+  border-color: #16803c !important;
+}
+
+.ma-admin-verification button.ma-admin-reject {
+  color: #ffffff !important;
+  background-color: #c62828 !important;
+  border-color: #c62828 !important;
+}
+
+.ma-admin-verification button.ma-admin-pending {
+  color: var(--ma-text, #111111) !important;
+  background-color: var(--ma-surface, #ffffff) !important;
+  border-color: var(--ma-border, #999999) !important;
+}
+
+.ma-admin-verification button.ma-admin-approve:hover,
+.ma-admin-verification button.ma-admin-reject:hover,
+.ma-admin-verification button.ma-admin-pending:hover {
+  filter: brightness(.94) !important;
+}
+
+.ma-admin-verification button:focus-visible {
+  outline: 3px solid #1d9bf0 !important;
+  outline-offset: 3px !important;
+}
+
+.ma-admin-verification button:disabled {
+  opacity: .45 !important;
+  cursor: not-allowed !important;
+  filter: grayscale(.25) !important;
+}

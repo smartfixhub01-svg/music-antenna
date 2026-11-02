@@ -4,6 +4,46 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "./lib/supabase";
 import "./App.css";
 
+const UGANDA_DISTRICTS_BY_REGION = {
+  Central: [
+    "Buikwe", "Bukomansimbi", "Butambala", "Buvuma", "Gomba",
+    "Kalangala", "Kalungu", "Kampala", "Kassanda", "Kayunga",
+    "Kiboga", "Kyankwanzi", "Kyotera", "Luwero", "Lwengo",
+    "Lyantonde", "Masaka", "Mityana", "Mpigi", "Mubende",
+    "Mukono", "Nakaseke", "Nakasongola", "Rakai", "Ssembabule",
+    "Wakiso"
+  ],
+  Eastern: [
+    "Amuria", "Budaka", "Bududa", "Bugiri", "Bugweri",
+    "Bukedea", "Bukwo", "Bulambuli", "Busia", "Butaleja",
+    "Butebo", "Buyende", "Iganga", "Jinja", "Kaberamaido",
+    "Kalaki", "Kaliro", "Kamuli", "Kapchorwa", "Kapelebyong",
+    "Katakwi", "Kibuku", "Kumi", "Kween", "Luuka",
+    "Manafwa", "Mayuge", "Mbale", "Namayingo", "Namisindwa",
+    "Namutumba", "Ngora", "Pallisa", "Serere", "Sironko",
+    "Soroti", "Tororo"
+  ],
+  Northern: [
+    "Abim", "Adjumani", "Agago", "Alebtong", "Amolatar",
+    "Amudat", "Amuru", "Apac", "Arua", "Dokolo",
+    "Gulu", "Kaabong", "Karenga", "Kitgum", "Koboko",
+    "Kole", "Kotido", "Kwania", "Lamwo", "Lira",
+    "Madi-Okollo", "Maracha", "Moroto", "Moyo", "Nabilatuk",
+    "Nakapiripirit", "Napak", "Nebbi", "Nwoya", "Obongi",
+    "Omoro", "Otuke", "Oyam", "Pader", "Pakwach",
+    "Terego", "Yumbe", "Zombo"
+  ],
+  Western: [
+    "Buhweju", "Buliisa", "Bundibugyo", "Bunyangabu", "Bushenyi",
+    "Hoima", "Ibanda", "Isingiro", "Kabale", "Kabarole",
+    "Kagadi", "Kakumiro", "Kamwenge", "Kanungu", "Kasese",
+    "Kazo", "Kibaale", "Kikuube", "Kiruhura", "Kiryandongo",
+    "Kisoro", "Kitagwenda", "Kyegegwa", "Kyenjojo", "Masindi",
+    "Mbarara", "Mitooma", "Ntoroko", "Ntungamo", "Rubanda",
+    "Rubirizi", "Rukiga", "Rukungiri", "Rwampara", "Sheema"
+  ]
+};
+
 function timeAgo(dateString) {
   const date = new Date(dateString);
   const now = new Date();
@@ -24,11 +64,22 @@ function timeAgo(dateString) {
 
 const BUCKET = "music-antenna-media";
 
+const MUSIC_ANTENNA_OWNER_IDS = new Set([
+  "43261483-df88-4bbf-b286-1fd9ca174196",
+  "bd155705-056d-4f94-9b7b-77373c4b641f",
+  "32687bea-2572-4d68-8f65-d67924ef5dd5",
+]);
+
+function isMusicAntennaOwner(userId) {
+  return Boolean(userId && MUSIC_ANTENNA_OWNER_IDS.has(userId));
+}
+
 export default function App() {
 
 
 
   const [session, setSession] = useState(null);
+  const isOwner = isMusicAntennaOwner(session?.user?.id);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [mode, setMode] = useState("login");
@@ -36,6 +87,15 @@ export default function App() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [creatorStep, setCreatorStep] = useState(1);
+  const [creatorLegalName, setCreatorLegalName] = useState("");
+  const [creatorGenre, setCreatorGenre] = useState("");
+  const [creatorCategory, setCreatorCategory] = useState("");
+  const [creatorCountry, setCreatorCountry] = useState("Uganda");
+  const [creatorRegion, setCreatorRegion] = useState("");
+  const [creatorDistrict, setCreatorDistrict] = useState("");
+  const [creatorBiography, setCreatorBiography] = useState("");
+  const [creatorConfirmPassword, setCreatorConfirmPassword] = useState("");
   const [accountType, setAccountType] = useState("listener");
   const [justTriedRegister, setJustTriedRegister] = useState(false);
   const [authTab, setAuthTab] = useState("listener");
@@ -465,6 +525,28 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [uploadScheduleMode, setUploadScheduleMode] = useState("now");
   const [uploadScheduledAt, setUploadScheduledAt] = useState("");
   const [profile, setProfile] = useState(null);
+  const [adminArtistProfiles, setAdminArtistProfiles] = useState([]);
+  const [adminArtistLoading, setAdminArtistLoading] = useState(false);
+  const [adminArtistMessage, setAdminArtistMessage] = useState("");
+  const [adminReviewBusyId, setAdminReviewBusyId] = useState(null);
+
+  const [adminSection, setAdminSection] = useState("overview");
+  const [adminOverview, setAdminOverview] = useState(null);
+  const [adminOverviewLoading, setAdminOverviewLoading] = useState(false);
+  const [adminOverviewError, setAdminOverviewError] = useState("");
+  const [adminAuditLogs, setAdminAuditLogs] = useState([]);
+  const [adminAuditLoading, setAdminAuditLoading] = useState(false);
+  const [adminAuditError, setAdminAuditError] = useState("");
+  const [adminUsers, setAdminUsers] = useState([]);
+  const [adminUsersLoading, setAdminUsersLoading] = useState(false);
+  const [adminUsersError, setAdminUsersError] = useState("");
+  const [adminUsersQuery, setAdminUsersQuery] = useState("");
+  const [adminUsersPage, setAdminUsersPage] = useState(1);
+  const [adminUsersTotal, setAdminUsersTotal] = useState(0);
+  const [adminUserBusyId, setAdminUserBusyId] = useState("");
+  const [adminSuspendTarget, setAdminSuspendTarget] = useState(null);
+  const [adminSuspendReason, setAdminSuspendReason] = useState("");
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showBecomeArtistForm, setShowBecomeArtistForm] = useState(false);
@@ -738,6 +820,21 @@ useEffect(() => {
   const [profilePhotoFile, setProfilePhotoFile] = useState(null);
   const [coverPhotoFile, setCoverPhotoFile] = useState(null);
   const [profileSaving, setProfileSaving] = useState(false);
+  const [artistProfile, setArtistProfile] = useState(null);
+  const [artistProfileLoading, setArtistProfileLoading] = useState(false);
+  const [artistProfileSaving, setArtistProfileSaving] = useState(false);
+  const [artistProfileEditing, setArtistProfileEditing] = useState(false);
+  const [artistProfileMessage, setArtistProfileMessage] = useState("");
+  const [artistProfileDraft, setArtistProfileDraft] = useState({
+    legal_name: "",
+    artist_name: "",
+    genre: "",
+    artist_category: "",
+    country: "Uganda",
+    region: "",
+    district: "",
+    biography: "",
+  });
 
   const [artistLoading, setArtistLoading] = useState(false);
   const [showArtistStudio, setShowArtistStudio] = useState(false);
@@ -854,6 +951,41 @@ useEffect(() => {
       alive = false;
     };
   }, [session?.user?.id]);
+
+  useEffect(() => {
+    let alive = true;
+
+    async function fetchArtistProfile() {
+      if (!session?.user?.id || profile?.role !== "artist") {
+        setArtistProfile(null);
+        return;
+      }
+
+      setArtistProfileLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("artist_profiles")
+          .select("user_id,legal_name,artist_name,genre,artist_category,country,region,district,biography,verification_status,created_at,updated_at")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+
+        if (error) throw error;
+        if (alive) setArtistProfile(data || null);
+      } catch (error) {
+        if (alive) {
+          setArtistProfileMessage(
+            "Could not load artist information: " + (error.message || "Unknown error")
+          );
+        }
+      } finally {
+        if (alive) setArtistProfileLoading(false);
+      }
+    }
+
+    fetchArtistProfile();
+    return () => { alive = false; };
+  }, [session?.user?.id, profile?.role]);
+
   useEffect(() => {
     if (session?.user?.id) {
       fetchNotifications();
@@ -1300,6 +1432,15 @@ useEffect(() => {
             data: {
               display_name: displayName.trim(),
               account_type: accountTypeVal,
+              ...(accountTypeVal === "artist" ? {
+                legal_name: creatorLegalName.trim(),
+                genre: creatorGenre.trim(),
+                artist_category: creatorCategory,
+                country: creatorCountry.trim(),
+                region: creatorRegion,
+                district: creatorDistrict.trim(),
+                biography: creatorBiography.trim(),
+              } : {}),
             },
           },
         });
@@ -1341,6 +1482,56 @@ useEffect(() => {
     }
   }
 
+  function creatorNextStep() {
+    if (creatorStep === 1) {
+      if (!creatorLegalName.trim() || !displayName.trim()) {
+        setMessage("Please enter your legal name and artist/stage name.");
+        return;
+      }
+    }
+
+    if (creatorStep === 2) {
+      if (!creatorGenre.trim() || !creatorCategory || !creatorBiography.trim()) {
+        setMessage("Please complete your music identity details.");
+        return;
+      }
+    }
+
+    if (creatorStep === 3) {
+      if (!creatorCountry.trim() || !creatorRegion || !creatorDistrict.trim()) {
+        setMessage("Please complete your country, region and district/city.");
+        return;
+      }
+    }
+
+    setMessage("");
+    setCreatorStep(previous => Math.min(previous + 1, 4));
+  }
+
+  function creatorPreviousStep() {
+    setMessage("");
+    setCreatorStep(previous => Math.max(previous - 1, 1));
+  }
+
+  function handleCreatorRegistration(event) {
+    event.preventDefault();
+
+    if (creatorStep !== 4) return;
+
+    if (password.length < 6) {
+      setMessage("Your password must contain at least 6 characters.");
+      return;
+    }
+
+    if (password !== creatorConfirmPassword) {
+      setMessage("Your passwords do not match.");
+      return;
+    }
+
+    setAccountType("artist");
+    doAuth("register", "artist");
+  }
+
   function handleAuth(event) {
     event.preventDefault();
     doAuth(mode, accountType);
@@ -1377,6 +1568,7 @@ useEffect(() => {
   }
 
   function startCreatorSignup() {
+    setCreatorStep(1);
     setAccountType("artist");
     setAuthTab("creator");
     setMode("register");
@@ -2826,6 +3018,265 @@ async function fetchPlaylists() {
   }
 
 
+  async function loadAdminArtistProfiles() {
+    if (!isMusicAntennaOwner(session?.user?.id)) return;
+    setAdminArtistLoading(true);
+    setAdminArtistMessage("");
+    try {
+      const { data, error } = await supabase
+        .from("artist_profiles")
+        .select("user_id,legal_name,artist_name,genre,artist_category,country,region,district,biography,verification_status,created_at,updated_at")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      setAdminArtistProfiles(data || []);
+    } catch (error) {
+      setAdminArtistMessage("Could not load applications: " + (error.message || "Please try again."));
+    } finally {
+      setAdminArtistLoading(false);
+    }
+  }
+
+  async function handleAdminSetArtistVerification(userId, status) {
+    if (!isMusicAntennaOwner(session?.user?.id)) return;
+    if (!["verified", "rejected", "pending"].includes(status)) return;
+
+    const reviewedArtist = adminArtistProfiles.find(
+      (artist) => artist.user_id === userId
+    );
+    const previousStatus = reviewedArtist?.verification_status || "pending";
+
+    setAdminReviewBusyId(userId);
+    setAdminArtistMessage("");
+
+    try {
+      const { error } = await supabase
+        .from("artist_profiles")
+        .update({
+          verification_status: status,
+          updated_at: new Date().toISOString()
+        })
+        .eq("user_id", userId);
+
+      if (error) throw error;
+
+      const { error: auditError } = await supabase.rpc(
+        "record_admin_audit",
+        {
+          p_action: `artist_verification_${status}`,
+          p_target_type: "artist_profile",
+          p_target_id: userId,
+          p_details: {
+            artist_name: reviewedArtist?.artist_name || reviewedArtist?.legal_name || "Unnamed artist",
+            previous_status: previousStatus,
+            new_status: status
+          }
+        }
+      );
+
+      await loadAdminArtistProfiles();
+
+      if (auditError) {
+        setAdminArtistMessage(
+          "Status updated, but audit logging failed: " +
+          (auditError.message || "Please contact the database administrator.")
+        );
+      } else {
+        setAdminArtistMessage("Application status updated and recorded in the audit log.");
+      }
+    } catch (error) {
+      setAdminArtistMessage(
+        "Update failed: " + (error.message || "Please try again.")
+      );
+    } finally {
+      setAdminReviewBusyId(null);
+    }
+  }
+
+
+  async function loadAdminOverview() {
+    if (!isMusicAntennaOwner(session?.user?.id)) return;
+
+    setAdminOverviewLoading(true);
+    setAdminOverviewError("");
+
+    try {
+      const { data, error } = await supabase.rpc(
+        "get_owner_dashboard_stats"
+      );
+
+      if (error) throw error;
+      if (!data || typeof data !== "object") {
+        throw new Error("The statistics function returned an invalid response.");
+      }
+
+      setAdminOverview({
+        users: Number(data.users ?? 0),
+        artists: Number(data.artists ?? 0),
+        media: Number(data.media ?? 0),
+        tracks: Number(data.tracks ?? 0),
+        subscribers: Number(data.subscribers ?? 0),
+        videoViews: Number(data.video_views ?? 0),
+        updatedAt: new Date().toISOString()
+      });
+    } catch (error) {
+      setAdminOverviewError(
+        error.message || "Could not load platform statistics."
+      );
+    } finally {
+      setAdminOverviewLoading(false);
+    }
+  }
+
+  async function loadAdminAuditLogs() {
+    if (!isMusicAntennaOwner(session?.user?.id)) return;
+
+    setAdminAuditLoading(true);
+    setAdminAuditError("");
+
+    try {
+      const { data, error } = await supabase
+        .from("admin_audit_logs")
+        .select("id,actor_id,action,target_type,target_id,details,created_at")
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+      setAdminAuditLogs(data || []);
+    } catch (error) {
+      setAdminAuditError(
+        error.message || "Could not load owner audit logs."
+      );
+    } finally {
+      setAdminAuditLoading(false);
+    }
+  }
+
+  async function loadAdminUsers(page = adminUsersPage, query = adminUsersQuery) {
+    if (!isMusicAntennaOwner(session?.user?.id)) return;
+
+    setAdminUsersLoading(true);
+    setAdminUsersError("");
+
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        "rapid-handler",
+        {
+          body: {
+            action: "list_users",
+            query: query.trim(),
+            page,
+            perPage: 25,
+          },
+        }
+      );
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      if (!Array.isArray(data?.users)) {
+        throw new Error("The server returned an invalid user list.");
+      }
+
+      setAdminUsers(data.users);
+      setAdminUsersTotal(Number(data.total) || 0);
+    } catch (error) {
+      setAdminUsersError(
+        error.message || "Could not load registered accounts."
+      );
+      setAdminUsers([]);
+      setAdminUsersTotal(0);
+    } finally {
+      setAdminUsersLoading(false);
+    }
+  }
+
+  async function handleAdminUserAction(action, userId, reason = "") {
+    if (!isMusicAntennaOwner(session?.user?.id)) return;
+
+    setAdminUserBusyId(userId);
+    setAdminUsersError("");
+
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        "rapid-handler",
+        {
+          body: {
+            action,
+            userId,
+            reason: reason.trim(),
+          },
+        }
+      );
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      if (data?.warning) {
+        setAdminUsersError(data.warning);
+      }
+
+      setAdminSuspendTarget(null);
+      setAdminSuspendReason("");
+      await loadAdminUsers();
+      await loadAdminAuditLogs();
+    } catch (error) {
+      setAdminUsersError(
+        error.message || "The account action could not be completed."
+      );
+    } finally {
+      setAdminUserBusyId("");
+    }
+  }
+
+  async function handleSaveArtistInformation(event) {
+    event.preventDefault();
+
+    if (!session?.user?.id || !artistProfile) {
+      setArtistProfileMessage("Artist registration information is unavailable.");
+      return;
+    }
+
+    const draft = {
+      legal_name: artistProfileDraft.legal_name.trim(),
+      artist_name: artistProfileDraft.artist_name.trim(),
+      genre: artistProfileDraft.genre.trim(),
+      artist_category: artistProfileDraft.artist_category.trim(),
+      country: artistProfileDraft.country.trim(),
+      region: artistProfileDraft.region.trim(),
+      district: artistProfileDraft.district.trim(),
+      biography: artistProfileDraft.biography.trim(),
+      updated_at: new Date().toISOString(),
+    };
+
+    if (!draft.artist_name) {
+      setArtistProfileMessage("Please enter your artist or stage name.");
+      return;
+    }
+
+    setArtistProfileSaving(true);
+    setArtistProfileMessage("");
+
+    try {
+      const { data, error } = await supabase
+        .from("artist_profiles")
+        .update(draft)
+        .eq("user_id", session.user.id)
+        .select("user_id,legal_name,artist_name,genre,artist_category,country,region,district,biography,verification_status,created_at,updated_at")
+        .single();
+
+      if (error) throw error;
+
+      setArtistProfile(data);
+      setArtistProfileEditing(false);
+      setArtistProfileMessage("Artist information saved successfully.");
+    } catch (error) {
+      setArtistProfileMessage(
+        "Could not save artist information: " + (error.message || "Unknown error")
+      );
+    } finally {
+      setArtistProfileSaving(false);
+    }
+  }
+
   function extractVideoFrame(file) {
     return new Promise((resolve) => {
       try {
@@ -3517,63 +3968,225 @@ document.body
                   </button>
                 </form>
               ) : (
-                <form onSubmit={handleAuth} className="auth-screen-form">
+                <form onSubmit={handleCreatorRegistration} className="auth-screen-form creator-registration">
+                  <div className="creator-registration-heading">
+                    <span className="creator-registration-eyebrow">MUSIC ANTENNA • ARTIST ONBOARDING</span>
+                    <h2>Create your Artist Profile</h2>
+                    <p>Complete these four steps to register as a Music Antenna artist.</p>
+                  </div>
 
+                  <div className="creator-stepper">
+                    {["Identity", "Music", "Location", "Account"].map((label, index) => (
+                      <div key={label} className={"creator-step-item " + (creatorStep >= index + 1 ? "is-active" : "")}>
+                        <span>{index + 1}</span>
+                        <small>{label}</small>
+                      </div>
+                    ))}
+                  </div>
 
+                  <div className="creator-step-count">STEP {creatorStep} OF 4</div>
 
+                  {creatorStep === 1 && (
+                    <div className="creator-step-content">
+                      <h3>Artist identity</h3>
+                      <p>Tell us your real identity and the name your audience knows.</p>
 
+                      <label>
+                        <span>Legal / Real name</span>
+                        <input type="text" value={creatorLegalName}
+                          onChange={e => setCreatorLegalName(e.target.value)}
+                          placeholder="Enter your real name" maxLength={100} autoComplete="name" />
+                      </label>
 
-
-                  <label>
-                    <span>Artist name</span>
-                    <input
-                      type="text"
-                      value={displayName}
-                      onChange={(e) => setDisplayName(e.target.value)}
-                      placeholder="Your artist name"
-                      maxLength={80}
-                      autoComplete="name"
-                      required
-                    />
-                  </label>
-                  <label>
-                    <span>Email</span>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="you@example.com"
-                      autoComplete="email"
-                      required
-                    />
-                  </label>
-                  <label>
-                    <span>Password</span>
-                    <div className="auth-pw-wrap">
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="At least 6 characters"
-                        minLength={6}
-                        autoComplete="new-password"
-                        required
-                      />
-                      <button
-                        type="button"
-                        className="auth-pw-toggle"
-                        aria-label={showPassword ? "Hide password" : "Show password"}
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        <span className="material-symbols-outlined">
-                          {showPassword ? "visibility_off" : "visibility"}
-                        </span>
-                      </button>
+                      <label>
+                        <span>Artist / Stage name</span>
+                        <input type="text" value={displayName}
+                          onChange={e => setDisplayName(e.target.value)}
+                          placeholder="Your professional artist name" maxLength={80} />
+                      </label>
                     </div>
-                  </label>
-                  <button type="submit" className="auth-screen-submit" disabled={busy}>
-                    {busy ? "Please wait..." : "Join as Creator"}
-                  </button>
+                  )}
+
+                  {creatorStep === 2 && (
+                    <div className="creator-step-content">
+                      <h3>Music identity</h3>
+                      <p>Help listeners understand your music and creative work.</p>
+
+                      <label>
+                        <span>Main music genre</span>
+                        <select value={creatorGenre}
+                          onChange={e => setCreatorGenre(e.target.value)}
+                          required>
+                          <option value="">Select your main music genre</option>
+                          <option value="Afrobeat">Afrobeat</option>
+                          <option value="Afropop">Afropop</option>
+                          <option value="Dancehall">Dancehall</option>
+                          <option value="DJ Mix">DJ Mix</option>
+                          <option value="Hip-Hop / Rap">Hip-Hop / Rap</option>
+                          <option value="R&B / Soul">R&B / Soul</option>
+                          <option value="Gospel">Gospel</option>
+                          <option value="Reggae">Reggae</option>
+                          <option value="Amapiano">Amapiano</option>
+                          <option value="Electronic / EDM">Electronic / EDM</option>
+                          <option value="Afro House">Afro House</option>
+                          <option value="Traditional / Cultural">Traditional / Cultural</option>
+                          <option value="Country">Country</option>
+                          <option value="Jazz">Jazz</option>
+                          <option value="Rock">Rock</option>
+                          <option value="Pop">Pop</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </label>
+
+                      <label>
+                        <span>Artist category</span>
+                        <select value={creatorCategory}
+                          onChange={e => setCreatorCategory(e.target.value)}>
+                          <option value="">Select artist category</option>
+                          <option value="Solo Artist">Solo Artist</option>
+                          <option value="Music Group / Band">Music Group / Band</option>
+                          <option value="DJ">DJ</option>
+                          <option value="Music Producer">Music Producer</option>
+                          <option value="Songwriter">Songwriter</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </label>
+
+                      <label>
+                        <span>Artist biography</span>
+                        <textarea value={creatorBiography}
+                          onChange={e => setCreatorBiography(e.target.value)}
+                          placeholder="Tell listeners about your music journey..."
+                          rows={4} maxLength={1500} />
+                      </label>
+                    </div>
+                  )}
+
+                  {creatorStep === 3 && (
+                    <div className="creator-step-content">
+                      <h3>Location information</h3>
+                      <p>Provide your country and the area where you are based.</p>
+
+                      <label>
+                        <span>Country</span>
+                        <input type="text" value={creatorCountry}
+                          onChange={e => setCreatorCountry(e.target.value)}
+                          placeholder="Your country" maxLength={100} />
+                      </label>
+
+                      <label>
+                        <span>Region</span>
+                        <select value={creatorRegion}
+                          onChange={e => {
+                            setCreatorRegion(e.target.value);
+                            setCreatorDistrict("");
+                          }}>
+                          <option value="">Select region</option>
+                          <option value="Central">Central Region</option>
+                          <option value="Eastern">Eastern Region</option>
+                          <option value="Northern">Northern Region</option>
+                          <option value="Western">Western Region</option>
+                          <option value="Outside Uganda">Outside Uganda</option>
+                        </select>
+                      </label>
+
+                      <label>
+                        <span>District / City</span>
+                        {creatorRegion === "Outside Uganda" ? (
+                          <input type="text" value={creatorDistrict}
+                            onChange={e => setCreatorDistrict(e.target.value)}
+                            placeholder="Enter your city or district"
+                            maxLength={100} required />
+                        ) : (
+                          <select value={creatorDistrict}
+                            onChange={e => setCreatorDistrict(e.target.value)}
+                            required disabled={!creatorRegion}>
+                            <option value="">
+                              {creatorRegion
+                                ? "Select your district"
+                                : "Select a region first"}
+                            </option>
+                            {(UGANDA_DISTRICTS_BY_REGION[creatorRegion] || []).map(district => (
+                              <option key={district} value={district}>
+                                {district}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      </label>
+                    </div>
+                  )}
+
+                  {creatorStep === 4 && (
+                    <div className="creator-step-content">
+                      <h3>Account and final review</h3>
+                      <p>Review your artist information and secure your account.</p>
+
+                      <div className="creator-review-card">
+                        <div><small>ARTIST NAME</small><strong>{displayName || "Not provided"}</strong></div>
+                        <div><small>GENRE</small><strong>{creatorGenre || "Not provided"}</strong></div>
+                        <div><small>CATEGORY</small><strong>{creatorCategory || "Not provided"}</strong></div>
+                        <div><small>LOCATION</small><strong>{[creatorDistrict, creatorRegion, creatorCountry].filter(Boolean).join(", ") || "Not provided"}</strong></div>
+                      </div>
+
+                      <label>
+                        <span>Email address</span>
+                        <input type="email" value={email}
+                          onChange={e => setEmail(e.target.value)}
+                          placeholder="you@example.com" autoComplete="email" required />
+                      </label>
+
+                      <label>
+                        <span>Password</span>
+                        <div className="auth-pw-wrap">
+                          <input type={showPassword ? "text" : "password"}
+                            value={password} onChange={e => setPassword(e.target.value)}
+                            placeholder="At least 6 characters" minLength={6}
+                            autoComplete="new-password" required />
+                          <button type="button" className="auth-pw-toggle"
+                            aria-label={showPassword ? "Hide password" : "Show password"}
+                            onClick={() => setShowPassword(!showPassword)}>
+                            <span className="material-symbols-outlined">
+                              {showPassword ? "visibility_off" : "visibility"}
+                            </span>
+                          </button>
+                        </div>
+                      </label>
+
+                      <label>
+                        <span>Confirm password</span>
+                        <input type={showPassword ? "text" : "password"}
+                          value={creatorConfirmPassword}
+                          onChange={e => setCreatorConfirmPassword(e.target.value)}
+                          placeholder="Enter your password again"
+                          autoComplete="new-password" required />
+                      </label>
+
+                      <div className="creator-pending-note">
+                        <strong>Verification notice</strong>
+                        <p>Your artist profile will begin with Pending status. Location information does not automatically verify an artist. Verification requires a genuine review.</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {message && <div className="creator-registration-message" role="alert">{message}</div>}
+
+                  <div className="creator-registration-actions">
+                    {creatorStep > 1 && (
+                      <button type="button" className="creator-back-button"
+                        onClick={creatorPreviousStep} disabled={busy}>Back</button>
+                    )}
+
+                    {creatorStep < 4 ? (
+                      <button type="button" className="creator-next-button"
+                        onClick={creatorNextStep}>Continue</button>
+                    ) : (
+                      <button type="submit" className="auth-screen-submit"
+                        disabled={busy}>
+                        {busy ? "Creating account..." : "Create Artist Account"}
+                      </button>
+                    )}
+                  </div>
                 </form>
               )}
               <div style={{ textAlign: "center", marginBottom: "20px" }}><span style={{ background: "rgba(255, 54, 95, 0.15)", color: "#FF365F", padding: "6px 16px", borderRadius: "20px", fontSize: "12px", fontWeight: "700", letterSpacing: "0.5px", border: "1px solid rgba(255, 54, 95, 0.3)" }}>CREATOR STUDIO PORTAL</span></div>
@@ -3584,6 +4197,7 @@ document.body
                     <button
                       type="button"
                       onClick={() => {
+                        setCreatorStep(1);
                         setAccountType("artist");
                         setAuthTab("creator");
                         setMode("register");
@@ -5313,8 +5927,8 @@ document.body
                 <div style={{ display: "flex", flexDirection: "column", gap: "4px", paddingBottom: "8px" }}>
                   <h2 style={{ margin: 0, fontSize: "22px", fontWeight: "800", display: "flex", alignItems: "center", gap: "6px", color: "#ffffff", textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}>
                     {profile?.display_name || displayUser || "Music listener"}
-                    {profile?.role === "artist" && media.filter(m => m.artist_id === session?.user?.id).length >= 10 && mySubCount >= 500 && (
-                      <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "#1D9BF0", fontVariationSettings: "'FILL' 1" }} title="Verified Artist">verified</span>
+                    {isMusicAntennaOwner(profile?.id) && (
+                      <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "#1D9BF0", fontVariationSettings: "'FILL' 1" }} title="Music Antenna Owner">verified</span>
                     )}
                   </h2>
                   <p style={{ margin: 0, fontSize: "13px", fontWeight: "600", color: "rgba(255, 255, 255, 0.85)", textShadow: "0 1px 2px rgba(0,0,0,0.5)" }}>
@@ -5331,7 +5945,17 @@ document.body
 
             {profile?.role === "artist" && (
               <p style={{ margin: "8px 0 16px", fontSize: "13px", color: "var(--ma-text-secondary, #666)", fontWeight: "600", display: "flex", alignItems: "center", gap: "4px" }}>
-                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>artist</span> Artist
+                {isOwner ? (
+                  <>
+                    <span className="material-symbols-outlined" style={{ fontSize: "17px", color: "#1D9BF0", fontVariationSettings: "'FILL' 1" }}>verified</span>
+                    <span style={{ color: "#1D9BF0", fontWeight: "800" }}>OWNER</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>headphones</span>
+                    {artistProfile?.artist_category || "Artist"}
+                  </>
+                )}
               </p>
             )}
 
@@ -5371,11 +5995,12 @@ document.body
 
 
             {/* 5. TABS */}
-            <div style={{ display: profile?.role === "artist" ? "flex" : "none", gap: "24px", borderBottom: "1px solid var(--ma-border, #e5e5e5)", marginBottom: "16px" }}>
+            <div style={{ display: (profile?.role === "artist" || isOwner) ? "flex" : "none", flexWrap: "wrap", gap: "24px", borderBottom: "1px solid var(--ma-border, #e5e5e5)", marginBottom: "16px" }}>
               <button onClick={() => setProfileTab("overview")} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: profileTab === "overview" ? "#ff365f" : "var(--ma-text-secondary, #666)", fontWeight: profileTab === "overview" ? "600" : "500", fontSize: "14px", borderBottom: profileTab === "overview" ? "2px solid #ff365f" : "none", cursor: "pointer" }}>Overview</button>
               <button onClick={() => setProfileTab("contents")} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: profileTab === "contents" ? "#ff365f" : "var(--ma-text-secondary, #666)", fontWeight: profileTab === "contents" ? "600" : "500", fontSize: "14px", borderBottom: profileTab === "contents" ? "2px solid #ff365f" : "none", cursor: "pointer" }}>Contents</button>
               <button onClick={openAnalytics} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: "var(--ma-text-secondary, #666)", fontWeight: "500", fontSize: "14px", cursor: "pointer" }}>Analytics</button>
               <button onClick={() => setProfileTab("about")} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: profileTab === "about" ? "#ff365f" : "var(--ma-text-secondary, #666)", fontWeight: profileTab === "about" ? "600" : "500", fontSize: "14px", borderBottom: profileTab === "about" ? "2px solid #ff365f" : "none", cursor: "pointer" }}>About</button>
+              {isOwner && <button onClick={() => { setProfileTab("admin"); setAdminSection("overview"); loadAdminOverview(); }} style={{ background: "transparent", border: 0, paddingBottom: "8px", color: profileTab === "admin" ? "#1D9BF0" : "var(--ma-text-secondary, #666)", fontWeight: "700", fontSize: "14px", borderBottom: profileTab === "admin" ? "2px solid #1D9BF0" : "none", cursor: "pointer" }}>Admin</button>}
             </div>
 
             {profileTab === "overview" && (<>
@@ -5615,60 +6240,520 @@ document.body
             )}
 
             {profileTab === "about" && (
-              <div style={{ background: "var(--ma-surface, #f0f0f0)", borderRadius: "16px", border: "1px solid var(--ma-border, #e5e5e5)", padding: "24px", marginBottom: "24px", boxShadow: "0 4px 20px rgba(0,0,0,0.02)" }}>
+              <div style={{
+                background: "var(--ma-surface, #f0f0f0)",
+                borderRadius: "16px",
+                border: "1px solid var(--ma-border, #e5e5e5)",
+                padding: "20px",
+                marginBottom: "24px",
+                color: "var(--ma-text, #000)"
+              }}>
+                <div style={{
+                  display: "flex", justifyContent: "space-between",
+                  alignItems: "center", gap: "12px", flexWrap: "wrap",
+                  marginBottom: "18px"
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span className="material-symbols-outlined"
+                      style={{ color: "#ff365f", fontSize: "23px" }}>badge</span>
+                    <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "700" }}>
+                      Artist Information
+                    </h3>
+                  </div>
 
-                {/* Header */}
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "20px" }}>
-                  <span className="material-symbols-outlined" style={{ color: "#ff365f", fontSize: "22px" }}>info</span>
-                  <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "700", color: "var(--ma-text, #000)" }}>Channel Details</h3>
+                  {!artistProfileEditing && artistProfile && (
+                    <button type="button"
+                      onClick={() => {
+                        setArtistProfileDraft({
+                          legal_name: artistProfile.legal_name || "",
+                          artist_name: artistProfile.artist_name || "",
+                          genre: artistProfile.genre || "",
+                          artist_category: artistProfile.artist_category || "",
+                          country: artistProfile.country || "",
+                          region: artistProfile.region || "",
+                          district: artistProfile.district || "",
+                          biography: artistProfile.biography || "",
+                        });
+                        setArtistProfileMessage("");
+                        setArtistProfileEditing(true);
+                      }}
+                      style={{
+                        display: "inline-flex", alignItems: "center", gap: "6px",
+                        padding: "10px 14px", borderRadius: "10px",
+                        border: "1px solid var(--ma-border, #ddd)",
+                        background: "var(--ma-bg, #fff)",
+                        color: "var(--ma-text, #000)",
+                        fontWeight: "600", fontSize: "13px", cursor: "pointer"
+                      }}>
+                      <span className="material-symbols-outlined"
+                        style={{ fontSize: "18px", color: "#ff365f" }}>edit</span>
+                      Edit Information
+                    </button>
+                  )}
                 </div>
 
-                {/* Bio Section */}
-                <div style={{ marginBottom: "24px", padding: "16px", background: "var(--ma-bg, #fff)", borderRadius: "12px", borderLeft: "4px solid #ff365f" }}>
-                  <p style={{ margin: 0, fontSize: "14px", color: "var(--ma-text-secondary, #666)", lineHeight: "1.6", fontStyle: "italic" }}>
-                    "{profile?.bio || "This artist hasn't added a bio yet."}"
+                {artistProfileLoading ? (
+                  <p style={{ color: "var(--ma-text-secondary, #777)" }}>
+                    Loading your artist information...
                   </p>
-                </div>
-
-                {/* Premium Stats Grid */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-
-                  {/* Joined Date */}
-                  <div style={{ background: "var(--ma-bg, #fff)", padding: "16px", borderRadius: "12px", border: "1px solid var(--ma-border, #e5e5e5)", display: "flex", flexDirection: "column", gap: "6px" }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "var(--ma-text-secondary, #888)" }}>calendar_month</span>
-                    <span style={{ fontSize: "11px", color: "var(--ma-text-secondary, #666)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: "600" }}>Joined</span>
-                    <span style={{ fontSize: "15px", fontWeight: "700", color: "var(--ma-text, #000)" }}>
-                      {new Date(profile?.created_at || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </span>
+                ) : !artistProfile ? (
+                  <div style={{
+                    padding: "16px", borderRadius: "12px",
+                    background: "var(--ma-bg, #fff)",
+                    color: "var(--ma-text-secondary, #666)"
+                  }}>
+                    Your artist registration details could not be found for this account.
+                    Please contact support if you recently registered as an artist.
                   </div>
+                ) : artistProfileEditing ? (
+                  <form onSubmit={handleSaveArtistInformation}
+                    style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                    {[
+                      ["legal_name", "Legal / Real Name"],
+                      ["artist_name", "Artist / Stage Name"],
+                      ["genre", "Main Music Genre"],
+                      ["artist_category", "Artist Category"],
+                      ["country", "Country"],
+                      ["region", "Region"],
+                      ["district", "District / City"],
+                    ].map(([field, label]) => (
+                      <label key={field} style={{
+                        display: "flex", flexDirection: "column", gap: "6px",
+                        fontSize: "13px", fontWeight: "600",
+                        color: "var(--ma-text, #000)"
+                      }}>
+                        {label}
+                        <input
+                          type="text"
+                          value={artistProfileDraft[field]}
+                          onChange={e => setArtistProfileDraft(prev => ({
+                            ...prev, [field]: e.target.value
+                          }))}
+                          maxLength={field === "legal_name" || field === "artist_name" ? 120 : 100}
+                          style={{
+                            width: "100%", boxSizing: "border-box",
+                            padding: "12px", borderRadius: "10px",
+                            background: "var(--ma-bg, #fff)",
+                            color: "var(--ma-text, #000)",
+                            border: "1px solid var(--ma-border, #ddd)",
+                            fontSize: "14px"
+                          }}
+                        />
+                      </label>
+                    ))}
 
-                  {/* Subscribers */}
-                  <div style={{ background: "var(--ma-bg, #fff)", padding: "16px", borderRadius: "12px", border: "1px solid var(--ma-border, #e5e5e5)", display: "flex", flexDirection: "column", gap: "6px" }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "var(--ma-text-secondary, #888)" }}>group</span>
-                    <span style={{ fontSize: "11px", color: "var(--ma-text-secondary, #666)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: "600" }}>Subscribers</span>
-                    <span style={{ fontSize: "15px", fontWeight: "700", color: "var(--ma-text, #000)" }}>{mySubCount}</span>
-                  </div>
+                    <label style={{
+                      display: "flex", flexDirection: "column", gap: "6px",
+                      fontSize: "13px", fontWeight: "600",
+                      color: "var(--ma-text, #000)"
+                    }}>
+                      Biography
+                      <textarea
+                        value={artistProfileDraft.biography}
+                        onChange={e => setArtistProfileDraft(prev => ({
+                          ...prev, biography: e.target.value
+                        }))}
+                        rows={5}
+                        maxLength={2000}
+                        placeholder="Tell listeners about your music and journey..."
+                        style={{
+                          width: "100%", boxSizing: "border-box",
+                          padding: "12px", borderRadius: "10px",
+                          background: "var(--ma-bg, #fff)",
+                          color: "var(--ma-text, #000)",
+                          border: "1px solid var(--ma-border, #ddd)",
+                          fontSize: "14px", resize: "vertical"
+                        }}
+                      />
+                    </label>
 
-                  {/* Total Uploads */}
-                  <div style={{ background: "var(--ma-bg, #fff)", padding: "16px", borderRadius: "12px", border: "1px solid var(--ma-border, #e5e5e5)", display: "flex", flexDirection: "column", gap: "6px" }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "var(--ma-text-secondary, #888)" }}>upload</span>
-                    <span style={{ fontSize: "11px", color: "var(--ma-text-secondary, #666)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: "600" }}>Uploads</span>
-                    <span style={{ fontSize: "15px", fontWeight: "700", color: "var(--ma-text, #000)" }}>
-                      {media.filter(m => m.artist_id === session?.user?.id).length}
-                    </span>
-                  </div>
+                    <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                      <button type="submit" disabled={artistProfileSaving}
+                        style={{
+                          padding: "11px 18px", border: 0, borderRadius: "10px",
+                          background: "#ff365f", color: "#fff",
+                          fontWeight: "700", cursor: artistProfileSaving ? "wait" : "pointer"
+                        }}>
+                        {artistProfileSaving ? "Saving..." : "Save Changes"}
+                      </button>
+                      <button type="button" disabled={artistProfileSaving}
+                        onClick={() => {
+                          setArtistProfileEditing(false);
+                          setArtistProfileMessage("");
+                        }}
+                        style={{
+                          padding: "11px 18px", borderRadius: "10px",
+                          border: "1px solid var(--ma-border, #ddd)",
+                          background: "var(--ma-bg, #fff)",
+                          color: "var(--ma-text, #000)",
+                          fontWeight: "600", cursor: "pointer"
+                        }}>
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <>
+                    <div style={{
+                      display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
+                      gap: "12px"
+                    }}>
+                      {[
+                        ["Legal / Real Name", artistProfile.legal_name],
+                        ["Artist / Stage Name", artistProfile.artist_name],
+                        ["Main Music Genre", artistProfile.genre],
+                        ["Artist Category", artistProfile.artist_category],
+                        ["Country", artistProfile.country],
+                        ["Region", artistProfile.region],
+                        ["District / City", artistProfile.district],
+                        ["Email Address", session?.user?.email],
+                        ["Date Joined", profile?.created_at
+                          ? new Date(profile.created_at).toLocaleDateString("en-GB", {
+                              day: "numeric", month: "long", year: "numeric"
+                            })
+                          : "Unavailable"],
+                      ].map(([label, value]) => (
+                        <div key={label} style={{
+                          padding: "14px", borderRadius: "11px",
+                          background: "var(--ma-bg, #fff)",
+                          border: "1px solid var(--ma-border, #e5e5e5)",
+                          minWidth: 0
+                        }}>
+                          <div style={{
+                            fontSize: "11px", fontWeight: "700",
+                            color: "var(--ma-text-secondary, #777)",
+                            textTransform: "uppercase", marginBottom: "7px"
+                          }}>{label}</div>
+                          <div style={{
+                            fontSize: "14px", fontWeight: "600",
+                            overflowWrap: "anywhere"
+                          }}>{value || "Not provided"}</div>
+                        </div>
+                      ))}
+                    </div>
 
-                  {/* Total Views */}
-                  <div style={{ background: "var(--ma-bg, #fff)", padding: "16px", borderRadius: "12px", border: "1px solid var(--ma-border, #e5e5e5)", display: "flex", flexDirection: "column", gap: "6px" }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "var(--ma-text-secondary, #888)" }}>visibility</span>
-                    <span style={{ fontSize: "11px", color: "var(--ma-text-secondary, #666)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: "600" }}>Total Views</span>
-                    <span style={{ fontSize: "15px", fontWeight: "700", color: "var(--ma-text, #000)" }}>
-                      {media.filter(m => m.artist_id === session?.user?.id).reduce((sum, m) => sum + (m.views || 0), 0)}
-                    </span>
-                  </div>
+                    <div style={{
+                      marginTop: "14px", padding: "14px",
+                      borderRadius: "11px", background: "var(--ma-bg, #fff)",
+                      border: "1px solid var(--ma-border, #e5e5e5)"
+                    }}>
+                      <div style={{
+                        fontSize: "11px", fontWeight: "700",
+                        color: "var(--ma-text-secondary, #777)",
+                        textTransform: "uppercase", marginBottom: "7px"
+                      }}>About the Artist</div>
+                      <p style={{
+                        margin: 0, fontSize: "14px", lineHeight: "1.7",
+                        whiteSpace: "pre-wrap", overflowWrap: "anywhere"
+                      }}>
+                        {artistProfile.biography || "No artist biography added yet."}
+                      </p>
+                    </div>
 
-                </div>
+                    <div style={{
+                      marginTop: "14px", padding: "14px",
+                      borderRadius: "11px", background: "var(--ma-bg, #fff)",
+                      border: "1px solid var(--ma-border, #e5e5e5)",
+                      display: "flex", justifyContent: "space-between",
+                      alignItems: "center", gap: "12px", flexWrap: "wrap"
+                    }}>
+                      <div>
+                        <div style={{
+                          fontSize: "11px", fontWeight: "700",
+                          color: "var(--ma-text-secondary, #777)",
+                          textTransform: "uppercase", marginBottom: "5px"
+                        }}>Artist Verification Status</div>
+                        <div style={{ fontSize: "14px", fontWeight: "700" }}>
+                          {(artistProfile.verification_status || "pending").replace(/^./, c => c.toUpperCase())}
+                        </div>
+                      </div>
+                      <span className="material-symbols-outlined"
+                        style={{ color: "#ff365f", fontSize: "25px" }}>
+                        {artistProfile.verification_status === "verified"
+                          ? "verified"
+                          : "hourglass_top"}
+                      </span>
+                    </div>
+
+                    <div style={{
+                      display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
+                      gap: "12px", marginTop: "14px"
+                    }}>
+                      {[
+                        ["Subscribers", mySubCount, "group"],
+                        ["Uploads", media.filter(m => m.artist_id === session?.user?.id).length, "upload"],
+                        ["Total Views", media.filter(m => m.artist_id === session?.user?.id)
+                          .reduce((sum, m) => sum + (m.views || 0), 0), "visibility"],
+                      ].map(([label, value, symbol]) => (
+                        <div key={label} style={{
+                          padding: "14px", borderRadius: "11px",
+                          background: "var(--ma-bg, #fff)",
+                          border: "1px solid var(--ma-border, #e5e5e5)"
+                        }}>
+                          <span className="material-symbols-outlined"
+                            style={{ color: "#ff365f", fontSize: "20px" }}>{symbol}</span>
+                          <div style={{ fontSize: "19px", fontWeight: "700", marginTop: "5px" }}>{value}</div>
+                          <div style={{
+                            fontSize: "11px", color: "var(--ma-text-secondary, #777)"
+                          }}>{label}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {artistProfileMessage && (
+                  <p role="status" style={{
+                    margin: "14px 0 0", fontSize: "13px",
+                    color: "var(--ma-text, #000)"
+                  }}>{artistProfileMessage}</p>
+                )}
               </div>
+            )}
+
+            {profileTab === "admin" && isOwner && (
+              <section className="ma-owner-centre" style={{ color: "var(--ma-text, #111)", margin: "16px 0" }}>
+                <header style={{ background: "var(--ma-surface, #fff)", border: "1px solid var(--ma-border, #ddd)", borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+                    <div>
+                      <p style={{ margin: "0 0 5px", color: "#1D9BF0", fontSize: "11px", fontWeight: "800", letterSpacing: "1.5px" }}>PRIVATE ADMINISTRATION</p>
+                      <h2 style={{ margin: 0, fontSize: "24px", fontWeight: "800" }}>Owner Control Centre</h2>
+                      <p style={{ margin: "6px 0 0", color: "var(--ma-text-secondary, #777)", fontSize: "13px" }}>Manage and monitor the Music Antenna platform</p>
+                    </div>
+                    <span style={{ borderRadius: "20px", padding: "7px 11px", background: "rgba(29,155,240,.12)", color: "#1D9BF0", fontSize: "12px", fontWeight: "800" }}>OWNER ACCESS</span>
+                  </div>
+                </header>
+
+                <nav aria-label="Owner dashboard sections" style={{ display: "flex", gap: "8px", overflowX: "auto", padding: "4px 2px 12px", marginBottom: "8px" }}>
+                  {[
+                    ["overview", "Overview", "dashboard"],
+                    ["verification", "Verification", "verified_user"],
+                    ["users", "Users", "group"],
+                    ["content", "Content", "video_library"],
+                    ["reports", "Reports", "flag"],
+                    ["analytics", "Analytics", "monitoring"],
+                    ["audit", "Audit Logs", "history"],
+                    ["settings", "Settings", "settings"]
+                  ].map(([key, label, icon]) => (
+                    <button key={key} type="button" onClick={() => {
+                      setAdminSection(key);
+                      if (key === "overview") loadAdminOverview();
+                      if (key === "verification") loadAdminArtistProfiles();
+                      if (key === "audit") loadAdminAuditLogs();
+                      if (key === "users") loadAdminUsers();
+                    }} style={{ flex: "0 0 auto", display: "flex", alignItems: "center", gap: "7px", padding: "10px 13px", borderRadius: "10px", border: adminSection === key ? "1px solid #1D9BF0" : "1px solid var(--ma-border, #ddd)", background: adminSection === key ? "rgba(29,155,240,.12)" : "var(--ma-surface, #fff)", color: adminSection === key ? "#1D9BF0" : "var(--ma-text, #111)", fontWeight: adminSection === key ? "800" : "600", fontSize: "13px", cursor: "pointer", whiteSpace: "nowrap" }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>{icon}</span>
+                      {label}
+                    </button>
+                  ))}
+                </nav>
+
+                {adminSection === "overview" && (
+                  <section style={{ background: "var(--ma-surface, #fff)", border: "1px solid var(--ma-border, #ddd)", borderRadius: "14px", padding: "18px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
+                      <div>
+                        <h3 style={{ margin: 0, fontSize: "19px" }}>Platform overview</h3>
+                        <p style={{ margin: "5px 0 0", color: "var(--ma-text-secondary, #777)", fontSize: "12px" }}>Live counts from your Supabase database</p>
+                      </div>
+                      <button type="button" onClick={loadAdminOverview} disabled={adminOverviewLoading} style={{ border: "1px solid var(--ma-border, #ccc)", borderRadius: "9px", padding: "9px 13px", background: "var(--ma-bg, #f5f5f5)", color: "var(--ma-text, #111)", cursor: "pointer" }}>{adminOverviewLoading ? "Refreshing..." : "Refresh data"}</button>
+                    </div>
+
+                    {adminOverviewError && <p role="alert" style={{ color: "#dc2626", fontSize: "13px" }}>{adminOverviewError}</p>}
+                    {adminOverviewLoading && <p style={{ color: "var(--ma-text-secondary, #777)" }}>Loading live platform statistics...</p>}
+
+                    {adminOverview && (
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(135px, 1fr))", gap: "12px", marginTop: "18px" }}>
+                        {[
+                          ["Registered users", adminOverview.users, "group"],
+                          ["Artist applications", adminOverview.artists, "verified_user"],
+                          ["Media uploads", adminOverview.media, "video_library"],
+                          ["Music tracks", adminOverview.tracks, "library_music"],
+                          ["Subscriptions", adminOverview.subscribers, "subscriptions"],
+                          ["Video views", adminOverview.videoViews, "visibility"]
+                        ].map(([label, value, icon]) => (
+                          <article key={label} style={{ padding: "16px", borderRadius: "12px", background: "var(--ma-bg, #f6f7f9)", border: "1px solid var(--ma-border, #e5e5e5)" }}>
+                            <span className="material-symbols-outlined" style={{ color: "#1D9BF0", fontSize: "21px" }}>{icon}</span>
+                            <p style={{ margin: "12px 0 4px", fontSize: "25px", fontWeight: "800", fontVariantNumeric: "tabular-nums" }}>{value.toLocaleString()}</p>
+                            <p style={{ margin: 0, color: "var(--ma-text-secondary, #777)", fontSize: "12px" }}>{label}</p>
+                          </article>
+                        ))}
+                      </div>
+                    )}
+                    {!adminOverview && !adminOverviewLoading && !adminOverviewError && <p style={{ color: "var(--ma-text-secondary, #777)", marginTop: "18px" }}>Refresh to load platform statistics.</p>}
+                    {adminOverview?.updatedAt && <p style={{ color: "var(--ma-text-secondary, #777)", fontSize: "11px", margin: "14px 0 0" }}>Last refreshed: {new Date(adminOverview.updatedAt).toLocaleString()}</p>}
+                  </section>
+                )}
+
+                {adminSection === "audit" && (
+                  <section style={{ background: "var(--ma-surface, #fff)", border: "1px solid var(--ma-border, #ddd)", borderRadius: "14px", padding: "18px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
+                      <div>
+                        <h3 style={{ margin: 0, fontSize: "19px" }}>Owner audit logs</h3>
+                        <p style={{ margin: "5px 0 0", color: "var(--ma-text-secondary, #777)", fontSize: "12px" }}>Recorded administrative actions</p>
+                      </div>
+                      <button type="button" onClick={loadAdminAuditLogs} disabled={adminAuditLoading} style={{ border: "1px solid var(--ma-border, #ccc)", borderRadius: "9px", padding: "9px 13px", background: "var(--ma-bg, #f5f5f5)", color: "var(--ma-text, #111)", cursor: "pointer" }}>{adminAuditLoading ? "Refreshing..." : "Refresh logs"}</button>
+                    </div>
+                    {adminAuditError && <p role="alert" style={{ color: "#dc2626", fontSize: "13px" }}>{adminAuditError}</p>}
+                    {adminAuditLoading && <p style={{ color: "var(--ma-text-secondary, #777)" }}>Loading audit records...</p>}
+                    {!adminAuditLoading && !adminAuditError && adminAuditLogs.length === 0 && <p style={{ color: "var(--ma-text-secondary, #777)" }}>No recorded owner actions yet.</p>}
+                    <div style={{ display: "grid", gap: "10px", marginTop: "14px" }}>
+                      {adminAuditLogs.map((log) => (
+                        <article key={log.id} style={{ border: "1px solid var(--ma-border, #ddd)", borderRadius: "10px", padding: "13px", background: "var(--ma-bg, #fafafa)" }}>
+                          <strong style={{ fontSize: "14px", overflowWrap: "anywhere" }}>{String(log.action || "Administrative action").replaceAll("_", " ")}</strong>
+                          <p style={{ margin: "6px 0", fontSize: "12px", color: "var(--ma-text-secondary, #777)" }}>{log.target_type || "Platform"}{log.target_id ? ` · ${log.target_id}` : ""}</p>
+                          <p style={{ margin: 0, fontSize: "11px", color: "var(--ma-text-secondary, #777)" }}>{new Date(log.created_at).toLocaleString()} · Owner ID: {log.actor_id}</p>
+                          {log.details && <pre style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", fontSize: "11px", color: "var(--ma-text-secondary, #777)" }}>{JSON.stringify(log.details, null, 2)}</pre>}
+                        </article>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {adminSection === "verification" && (
+              <section className="ma-admin-verification" style={{ background: "var(--ma-surface, #fff)", color: "var(--ma-text, #111)", border: "1px solid var(--ma-border, #ddd)", borderRadius: "14px", padding: "18px", margin: "16px 0" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+                  <div>
+                    <h2 style={{ margin: 0, fontSize: "20px" }}>Artist verification</h2>
+                    <p style={{ margin: "6px 0 0", color: "var(--ma-text-secondary, #777)", fontSize: "13px" }}>Private Music Antenna owner dashboard</p>
+                  </div>
+                  <button onClick={loadAdminArtistProfiles} disabled={adminArtistLoading} style={{ background: "var(--ma-bg, #f5f5f5)", color: "var(--ma-text, #111)", border: "1px solid var(--ma-border, #ccc)", borderRadius: "9px", padding: "9px 13px", cursor: "pointer" }}>
+                    {adminArtistLoading ? "Refreshing..." : "Refresh"}
+                  </button>
+                </div>
+                {adminArtistMessage && <p role="status" style={{ color: "var(--ma-text, #111)", fontSize: "13px" }}>{adminArtistMessage}</p>}
+                {adminArtistLoading && <p style={{ color: "var(--ma-text-secondary, #777)" }}>Loading real applications...</p>}
+                {!adminArtistLoading && adminArtistProfiles.length === 0 && <p style={{ color: "var(--ma-text-secondary, #777)" }}>No artist applications found.</p>}
+                <div style={{ display: "grid", gap: "12px", marginTop: "16px" }}>
+                  {adminArtistProfiles.map((artist) => (
+                    <article key={artist.user_id} style={{ border: "1px solid var(--ma-border, #ddd)", borderRadius: "12px", padding: "14px", background: "var(--ma-bg, #fafafa)" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
+                        <strong style={{ fontSize: "16px" }}>{artist.artist_name || artist.legal_name || "Unnamed artist"}</strong>
+                        <span style={{ fontSize: "12px", fontWeight: "700", textTransform: "capitalize", color: artist.verification_status === "verified" ? "#16a34a" : artist.verification_status === "rejected" ? "#dc2626" : "var(--ma-text-secondary, #777)" }}>{artist.verification_status || "pending"}</span>
+                      </div>
+                      <p style={{ margin: "8px 0 4px", fontSize: "13px" }}>{artist.legal_name || "Legal name not provided"} · {artist.genre || "Genre not provided"}</p>
+                      <p style={{ margin: "4px 0", fontSize: "13px", color: "var(--ma-text-secondary, #777)" }}>{[artist.district, artist.region, artist.country].filter(Boolean).join(", ")}</p>
+                      {artist.artist_category && <p style={{ margin: "4px 0", fontSize: "13px" }}>Category: {artist.artist_category}</p>}
+                      {artist.biography && <p style={{ margin: "8px 0", fontSize: "13px", whiteSpace: "pre-wrap" }}>{artist.biography}</p>}
+                      <p style={{ margin: "8px 0", fontSize: "11px", color: "var(--ma-text-secondary, #777)" }}>Applicant ID: {artist.user_id}</p>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "12px" }}>
+                        <button className="ma-admin-approve" disabled={adminReviewBusyId === artist.user_id || artist.verification_status === "verified"} onClick={() => handleAdminSetArtistVerification(artist.user_id, "verified")} style={{ background: "#16a34a", color: "#fff", border: 0, borderRadius: "8px", padding: "9px 13px", fontWeight: "700", cursor: "pointer", opacity: adminReviewBusyId === artist.user_id || artist.verification_status === "verified" ? 0.55 : 1 }}>Approve</button>
+                        <button className="ma-admin-reject" disabled={adminReviewBusyId === artist.user_id || artist.verification_status === "rejected"} onClick={() => handleAdminSetArtistVerification(artist.user_id, "rejected")} style={{ background: "#dc2626", color: "#fff", border: 0, borderRadius: "8px", padding: "9px 13px", fontWeight: "700", cursor: "pointer", opacity: adminReviewBusyId === artist.user_id || artist.verification_status === "rejected" ? 0.55 : 1 }}>Reject</button>
+                        <button className="ma-admin-pending" disabled={adminReviewBusyId === artist.user_id || artist.verification_status === "pending"} onClick={() => handleAdminSetArtistVerification(artist.user_id, "pending")} style={{ background: "var(--ma-surface, #fff)", color: "var(--ma-text, #111)", border: "1px solid var(--ma-border, #ccc)", borderRadius: "8px", padding: "9px 13px", cursor: "pointer" }}>Set pending</button>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </section>
+                )}
+                {adminSection === "users" && (
+                  <section style={{ background: "var(--ma-surface, #fff)", color: "var(--ma-text, #111)", border: "1px solid var(--ma-border, #ddd)", borderRadius: "14px", padding: "18px", margin: "8px 0" }}>
+                    <h3 style={{ marginTop: 0 }}>User management</h3>
+                    <p style={{ color: "var(--ma-text-secondary, #777)", fontSize: "13px" }}>
+                      Registered accounts: <strong>{adminUsersTotal.toLocaleString()}</strong>
+                    </p>
+
+                    <form onSubmit={async (event) => {
+                      event.preventDefault();
+                      setAdminUsersPage(1);
+                      await loadAdminUsers(1, adminUsersQuery);
+                    }} style={{ display: "flex", gap: "8px", flexWrap: "wrap", margin: "14px 0" }}>
+                      <input
+                        type="search"
+                        value={adminUsersQuery}
+                        onChange={(event) => setAdminUsersQuery(event.target.value)}
+                        placeholder="Search email, username, name or account ID"
+                        aria-label="Search registered users"
+                        style={{ flex: "1 1 240px", minWidth: 0, padding: "11px 12px", borderRadius: "9px", border: "1px solid var(--ma-border, #ccc)", background: "var(--ma-bg, #fff)", color: "var(--ma-text, #111)" }}
+                      />
+                      <button type="submit" disabled={adminUsersLoading} style={{ padding: "10px 16px", border: 0, borderRadius: "9px", background: "#1D9BF0", color: "#fff", fontWeight: "700", cursor: "pointer", opacity: adminUsersLoading ? 0.6 : 1 }}>
+                        Search
+                      </button>
+                    </form>
+
+                    {adminUsersError && (
+                      <p role="alert" style={{ padding: "11px", borderRadius: "9px", background: "rgba(220,38,38,.10)", color: "#dc2626", fontSize: "13px" }}>
+                        {adminUsersError}
+                      </p>
+                    )}
+
+                    {adminUsersLoading ? (
+                      <p style={{ color: "var(--ma-text-secondary, #777)" }}>Loading registered accounts…</p>
+                    ) : adminUsers.length === 0 ? (
+                      <p style={{ color: "var(--ma-text-secondary, #777)" }}>No accounts found for this search.</p>
+                    ) : (
+                      <div style={{ display: "grid", gap: "12px" }}>
+                        {adminUsers.map((user) => {
+                          const isSuspended = user.banned_until && new Date(user.banned_until).getTime() > Date.now();
+                          const protectedAccount = user.is_owner || user.id === session?.user?.id;
+                          return (
+                            <article key={user.id} style={{ border: "1px solid var(--ma-border, #ddd)", borderRadius: "12px", padding: "14px", background: "var(--ma-bg, #fafafa)", minWidth: 0 }}>
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
+                                <strong style={{ overflowWrap: "anywhere" }}>{user.display_name || user.username || user.email || "Unnamed account"}</strong>
+                                <span style={{ fontSize: "12px", fontWeight: "800", color: protectedAccount ? "#1D9BF0" : isSuspended ? "#dc2626" : "#16a34a" }}>
+                                  {protectedAccount ? "Protected owner" : isSuspended ? "Suspended" : "Active"}
+                                </span>
+                              </div>
+                              <p style={{ margin: "7px 0", fontSize: "13px", overflowWrap: "anywhere" }}>{user.email || "No email"}{user.username ? " · @" + user.username : ""}</p>
+                              <p style={{ margin: "5px 0", fontSize: "12px", color: "var(--ma-text-secondary, #777)" }}>Role: {user.role || "listener"}</p>
+                              <p style={{ margin: "5px 0", fontSize: "12px", color: "var(--ma-text-secondary, #777)" }}>Registered: {user.created_at ? new Date(user.created_at).toLocaleString() : "Unavailable"}</p>
+                              <p style={{ margin: "5px 0", fontSize: "12px", color: "var(--ma-text-secondary, #777)" }}>Last sign-in: {user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : "No recorded sign-in"}</p>
+                              {isSuspended && <p style={{ margin: "5px 0", fontSize: "12px", color: "#dc2626" }}>Suspension expiry: {new Date(user.banned_until).toLocaleString()}</p>}
+                              <p style={{ margin: "7px 0", fontSize: "10px", color: "var(--ma-text-secondary, #777)", overflowWrap: "anywhere" }}>Account ID: {user.id}</p>
+
+                              {!protectedAccount && (
+                                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginTop: "12px" }}>
+                                  {isSuspended ? (
+                                    <button type="button" disabled={adminUserBusyId === user.id} onClick={() => handleAdminUserAction("restore_user", user.id)} style={{ border: 0, borderRadius: "8px", padding: "9px 13px", background: "#16a34a", color: "#fff", fontWeight: "700", cursor: "pointer", opacity: adminUserBusyId === user.id ? 0.6 : 1 }}>
+                                      {adminUserBusyId === user.id ? "Processing…" : "Restore account"}
+                                    </button>
+                                  ) : (
+                                    <button type="button" disabled={Boolean(adminUserBusyId)} onClick={() => { setAdminSuspendTarget(user); setAdminSuspendReason(""); }} style={{ border: 0, borderRadius: "8px", padding: "9px 13px", background: "#dc2626", color: "#fff", fontWeight: "700", cursor: "pointer", opacity: adminUserBusyId ? 0.6 : 1 }}>
+                                      Suspend account
+                                    </button>
+                                  )}
+                                </div>
+                              )}
+                            </article>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", flexWrap: "wrap", marginTop: "16px" }}>
+                      <span style={{ fontSize: "12px", color: "var(--ma-text-secondary, #777)" }}>
+                        Page {adminUsersPage} of {Math.max(1, Math.ceil(adminUsersTotal / 25))}
+                      </span>
+                      <div style={{ display: "flex", gap: "8px" }}>
+                        <button type="button" disabled={adminUsersLoading || adminUsersPage <= 1} onClick={() => { const next = adminUsersPage - 1; setAdminUsersPage(next); loadAdminUsers(next, adminUsersQuery); }} style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid var(--ma-border, #ccc)", background: "var(--ma-surface, #fff)", color: "var(--ma-text, #111)", cursor: "pointer" }}>Previous</button>
+                        <button type="button" disabled={adminUsersLoading || adminUsersPage >= Math.ceil(adminUsersTotal / 25)} onClick={() => { const next = adminUsersPage + 1; setAdminUsersPage(next); loadAdminUsers(next, adminUsersQuery); }} style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid var(--ma-border, #ccc)", background: "var(--ma-surface, #fff)", color: "var(--ma-text, #111)", cursor: "pointer" }}>Next</button>
+                      </div>
+                    </div>
+                  </section>
+                )}
+
+                {["content", "reports", "analytics", "settings"].includes(adminSection) && (
+                  <section style={{ background: "var(--ma-surface, #fff)", color: "var(--ma-text, #111)", border: "1px solid var(--ma-border, #ddd)", borderRadius: "14px", padding: "18px", margin: "8px 0" }}>
+                    <h3 style={{ marginTop: 0, textTransform: "capitalize" }}>{adminSection === "content" ? "Content management" : adminSection === "reports" ? "Reports centre" : adminSection === "analytics" ? "Platform analytics" : "Platform settings"}</h3>
+                    <p style={{ color: "var(--ma-text-secondary, #777)", fontSize: "13px" }}>This section will be enabled after its owner-only database permissions and secure actions are configured. No sample records or simulated controls are shown.</p>
+                  </section>
+                )}
+
+                {adminSuspendTarget && (
+                  <div role="dialog" aria-modal="true" aria-labelledby="admin-suspend-title" style={{ position: "fixed", inset: 0, zIndex: 1000000, background: "rgba(0,0,0,.65)", display: "flex", alignItems: "center", justifyContent: "center", padding: "18px" }}>
+                    <section style={{ width: "100%", maxWidth: "440px", background: "var(--ma-surface, #fff)", color: "var(--ma-text, #111)", border: "1px solid var(--ma-border, #ddd)", borderRadius: "14px", padding: "20px" }}>
+                      <h3 id="admin-suspend-title" style={{ marginTop: 0 }}>Suspend account</h3>
+                      <p style={{ fontSize: "13px", overflowWrap: "anywhere" }}>You are about to suspend {adminSuspendTarget.email || adminSuspendTarget.username || adminSuspendTarget.id}.</p>
+                      <label htmlFor="admin-suspend-reason" style={{ display: "block", fontSize: "13px", fontWeight: "700", marginBottom: "7px" }}>Reason (required)</label>
+                      <textarea id="admin-suspend-reason" value={adminSuspendReason} onChange={(event) => setAdminSuspendReason(event.target.value)} maxLength={500} rows={4} placeholder="Explain why this account is being suspended…" style={{ boxSizing: "border-box", width: "100%", resize: "vertical", padding: "11px", borderRadius: "9px", border: "1px solid var(--ma-border, #ccc)", background: "var(--ma-bg, #fff)", color: "var(--ma-text, #111)" }} />
+                      <p style={{ fontSize: "11px", color: "var(--ma-text-secondary, #777)" }}>At least 5 characters. This reason will be included in the admin audit log.</p>
+                      <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", flexWrap: "wrap", marginTop: "14px" }}>
+                        <button type="button" onClick={() => { setAdminSuspendTarget(null); setAdminSuspendReason(""); }} style={{ padding: "9px 13px", borderRadius: "8px", border: "1px solid var(--ma-border, #ccc)", background: "var(--ma-surface, #fff)", color: "var(--ma-text, #111)", cursor: "pointer" }}>Cancel</button>
+                        <button type="button" disabled={adminSuspendReason.trim().length < 5 || Boolean(adminUserBusyId)} onClick={() => handleAdminUserAction("suspend_user", adminSuspendTarget.id, adminSuspendReason)} style={{ padding: "9px 13px", border: 0, borderRadius: "8px", background: "#dc2626", color: "#fff", fontWeight: "700", cursor: "pointer", opacity: adminSuspendReason.trim().length < 5 || adminUserBusyId ? 0.5 : 1 }}>Confirm suspension</button>
+                      </div>
+                    </section>
+                  </div>
+                )}
+              </section>
             )}
 
             {/* EDIT PROFILE FORM */}
@@ -5844,7 +6929,10 @@ document.body
                 </div>
 
                 <div className="yt-channel-meta">
-                  <h1>{channelProfile.display_name || "Unknown artist"}</h1>
+                  <h1 style={{ display: "flex", alignItems: "center", gap: "7px", flexWrap: "wrap" }}>
+                    {channelProfile.display_name || "Unknown artist"}
+                    {isMusicAntennaOwner(channelProfile.id) && <span className="material-symbols-outlined" style={{ color: "#1D9BF0", fontSize: "22px", fontVariationSettings: "'FILL' 1" }} title="Music Antenna Owner">verified</span>}
+                  </h1>
                   <p className="yt-channel-sub">
                     @{channelProfile.username || channelProfile.display_name || "music-antenna"} · {channelMedia.length} {channelMedia.length === 1 ? "upload" : "uploads"}
                   </p>
