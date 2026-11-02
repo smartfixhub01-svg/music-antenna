@@ -6535,7 +6535,7 @@ document.body
                     ["audit", "Audit Logs", "history"],
                     ["settings", "Settings", "settings"]
                   ].map(([key, label, icon]) => (
-                    <button key={key} type="button" onClick={() => {
+                    <button key={key} className={`ma-owner-nav-button ${adminSection === key ? "is-active" : ""}`} type="button" onClick={() => {
                       setAdminSection(key);
                       if (key === "overview") loadAdminOverview();
                       if (key === "verification") loadAdminArtistProfiles();
@@ -6555,7 +6555,7 @@ document.body
                         <h3 style={{ margin: 0, fontSize: "19px" }}>Platform overview</h3>
                         <p style={{ margin: "5px 0 0", color: "var(--ma-text-secondary, #777)", fontSize: "12px" }}>Live counts from your Supabase database</p>
                       </div>
-                      <button type="button" onClick={loadAdminOverview} disabled={adminOverviewLoading} style={{ border: "1px solid var(--ma-border, #ccc)", borderRadius: "9px", padding: "9px 13px", background: "var(--ma-bg, #f5f5f5)", color: "var(--ma-text, #111)", cursor: "pointer" }}>{adminOverviewLoading ? "Refreshing..." : "Refresh data"}</button>
+                      <button className="ma-owner-refresh-button" type="button" onClick={loadAdminOverview} disabled={adminOverviewLoading} style={{ border: "1px solid var(--ma-border, #ccc)", borderRadius: "9px", padding: "9px 13px", background: "var(--ma-bg, #f5f5f5)", color: "var(--ma-text, #111)", cursor: "pointer" }}>{adminOverviewLoading ? "Refreshing..." : "Refresh data"}</button>
                     </div>
 
                     {adminOverviewError && <p role="alert" style={{ color: "#dc2626", fontSize: "13px" }}>{adminOverviewError}</p>}
@@ -6591,7 +6591,7 @@ document.body
                         <h3 style={{ margin: 0, fontSize: "19px" }}>Owner audit logs</h3>
                         <p style={{ margin: "5px 0 0", color: "var(--ma-text-secondary, #777)", fontSize: "12px" }}>Recorded administrative actions</p>
                       </div>
-                      <button type="button" onClick={loadAdminAuditLogs} disabled={adminAuditLoading} style={{ border: "1px solid var(--ma-border, #ccc)", borderRadius: "9px", padding: "9px 13px", background: "var(--ma-bg, #f5f5f5)", color: "var(--ma-text, #111)", cursor: "pointer" }}>{adminAuditLoading ? "Refreshing..." : "Refresh logs"}</button>
+                      <button className="ma-owner-refresh-button" type="button" onClick={loadAdminAuditLogs} disabled={adminAuditLoading} style={{ border: "1px solid var(--ma-border, #ccc)", borderRadius: "9px", padding: "9px 13px", background: "var(--ma-bg, #f5f5f5)", color: "var(--ma-text, #111)", cursor: "pointer" }}>{adminAuditLoading ? "Refreshing..." : "Refresh logs"}</button>
                     </div>
                     {adminAuditError && <p role="alert" style={{ color: "#dc2626", fontSize: "13px" }}>{adminAuditError}</p>}
                     {adminAuditLoading && <p style={{ color: "var(--ma-text-secondary, #777)" }}>Loading audit records...</p>}
@@ -6616,7 +6616,7 @@ document.body
                     <h2 style={{ margin: 0, fontSize: "20px" }}>Artist verification</h2>
                     <p style={{ margin: "6px 0 0", color: "var(--ma-text-secondary, #777)", fontSize: "13px" }}>Private Music Antenna owner dashboard</p>
                   </div>
-                  <button onClick={loadAdminArtistProfiles} disabled={adminArtistLoading} style={{ background: "var(--ma-bg, #f5f5f5)", color: "var(--ma-text, #111)", border: "1px solid var(--ma-border, #ccc)", borderRadius: "9px", padding: "9px 13px", cursor: "pointer" }}>
+                  <button className="ma-owner-refresh-button" onClick={loadAdminArtistProfiles} disabled={adminArtistLoading} style={{ background: "var(--ma-bg, #f5f5f5)", color: "var(--ma-text, #111)", border: "1px solid var(--ma-border, #ccc)", borderRadius: "9px", padding: "9px 13px", cursor: "pointer" }}>
                     {adminArtistLoading ? "Refreshing..." : "Refresh"}
                   </button>
                 </div>
@@ -6717,11 +6717,11 @@ document.body
                               {!protectedAccount && (
                                 <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginTop: "12px" }}>
                                   {isSuspended ? (
-                                    <button type="button" disabled={adminUserBusyId === user.id} onClick={() => handleAdminUserAction("restore_user", user.id)} style={{ border: 0, borderRadius: "8px", padding: "9px 13px", background: "#16a34a", color: "#fff", fontWeight: "700", cursor: "pointer", opacity: adminUserBusyId === user.id ? 0.6 : 1 }}>
+                                    <button className="ma-admin-restore-button" type="button" disabled={adminUserBusyId === user.id} onClick={() => handleAdminUserAction("restore_user", user.id)} style={{ border: 0, borderRadius: "8px", padding: "9px 13px", background: "#16a34a", color: "#fff", fontWeight: "700", cursor: "pointer", opacity: adminUserBusyId === user.id ? 0.6 : 1 }}>
                                       {adminUserBusyId === user.id ? "Processing…" : "Restore account"}
                                     </button>
                                   ) : (
-                                    <button type="button" disabled={Boolean(adminUserBusyId)} onClick={() => { setAdminSuspendTarget(user); setAdminSuspendReason(""); }} style={{ border: 0, borderRadius: "8px", padding: "9px 13px", background: "#dc2626", color: "#fff", fontWeight: "700", cursor: "pointer", opacity: adminUserBusyId ? 0.6 : 1 }}>
+                                    <button className="ma-admin-suspend-button" type="button" disabled={Boolean(adminUserBusyId)} onClick={() => { setAdminSuspendTarget(user); setAdminSuspendReason(""); }} style={{ border: 0, borderRadius: "8px", padding: "9px 13px", background: "#dc2626", color: "#fff", fontWeight: "700", cursor: "pointer", opacity: adminUserBusyId ? 0.6 : 1 }}>
                                       Suspend account
                                     </button>
                                   )}
@@ -6738,8 +6738,8 @@ document.body
                         Page {adminUsersPage} of {Math.max(1, Math.ceil(adminUsersTotal / 25))}
                       </span>
                       <div style={{ display: "flex", gap: "8px" }}>
-                        <button type="button" disabled={adminUsersLoading || adminUsersPage <= 1} onClick={() => { const next = adminUsersPage - 1; setAdminUsersPage(next); loadAdminUsers(next, adminUsersQuery); }} style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid var(--ma-border, #ccc)", background: "var(--ma-surface, #fff)", color: "var(--ma-text, #111)", cursor: "pointer" }}>Previous</button>
-                        <button type="button" disabled={adminUsersLoading || adminUsersPage >= Math.ceil(adminUsersTotal / 25)} onClick={() => { const next = adminUsersPage + 1; setAdminUsersPage(next); loadAdminUsers(next, adminUsersQuery); }} style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid var(--ma-border, #ccc)", background: "var(--ma-surface, #fff)", color: "var(--ma-text, #111)", cursor: "pointer" }}>Next</button>
+                        <button className="ma-admin-page-button" type="button" disabled={adminUsersLoading || adminUsersPage <= 1} onClick={() => { const next = adminUsersPage - 1; setAdminUsersPage(next); loadAdminUsers(next, adminUsersQuery); }} style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid var(--ma-border, #ccc)", background: "var(--ma-surface, #fff)", color: "var(--ma-text, #111)", cursor: "pointer" }}>Previous</button>
+                        <button className="ma-admin-page-button" type="button" disabled={adminUsersLoading || adminUsersPage >= Math.ceil(adminUsersTotal / 25)} onClick={() => { const next = adminUsersPage + 1; setAdminUsersPage(next); loadAdminUsers(next, adminUsersQuery); }} style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid var(--ma-border, #ccc)", background: "var(--ma-surface, #fff)", color: "var(--ma-text, #111)", cursor: "pointer" }}>Next</button>
                       </div>
                     </div>
                   </section>
@@ -6753,16 +6753,16 @@ document.body
                 )}
 
                 {adminSuspendTarget && (
-                  <div role="dialog" aria-modal="true" aria-labelledby="admin-suspend-title" style={{ position: "fixed", inset: 0, zIndex: 1000000, background: "rgba(0,0,0,.65)", display: "flex", alignItems: "center", justifyContent: "center", padding: "18px" }}>
-                    <section style={{ width: "100%", maxWidth: "440px", background: "var(--ma-surface, #fff)", color: "var(--ma-text, #111)", border: "1px solid var(--ma-border, #ddd)", borderRadius: "14px", padding: "20px" }}>
+                  <div className="ma-admin-suspend-overlay" role="dialog" aria-modal="true" aria-labelledby="admin-suspend-title" style={{ position: "fixed", inset: 0, zIndex: 1000000, background: "rgba(0,0,0,.65)", display: "flex", alignItems: "center", justifyContent: "center", padding: "18px" }}>
+                    <section className="ma-admin-suspend-dialog" style={{ width: "100%", maxWidth: "440px", background: "var(--ma-surface, #fff)", color: "var(--ma-text, #111)", border: "1px solid var(--ma-border, #ddd)", borderRadius: "14px", padding: "20px" }}>
                       <h3 id="admin-suspend-title" style={{ marginTop: 0 }}>Suspend account</h3>
                       <p style={{ fontSize: "13px", overflowWrap: "anywhere" }}>You are about to suspend {adminSuspendTarget.email || adminSuspendTarget.username || adminSuspendTarget.id}.</p>
                       <label htmlFor="admin-suspend-reason" style={{ display: "block", fontSize: "13px", fontWeight: "700", marginBottom: "7px" }}>Reason (required)</label>
                       <textarea id="admin-suspend-reason" value={adminSuspendReason} onChange={(event) => setAdminSuspendReason(event.target.value)} maxLength={500} rows={4} placeholder="Explain why this account is being suspended…" style={{ boxSizing: "border-box", width: "100%", resize: "vertical", padding: "11px", borderRadius: "9px", border: "1px solid var(--ma-border, #ccc)", background: "var(--ma-bg, #fff)", color: "var(--ma-text, #111)" }} />
                       <p style={{ fontSize: "11px", color: "var(--ma-text-secondary, #777)" }}>At least 5 characters. This reason will be included in the admin audit log.</p>
                       <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", flexWrap: "wrap", marginTop: "14px" }}>
-                        <button type="button" onClick={() => { setAdminSuspendTarget(null); setAdminSuspendReason(""); }} style={{ padding: "9px 13px", borderRadius: "8px", border: "1px solid var(--ma-border, #ccc)", background: "var(--ma-surface, #fff)", color: "var(--ma-text, #111)", cursor: "pointer" }}>Cancel</button>
-                        <button type="button" disabled={adminSuspendReason.trim().length < 5 || Boolean(adminUserBusyId)} onClick={() => handleAdminUserAction("suspend_user", adminSuspendTarget.id, adminSuspendReason)} style={{ padding: "9px 13px", border: 0, borderRadius: "8px", background: "#dc2626", color: "#fff", fontWeight: "700", cursor: "pointer", opacity: adminSuspendReason.trim().length < 5 || adminUserBusyId ? 0.5 : 1 }}>Confirm suspension</button>
+                        <button className="ma-admin-cancel-button" type="button" onClick={() => { setAdminSuspendTarget(null); setAdminSuspendReason(""); }} style={{ padding: "9px 13px", borderRadius: "8px", border: "1px solid var(--ma-border, #ccc)", background: "var(--ma-surface, #fff)", color: "var(--ma-text, #111)", cursor: "pointer" }}>Cancel</button>
+                        <button className="ma-admin-confirm-suspend-button" type="button" disabled={adminSuspendReason.trim().length < 5 || Boolean(adminUserBusyId)} onClick={() => handleAdminUserAction("suspend_user", adminSuspendTarget.id, adminSuspendReason)} style={{ padding: "9px 13px", border: 0, borderRadius: "8px", background: "#dc2626", color: "#fff", fontWeight: "700", cursor: "pointer", opacity: adminSuspendReason.trim().length < 5 || adminUserBusyId ? 0.5 : 1 }}>Confirm suspension</button>
                       </div>
                     </section>
                   </div>
