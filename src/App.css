@@ -6718,3 +6718,53 @@ p
   cursor: not-allowed !important;
   filter: grayscale(.25) !important;
 }
+
+
+/* Private Owner Administration — User Management theme protection */
+.ma-admin-users .ma-admin-users-search button.ma-admin-search-button,
+.ma-admin-users .ma-admin-users-search button.ma-admin-back-button {
+  display: inline-flex !important;
+  visibility: visible !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 42px !important;
+  padding: 10px 16px !important;
+  border: 1px solid transparent !important;
+  border-radius: 9px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+  opacity: 1 !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+  transition: background-color .18s ease, filter .18s ease !important;
+}
+
+.ma-admin-users .ma-admin-users-search button.ma-admin-search-button {
+  background: #087dcc !important;
+  background-color: #087dcc !important;
+  border-color: #087dcc !important;
+  color: #ffffff !important;
+}
+
+.ma-admin-users .ma-admin-users-search button.ma-admin-back-button {
+  background: var(--ma-surface, #ffffff) !important;
+  background-color: var(--ma-surface, #ffffff) !important;
+  border-color: var(--ma-border, #b8b8b8) !important;
+  color: var(--ma-text, #171717) !important;
+}
+
+.ma-admin-users .ma-admin-users-search button:hover:not(:disabled) {
+  filter: brightness(.94) !important;
+}
+
+.ma-admin-users .ma-admin-users-search button:focus-visible {
+  outline: 3px solid #1d9bf0 !important;
+  outline-offset: 3px !important;
+}
+
+.ma-admin-users .ma-admin-users-search button:disabled {
+  opacity: .55 !important;
+  cursor: not-allowed !important;
+}
+

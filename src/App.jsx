@@ -6646,7 +6646,7 @@ document.body
               </section>
                 )}
                 {adminSection === "users" && (
-                  <section style={{ background: "var(--ma-surface, #fff)", color: "var(--ma-text, #111)", border: "1px solid var(--ma-border, #ddd)", borderRadius: "14px", padding: "18px", margin: "8px 0" }}>
+                  <section className="ma-admin-users" style={{ background: "var(--ma-surface, #fff)", color: "var(--ma-text, #111)", border: "1px solid var(--ma-border, #ddd)", borderRadius: "14px", padding: "18px", margin: "8px 0" }}>
                     <h3 style={{ marginTop: 0 }}>User management</h3>
                     <p style={{ color: "var(--ma-text-secondary, #777)", fontSize: "13px" }}>
                       Registered accounts: <strong>{adminUsersTotal.toLocaleString()}</strong>
@@ -6656,7 +6656,7 @@ document.body
                       event.preventDefault();
                       setAdminUsersPage(1);
                       await loadAdminUsers(1, adminUsersQuery);
-                    }} style={{ display: "flex", gap: "8px", flexWrap: "wrap", margin: "14px 0" }}>
+                    }} className="ma-admin-users-search" style={{ display: "flex", gap: "8px", flexWrap: "wrap", margin: "14px 0" }}>
                       <input
                         type="search"
                         value={adminUsersQuery}
@@ -6665,9 +6665,23 @@ document.body
                         aria-label="Search registered users"
                         style={{ flex: "1 1 240px", minWidth: 0, padding: "11px 12px", borderRadius: "9px", border: "1px solid var(--ma-border, #ccc)", background: "var(--ma-bg, #fff)", color: "var(--ma-text, #111)" }}
                       />
-                      <button type="submit" disabled={adminUsersLoading} style={{ padding: "10px 16px", border: 0, borderRadius: "9px", background: "#1D9BF0", color: "#fff", fontWeight: "700", cursor: "pointer", opacity: adminUsersLoading ? 0.6 : 1 }}>
+                      <button className="ma-admin-search-button" type="submit" disabled={adminUsersLoading} style={{ padding: "10px 16px", border: 0, borderRadius: "9px", background: "#1D9BF0", color: "#fff", fontWeight: "700", cursor: "pointer", opacity: adminUsersLoading ? 0.6 : 1 }}>
                         Search
                       </button>
+                      {(adminUsersQuery.trim() || adminUsersPage > 1) && (
+                        <button
+                          className="ma-admin-back-button"
+                          type="button"
+                          disabled={adminUsersLoading}
+                          onClick={async () => {
+                            setAdminUsersQuery("");
+                            setAdminUsersPage(1);
+                            await loadAdminUsers(1, "");
+                          }}
+                        >
+                          ← Back to all accounts
+                        </button>
+                      )}
                     </form>
 
                     {adminUsersError && (
