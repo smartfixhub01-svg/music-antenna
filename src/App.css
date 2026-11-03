@@ -7440,3 +7440,35 @@ p
     transition: none !important;
   }
 }
+/* Voice Studio Light and Dark Mode Fix */
+
+.voice-edit-studio {
+  background: var(--ma-bg-elevated, #ffffff) !important;
+  color: var(--ma-text-primary, #111111) !important;
+  border-color: var(--ma-border, #dddddd) !important;
+}
+
+.voice-edit-studio > div:nth-of-type(2) {
+  background: var(--ma-bg-secondary, #f2f2f2) !important;
+  color: var(--ma-text-primary, #111111) !important;
+  border: 1px solid var(--ma-border, #dddddd) !important;
+}
+
+.voice-edit-studio button.voice-edit-secondary {
+  background: var(--ma-bg-secondary, #f2f2f2) !important;
+  color: var(--ma-text-primary, #111111) !important;
+  border-color: var(--ma-border, #dddddd) !important;
+}
+
+.voice-edit-studio button.voice-edit-primary {
+  background: var(--ma-accent, #ff0033) !important;
+  color: #ffffff !important;
+}
+
+:root[data-theme="dark"] .voice-edit-studio {
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] .voice-edit-studio {
+  color-scheme: light;
+}
