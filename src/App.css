@@ -7000,3 +7000,48 @@ p
     transition: none !important;
   }
 }
+
+
+/* MUSIC ANTENNA — FULL-SCREEN OWNER DASHBOARD */
+.ma-owner-centre {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9990 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-width: none !important;
+  min-height: 100vh !important;
+  margin: 0 !important;
+  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: var(--ma-bg, #f5f6f8) !important;
+}
+
+.ma-owner-centre > header {
+  width: 100% !important;
+  max-width: 1500px !important;
+  margin: 0 auto 18px !important;
+}
+
+.ma-owner-centre > nav,
+.ma-owner-centre > section,
+.ma-owner-centre > div {
+  max-width: 1500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 640px) {
+  .ma-owner-centre {
+    padding: max(10px, env(safe-area-inset-top)) 10px max(16px, env(safe-area-inset-bottom)) !important;
+  }
+
+  .ma-owner-centre > header {
+    margin-bottom: 12px !important;
+  }
+}

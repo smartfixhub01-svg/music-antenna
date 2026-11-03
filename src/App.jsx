@@ -6520,7 +6520,10 @@ document.body
                       <h2 style={{ margin: 0, fontSize: "24px", fontWeight: "800" }}>Owner Control Centre</h2>
                       <p style={{ margin: "6px 0 0", color: "var(--ma-text-secondary, #777)", fontSize: "13px" }}>Manage and monitor the Music Antenna platform</p>
                     </div>
-                    <span style={{ borderRadius: "20px", padding: "7px 11px", background: "rgba(29,155,240,.12)", color: "#1D9BF0", fontSize: "12px", fontWeight: "800" }}>OWNER ACCESS</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                      <span style={{ borderRadius: "20px", padding: "7px 11px", background: "rgba(29,155,240,.12)", color: "#1D9BF0", fontSize: "12px", fontWeight: "800" }}>OWNER ACCESS</span>
+                      <button type="button" onClick={() => setProfileTab("overview")} style={{ minHeight: "40px", padding: "9px 14px", border: "1px solid var(--ma-border, #ccc)", borderRadius: "10px", background: "var(--ma-bg, #f5f6f8)", color: "var(--ma-text, #171717)", fontWeight: "700", cursor: "pointer" }}>← Back to Profile</button>
+                    </div>
                   </div>
                 </header>
 
