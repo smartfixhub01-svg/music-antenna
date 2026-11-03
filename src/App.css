@@ -7207,3 +7207,236 @@ p
   color: inherit !important;
   flex: 0 0 auto;
 }
+
+
+/* Music Antenna compact voice-note studio */
+.voice-edit-studio {
+  box-sizing: border-box !important;
+  width: min(340px, calc(100vw - 28px)) !important;
+  max-width: 340px !important;
+  max-height: 82vh !important;
+  overflow-y: auto !important;
+  padding: 14px !important;
+  border-radius: 14px !important;
+  color: var(--ma-text, #171717) !important;
+  background: var(--ma-bg, #ffffff) !important;
+  border: 1px solid var(--ma-border, #dddddd) !important;
+  scrollbar-width: thin;
+}
+
+.voice-edit-studio,
+.voice-edit-studio * {
+  box-sizing: border-box;
+}
+
+.voice-edit-studio > div:first-child {
+  margin-bottom: 10px !important;
+  gap: 8px !important;
+}
+
+.voice-edit-studio > div:first-child .material-symbols-outlined {
+  font-size: 22px !important;
+}
+
+.voice-edit-studio > div:nth-of-type(2) {
+  padding: 11px !important;
+  margin-bottom: 10px !important;
+  border-radius: 11px !important;
+}
+
+.voice-edit-studio > div:nth-of-type(2) > div:first-child {
+  font-size: 27px !important;
+}
+
+.voice-edit-studio > div:nth-of-type(2) > div:last-child {
+  margin-top: 9px !important;
+}
+
+.voice-edit-studio button {
+  min-height: 36px !important;
+  padding: 0 10px !important;
+  border-radius: 9px !important;
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+  font-weight: 750 !important;
+  gap: 5px !important;
+  cursor: pointer;
+}
+
+.voice-edit-studio button:disabled {
+  cursor: not-allowed !important;
+  opacity: 0.48 !important;
+}
+
+.voice-edit-studio button.voice-edit-primary {
+  background: var(--ma-accent, #ff365f) !important;
+  border: 1px solid var(--ma-accent, #ff365f) !important;
+  color: #ffffff !important;
+}
+
+.voice-edit-studio button.voice-edit-secondary {
+  background: var(--ma-surface, #f3f3f3) !important;
+  border: 1px solid var(--ma-border, #888888) !important;
+  color: var(--ma-text, #171717) !important;
+}
+
+.voice-edit-studio .material-symbols-outlined {
+  color: inherit !important;
+  font-size: 17px !important;
+  vertical-align: middle;
+  flex: 0 0 auto;
+}
+
+.voice-edit-studio audio {
+  display: block;
+  width: 100%;
+  max-height: 38px;
+}
+
+.voice-edit-studio > div:last-child {
+  gap: 7px !important;
+}
+
+@media (max-width: 380px) {
+  .voice-edit-studio {
+    width: calc(100vw - 24px) !important;
+    padding: 12px !important;
+  }
+
+  .voice-edit-studio button {
+    padding: 0 8px !important;
+    font-size: 11px !important;
+  }
+}
+
+/* GNZ Professional Comments Modal — theme-aware controls */
+.ma-comments-modal {
+  --gnz-comment-accent: var(--ma-accent, #ff365f);
+  --gnz-comment-border: var(--ma-border, #dedee5);
+  --gnz-comment-surface: var(--ma-surface, #f3f4f7);
+  color: var(--ma-text, #17171c);
+  border: 1px solid var(--gnz-comment-border);
+  box-shadow: 0 -14px 48px rgba(0, 0, 0, 0.16);
+  overflow: hidden;
+}
+
+.ma-comments-modal button {
+  font-family: inherit;
+  font-weight: 650;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color .18s ease, color .18s ease,
+              border-color .18s ease, transform .18s ease,
+              box-shadow .18s ease;
+}
+
+.ma-comments-modal button:focus-visible,
+.ma-comments-modal label:focus-within,
+.ma-comments-modal input:focus-visible {
+  outline: 2px solid var(--gnz-comment-accent) !important;
+  outline-offset: 3px !important;
+}
+
+.ma-comments-modal button:active:not(:disabled) {
+  transform: scale(.96);
+}
+
+.ma-comments-modal button:disabled {
+  opacity: .48 !important;
+  cursor: not-allowed !important;
+}
+
+.ma-comments-modal button[style*="background: transparent"],
+.ma-comments-modal button[style*="background:transparent"] {
+  color: var(--ma-text-secondary, #62626d) !important;
+  border-radius: 9px !important;
+}
+
+.ma-comments-modal button[style*="background: transparent"]:hover,
+.ma-comments-modal button[style*="background:transparent"]:hover {
+  background: var(--gnz-comment-surface) !important;
+  color: var(--ma-text, #17171c) !important;
+}
+
+.ma-comments-modal button[type="submit"] {
+  background: var(--gnz-comment-accent) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--gnz-comment-accent) !important;
+  box-shadow: 0 3px 10px rgba(255, 54, 95, .2);
+}
+
+.ma-comments-modal button[type="submit"]:hover:not(:disabled) {
+  filter: brightness(1.06);
+  box-shadow: 0 5px 15px rgba(255, 54, 95, .25);
+}
+
+.ma-comments-modal .premium-comment-input-wrap {
+  background: var(--gnz-comment-surface) !important;
+  border: 1px solid var(--gnz-comment-border) !important;
+  border-radius: 18px !important;
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+.ma-comments-modal .premium-comment-input-wrap:focus-within {
+  border-color: var(--gnz-comment-accent) !important;
+  box-shadow: 0 0 0 3px rgba(255, 54, 95, .10);
+}
+
+.ma-comments-modal .premium-comment-input-wrap input {
+  color: var(--ma-text, #17171c) !important;
+}
+
+.ma-comments-modal .premium-comment-input-wrap input::placeholder {
+  color: var(--ma-text-secondary, #777782) !important;
+  opacity: 1;
+}
+
+.ma-comments-modal .premium-comment-input-wrap label {
+  min-width: 32px;
+  min-height: 32px;
+  justify-content: center;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: background-color .18s ease, color .18s ease;
+}
+
+.ma-comments-modal .premium-comment-input-wrap label:hover {
+  background: rgba(128, 128, 128, .13);
+  color: var(--gnz-comment-accent) !important;
+}
+
+.ma-comments-modal audio {
+  accent-color: var(--gnz-comment-accent);
+  max-width: 100%;
+}
+
+.ma-comments-modal img {
+  object-fit: cover;
+}
+
+.ma-comments-modal button .material-symbols-outlined {
+  vertical-align: middle;
+}
+
+.ma-comments-modal button[aria-label="Close"] {
+  min-width: 36px;
+  min-height: 36px;
+  display: inline-grid;
+  place-items: center;
+}
+
+.ma-comments-modal > div:first-child {
+  scrollbar-color: var(--gnz-comment-border) transparent;
+}
+
+@media (hover: hover) {
+  .ma-comments-modal button:hover:not(:disabled) {
+    filter: brightness(1.04);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ma-comments-modal button,
+  .ma-comments-modal .premium-comment-input-wrap {
+    transition: none !important;
+  }
+}

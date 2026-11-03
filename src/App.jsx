@@ -9234,6 +9234,7 @@ document.body
           onClick={() => setShowCommentsModal(false)}
         >
           <div
+            className="ma-comments-modal"
             style={{ background: "var(--ma-bg, #fff)", height: "85vh", borderTopLeftRadius: "16px", borderTopRightRadius: "16px", display: "flex", flexDirection: "column" }}
             onClick={e => e.stopPropagation()}
           >
@@ -9382,7 +9383,8 @@ document.body
                         fontWeight: "700",
                         marginBottom: "8px"
                       }}>
-                        Preview your new recording
+                        <span className="material-symbols-outlined">play_circle</span>
+                        {" "}Preview your new recording
                       </div>
                       <audio
                         controls
@@ -9472,7 +9474,8 @@ document.body
                           cursor: "pointer"
                         }}
                       >
-                        Record again
+                        <span className="material-symbols-outlined">restart_alt</span>
+                        {" "}Record again
                       </button>
                     )}
                   </div>
@@ -9507,7 +9510,8 @@ document.body
                         cursor: "pointer"
                       }}
                     >
-                      Cancel
+                      <span className="material-symbols-outlined">close</span>
+                      {" "}Cancel
                     </button>
 
                     <button
@@ -9527,7 +9531,10 @@ document.body
                         opacity: !voiceEditBlob || voiceEditRecording || voiceEditSaving ? 0.5 : 1
                       }}
                     >
-                      {voiceEditSaving ? "Saving..." : "Save voice note"}
+                      <span className="material-symbols-outlined">
+                        {voiceEditSaving ? "progress_activity" : "save"}
+                      </span>
+                      {" "}{voiceEditSaving ? "Saving..." : "Save voice note"}
                     </button>
                   </div>
                 </div>
