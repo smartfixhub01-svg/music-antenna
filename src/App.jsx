@@ -535,6 +535,10 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [adminOverview, setAdminOverview] = useState(null);
   const [adminOverviewLoading, setAdminOverviewLoading] = useState(false);
   const [adminOverviewError, setAdminOverviewError] = useState("");
+  const [adminMedia, setAdminMedia] = useState([]);
+  const [adminMediaLoading, setAdminMediaLoading] = useState(false);
+  const [adminMediaError, setAdminMediaError] = useState("");
+  const [adminMediaBusyId, setAdminMediaBusyId] = useState(null);
   const [adminReports, setAdminReports] = useState([]);
   const [adminReportsLoading, setAdminReportsLoading] = useState(false);
   const [adminReportsError, setAdminReportsError] = useState("");
@@ -3258,6 +3262,85 @@ async function fetchPlaylists() {
       setAdminReports([]);
     } finally {
       setAdminReportsLoading(false);
+    }
+  }
+
+  async function loadAdminMedia() {
+    if (!isMusicAntennaOwner(session?.user?.id)) return;
+
+    setAdminMediaLoading(true);
+    setAdminMediaError("");
+
+    try {
+      const { data, error } = await supabase
+        .from("media")
+        .select("id,artist_id,title,description,media_type,thumbnail_path,status,visibility,artist_name,views,created_at,report_count,moderation_hidden")
+        .order("created_at", { ascending: false })
+        .limit(200);
+
+      if (error) throw error;
+      setAdminMedia(data || []);
+    } catch (error) {
+      setAdminMediaError(error.message || "Could not load platform media.");
+      setAdminMedia([]);
+    } finally {
+      setAdminMediaLoading(false);
+    }
+  }
+
+  async function handleAdminMediaModeration(mediaId, hidden) {
+    if (!isMusicAntennaOwner(session?.user?.id)) return;
+    if (typeof hidden !== "boolean") return;
+
+    const item = adminMedia.find(media => media.id === mediaId);
+    if (!item) return;
+
+    setAdminMediaBusyId(mediaId);
+    setAdminMediaError("");
+
+    try {
+      const { data, error } = await supabase
+        .from("media")
+        .update({ moderation_hidden: hidden })
+        .eq("id", mediaId)
+        .select("id,moderation_hidden")
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!data) throw new Error("No media record was updated. Refresh and try again.");
+
+      setAdminMedia(current =>
+        current.map(media =>
+          media.id === mediaId
+            ? { ...media, moderation_hidden: data.moderation_hidden }
+            : media
+        )
+      );
+
+      const { error: auditError } = await supabase.rpc("record_admin_audit", {
+        p_action: hidden ? "media_hidden_by_moderator" : "media_restored_by_moderator",
+        p_target_type: "media",
+        p_target_id: mediaId,
+        p_details: {
+          title: item.title,
+          media_type: item.media_type,
+          artist_id: item.artist_id,
+          previous_moderation_hidden: Boolean(item.moderation_hidden),
+          moderation_hidden: hidden
+        }
+      });
+
+      await loadAdminAuditLogs();
+
+      if (auditError) {
+        setAdminMediaError(
+          "Media was updated, but audit logging failed: " + auditError.message
+        );
+      }
+    } catch (error) {
+      setAdminMediaError(error.message || "Could not update media moderation.");
+    } finally {
+      setAdminMediaBusyId(null);
     }
   }
 
@@ -6600,6 +6683,12 @@ document.body
                 adminReviewBusyId={adminReviewBusyId}
                 loadAdminArtistProfiles={loadAdminArtistProfiles}
                 handleAdminSetArtistVerification={handleAdminSetArtistVerification}
+                adminMedia={adminMedia}
+                adminMediaLoading={adminMediaLoading}
+                adminMediaError={adminMediaError}
+                adminMediaBusyId={adminMediaBusyId}
+                loadAdminMedia={loadAdminMedia}
+                handleAdminMediaModeration={handleAdminMediaModeration}
                 adminReports={adminReports}
                 adminReportsLoading={adminReportsLoading}
                 adminReportsError={adminReportsError}

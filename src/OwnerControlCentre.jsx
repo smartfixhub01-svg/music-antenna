@@ -15,12 +15,27 @@ export default function OwnerControlCentre(p) {
   const [menu,setMenu] = React.useState(false);
   const [suspendReason,setSuspendReason] = React.useState("");
   const [search,setSearch] = React.useState(p.adminUsersQuery || "");
+  const [contentSearch,setContentSearch] = React.useState("");
+  const [contentFilter,setContentFilter] = React.useState("all");
+  const contentItems = (p.adminMedia || []).filter(item => {
+    const term = contentSearch.trim().toLowerCase();
+    const matchesSearch = !term || [
+      item.title, item.artist_name, item.artist_id, item.id, item.media_type
+    ].some(value => String(value || "").toLowerCase().includes(term));
+    const hidden = Boolean(item.moderation_hidden);
+    const matchesFilter =
+      contentFilter === "all" ||
+      (contentFilter === "hidden" && hidden) ||
+      (contentFilter === "visible" && !hidden);
+    return matchesSearch && matchesFilter;
+  });
   const active = nav.find(x => x[0] === p.adminSection) || nav[0];
   const go = id => {
     p.setAdminSection?.(id); setMenu(false);
     if(id==="overview") p.loadAdminOverview?.();
     if(id==="users") p.loadAdminUsers?.(1,search);
     if(id==="verification") p.loadAdminArtistProfiles?.();
+    if(id==="content") p.loadAdminMedia?.();
     if(id==="audit") p.loadAdminAuditLogs?.();
     if(id==="reports") p.loadAdminReports?.();
   };
@@ -38,6 +53,7 @@ export default function OwnerControlCentre(p) {
     if(p.adminSection==="overview") p.loadAdminOverview?.();
     if(p.adminSection==="users") p.loadAdminUsers?.(p.adminUsersPage || 1,search);
     if(p.adminSection==="verification") p.loadAdminArtistProfiles?.();
+    if(p.adminSection==="content") p.loadAdminMedia?.();
     if(p.adminSection==="audit") p.loadAdminAuditLogs?.();
     if(p.adminSection==="reports") p.loadAdminReports?.();
   };
@@ -59,6 +75,115 @@ export default function OwnerControlCentre(p) {
     <div className="occ-heading"><div><small>CREATOR TRUST</small><h2>Artist verification</h2><p>Review creator applications and update verification status.</p></div><button onClick={refresh}>↻ Refresh</button></div>
     {p.adminArtistMessage&&<div className="occ-alert">{p.adminArtistMessage}</div>}
     <section className="occ-panel">{p.adminArtistLoading?<div className="occ-loading">Loading artist applications…</div>:p.adminArtistProfiles?.length?<div className="occ-table-wrap"><table><thead><tr><th>ARTIST</th><th>STATUS</th><th>REGION</th><th>REVIEW</th></tr></thead><tbody>{p.adminArtistProfiles.map(a=>{const id=a.user_id||a.id;return <tr key={id}><td><b>{a.artist_name||a.stage_name||a.full_name||"Artist"}</b><small>{a.email||id}</small></td><td><span className="occ-status">{a.verification_status||"pending"}</span></td><td>{a.region||a.region_name||"—"}</td><td><button disabled={p.adminReviewBusyId===id||a.verification_status==="verified"} onClick={()=>p.handleAdminSetArtistVerification?.(id,"verified")}>Approve</button> <button disabled={p.adminReviewBusyId===id||a.verification_status==="rejected"} onClick={()=>p.handleAdminSetArtistVerification?.(id,"rejected")}>Reject</button></td></tr>})}</tbody></table></div>:empty("No artist applications","New creator applications will appear here.")}</section>
+  </>;
+  else if(p.adminSection==="content") page = <>
+    <div className="occ-heading">
+      <div>
+        <small>TRUST, SAFETY & PUBLISHING</small>
+        <h2>Content moderation</h2>
+        <p>Review real music and video records. Hidden media is unavailable to public readers.</p>
+      </div>
+      <button onClick={refresh}>↻ Refresh media</button>
+    </div>
+
+    {p.adminMediaError && <div className="occ-alert">{p.adminMediaError}</div>}
+
+    <section className="occ-panel">
+      <div className="occ-search occ-content-search">
+        <input
+          value={contentSearch}
+          placeholder="Search title, artist or media ID"
+          onChange={e => setContentSearch(e.target.value)}
+        />
+        <select
+          value={contentFilter}
+          onChange={e => setContentFilter(e.target.value)}
+          aria-label="Filter moderation records"
+        >
+          <option value="all">All media</option>
+          <option value="visible">Visible media</option>
+          <option value="hidden">Hidden media</option>
+        </select>
+      </div>
+
+      <div className="occ-content-summary">
+        <span>{fmt(p.adminMedia?.length)} records loaded</span>
+        <span>{fmt((p.adminMedia || []).filter(item => item.moderation_hidden).length)} hidden</span>
+        <span>{fmt(contentItems.length)} matching</span>
+      </div>
+
+      {p.adminMediaLoading
+        ? <div className="occ-loading">Loading platform media…</div>
+        : contentItems.length
+          ? <div className="occ-table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>CONTENT</th>
+                    <th>TYPE</th>
+                    <th>ARTIST</th>
+                    <th>VIEWS</th>
+                    <th>REPORTS</th>
+                    <th>STATE</th>
+                    <th>ACTION</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {contentItems.map(item => {
+                    const hidden = Boolean(item.moderation_hidden);
+                    const busy = p.adminMediaBusyId === item.id;
+                    return <tr key={item.id}>
+                      <td>
+                        <b>{item.title || "Untitled media"}</b>
+                        <small>{item.id}</small>
+                        <small>{when(item.created_at)}</small>
+                      </td>
+                      <td>{item.media_type || "—"}</td>
+                      <td>
+                        {item.artist_name || "Artist"}
+                        <small>{item.artist_id}</small>
+                      </td>
+                      <td>{fmt(item.views)}</td>
+                      <td>{fmt(item.report_count)}</td>
+                      <td>
+                        <span className={`occ-status ${hidden ? "danger" : "good"}`}>
+                          {hidden ? "Hidden" : "Public"}
+                        </span>
+                      </td>
+                      <td>
+                        {hidden
+                          ? <button
+                              disabled={busy || p.adminMediaLoading}
+                              onClick={() => {
+                                if (window.confirm("Restore this media to public availability?")) {
+                                  p.handleAdminMediaModeration?.(item.id, false);
+                                }
+                              }}
+                            >{busy ? "Working…" : "Restore"}</button>
+                          : <button
+                              className="danger"
+                              disabled={busy || p.adminMediaLoading}
+                              onClick={() => {
+                                if (window.confirm("Hide this media from public readers? The media file and artist publication status will remain unchanged.")) {
+                                  p.handleAdminMediaModeration?.(item.id, true);
+                                }
+                              }}
+                            >{busy ? "Working…" : "Hide"}</button>
+                        }
+                      </td>
+                    </tr>;
+                  })}
+                </tbody>
+              </table>
+            </div>
+          : empty(
+              p.adminMedia?.length ? "No matching media" : "No media records found",
+              p.adminMedia?.length
+                ? "Try another search or filter."
+                : "Media records from Supabase will appear here when available."
+            )
+      }
+    </section>
   </>;
   else if(p.adminSection==="reports") page = <>
     <div className="occ-heading">
