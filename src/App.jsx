@@ -6511,7 +6511,7 @@ document.body
               </div>
             )}
 
-            {profileTab === "admin" && isOwner && (
+            {profileTab === "admin" && isOwner && createPortal(
               <section className="ma-owner-centre" style={{ color: "var(--ma-text, #111)", margin: "16px 0" }}>
                 <header style={{ background: "var(--ma-surface, #fff)", border: "1px solid var(--ma-border, #ddd)", borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
@@ -6770,7 +6770,8 @@ document.body
                     </section>
                   </div>
                 )}
-              </section>
+              </section>,
+              document.body
             )}
 
             {/* EDIT PROFILE FORM */}
