@@ -15,3 +15,272 @@
 @media(max-width:900px){.occ-sidebar{width:230px;flex-basis:230px}.occ-content{padding:24px 20px}.occ-topbar{padding:13px 20px}.occ-grid{grid-template-columns:1fr}}
 @media(max-width:680px){.occ-sidebar{position:fixed;inset:0 auto 0 0;width:min(290px,86vw);transform:translateX(-105%);transition:transform .2s;box-shadow:10px 0 35px #0003}.occ-sidebar.open{transform:translateX(0)}.occ-close{display:block}.occ-backdrop{display:block;position:fixed;inset:0;z-index:3;border:0;background:#0008}.occ-menu{display:inline-block;margin-right:10px;padding:8px 10px;border:1px solid var(--occ-border);border-radius:7px;background:var(--occ-soft);color:var(--occ-text)}.occ-topbar{min-height:68px;padding:10px 13px}.occ-topbar h1{font-size:16px}.occ-content{padding:20px 12px 14px}.occ-heading{align-items:flex-start;flex-direction:column}.occ-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.occ-metric{padding:12px}.occ-metric strong{font-size:22px}.occ-panel{padding:13px}.occ-search{flex-direction:column}.occ-search button{width:100%}.occ-pagination{align-items:flex-start;flex-direction:column}.occ-content footer{flex-direction:column;gap:5px}.occ-modal>div{flex-direction:column-reverse}.occ-modal>div button{width:100%}}
 @media(prefers-reduced-motion:reduce){.ma-owner-centre *{transition:none!important}}
+
+/* =====================================================
+   OWNER CONTROL CENTRE — COMPLETE THEME PROTECTION
+   Light mode + Dark mode
+===================================================== */
+
+.ma-owner-centre {
+  color: var(--occ-text) !important;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] .ma-owner-centre {
+  color-scheme: dark;
+}
+
+/* Protect all Owner Console text from global overrides */
+.ma-owner-centre h1,
+.ma-owner-centre h2,
+.ma-owner-centre h3,
+.ma-owner-centre strong,
+.ma-owner-centre b,
+.ma-owner-centre td b,
+.ma-owner-centre td strong,
+.ma-owner-centre .occ-empty b,
+.ma-owner-centre .occ-stat b,
+.ma-owner-centre .occ-placeholder strong {
+  color: var(--occ-text) !important;
+}
+
+.ma-owner-centre p,
+.ma-owner-centre span,
+.ma-owner-centre small,
+.ma-owner-centre label,
+.ma-owner-centre td,
+.ma-owner-centre th,
+.ma-owner-centre .occ-loading,
+.ma-owner-centre .occ-empty,
+.ma-owner-centre .occ-stat,
+.ma-owner-centre .occ-content footer {
+  color: var(--occ-muted) !important;
+}
+
+.ma-owner-centre .occ-topbar h1,
+.ma-owner-centre .occ-heading h2,
+.ma-owner-centre .occ-panel h3 {
+  color: var(--occ-text) !important;
+}
+
+.ma-owner-centre .occ-topbar span,
+.ma-owner-centre .occ-heading p,
+.ma-owner-centre .occ-panel > p,
+.ma-owner-centre .occ-owner small,
+.ma-owner-centre .occ-nav-group label,
+.ma-owner-centre .occ-sidebar-bottom small {
+  color: var(--occ-muted) !important;
+}
+
+/* Header Back button */
+.ma-owner-centre .occ-header-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 14px;
+  border: 1px solid var(--occ-border) !important;
+  border-radius: 9px;
+  background: var(--occ-soft) !important;
+  color: var(--occ-text) !important;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.ma-owner-centre .occ-header-back:hover {
+  background: var(--occ-hover) !important;
+  border-color: var(--occ-red) !important;
+  color: var(--occ-red) !important;
+}
+
+/* Sidebar Back button */
+.ma-owner-centre .occ-sidebar-bottom button {
+  background: var(--occ-soft) !important;
+  color: var(--occ-text) !important;
+  border-color: var(--occ-border) !important;
+}
+
+.ma-owner-centre .occ-sidebar-bottom button:hover {
+  background: var(--occ-hover) !important;
+  color: var(--occ-red) !important;
+  border-color: var(--occ-red) !important;
+}
+
+/* Navigation */
+.ma-owner-centre .occ-nav-group > button {
+  background: transparent !important;
+  color: var(--occ-muted) !important;
+}
+
+.ma-owner-centre .occ-nav-group > button:hover {
+  background: var(--occ-hover) !important;
+  color: var(--occ-text) !important;
+}
+
+.ma-owner-centre .occ-nav-group > button.active {
+  background: #ff003311 !important;
+  color: var(--occ-red) !important;
+}
+
+/* General buttons */
+.ma-owner-centre .occ-heading > button,
+.ma-owner-centre .occ-panel button,
+.ma-owner-centre .occ-pagination button,
+.ma-owner-centre .occ-modal button {
+  background: var(--occ-card) !important;
+  color: var(--occ-text) !important;
+  border: 1px solid var(--occ-border) !important;
+}
+
+.ma-owner-centre .occ-heading > button:hover,
+.ma-owner-centre .occ-panel button:hover,
+.ma-owner-centre .occ-pagination button:hover,
+.ma-owner-centre .occ-modal button:hover {
+  background: var(--occ-hover) !important;
+  color: var(--occ-red) !important;
+  border-color: var(--occ-red) !important;
+}
+
+/* Search action */
+.ma-owner-centre .occ-search button {
+  background: var(--occ-red) !important;
+  color: #fff !important;
+  border-color: var(--occ-red) !important;
+}
+
+.ma-owner-centre .occ-search button:hover {
+  background: #d9002b !important;
+  color: #fff !important;
+}
+
+/* Danger actions */
+.ma-owner-centre .occ-table-wrap button.danger,
+.ma-owner-centre .occ-modal button.danger,
+.ma-owner-centre .occ-modal > div button.danger {
+  background: #c62828 !important;
+  color: #fff !important;
+  border-color: #c62828 !important;
+}
+
+/* Menu and close controls */
+.ma-owner-centre .occ-menu {
+  background: var(--occ-soft) !important;
+  color: var(--occ-text) !important;
+  border: 1px solid var(--occ-border) !important;
+}
+
+.ma-owner-centre .occ-close,
+.ma-owner-centre .occ-close-modal {
+  background: transparent !important;
+  color: var(--occ-text) !important;
+}
+
+.ma-owner-centre .occ-close-modal:hover,
+.ma-owner-centre .occ-close:hover {
+  color: var(--occ-red) !important;
+}
+
+/* Inputs and text areas */
+.ma-owner-centre input,
+.ma-owner-centre textarea {
+  background: var(--occ-soft) !important;
+  color: var(--occ-text) !important;
+  border-color: var(--occ-border) !important;
+}
+
+.ma-owner-centre input::placeholder,
+.ma-owner-centre textarea::placeholder {
+  color: var(--occ-muted) !important;
+  opacity: 1;
+}
+
+/* Tables */
+.ma-owner-centre .occ-table-wrap th {
+  background: var(--occ-soft) !important;
+  color: var(--occ-muted) !important;
+}
+
+.ma-owner-centre .occ-table-wrap td {
+  background: transparent;
+  color: var(--occ-muted) !important;
+  border-bottom-color: var(--occ-border) !important;
+}
+
+.ma-owner-centre .occ-table-wrap td b,
+.ma-owner-centre .occ-table-wrap td strong {
+  color: var(--occ-text) !important;
+}
+
+.ma-owner-centre .occ-table-wrap td small {
+  color: var(--occ-muted) !important;
+}
+
+/* Status indicators */
+.ma-owner-centre .occ-status {
+  background: var(--occ-soft) !important;
+  color: var(--occ-muted) !important;
+}
+
+.ma-owner-centre .occ-status.good {
+  background: #20b87922 !important;
+  color: #15945f !important;
+}
+
+.ma-owner-centre .occ-status.warn {
+  background: #e6a52b25 !important;
+  color: #bd801b !important;
+}
+
+.ma-owner-centre .occ-status.danger {
+  background: #d64b4b22 !important;
+  color: #d64b4b !important;
+}
+
+/* Alerts and modal surfaces */
+.ma-owner-centre .occ-alert {
+  color: var(--occ-text) !important;
+}
+
+.ma-owner-centre .occ-modal {
+  background: var(--occ-card) !important;
+  color: var(--occ-text) !important;
+  border-color: var(--occ-border) !important;
+}
+
+.ma-owner-centre .occ-modal h2 {
+  color: var(--occ-text) !important;
+}
+
+.ma-owner-centre .occ-modal p {
+  color: var(--occ-muted) !important;
+}
+
+/* Keyboard focus and disabled states */
+.ma-owner-centre button:focus-visible,
+.ma-owner-centre input:focus-visible,
+.ma-owner-centre textarea:focus-visible {
+  outline: 2px solid var(--occ-red) !important;
+  outline-offset: 3px;
+}
+
+.ma-owner-centre button:disabled {
+  opacity: .45 !important;
+  cursor: not-allowed !important;
+}
+
+/* Mobile controls */
+@media (max-width: 680px) {
+  .ma-owner-centre .occ-header-back {
+    padding: 8px 10px;
+    font-size: 10px;
+  }
+
+  .ma-owner-centre .occ-menu {
+    color: var(--occ-text) !important;
+  }
+
+  .ma-owner-centre .occ-sidebar-bottom button {
+    min-height: 42px;
+  }
+}
