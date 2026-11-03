@@ -8946,71 +8946,41 @@ document.body
                           {c.content && <p style={{ margin: 0, fontSize: "13px", color: "var(--ma-text, #000)", lineHeight: 1.3, wordWrap: "break-word" }}>{c.content}</p>}
                           {c.image_url && <img src={c.image_url} style={{ maxWidth: "100%", maxHeight: "160px", borderRadius: "6px", marginTop: "6px" }} />}
                           {c.audio_url && (
-                          <div style={{ display: "flex", alignItems: "center", gap: "12px", background: "var(--ma-surface, #f2f2f2)", padding: "10px 14px", borderRadius: "16px", border: "1px solid var(--ma-border, #e5e5e5)", marginTop: "10px", width: "100%", maxWidth: "340px", boxShadow: "0 2px 8px rgba(0,0,0,0.03)" }}>
-                            <button
-                              onClick={() => {
-                                if (playingCommentId === c.id) {
-                                  if (playingCommentRef.current.paused) playingCommentRef.current.play();
-                                  else playingCommentRef.current.pause();
-                                } else {
-                                  if (playingCommentRef.current) {
-                                    playingCommentRef.current.src = c.audio_url;
-                                    playingCommentRef.current.playbackRate = 1;
-                                    playingCommentRef.current.play();
-                                  }
-                                  setPlayingCommentId(c.id);
-                                  setPlayingCommentSpeed(1);
-                                }
-                              }}
-                              style={{ background: "transparent", border: 0, color: "var(--ma-text, #000)", cursor: "pointer", display: "flex", padding: 0 }}
-                            >
-                              <span className="material-symbols-outlined" style={{ fontSize: "28px" }}>
-                                {playingCommentId === c.id && !playingCommentRef.current?.paused ? "pause_circle" : "play_circle"}
+                            <div style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: "6px",
+                              marginTop: "8px",
+                              padding: "9px 10px",
+                              borderRadius: "10px",
+                              background: "var(--ma-surface, #f2f2f2)",
+                              border: "1px solid var(--ma-border, #e5e5e5)",
+                              maxWidth: "320px"
+                            }}>
+                              <span style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "5px",
+                                color: "var(--ma-text, #000)",
+                                fontSize: "11px",
+                                fontWeight: "700"
+                              }}>
+                                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>mic</span>
+                                Voice comment
                               </span>
-                            </button>
-
-                            <span style={{ fontSize: "12px", color: "var(--ma-text, #000)", minWidth: "28px", fontWeight: "600" }}>
-                              {playingCommentId === c.id ? formatVoiceTime(playingCommentProgress) : "0:00"}
-                            </span>
-
-                            <div style={{ display: "flex", alignItems: "center", gap: "2px", height: "20px", flex: 1 }}>
-                              {Array.from({ length: 35 }).map((_, i) => {
-                                const isActive = playingCommentId === c.id && (playingCommentProgress / (playingCommentDuration || 1)) > (i / 35);
-                                const height = 4 + (Math.sin(i * 0.5) * 4) + (i % 3 === 0 ? 4 : 0);
-                                return <div key={i} style={{ width: "2px", height: `${Math.max(3, height)}px`, borderRadius: "1px", background: isActive ? "#ff365f" : "var(--ma-border, #e5e5e5)" }} />;
-                              })}
+                              <audio
+                                controls
+                                preload="metadata"
+                                src={c.audio_url}
+                                style={{ width: "100%", height: "36px" }}
+                                onPlay={(e) => {
+                                  document.querySelectorAll("audio, video").forEach(el => {
+                                    if (el !== e.currentTarget) el.pause();
+                                  });
+                                }}
+                              />
                             </div>
-
-                            <button
-                              onClick={() => {
-                                const speeds = [1, 1.5, 2];
-                                const nextSpeed = speeds[(speeds.indexOf(playingCommentSpeed) + 1) % speeds.length];
-                                setPlayingCommentSpeed(nextSpeed);
-                                if (playingCommentRef.current) playingCommentRef.current.playbackRate = nextSpeed;
-                              }}
-                              style={{ background: "var(--ma-bg, #fff)", border: "1px solid var(--ma-border, #e5e5e5)", borderRadius: "6px", color: "var(--ma-text, #000)", width: "28px", height: "22px", display: "grid", placeItems: "center", fontSize: "10px", fontWeight: "700", cursor: "pointer" }}
-                            >
-                              {playingCommentId === c.id ? `${playingCommentSpeed}x` : "1x"}
-                            </button>
-
-                            {/* Hidden Audio for playback */}
-                            <audio
-                              ref={playingCommentId === c.id ? playingCommentRef : null}
-                              src={c.audio_url}
-                              preload="metadata"
-                              onTimeUpdate={(e) => setPlayingCommentProgress(e.target.currentTime)}
-                              onLoadedMetadata={(e) => {
-                                if (e.target.duration && e.target.duration !== Infinity) {
-                                  setPlayingCommentDuration(e.target.duration);
-                                }
-                              }}
-                              onEnded={() => { setPlayingCommentId(null); setPlayingCommentProgress(0); }}
-                              onPlay={() => { document.querySelectorAll('audio, video').forEach(el => { if (el !== playingCommentRef.current) el.pause(); }); }}
-                              style={{ display: "none" }}
-                            />
-                          </div>
-                        )}
-
+                          )}
                           {/* Creator Heart inline with text */}
                           {c.has_creator_heart && (
                             <span style={{ display: "inline-flex", alignItems: "center", gap: "2px", marginTop: "2px", fontSize: "11px", color: "#ff365f" }}>
