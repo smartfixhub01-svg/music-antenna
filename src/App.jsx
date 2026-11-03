@@ -2149,12 +2149,49 @@ async function fetchPlaylists() {
   }
 
   async function handleUpdateComment(commentId) {
-    if (!editCommentText.trim()) return;
+    const updatedContent = editCommentText.trim();
+
+    if (!updatedContent) {
+      setMessage("Comment cannot be empty.");
+      return;
+    }
+    if (!session?.user?.id) {
+      setMessage("Please sign in first.");
+      return;
+    }
+
     try {
-      await supabase.from("comments").update({ content: editCommentText }).eq("id", commentId);
-      setComments(prev => prev.map(c => c.id === commentId ? { ...c, content: editCommentText } : c));
+      const { data: existingComment, error: fetchError } = await supabase
+        .from("comments")
+        .select("id, user_id")
+        .eq("id", commentId)
+        .maybeSingle();
+
+      if (fetchError) throw fetchError;
+      if (!existingComment || existingComment.user_id !== session.user.id) {
+        throw new Error("You can only edit your own comments.");
+      }
+
+      const { data, error } = await supabase
+        .from("comments")
+        .update({ content: updatedContent })
+        .eq("id", commentId)
+        .eq("user_id", session.user.id)
+        .select("id")
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!data) throw new Error("Comment was not updated. Please try again.");
+
+      setComments(prev => prev.map(c =>
+        c.id === commentId ? { ...c, content: updatedContent } : c
+      ));
       setEditingCommentId(null);
-    } catch (err) { setMessage(err.message); }
+      setMessage("Comment updated.");
+    } catch (err) {
+      console.error("Comment update failed:", err);
+      setMessage(err.message || "Could not update comment.");
+    }
   }
 
 
@@ -2181,36 +2218,41 @@ async function fetchPlaylists() {
   }
 
   async function handleDeleteComment(commentId) {
-    // 1. Instantly close the modal and remove the comment from the UI
-    setDeletingCommentId(null);
-    setComments(prev => prev.filter(c => c.id !== commentId));
+    if (!session?.user?.id) {
+      setMessage("Please sign in first.");
+      return;
+    }
 
     try {
-      // 2. Delete ONLY the specific comment ID from the database
-      const { data: commentData } = await supabase.from("comments").select("user_id, media_id").eq("id", commentId).single();
+      const { data: existingComment, error: fetchError } = await supabase
+        .from("comments")
+        .select("id, user_id")
+        .eq("id", commentId)
+        .maybeSingle();
 
-        const { error } = await supabase.from("comments").delete().eq("id", commentId);
-        if (error) throw error;
+      if (fetchError) throw fetchError;
+      if (!existingComment || existingComment.user_id !== session.user.id) {
+        throw new Error("You can only delete your own comments.");
+      }
 
-        if (commentData && commentData.user_id !== session?.user?.id) {
-          const { error: notifError } = await supabase.rpc('notify_comment_deleted', {
-            target_user_id: commentData.user_id,
-            actor_user_id: session.user.id,
-            target_media_id: commentData.media_id,
-            creator_name: profile?.display_name || "Creator"
-          });
-          if (notifError) {
-            console.error("RPC ERROR:", notifError);
-          } else {
-            console.log("Notification inserted successfully!");
-          }
-        }
+      const { data, error } = await supabase
+        .from("comments")
+        .delete()
+        .eq("id", commentId)
+        .eq("user_id", session.user.id)
+        .select("id")
+        .maybeSingle();
+
       if (error) throw error;
+      if (!data) throw new Error("Comment was not deleted. Please try again.");
+
+      setComments(prev => prev.filter(c => c.id !== commentId));
+      setDeletingCommentId(null);
+      if (editingCommentId === commentId) setEditingCommentId(null);
       setMessage("Comment deleted.");
     } catch (err) {
+      console.error("Comment deletion failed:", err);
       setMessage("Error deleting comment: " + err.message);
-      // If it fails, you might want to refetch comments to restore it,
-      // but for now, the UI stays clean.
     }
   }
 
@@ -9000,10 +9042,10 @@ document.body
                             </>
                           )}
 
-                          {(session?.user?.id === activeMedia.artist_id || session?.user?.id === c.user_id) && (
+                          {session?.user?.id && session.user.id === c.user_id && (
                             <>
-                              <button onClick={() => { setEditingCommentId(c.id); setEditCommentText(c.content); }} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", fontSize: "12px", fontWeight: "600", padding: 0, cursor: "pointer", marginLeft: "auto" }}>Edit</button>
-                              <button onClick={() => setDeletingCommentId(c.id)} style={{ background: "transparent", border: 0, color: "#ff365f", fontSize: "12px", fontWeight: "600", padding: 0, cursor: "pointer" }}>Delete</button>
+                              <button onClick={() => { setEditingCommentId(c.id); setEditCommentText(c.content); }} style={{ background: "transparent", border: 0, color: "var(--ma-text, #222)", fontSize: "12px", fontWeight: "700", padding: "4px 2px", cursor: "pointer", marginLeft: "auto" }}>Edit</button>
+                              <button onClick={() => handleDeleteComment(c.id)} style={{ background: "transparent", border: 0, color: "#d62850", fontSize: "12px", fontWeight: "700", padding: "4px 2px", cursor: "pointer" }}>Delete</button>
                             </>
                           )}
                         </div>
@@ -9022,7 +9064,27 @@ document.body
                                   <span style={{ fontSize: "12px", fontWeight: "600", color: "var(--ma-text, #000)" }}>@{reply.profiles?.display_name || "user"}</span>
                                   <span style={{ fontSize: "10px", color: "var(--ma-text-secondary, #666)" }}>{timeAgo(reply.created_at)}</span>
                                 </div>
-                                <p style={{ margin: "2px 0 0 0", fontSize: "13px", color: "var(--ma-text, #000)", lineHeight: 1.3 }}>{reply.content}</p>
+                                {editingCommentId === reply.id ? (
+                                  <div style={{ marginTop: "6px" }}>
+                                    <input
+                                      value={editCommentText}
+                                      onChange={e => setEditCommentText(e.target.value)}
+                                      style={{ width: "100%", padding: "8px", borderRadius: "8px", border: "1px solid var(--ma-border, #888)", background: "var(--ma-surface, #f2f2f2)", color: "var(--ma-text, #111)", fontSize: "13px" }}
+                                    />
+                                    <div style={{ display: "flex", gap: "12px", marginTop: "6px" }}>
+                                      <button onClick={() => setEditingCommentId(null)} style={{ background: "transparent", border: 0, color: "var(--ma-text, #222)", fontWeight: "600", cursor: "pointer" }}>Cancel</button>
+                                      <button onClick={() => handleUpdateComment(reply.id)} style={{ background: "#ff365f", border: 0, borderRadius: "8px", padding: "5px 12px", color: "#fff", fontWeight: "700", cursor: "pointer" }}>Save</button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <p style={{ margin: "2px 0 0 0", fontSize: "13px", color: "var(--ma-text, #000)", lineHeight: 1.3 }}>{reply.content}</p>
+                                )}
+                                {editingCommentId !== reply.id && session?.user?.id === reply.user_id && (
+                                  <div style={{ display: "flex", gap: "14px", alignItems: "center", marginTop: "6px" }}>
+                                    <button onClick={() => { setEditingCommentId(reply.id); setEditCommentText(reply.content || ""); }} style={{ background: "transparent", border: 0, color: "var(--ma-text, #222)", fontSize: "11px", fontWeight: "700", padding: "3px 2px", cursor: "pointer" }}>Edit</button>
+                                    <button onClick={() => handleDeleteComment(reply.id)} style={{ background: "transparent", border: 0, color: "#d62850", fontSize: "11px", fontWeight: "700", padding: "3px 2px", cursor: "pointer" }}>Delete</button>
+                                  </div>
+                                )}
                                 <button
                                   onClick={(e) => handleLikeComment(reply.id, reply.likes || 0, e)}
                                   style={{
