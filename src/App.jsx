@@ -584,6 +584,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const voiceEditChunksRef = useRef([]);
   const voiceEditTimerRef = useRef(null);
   const voiceEditCancelledRef = useRef(false);
+  const voiceEditWasPlayingRef = useRef(false);
 
 
 
@@ -2168,6 +2169,15 @@ function openVoiceNoteEditor(commentId) {
     return;
   }
 
+  const mainPlayer = activeMedia?.media_type === "audio"
+    ? audioRef.current
+    : videoRef.current;
+
+  voiceEditWasPlayingRef.current = !!mainPlayer && !mainPlayer.paused;
+  if (audioRef.current) audioRef.current.pause();
+  if (videoRef.current) videoRef.current.pause();
+  setIsPlaying(false);
+
   setVoiceEditTarget(commentId);
   setVoiceEditBlob(null);
   setVoiceEditSeconds(0);
@@ -2287,6 +2297,9 @@ function closeVoiceEditModal() {
   voiceEditCancelledRef.current = true;
   stopVoiceEditRecording();
 
+  const shouldResumeMainPlayer = voiceEditWasPlayingRef.current;
+  voiceEditWasPlayingRef.current = false;
+
   if (voiceEditStreamRef.current) {
     voiceEditStreamRef.current.getTracks().forEach(track => track.stop());
     voiceEditStreamRef.current = null;
@@ -2301,6 +2314,15 @@ function closeVoiceEditModal() {
   setVoiceEditPreviewUrl("");
   setVoiceEditSeconds(0);
   setVoiceEditRecording(false);
+
+  if (shouldResumeMainPlayer) {
+    window.setTimeout(() => {
+      const player = activeMedia?.media_type === "audio"
+        ? audioRef.current
+        : videoRef.current;
+      if (player && player.paused) player.play().catch(() => {});
+    }, 150);
+  }
 }
 
 async function saveReplacementVoiceNote() {
@@ -4800,6 +4822,12 @@ document.body
   }
 
   function handleFirstPlay(e) {
+    if (voiceEditTarget) {
+      e?.currentTarget?.pause?.();
+      setIsPlaying(false);
+      return;
+    }
+
     if (viewCountedRef.current || !activeMedia?.id) return;
 
     // 1. Don't count if the creator is watching their own video
@@ -5317,8 +5345,13 @@ document.body
               onClick={(e) => {
                 e.stopPropagation();
                 const mediaEl = activeMedia.media_type === "audio" ? audioRef.current : videoRef.current;
+                if (voiceEditTarget) {
+                  if (mediaEl) mediaEl.pause();
+                  setIsPlaying(false);
+                  return;
+                }
                 if (mediaEl) {
-                  if (mediaEl.paused) mediaEl.play();
+                  if (mediaEl.paused) mediaEl.play().catch(() => {});
                   else mediaEl.pause();
                 }
               }}
@@ -7871,8 +7904,13 @@ document.body
               onClick={(e) => {
                 e.stopPropagation();
                 const mediaEl = activeMedia.media_type === "audio" ? audioRef.current : videoRef.current;
+                if (voiceEditTarget) {
+                  if (mediaEl) mediaEl.pause();
+                  setIsPlaying(false);
+                  return;
+                }
                 if (mediaEl) {
-                  if (mediaEl.paused) mediaEl.play();
+                  if (mediaEl.paused) mediaEl.play().catch(() => {});
                   else mediaEl.pause();
                 }
               }}
@@ -9218,6 +9256,7 @@ document.body
                   role="dialog"
                   aria-modal="true"
                   aria-label="Replace voice note"
+                  className="voice-edit-studio"
                   onClick={event => event.stopPropagation()}
                   style={{
                     width: "100%",
@@ -9362,6 +9401,7 @@ document.body
                     {!voiceEditRecording ? (
                       <button
                         type="button"
+                        className="voice-edit-primary"
                         onClick={startVoiceEditRecording}
                         disabled={voiceEditSaving || !!voiceEditBlob}
                         style={{
@@ -9387,6 +9427,7 @@ document.body
                     ) : (
                       <button
                         type="button"
+                        className="voice-edit-primary"
                         onClick={stopVoiceEditRecording}
                         style={{
                           flex: "1 1 120px",
@@ -9452,6 +9493,7 @@ document.body
                   }}>
                     <button
                       type="button"
+                      className="voice-edit-secondary"
                       onClick={closeVoiceEditModal}
                       disabled={voiceEditSaving}
                       style={{
@@ -9470,6 +9512,7 @@ document.body
 
                     <button
                       type="button"
+                      className="voice-edit-primary voice-edit-save"
                       onClick={saveReplacementVoiceNote}
                       disabled={!voiceEditBlob || voiceEditRecording || voiceEditSaving}
                       style={{
