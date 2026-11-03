@@ -9062,8 +9062,8 @@ document.body
                         <div style={{ width: "100%", marginBottom: "6px" }}>
                           <input value={editCommentText} onChange={e => setEditCommentText(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "8px", border: "1px solid var(--ma-border, #e5e5e5)", background: "var(--ma-surface, #f2f2f2)", color: "var(--ma-text, #000)", fontSize: "13px", marginBottom: "8px", outline: "none" }} />
                           <div style={{ display: "flex", gap: "8px" }}>
-                            <button onClick={() => setEditingCommentId(null)} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", fontSize: "11px" }}>Cancel</button>
-                            <button onClick={() => handleUpdateComment(c.id)} style={{ background: "var(--ma-accent, #ff365f)", border: 0, borderRadius: "12px", padding: "4px 12px", color: "#ffffff", fontWeight: "bold", fontSize: "12px", cursor: "pointer" }}>Save</button>
+                            <button onClick={() => setEditingCommentId(null)} style={{ background: "var(--ma-surface)", border: "1px solid var(--ma-border)", borderRadius: "8px", padding: "7px 14px", color: "var(--ma-text)", fontSize: "12px", fontWeight: "600", minHeight: "34px", cursor: "pointer" }}>Cancel</button>
+                            <button onClick={() => handleUpdateComment(c.id)} style={{ background: "var(--ma-accent, #ff365f)", border: "1px solid var(--ma-accent, #ff365f)", borderRadius: "8px", padding: "7px 16px", color: "#ffffff", fontWeight: "700", fontSize: "12px", minHeight: "34px", cursor: "pointer" }}>Save</button>
                           </div>
                         </div>
                       ) : (
@@ -9196,8 +9196,8 @@ document.body
                                       style={{ width: "100%", padding: "8px", borderRadius: "8px", border: "1px solid var(--ma-border, #888)", background: "var(--ma-surface, #f2f2f2)", color: "var(--ma-text, #111)", fontSize: "13px" }}
                                     />
                                     <div style={{ display: "flex", gap: "12px", marginTop: "6px" }}>
-                                      <button onClick={() => setEditingCommentId(null)} style={{ background: "transparent", border: 0, color: "var(--ma-text, #222)", fontWeight: "600", cursor: "pointer" }}>Cancel</button>
-                                      <button onClick={() => handleUpdateComment(reply.id)} style={{ background: "var(--ma-accent, #ff365f)", border: 0, borderRadius: "8px", padding: "5px 12px", color: "#ffffff", fontWeight: "700", cursor: "pointer" }}>Save</button>
+                                      <button onClick={() => setEditingCommentId(null)} style={{ background: "var(--ma-surface)", border: "1px solid var(--ma-border)", borderRadius: "8px", padding: "7px 14px", color: "var(--ma-text)", fontSize: "12px", fontWeight: "600", minHeight: "34px", cursor: "pointer" }}>Cancel</button>
+                                      <button onClick={() => handleUpdateComment(reply.id)} style={{ background: "var(--ma-accent, #ff365f)", border: "1px solid var(--ma-accent, #ff365f)", borderRadius: "8px", padding: "7px 16px", color: "#ffffff", fontWeight: "700", fontSize: "12px", minHeight: "34px", cursor: "pointer" }}>Save</button>
                                     </div>
                                   </div>
                                 ) : (
