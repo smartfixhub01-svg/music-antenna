@@ -2,6 +2,7 @@ import { createPortal } from 'react-dom';
 import { useEffect, useRef, useState } from "react";
 
 import { supabase } from "./lib/supabase";
+import OwnerControlCentre from "./OwnerControlCentre";
 import "./App.css";
 
 const UGANDA_DISTRICTS_BY_REGION = {
@@ -6511,267 +6512,40 @@ document.body
               </div>
             )}
 
-            {profileTab === "admin" && isOwner && createPortal(
-              <section className="ma-owner-centre" style={{ color: "var(--ma-text, #111)", margin: "16px 0" }}>
-                <header style={{ background: "var(--ma-surface, #fff)", border: "1px solid var(--ma-border, #ddd)", borderRadius: "16px", padding: "20px", marginBottom: "16px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
-                    <div>
-                      <p style={{ margin: "0 0 5px", color: "#1D9BF0", fontSize: "11px", fontWeight: "800", letterSpacing: "1.5px" }}>PRIVATE ADMINISTRATION</p>
-                      <h2 style={{ margin: 0, fontSize: "24px", fontWeight: "800" }}>Owner Control Centre</h2>
-                      <p style={{ margin: "6px 0 0", color: "var(--ma-text-secondary, #777)", fontSize: "13px" }}>Manage and monitor the Music Antenna platform</p>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-                      <span style={{ borderRadius: "20px", padding: "7px 11px", background: "rgba(29,155,240,.12)", color: "#1D9BF0", fontSize: "12px", fontWeight: "800" }}>OWNER ACCESS</span>
-                      <button type="button" onClick={() => setProfileTab("overview")} style={{ minHeight: "40px", padding: "9px 14px", border: "1px solid var(--ma-border, #ccc)", borderRadius: "10px", background: "var(--ma-bg, #f5f6f8)", color: "var(--ma-text, #171717)", fontWeight: "700", cursor: "pointer" }}>← Back to Profile</button>
-                    </div>
-                  </div>
-                </header>
-
-                <nav aria-label="Owner dashboard sections" style={{ display: "flex", gap: "8px", overflowX: "auto", padding: "4px 2px 12px", marginBottom: "8px" }}>
-                  {[
-                    ["overview", "Overview", "dashboard"],
-                    ["verification", "Verification", "verified_user"],
-                    ["users", "Users", "group"],
-                    ["content", "Content", "video_library"],
-                    ["reports", "Reports", "flag"],
-                    ["analytics", "Analytics", "monitoring"],
-                    ["audit", "Audit Logs", "history"],
-                    ["settings", "Settings", "settings"]
-                  ].map(([key, label, icon]) => (
-                    <button key={key} className={`ma-owner-nav-button ${adminSection === key ? "is-active" : ""}`} type="button" onClick={() => {
-                      setAdminSection(key);
-                      if (key === "overview") loadAdminOverview();
-                      if (key === "verification") loadAdminArtistProfiles();
-                      if (key === "audit") loadAdminAuditLogs();
-                      if (key === "users") loadAdminUsers();
-                    }} style={{ flex: "0 0 auto", display: "flex", alignItems: "center", gap: "7px", padding: "10px 13px", borderRadius: "10px", border: adminSection === key ? "1px solid #1D9BF0" : "1px solid var(--ma-border, #ddd)", background: adminSection === key ? "rgba(29,155,240,.12)" : "var(--ma-surface, #fff)", color: adminSection === key ? "#1D9BF0" : "var(--ma-text, #111)", fontWeight: adminSection === key ? "800" : "600", fontSize: "13px", cursor: "pointer", whiteSpace: "nowrap" }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>{icon}</span>
-                      {label}
-                    </button>
-                  ))}
-                </nav>
-
-                {adminSection === "overview" && (
-                  <section style={{ background: "var(--ma-surface, #fff)", border: "1px solid var(--ma-border, #ddd)", borderRadius: "14px", padding: "18px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
-                      <div>
-                        <h3 style={{ margin: 0, fontSize: "19px" }}>Platform overview</h3>
-                        <p style={{ margin: "5px 0 0", color: "var(--ma-text-secondary, #777)", fontSize: "12px" }}>Live counts from your Supabase database</p>
-                      </div>
-                      <button className="ma-owner-refresh-button" type="button" onClick={loadAdminOverview} disabled={adminOverviewLoading} style={{ border: "1px solid var(--ma-border, #ccc)", borderRadius: "9px", padding: "9px 13px", background: "var(--ma-bg, #f5f5f5)", color: "var(--ma-text, #111)", cursor: "pointer" }}>{adminOverviewLoading ? "Refreshing..." : "Refresh data"}</button>
-                    </div>
-
-                    {adminOverviewError && <p role="alert" style={{ color: "#dc2626", fontSize: "13px" }}>{adminOverviewError}</p>}
-                    {adminOverviewLoading && <p style={{ color: "var(--ma-text-secondary, #777)" }}>Loading live platform statistics...</p>}
-
-                    {adminOverview && (
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(135px, 1fr))", gap: "12px", marginTop: "18px" }}>
-                        {[
-                          ["Registered users", adminOverview.users, "group"],
-                          ["Artist applications", adminOverview.artists, "verified_user"],
-                          ["Media uploads", adminOverview.media, "video_library"],
-                          ["Music tracks", adminOverview.tracks, "library_music"],
-                          ["Subscriptions", adminOverview.subscribers, "subscriptions"],
-                          ["Video views", adminOverview.videoViews, "visibility"]
-                        ].map(([label, value, icon]) => (
-                          <article key={label} style={{ padding: "16px", borderRadius: "12px", background: "var(--ma-bg, #f6f7f9)", border: "1px solid var(--ma-border, #e5e5e5)" }}>
-                            <span className="material-symbols-outlined" style={{ color: "#1D9BF0", fontSize: "21px" }}>{icon}</span>
-                            <p style={{ margin: "12px 0 4px", fontSize: "25px", fontWeight: "800", fontVariantNumeric: "tabular-nums" }}>{value.toLocaleString()}</p>
-                            <p style={{ margin: 0, color: "var(--ma-text-secondary, #777)", fontSize: "12px" }}>{label}</p>
-                          </article>
-                        ))}
-                      </div>
-                    )}
-                    {!adminOverview && !adminOverviewLoading && !adminOverviewError && <p style={{ color: "var(--ma-text-secondary, #777)", marginTop: "18px" }}>Refresh to load platform statistics.</p>}
-                    {adminOverview?.updatedAt && <p style={{ color: "var(--ma-text-secondary, #777)", fontSize: "11px", margin: "14px 0 0" }}>Last refreshed: {new Date(adminOverview.updatedAt).toLocaleString()}</p>}
-                  </section>
-                )}
-
-                {adminSection === "audit" && (
-                  <section style={{ background: "var(--ma-surface, #fff)", border: "1px solid var(--ma-border, #ddd)", borderRadius: "14px", padding: "18px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
-                      <div>
-                        <h3 style={{ margin: 0, fontSize: "19px" }}>Owner audit logs</h3>
-                        <p style={{ margin: "5px 0 0", color: "var(--ma-text-secondary, #777)", fontSize: "12px" }}>Recorded administrative actions</p>
-                      </div>
-                      <button className="ma-owner-refresh-button" type="button" onClick={loadAdminAuditLogs} disabled={adminAuditLoading} style={{ border: "1px solid var(--ma-border, #ccc)", borderRadius: "9px", padding: "9px 13px", background: "var(--ma-bg, #f5f5f5)", color: "var(--ma-text, #111)", cursor: "pointer" }}>{adminAuditLoading ? "Refreshing..." : "Refresh logs"}</button>
-                    </div>
-                    {adminAuditError && <p role="alert" style={{ color: "#dc2626", fontSize: "13px" }}>{adminAuditError}</p>}
-                    {adminAuditLoading && <p style={{ color: "var(--ma-text-secondary, #777)" }}>Loading audit records...</p>}
-                    {!adminAuditLoading && !adminAuditError && adminAuditLogs.length === 0 && <p style={{ color: "var(--ma-text-secondary, #777)" }}>No recorded owner actions yet.</p>}
-                    <div style={{ display: "grid", gap: "10px", marginTop: "14px" }}>
-                      {adminAuditLogs.map((log) => (
-                        <article key={log.id} style={{ border: "1px solid var(--ma-border, #ddd)", borderRadius: "10px", padding: "13px", background: "var(--ma-bg, #fafafa)" }}>
-                          <strong style={{ fontSize: "14px", overflowWrap: "anywhere" }}>{String(log.action || "Administrative action").replaceAll("_", " ")}</strong>
-                          <p style={{ margin: "6px 0", fontSize: "12px", color: "var(--ma-text-secondary, #777)" }}>{log.target_type || "Platform"}{log.target_id ? ` · ${log.target_id}` : ""}</p>
-                          <p style={{ margin: 0, fontSize: "11px", color: "var(--ma-text-secondary, #777)" }}>{new Date(log.created_at).toLocaleString()} · Owner ID: {log.actor_id}</p>
-                          {log.details && <pre style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", fontSize: "11px", color: "var(--ma-text-secondary, #777)" }}>{JSON.stringify(log.details, null, 2)}</pre>}
-                        </article>
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                {adminSection === "verification" && (
-              <section className="ma-admin-verification" style={{ background: "var(--ma-surface, #fff)", color: "var(--ma-text, #111)", border: "1px solid var(--ma-border, #ddd)", borderRadius: "14px", padding: "18px", margin: "16px 0" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
-                  <div>
-                    <h2 style={{ margin: 0, fontSize: "20px" }}>Artist verification</h2>
-                    <p style={{ margin: "6px 0 0", color: "var(--ma-text-secondary, #777)", fontSize: "13px" }}>Private Music Antenna owner dashboard</p>
-                  </div>
-                  <button className="ma-owner-refresh-button" onClick={loadAdminArtistProfiles} disabled={adminArtistLoading} style={{ background: "var(--ma-bg, #f5f5f5)", color: "var(--ma-text, #111)", border: "1px solid var(--ma-border, #ccc)", borderRadius: "9px", padding: "9px 13px", cursor: "pointer" }}>
-                    {adminArtistLoading ? "Refreshing..." : "Refresh"}
-                  </button>
-                </div>
-                {adminArtistMessage && <p role="status" style={{ color: "var(--ma-text, #111)", fontSize: "13px" }}>{adminArtistMessage}</p>}
-                {adminArtistLoading && <p style={{ color: "var(--ma-text-secondary, #777)" }}>Loading real applications...</p>}
-                {!adminArtistLoading && adminArtistProfiles.length === 0 && <p style={{ color: "var(--ma-text-secondary, #777)" }}>No artist applications found.</p>}
-                <div style={{ display: "grid", gap: "12px", marginTop: "16px" }}>
-                  {adminArtistProfiles.map((artist) => (
-                    <article key={artist.user_id} style={{ border: "1px solid var(--ma-border, #ddd)", borderRadius: "12px", padding: "14px", background: "var(--ma-bg, #fafafa)" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
-                        <strong style={{ fontSize: "16px" }}>{artist.artist_name || artist.legal_name || "Unnamed artist"}</strong>
-                        <span style={{ fontSize: "12px", fontWeight: "700", textTransform: "capitalize", color: artist.verification_status === "verified" ? "#16a34a" : artist.verification_status === "rejected" ? "#dc2626" : "var(--ma-text-secondary, #777)" }}>{artist.verification_status || "pending"}</span>
-                      </div>
-                      <p style={{ margin: "8px 0 4px", fontSize: "13px" }}>{artist.legal_name || "Legal name not provided"} · {artist.genre || "Genre not provided"}</p>
-                      <p style={{ margin: "4px 0", fontSize: "13px", color: "var(--ma-text-secondary, #777)" }}>{[artist.district, artist.region, artist.country].filter(Boolean).join(", ")}</p>
-                      {artist.artist_category && <p style={{ margin: "4px 0", fontSize: "13px" }}>Category: {artist.artist_category}</p>}
-                      {artist.biography && <p style={{ margin: "8px 0", fontSize: "13px", whiteSpace: "pre-wrap" }}>{artist.biography}</p>}
-                      <p style={{ margin: "8px 0", fontSize: "11px", color: "var(--ma-text-secondary, #777)" }}>Applicant ID: {artist.user_id}</p>
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "12px" }}>
-                        <button className="ma-admin-approve" disabled={adminReviewBusyId === artist.user_id || artist.verification_status === "verified"} onClick={() => handleAdminSetArtistVerification(artist.user_id, "verified")} style={{ background: "#16a34a", color: "#fff", border: 0, borderRadius: "8px", padding: "9px 13px", fontWeight: "700", cursor: "pointer", opacity: adminReviewBusyId === artist.user_id || artist.verification_status === "verified" ? 0.55 : 1 }}>Approve</button>
-                        <button className="ma-admin-reject" disabled={adminReviewBusyId === artist.user_id || artist.verification_status === "rejected"} onClick={() => handleAdminSetArtistVerification(artist.user_id, "rejected")} style={{ background: "#dc2626", color: "#fff", border: 0, borderRadius: "8px", padding: "9px 13px", fontWeight: "700", cursor: "pointer", opacity: adminReviewBusyId === artist.user_id || artist.verification_status === "rejected" ? 0.55 : 1 }}>Reject</button>
-                        <button className="ma-admin-pending" disabled={adminReviewBusyId === artist.user_id || artist.verification_status === "pending"} onClick={() => handleAdminSetArtistVerification(artist.user_id, "pending")} style={{ background: "var(--ma-surface, #fff)", color: "var(--ma-text, #111)", border: "1px solid var(--ma-border, #ccc)", borderRadius: "8px", padding: "9px 13px", cursor: "pointer" }}>Set pending</button>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              </section>
-                )}
-                {adminSection === "users" && (
-                  <section className="ma-admin-users" style={{ background: "var(--ma-surface, #fff)", color: "var(--ma-text, #111)", border: "1px solid var(--ma-border, #ddd)", borderRadius: "14px", padding: "18px", margin: "8px 0" }}>
-                    <h3 style={{ marginTop: 0 }}>User management</h3>
-                    <p style={{ color: "var(--ma-text-secondary, #777)", fontSize: "13px" }}>
-                      Registered accounts: <strong>{adminUsersTotal.toLocaleString()}</strong>
-                    </p>
-
-                    <form onSubmit={async (event) => {
-                      event.preventDefault();
-                      setAdminUsersPage(1);
-                      await loadAdminUsers(1, adminUsersQuery);
-                    }} className="ma-admin-users-search" style={{ display: "flex", gap: "8px", flexWrap: "wrap", margin: "14px 0" }}>
-                      <input
-                        type="search"
-                        value={adminUsersQuery}
-                        onChange={(event) => setAdminUsersQuery(event.target.value)}
-                        placeholder="Search email, username, name or account ID"
-                        aria-label="Search registered users"
-                        style={{ flex: "1 1 240px", minWidth: 0, padding: "11px 12px", borderRadius: "9px", border: "1px solid var(--ma-border, #ccc)", background: "var(--ma-bg, #fff)", color: "var(--ma-text, #111)" }}
-                      />
-                      <button className="ma-admin-search-button" type="submit" disabled={adminUsersLoading} style={{ padding: "10px 16px", border: 0, borderRadius: "9px", background: "#1D9BF0", color: "#fff", fontWeight: "700", cursor: "pointer", opacity: adminUsersLoading ? 0.6 : 1 }}>
-                        Search
-                      </button>
-                      {(adminUsersQuery.trim() || adminUsersPage > 1) && (
-                        <button
-                          className="ma-admin-back-button"
-                          type="button"
-                          disabled={adminUsersLoading}
-                          onClick={async () => {
-                            setAdminUsersQuery("");
-                            setAdminUsersPage(1);
-                            await loadAdminUsers(1, "");
-                          }}
-                        >
-                          ← Back to all accounts
-                        </button>
-                      )}
-                    </form>
-
-                    {adminUsersError && (
-                      <p role="alert" style={{ padding: "11px", borderRadius: "9px", background: "rgba(220,38,38,.10)", color: "#dc2626", fontSize: "13px" }}>
-                        {adminUsersError}
-                      </p>
-                    )}
-
-                    {adminUsersLoading ? (
-                      <p style={{ color: "var(--ma-text-secondary, #777)" }}>Loading registered accounts…</p>
-                    ) : adminUsers.length === 0 ? (
-                      <p style={{ color: "var(--ma-text-secondary, #777)" }}>No accounts found for this search.</p>
-                    ) : (
-                      <div style={{ display: "grid", gap: "12px" }}>
-                        {adminUsers.map((user) => {
-                          const isSuspended = user.banned_until && new Date(user.banned_until).getTime() > Date.now();
-                          const protectedAccount = user.is_owner || user.id === session?.user?.id;
-                          return (
-                            <article key={user.id} style={{ border: "1px solid var(--ma-border, #ddd)", borderRadius: "12px", padding: "14px", background: "var(--ma-bg, #fafafa)", minWidth: 0 }}>
-                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
-                                <strong style={{ overflowWrap: "anywhere" }}>{user.display_name || user.username || user.email || "Unnamed account"}</strong>
-                                <span style={{ fontSize: "12px", fontWeight: "800", color: protectedAccount ? "#1D9BF0" : isSuspended ? "#dc2626" : "#16a34a" }}>
-                                  {protectedAccount ? "Protected owner" : isSuspended ? "Suspended" : "Active"}
-                                </span>
-                              </div>
-                              <p style={{ margin: "7px 0", fontSize: "13px", overflowWrap: "anywhere" }}>{user.email || "No email"}{user.username ? " · @" + user.username : ""}</p>
-                              <p style={{ margin: "5px 0", fontSize: "12px", color: "var(--ma-text-secondary, #777)" }}>Role: {user.role || "listener"}</p>
-                              <p style={{ margin: "5px 0", fontSize: "12px", color: "var(--ma-text-secondary, #777)" }}>Registered: {user.created_at ? new Date(user.created_at).toLocaleString() : "Unavailable"}</p>
-                              <p style={{ margin: "5px 0", fontSize: "12px", color: "var(--ma-text-secondary, #777)" }}>Last sign-in: {user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : "No recorded sign-in"}</p>
-                              {isSuspended && <p style={{ margin: "5px 0", fontSize: "12px", color: "#dc2626" }}>Suspension expiry: {new Date(user.banned_until).toLocaleString()}</p>}
-                              <p style={{ margin: "7px 0", fontSize: "10px", color: "var(--ma-text-secondary, #777)", overflowWrap: "anywhere" }}>Account ID: {user.id}</p>
-
-                              {!protectedAccount && (
-                                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginTop: "12px" }}>
-                                  {isSuspended ? (
-                                    <button className="ma-admin-restore-button" type="button" disabled={adminUserBusyId === user.id} onClick={() => handleAdminUserAction("restore_user", user.id)} style={{ border: 0, borderRadius: "8px", padding: "9px 13px", background: "#16a34a", color: "#fff", fontWeight: "700", cursor: "pointer", opacity: adminUserBusyId === user.id ? 0.6 : 1 }}>
-                                      {adminUserBusyId === user.id ? "Processing…" : "Restore account"}
-                                    </button>
-                                  ) : (
-                                    <button className="ma-admin-suspend-button" type="button" disabled={Boolean(adminUserBusyId)} onClick={() => { setAdminSuspendTarget(user); setAdminSuspendReason(""); }} style={{ border: 0, borderRadius: "8px", padding: "9px 13px", background: "#dc2626", color: "#fff", fontWeight: "700", cursor: "pointer", opacity: adminUserBusyId ? 0.6 : 1 }}>
-                                      Suspend account
-                                    </button>
-                                  )}
-                                </div>
-                              )}
-                            </article>
-                          );
-                        })}
-                      </div>
-                    )}
-
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", flexWrap: "wrap", marginTop: "16px" }}>
-                      <span style={{ fontSize: "12px", color: "var(--ma-text-secondary, #777)" }}>
-                        Page {adminUsersPage} of {Math.max(1, Math.ceil(adminUsersTotal / 25))}
-                      </span>
-                      <div style={{ display: "flex", gap: "8px" }}>
-                        <button className="ma-admin-page-button" type="button" disabled={adminUsersLoading || adminUsersPage <= 1} onClick={() => { const next = adminUsersPage - 1; setAdminUsersPage(next); loadAdminUsers(next, adminUsersQuery); }} style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid var(--ma-border, #ccc)", background: "var(--ma-surface, #fff)", color: "var(--ma-text, #111)", cursor: "pointer" }}>Previous</button>
-                        <button className="ma-admin-page-button" type="button" disabled={adminUsersLoading || adminUsersPage >= Math.ceil(adminUsersTotal / 25)} onClick={() => { const next = adminUsersPage + 1; setAdminUsersPage(next); loadAdminUsers(next, adminUsersQuery); }} style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid var(--ma-border, #ccc)", background: "var(--ma-surface, #fff)", color: "var(--ma-text, #111)", cursor: "pointer" }}>Next</button>
-                      </div>
-                    </div>
-                  </section>
-                )}
-
-                {["content", "reports", "analytics", "settings"].includes(adminSection) && (
-                  <section style={{ background: "var(--ma-surface, #fff)", color: "var(--ma-text, #111)", border: "1px solid var(--ma-border, #ddd)", borderRadius: "14px", padding: "18px", margin: "8px 0" }}>
-                    <h3 style={{ marginTop: 0, textTransform: "capitalize" }}>{adminSection === "content" ? "Content management" : adminSection === "reports" ? "Reports centre" : adminSection === "analytics" ? "Platform analytics" : "Platform settings"}</h3>
-                    <p style={{ color: "var(--ma-text-secondary, #777)", fontSize: "13px" }}>This section will be enabled after its owner-only database permissions and secure actions are configured. No sample records or simulated controls are shown.</p>
-                  </section>
-                )}
-
-                {adminSuspendTarget && (
-                  <div className="ma-admin-suspend-overlay" role="dialog" aria-modal="true" aria-labelledby="admin-suspend-title" style={{ position: "fixed", inset: 0, zIndex: 1000000, background: "rgba(0,0,0,.65)", display: "flex", alignItems: "center", justifyContent: "center", padding: "18px" }}>
-                    <section className="ma-admin-suspend-dialog" style={{ width: "100%", maxWidth: "440px", background: "var(--ma-surface, #fff)", color: "var(--ma-text, #111)", border: "1px solid var(--ma-border, #ddd)", borderRadius: "14px", padding: "20px" }}>
-                      <h3 id="admin-suspend-title" style={{ marginTop: 0 }}>Suspend account</h3>
-                      <p style={{ fontSize: "13px", overflowWrap: "anywhere" }}>You are about to suspend {adminSuspendTarget.email || adminSuspendTarget.username || adminSuspendTarget.id}.</p>
-                      <label htmlFor="admin-suspend-reason" style={{ display: "block", fontSize: "13px", fontWeight: "700", marginBottom: "7px" }}>Reason (required)</label>
-                      <textarea id="admin-suspend-reason" value={adminSuspendReason} onChange={(event) => setAdminSuspendReason(event.target.value)} maxLength={500} rows={4} placeholder="Explain why this account is being suspended…" style={{ boxSizing: "border-box", width: "100%", resize: "vertical", padding: "11px", borderRadius: "9px", border: "1px solid var(--ma-border, #ccc)", background: "var(--ma-bg, #fff)", color: "var(--ma-text, #111)" }} />
-                      <p style={{ fontSize: "11px", color: "var(--ma-text-secondary, #777)" }}>At least 5 characters. This reason will be included in the admin audit log.</p>
-                      <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", flexWrap: "wrap", marginTop: "14px" }}>
-                        <button className="ma-admin-cancel-button" type="button" onClick={() => { setAdminSuspendTarget(null); setAdminSuspendReason(""); }} style={{ padding: "9px 13px", borderRadius: "8px", border: "1px solid var(--ma-border, #ccc)", background: "var(--ma-surface, #fff)", color: "var(--ma-text, #111)", cursor: "pointer" }}>Cancel</button>
-                        <button className="ma-admin-confirm-suspend-button" type="button" disabled={adminSuspendReason.trim().length < 5 || Boolean(adminUserBusyId)} onClick={() => handleAdminUserAction("suspend_user", adminSuspendTarget.id, adminSuspendReason)} style={{ padding: "9px 13px", border: 0, borderRadius: "8px", background: "#dc2626", color: "#fff", fontWeight: "700", cursor: "pointer", opacity: adminSuspendReason.trim().length < 5 || adminUserBusyId ? 0.5 : 1 }}>Confirm suspension</button>
-                      </div>
-                    </section>
-                  </div>
-                )}
-              </section>,
-              document.body
+            {profileTab === "admin" && isOwner && (
+              <OwnerControlCentre
+                session={session}
+                adminSection={adminSection}
+                setAdminSection={setAdminSection}
+                adminOverview={adminOverview}
+                adminOverviewLoading={adminOverviewLoading}
+                adminOverviewError={adminOverviewError}
+                loadAdminOverview={loadAdminOverview}
+                adminArtistProfiles={adminArtistProfiles}
+                adminArtistLoading={adminArtistLoading}
+                adminArtistMessage={adminArtistMessage}
+                adminReviewBusyId={adminReviewBusyId}
+                loadAdminArtistProfiles={loadAdminArtistProfiles}
+                handleAdminSetArtistVerification={handleAdminSetArtistVerification}
+                adminAuditLogs={adminAuditLogs}
+                adminAuditLoading={adminAuditLoading}
+                adminAuditError={adminAuditError}
+                loadAdminAuditLogs={loadAdminAuditLogs}
+                adminUsers={adminUsers}
+                adminUsersLoading={adminUsersLoading}
+                adminUsersError={adminUsersError}
+                adminUsersQuery={adminUsersQuery}
+                setAdminUsersQuery={setAdminUsersQuery}
+                adminUsersPage={adminUsersPage}
+                setAdminUsersPage={setAdminUsersPage}
+                adminUsersTotal={adminUsersTotal}
+                loadAdminUsers={loadAdminUsers}
+                adminUserBusyId={adminUserBusyId}
+                adminSuspendTarget={adminSuspendTarget}
+                setAdminSuspendTarget={setAdminSuspendTarget}
+                handleAdminUserAction={handleAdminUserAction}
+                onBack={() => setProfileTab("overview")}
+              />
             )}
 
             {/* EDIT PROFILE FORM */}
