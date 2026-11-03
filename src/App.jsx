@@ -535,6 +535,10 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [adminOverview, setAdminOverview] = useState(null);
   const [adminOverviewLoading, setAdminOverviewLoading] = useState(false);
   const [adminOverviewError, setAdminOverviewError] = useState("");
+  const [adminReports, setAdminReports] = useState([]);
+  const [adminReportsLoading, setAdminReportsLoading] = useState(false);
+  const [adminReportsError, setAdminReportsError] = useState("");
+  const [adminReportBusyId, setAdminReportBusyId] = useState(null);
   const [adminAuditLogs, setAdminAuditLogs] = useState([]);
   const [adminAuditLoading, setAdminAuditLoading] = useState(false);
   const [adminAuditError, setAdminAuditError] = useState("");
@@ -2152,17 +2156,23 @@ async function fetchPlaylists() {
 
   async function handleReportVideo(mediaId) {
     try {
-      const { data } = await supabase.from("media").select("report_count").eq("id", mediaId).single();
-      const newCount = (data?.report_count || 0) + 1;
+      if (!session?.user?.id) {
+        setMessage("Please sign in to report this video.");
+        return;
+      }
 
-      await supabase.from("media").update({
-        report_count: newCount,
-        status: newCount >= 3 ? "under_review" : "published"
-      }).eq("id", mediaId);
+      const { error } = await supabase.from("media_reports").insert({
+        media_id: mediaId,
+        reporter_id: session.user.id,
+        reason: "Other",
+        details: "No additional details provided."
+      });
 
-      setMessage(newCount >= 3 ? "Video reported. It has been hidden for review." : "Video reported. Thank you.");
+      if (error) throw error;
+      setMessage("Report submitted successfully. Thank you.");
     } catch (err) {
-      setMessage("Could not report video.");
+      console.error("Video report failed:", err);
+      setMessage(err.message || "Could not submit the report.");
     }
   }
 
@@ -3225,6 +3235,69 @@ async function fetchPlaylists() {
       );
     } finally {
       setAdminUserBusyId("");
+    }
+  }
+
+  async function loadAdminReports() {
+    if (!isMusicAntennaOwner(session?.user?.id)) return;
+
+    setAdminReportsLoading(true);
+    setAdminReportsError("");
+
+    try {
+      const { data, error } = await supabase
+        .from("media_reports")
+        .select("id,media_id,reporter_id,reason,details,status,reviewed_by,reviewed_at,resolution,created_at")
+        .order("created_at", { ascending: false })
+        .limit(100);
+
+      if (error) throw error;
+      setAdminReports(data || []);
+    } catch (error) {
+      setAdminReportsError(error.message || "Could not load reports.");
+      setAdminReports([]);
+    } finally {
+      setAdminReportsLoading(false);
+    }
+  }
+
+  async function handleAdminReportReview(reportId, status, resolution = "") {
+    if (!isMusicAntennaOwner(session?.user?.id)) return;
+    if (!["reviewing", "resolved", "dismissed"].includes(status)) return;
+
+    setAdminReportBusyId(reportId);
+    setAdminReportsError("");
+
+    try {
+      const { error } = await supabase
+        .from("media_reports")
+        .update({
+          status,
+          reviewed_by: session.user.id,
+          reviewed_at: new Date().toISOString(),
+          resolution: resolution || null
+        })
+        .eq("id", reportId);
+
+      if (error) throw error;
+
+      const { error: auditError } = await supabase.rpc("record_admin_audit", {
+        p_action: `media_report_${status}`,
+        p_target_type: "media_report",
+        p_target_id: reportId,
+        p_details: { status, resolution }
+      });
+
+      await loadAdminReports();
+      await loadAdminAuditLogs();
+
+      if (auditError) {
+        setAdminReportsError("Report updated, but audit logging failed: " + auditError.message);
+      }
+    } catch (error) {
+      setAdminReportsError(error.message || "Could not update this report.");
+    } finally {
+      setAdminReportBusyId(null);
     }
   }
 
@@ -6527,6 +6600,12 @@ document.body
                 adminReviewBusyId={adminReviewBusyId}
                 loadAdminArtistProfiles={loadAdminArtistProfiles}
                 handleAdminSetArtistVerification={handleAdminSetArtistVerification}
+                adminReports={adminReports}
+                adminReportsLoading={adminReportsLoading}
+                adminReportsError={adminReportsError}
+                adminReportBusyId={adminReportBusyId}
+                loadAdminReports={loadAdminReports}
+                handleAdminReportReview={handleAdminReportReview}
                 adminAuditLogs={adminAuditLogs}
                 adminAuditLoading={adminAuditLoading}
                 adminAuditError={adminAuditError}

@@ -22,6 +22,7 @@ export default function OwnerControlCentre(p) {
     if(id==="users") p.loadAdminUsers?.(1,search);
     if(id==="verification") p.loadAdminArtistProfiles?.();
     if(id==="audit") p.loadAdminAuditLogs?.();
+    if(id==="reports") p.loadAdminReports?.();
   };
   const back = () => { p.setAdminSuspendTarget?.(null); setSuspendReason(""); };
   const metrics = [
@@ -38,6 +39,7 @@ export default function OwnerControlCentre(p) {
     if(p.adminSection==="users") p.loadAdminUsers?.(p.adminUsersPage || 1,search);
     if(p.adminSection==="verification") p.loadAdminArtistProfiles?.();
     if(p.adminSection==="audit") p.loadAdminAuditLogs?.();
+    if(p.adminSection==="reports") p.loadAdminReports?.();
   };
   let page;
   if(p.adminSection==="overview") page = <>
@@ -57,6 +59,33 @@ export default function OwnerControlCentre(p) {
     <div className="occ-heading"><div><small>CREATOR TRUST</small><h2>Artist verification</h2><p>Review creator applications and update verification status.</p></div><button onClick={refresh}>↻ Refresh</button></div>
     {p.adminArtistMessage&&<div className="occ-alert">{p.adminArtistMessage}</div>}
     <section className="occ-panel">{p.adminArtistLoading?<div className="occ-loading">Loading artist applications…</div>:p.adminArtistProfiles?.length?<div className="occ-table-wrap"><table><thead><tr><th>ARTIST</th><th>STATUS</th><th>REGION</th><th>REVIEW</th></tr></thead><tbody>{p.adminArtistProfiles.map(a=>{const id=a.user_id||a.id;return <tr key={id}><td><b>{a.artist_name||a.stage_name||a.full_name||"Artist"}</b><small>{a.email||id}</small></td><td><span className="occ-status">{a.verification_status||"pending"}</span></td><td>{a.region||a.region_name||"—"}</td><td><button disabled={p.adminReviewBusyId===id||a.verification_status==="verified"} onClick={()=>p.handleAdminSetArtistVerification?.(id,"verified")}>Approve</button> <button disabled={p.adminReviewBusyId===id||a.verification_status==="rejected"} onClick={()=>p.handleAdminSetArtistVerification?.(id,"rejected")}>Reject</button></td></tr>})}</tbody></table></div>:empty("No artist applications","New creator applications will appear here.")}</section>
+  </>;
+  else if(p.adminSection==="reports") page = <>
+    <div className="occ-heading">
+      <div><small>TRUST & SAFETY</small><h2>Content reports</h2><p>Review reports submitted by signed-in users.</p></div>
+      <button onClick={refresh}>↻ Refresh reports</button>
+    </div>
+    {p.adminReportsError && <div className="occ-alert">{p.adminReportsError}</div>}
+    <section className="occ-panel">
+      {p.adminReportsLoading ? <div className="occ-loading">Loading submitted reports…</div>
+      : p.adminReports?.length ? <div className="occ-table-wrap">
+        <table>
+          <thead><tr><th>REPORT</th><th>MEDIA ID</th><th>REPORTER</th><th>STATUS</th><th>SUBMITTED</th><th>ACTION</th></tr></thead>
+          <tbody>{p.adminReports.map(r => <tr key={r.id}>
+            <td><b>{r.reason || "Report"}</b><small>{r.details || "No additional details"}</small></td>
+            <td>{r.media_id}</td>
+            <td>{r.reporter_id}</td>
+            <td><span className={`occ-status ${r.status === "resolved" ? "good" : r.status === "dismissed" ? "warn" : ""}`}>{r.status}</span></td>
+            <td>{when(r.created_at)}</td>
+            <td>
+              <button disabled={p.adminReportBusyId === r.id || r.status === "resolved" || r.status === "dismissed"} onClick={() => p.handleAdminReportReview?.(r.id,"reviewing")}>Review</button>{" "}
+              <button disabled={p.adminReportBusyId === r.id || r.status === "resolved" || r.status === "dismissed"} onClick={() => p.handleAdminReportReview?.(r.id,"resolved","Reviewed and resolved by owner.")}>Resolve</button>{" "}
+              <button className="danger" disabled={p.adminReportBusyId === r.id || r.status === "resolved" || r.status === "dismissed"} onClick={() => p.handleAdminReportReview?.(r.id,"dismissed","Report dismissed by owner.")}>Dismiss</button>
+            </td>
+          </tr>)}</tbody>
+        </table>
+      </div> : empty("No reports submitted","User-submitted reports will appear here.") }
+    </section>
   </>;
   else if(p.adminSection==="audit") page = <>
     <div className="occ-heading"><div><small>SECURITY & ACCOUNTABILITY</small><h2>Audit logs</h2><p>Review administrative activity on your platform.</p></div><button onClick={refresh}>↻ Refresh logs</button></div>
