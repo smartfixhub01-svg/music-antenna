@@ -2148,7 +2148,132 @@ async function fetchPlaylists() {
     }
   }
 
-  async function handleUpdateComment(commentId) {
+
+async function handleReplaceVoiceNote(commentId) {
+  if (!session?.user?.id) return setMessage("Please sign in first.");
+  if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+    return setMessage("Voice recording is not supported.");
+  }
+
+  let stream;
+  try {
+    const { data: row, error: readError } = await supabase
+      .from("comments").select("id,user_id,audio_url")
+      .eq("id", commentId).maybeSingle();
+    if (readError) throw readError;
+    if (!row || row.user_id !== session.user.id || !row.audio_url) {
+      throw new Error("You can only replace your own voice note.");
+    }
+
+    if (!window.confirm("Record a replacement voice note for up to 35 seconds?")) return;
+
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mimeType = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "";
+    const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+    const chunks = [];
+
+    const blob = await new Promise((resolve, reject) => {
+      recorder.ondataavailable = e => { if (e.data?.size) chunks.push(e.data); };
+      recorder.onerror = () => reject(new Error("Recording failed."));
+      recorder.onstop = () => resolve(new Blob(chunks, { type: recorder.mimeType || "audio/webm" }));
+      recorder.start();
+      setMessage("Recording replacement... maximum 35 seconds.");
+      window.setTimeout(() => {
+        if (recorder.state !== "inactive") recorder.stop();
+      }, 35000);
+    });
+
+    if (!blob.size) throw new Error("The recording was empty.");
+
+    const ext = blob.type.includes("mp4") ? "mp4" : "webm";
+    const path = session.user.id + "/" + Date.now() + "-voice." + ext;
+    const { error: uploadError } = await supabase.storage
+      .from("comment-media").upload(path, blob, { contentType: blob.type });
+    if (uploadError) throw uploadError;
+
+    const newUrl = supabase.storage.from("comment-media").getPublicUrl(path).data.publicUrl;
+    const { data: updated, error: updateError } = await supabase
+      .from("comments").update({ audio_url: newUrl })
+      .eq("id", commentId).eq("user_id", session.user.id)
+      .select("id").maybeSingle();
+
+    if (updateError || !updated) {
+      await supabase.storage.from("comment-media").remove([path]);
+      throw updateError || new Error("Voice note was not updated.");
+    }
+
+    setComments(prev => prev.map(item =>
+      item.id === commentId ? { ...item, audio_url: newUrl } : item
+    ));
+
+    try {
+      const marker = "/storage/v1/object/public/comment-media/";
+      const oldUrl = row.audio_url || "";
+      const oldPath = oldUrl.includes(marker)
+        ? decodeURIComponent(oldUrl.split(marker)[1].split("?")[0]) : "";
+      if (oldPath.startsWith(session.user.id + "/")) {
+        await supabase.storage.from("comment-media").remove([oldPath]);
+      }
+    } catch (cleanupError) {
+      console.warn("Old voice cleanup failed:", cleanupError);
+    }
+    setMessage("Voice note replaced.");
+  } catch (error) {
+    console.error("Voice replacement failed:", error);
+    setMessage(error.message || "Could not replace voice note.");
+  } finally {
+    if (stream) stream.getTracks().forEach(track => track.stop());
+  }
+}
+
+async function handleDeleteVoiceNote(commentId) {
+  if (!session?.user?.id) return setMessage("Please sign in first.");
+  if (!window.confirm("Delete only this voice recording? The comment or reply will remain.")) return;
+
+  try {
+    const { data: row, error: readError } = await supabase
+      .from("comments").select("id,user_id,audio_url")
+      .eq("id", commentId).maybeSingle();
+    if (readError) throw readError;
+    if (!row || row.user_id !== session.user.id || !row.audio_url) {
+      throw new Error("You can only delete your own voice note.");
+    }
+
+    const { data: updated, error: updateError } = await supabase
+      .from("comments").update({ audio_url: null })
+      .eq("id", commentId).eq("user_id", session.user.id)
+      .select("id").maybeSingle();
+    if (updateError) throw updateError;
+    if (!updated) throw new Error("Voice note was not deleted.");
+
+    setComments(prev => prev.map(item =>
+      item.id === commentId ? { ...item, audio_url: null } : item
+    ));
+
+    let warning = false;
+    try {
+      const marker = "/storage/v1/object/public/comment-media/";
+      const url = row.audio_url || "";
+      const objectPath = url.includes(marker)
+        ? decodeURIComponent(url.split(marker)[1].split("?")[0]) : "";
+      if (objectPath.startsWith(session.user.id + "/")) {
+        const result = await supabase.storage.from("comment-media").remove([objectPath]);
+        if (result.error) warning = true;
+      }
+    } catch (cleanupError) {
+      warning = true;
+      console.warn("Voice storage cleanup failed:", cleanupError);
+    }
+    setMessage(warning
+      ? "Voice note removed. Storage cleanup may need attention."
+      : "Voice note deleted. The comment or reply remains.");
+  } catch (error) {
+    console.error("Voice deletion failed:", error);
+    setMessage(error.message || "Could not delete voice note.");
+  }
+}
+
+async function handleUpdateComment(commentId) {
     const updatedContent = editCommentText.trim();
 
     if (!updatedContent) {
@@ -8979,6 +9104,35 @@ document.body
                                   });
                                 }}
                               />
+    {session?.user?.id === c.user_id && (
+      <div style={{
+        display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "8px"
+      }}>
+        <button type="button" onClick={() => handleReplaceVoiceNote(c.id)}
+          style={{
+            display: "inline-flex", alignItems: "center", gap: "6px",
+            padding: "7px 11px", borderRadius: "8px",
+            border: "1px solid var(--ma-border, #777)",
+            background: "var(--ma-surface, #f2f2f2)",
+            color: "var(--ma-text, #111)", fontWeight: 600, cursor: "pointer"
+          }}>
+          <span className="material-symbols-outlined">edit</span>
+          Edit voice note
+        </button>
+        <button type="button" onClick={() => handleDeleteVoiceNote(c.id)}
+          style={{
+            display: "inline-flex", alignItems: "center", gap: "6px",
+            padding: "7px 11px", borderRadius: "8px",
+            border: "1px solid #b94b4b",
+            background: "var(--ma-surface, #f2f2f2)",
+            color: "#c04444", fontWeight: 600, cursor: "pointer"
+          }}>
+          <span className="material-symbols-outlined">delete</span>
+          Delete voice note
+        </button>
+      </div>
+    )}
+
                             </div>
                           )}
                           {/* Creator Heart inline with text */}
@@ -9087,6 +9241,35 @@ document.body
                                             });
                                           }}
                                         />
+    {session?.user?.id === reply.user_id && (
+      <div style={{
+        display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "8px"
+      }}>
+        <button type="button" onClick={() => handleReplaceVoiceNote(reply.id)}
+          style={{
+            display: "inline-flex", alignItems: "center", gap: "6px",
+            padding: "7px 11px", borderRadius: "8px",
+            border: "1px solid var(--ma-border, #777)",
+            background: "var(--ma-surface, #f2f2f2)",
+            color: "var(--ma-text, #111)", fontWeight: 600, cursor: "pointer"
+          }}>
+          <span className="material-symbols-outlined">edit</span>
+          Edit voice note
+        </button>
+        <button type="button" onClick={() => handleDeleteVoiceNote(reply.id)}
+          style={{
+            display: "inline-flex", alignItems: "center", gap: "6px",
+            padding: "7px 11px", borderRadius: "8px",
+            border: "1px solid #b94b4b",
+            background: "var(--ma-surface, #f2f2f2)",
+            color: "#c04444", fontWeight: 600, cursor: "pointer"
+          }}>
+          <span className="material-symbols-outlined">delete</span>
+          Delete voice note
+        </button>
+      </div>
+    )}
+
                                       </div>
                                     )}
                                   </>
