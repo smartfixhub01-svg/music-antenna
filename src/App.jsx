@@ -8938,7 +8938,7 @@ document.body
                           <input value={editCommentText} onChange={e => setEditCommentText(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "8px", border: "1px solid var(--ma-border, #e5e5e5)", background: "var(--ma-surface, #f2f2f2)", color: "var(--ma-text, #000)", fontSize: "13px", marginBottom: "8px", outline: "none" }} />
                           <div style={{ display: "flex", gap: "8px" }}>
                             <button onClick={() => setEditingCommentId(null)} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", fontSize: "11px" }}>Cancel</button>
-                            <button onClick={() => handleUpdateComment(c.id)} style={{ background: "#ff365f", border: 0, borderRadius: "12px", padding: "4px 12px", color: "#ffffff", fontWeight: "bold", fontSize: "12px", cursor: "pointer" }}>Save</button>
+                            <button onClick={() => handleUpdateComment(c.id)} style={{ background: "var(--ma-accent, #ff365f)", border: 0, borderRadius: "12px", padding: "4px 12px", color: "#ffffff", fontWeight: "bold", fontSize: "12px", cursor: "pointer" }}>Save</button>
                           </div>
                         </div>
                       ) : (
@@ -9073,11 +9073,53 @@ document.body
                                     />
                                     <div style={{ display: "flex", gap: "12px", marginTop: "6px" }}>
                                       <button onClick={() => setEditingCommentId(null)} style={{ background: "transparent", border: 0, color: "var(--ma-text, #222)", fontWeight: "600", cursor: "pointer" }}>Cancel</button>
-                                      <button onClick={() => handleUpdateComment(reply.id)} style={{ background: "#ff365f", border: 0, borderRadius: "8px", padding: "5px 12px", color: "#fff", fontWeight: "700", cursor: "pointer" }}>Save</button>
+                                      <button onClick={() => handleUpdateComment(reply.id)} style={{ background: "var(--ma-accent, #ff365f)", border: 0, borderRadius: "8px", padding: "5px 12px", color: "#ffffff", fontWeight: "700", cursor: "pointer" }}>Save</button>
                                     </div>
                                   </div>
                                 ) : (
-                                  <p style={{ margin: "2px 0 0 0", fontSize: "13px", color: "var(--ma-text, #000)", lineHeight: 1.3 }}>{reply.content}</p>
+                                  <>
+                                    {reply.content && (
+                                      <p style={{ margin: "2px 0 0 0", fontSize: "13px", color: "var(--ma-text, #000)", lineHeight: 1.3 }}>
+                                        {reply.content}
+                                      </p>
+                                    )}
+                                    {reply.audio_url && (
+                                      <div style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "6px",
+                                        marginTop: "8px",
+                                        padding: "9px 10px",
+                                        borderRadius: "10px",
+                                        background: "var(--ma-surface, #f2f2f2)",
+                                        border: "1px solid var(--ma-border, #e5e5e5)",
+                                        maxWidth: "320px"
+                                      }}>
+                                        <span style={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                          gap: "5px",
+                                          color: "var(--ma-text, #000)",
+                                          fontSize: "11px",
+                                          fontWeight: "700"
+                                        }}>
+                                          <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>mic</span>
+                                          Voice reply
+                                        </span>
+                                        <audio
+                                          controls
+                                          preload="metadata"
+                                          src={reply.audio_url}
+                                          style={{ width: "100%", height: "36px" }}
+                                          onPlay={(e) => {
+                                            document.querySelectorAll("audio, video").forEach(el => {
+                                              if (el !== e.currentTarget) el.pause();
+                                            });
+                                          }}
+                                        />
+                                      </div>
+                                    )}
+                                  </>
                                 )}
                                 {editingCommentId !== reply.id && session?.user?.id === reply.user_id && (
                                   <div style={{ display: "flex", gap: "14px", alignItems: "center", marginTop: "6px" }}>
