@@ -573,6 +573,18 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [comments, setComments] = useState([]);
+  const [voiceEditTarget, setVoiceEditTarget] = useState(null);
+  const [voiceEditRecording, setVoiceEditRecording] = useState(false);
+  const [voiceEditSeconds, setVoiceEditSeconds] = useState(0);
+  const [voiceEditBlob, setVoiceEditBlob] = useState(null);
+  const [voiceEditPreviewUrl, setVoiceEditPreviewUrl] = useState("");
+  const [voiceEditSaving, setVoiceEditSaving] = useState(false);
+  const voiceEditRecorderRef = useRef(null);
+  const voiceEditStreamRef = useRef(null);
+  const voiceEditChunksRef = useRef([]);
+  const voiceEditTimerRef = useRef(null);
+  const voiceEditCancelledRef = useRef(false);
+
 
 
 
@@ -2149,83 +2161,251 @@ async function fetchPlaylists() {
   }
 
 
-async function handleReplaceVoiceNote(commentId) {
-  if (!session?.user?.id) return setMessage("Please sign in first.");
-  if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
-    return setMessage("Voice recording is not supported.");
+
+function openVoiceNoteEditor(commentId) {
+  if (!session?.user?.id) {
+    setMessage("Please sign in first.");
+    return;
   }
 
-  let stream;
+  setVoiceEditTarget(commentId);
+  setVoiceEditBlob(null);
+  setVoiceEditSeconds(0);
+  setVoiceEditPreviewUrl("");
+}
+
+function stopVoiceEditRecording() {
+  if (voiceEditTimerRef.current) {
+    clearInterval(voiceEditTimerRef.current);
+    voiceEditTimerRef.current = null;
+  }
+
+  const recorder = voiceEditRecorderRef.current;
+
+  if (recorder && recorder.state !== "inactive") {
+    recorder.stop();
+  }
+}
+
+async function startVoiceEditRecording() {
+  if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+    setMessage("Voice recording is not supported on this device.");
+    return;
+  }
+
+  try {
+    voiceEditCancelledRef.current = false;
+
+    if (voiceEditPreviewUrl) {
+      URL.revokeObjectURL(voiceEditPreviewUrl);
+    }
+
+    setVoiceEditPreviewUrl("");
+    setVoiceEditBlob(null);
+    setVoiceEditSeconds(0);
+    voiceEditChunksRef.current = [];
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: true
+    });
+
+    if (voiceEditCancelledRef.current) {
+      stream.getTracks().forEach(track => track.stop());
+      return;
+    }
+
+    voiceEditStreamRef.current = stream;
+
+    const mimeType = MediaRecorder.isTypeSupported("audio/webm")
+      ? "audio/webm"
+      : "";
+
+    const recorder = mimeType
+      ? new MediaRecorder(stream, { mimeType })
+      : new MediaRecorder(stream);
+
+    voiceEditRecorderRef.current = recorder;
+
+    recorder.ondataavailable = event => {
+      if (event.data?.size) {
+        voiceEditChunksRef.current.push(event.data);
+      }
+    };
+
+    recorder.onerror = () => {
+      setMessage("Recording failed. Please try again.");
+      stopVoiceEditRecording();
+    };
+
+    recorder.onstop = () => {
+      const blob = new Blob(voiceEditChunksRef.current, {
+        type: recorder.mimeType || "audio/webm"
+      });
+
+      stream.getTracks().forEach(track => track.stop());
+      voiceEditStreamRef.current = null;
+      voiceEditRecorderRef.current = null;
+      setVoiceEditRecording(false);
+
+      if (voiceEditCancelledRef.current) return;
+
+      if (blob.size) {
+        setVoiceEditBlob(blob);
+        setVoiceEditPreviewUrl(URL.createObjectURL(blob));
+      } else {
+        setMessage("No audio was recorded. Please try again.");
+      }
+    };
+
+    recorder.start();
+    setVoiceEditRecording(true);
+
+    voiceEditTimerRef.current = window.setInterval(() => {
+      setVoiceEditSeconds(previous => {
+        const next = previous + 1;
+
+        if (next >= 35) {
+          window.setTimeout(() => stopVoiceEditRecording(), 0);
+        }
+
+        return Math.min(next, 35);
+      });
+    }, 1000);
+
+  } catch (error) {
+    if (voiceEditStreamRef.current) {
+      voiceEditStreamRef.current.getTracks().forEach(track => track.stop());
+      voiceEditStreamRef.current = null;
+    }
+
+    setVoiceEditRecording(false);
+    setMessage(error.message || "Could not access the microphone.");
+  }
+}
+
+function closeVoiceEditModal() {
+  voiceEditCancelledRef.current = true;
+  stopVoiceEditRecording();
+
+  if (voiceEditStreamRef.current) {
+    voiceEditStreamRef.current.getTracks().forEach(track => track.stop());
+    voiceEditStreamRef.current = null;
+  }
+
+  if (voiceEditPreviewUrl) {
+    URL.revokeObjectURL(voiceEditPreviewUrl);
+  }
+
+  setVoiceEditTarget(null);
+  setVoiceEditBlob(null);
+  setVoiceEditPreviewUrl("");
+  setVoiceEditSeconds(0);
+  setVoiceEditRecording(false);
+}
+
+async function saveReplacementVoiceNote() {
+  if (!voiceEditTarget || !voiceEditBlob || voiceEditSaving) return;
+
+  if (!session?.user?.id) {
+    setMessage("Please sign in first.");
+    return;
+  }
+
+  setVoiceEditSaving(true);
+  let uploadedPath = "";
+
   try {
     const { data: row, error: readError } = await supabase
-      .from("comments").select("id,user_id,audio_url")
-      .eq("id", commentId).maybeSingle();
+      .from("comments")
+      .select("id,user_id,audio_url")
+      .eq("id", voiceEditTarget)
+      .maybeSingle();
+
     if (readError) throw readError;
+
     if (!row || row.user_id !== session.user.id || !row.audio_url) {
       throw new Error("You can only replace your own voice note.");
     }
 
-    if (!window.confirm("Record a replacement voice note for up to 35 seconds?")) return;
+    const ext = voiceEditBlob.type.includes("mp4") ? "mp4" : "webm";
 
-    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mimeType = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "";
-    const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
-    const chunks = [];
+    uploadedPath =
+      session.user.id + "/" + Date.now() + "-voice." + ext;
 
-    const blob = await new Promise((resolve, reject) => {
-      recorder.ondataavailable = e => { if (e.data?.size) chunks.push(e.data); };
-      recorder.onerror = () => reject(new Error("Recording failed."));
-      recorder.onstop = () => resolve(new Blob(chunks, { type: recorder.mimeType || "audio/webm" }));
-      recorder.start();
-      setMessage("Recording replacement... maximum 35 seconds.");
-      window.setTimeout(() => {
-        if (recorder.state !== "inactive") recorder.stop();
-      }, 35000);
-    });
-
-    if (!blob.size) throw new Error("The recording was empty.");
-
-    const ext = blob.type.includes("mp4") ? "mp4" : "webm";
-    const path = session.user.id + "/" + Date.now() + "-voice." + ext;
     const { error: uploadError } = await supabase.storage
-      .from("comment-media").upload(path, blob, { contentType: blob.type });
+      .from("comment-media")
+      .upload(uploadedPath, voiceEditBlob, {
+        contentType: voiceEditBlob.type
+      });
+
     if (uploadError) throw uploadError;
 
-    const newUrl = supabase.storage.from("comment-media").getPublicUrl(path).data.publicUrl;
+    const newUrl = supabase.storage
+      .from("comment-media")
+      .getPublicUrl(uploadedPath).data.publicUrl;
+
     const { data: updated, error: updateError } = await supabase
-      .from("comments").update({ audio_url: newUrl })
-      .eq("id", commentId).eq("user_id", session.user.id)
-      .select("id").maybeSingle();
+      .from("comments")
+      .update({ audio_url: newUrl })
+      .eq("id", voiceEditTarget)
+      .eq("user_id", session.user.id)
+      .select("id")
+      .maybeSingle();
 
     if (updateError || !updated) {
-      await supabase.storage.from("comment-media").remove([path]);
       throw updateError || new Error("Voice note was not updated.");
     }
 
-    setComments(prev => prev.map(item =>
-      item.id === commentId ? { ...item, audio_url: newUrl } : item
-    ));
+    setComments(previous =>
+      previous.map(item =>
+        item.id === voiceEditTarget
+          ? { ...item, audio_url: newUrl }
+          : item
+      )
+    );
 
     try {
       const marker = "/storage/v1/object/public/comment-media/";
       const oldUrl = row.audio_url || "";
+
       const oldPath = oldUrl.includes(marker)
-        ? decodeURIComponent(oldUrl.split(marker)[1].split("?")[0]) : "";
+        ? decodeURIComponent(oldUrl.split(marker)[1].split("?")[0])
+        : "";
+
       if (oldPath.startsWith(session.user.id + "/")) {
-        await supabase.storage.from("comment-media").remove([oldPath]);
+        await supabase.storage
+          .from("comment-media")
+          .remove([oldPath]);
       }
     } catch (cleanupError) {
       console.warn("Old voice cleanup failed:", cleanupError);
     }
-    setMessage("Voice note replaced.");
+
+    closeVoiceEditModal();
+    setMessage("Voice note replaced successfully.");
+
   } catch (error) {
+    if (uploadedPath) {
+      try {
+        await supabase.storage
+          .from("comment-media")
+          .remove([uploadedPath]);
+      } catch (cleanupError) {
+        console.warn("Replacement cleanup failed:", cleanupError);
+      }
+    }
+
     console.error("Voice replacement failed:", error);
     setMessage(error.message || "Could not replace voice note.");
+
   } finally {
-    if (stream) stream.getTracks().forEach(track => track.stop());
+    setVoiceEditSaving(false);
   }
 }
 
+async function handleReplaceVoiceNote(commentId) {
+  openVoiceNoteEditor(commentId);
+}
 async function handleDeleteVoiceNote(commentId) {
   if (!session?.user?.id) return setMessage("Please sign in first.");
   if (!window.confirm("Delete only this voice recording? The comment or reply will remain.")) return;
@@ -9019,6 +9199,298 @@ document.body
             style={{ background: "var(--ma-bg, #fff)", height: "85vh", borderTopLeftRadius: "16px", borderTopRightRadius: "16px", display: "flex", flexDirection: "column" }}
             onClick={e => e.stopPropagation()}
           >
+
+            {voiceEditTarget && (
+              <div
+                onClick={closeVoiceEditModal}
+                style={{
+                  position: "fixed",
+                  inset: 0,
+                  zIndex: 10050,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "20px",
+                  background: "rgba(0,0,0,0.72)"
+                }}
+              >
+                <div
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label="Replace voice note"
+                  onClick={event => event.stopPropagation()}
+                  style={{
+                    width: "100%",
+                    maxWidth: "390px",
+                    padding: "22px",
+                    borderRadius: "18px",
+                    background: "var(--ma-bg, #ffffff)",
+                    color: "var(--ma-text, #111111)",
+                    border: "1px solid var(--ma-border, #dddddd)",
+                    boxShadow: "0 20px 60px rgba(0,0,0,0.35)"
+                  }}
+                >
+                  <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginBottom: "18px"
+                  }}>
+                    <div style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px"
+                    }}>
+                      <span
+                        className="material-symbols-outlined"
+                        style={{
+                          fontSize: "28px",
+                          color: "var(--ma-accent, #ff365f)"
+                        }}
+                      >
+                        graphic_eq
+                      </span>
+
+                      <div>
+                        <div style={{ fontSize: "16px", fontWeight: "800" }}>
+                          Replace voice note
+                        </div>
+                        <div style={{
+                          fontSize: "12px",
+                          color: "var(--ma-text-secondary, #777)",
+                          marginTop: "3px"
+                        }}>
+                          Music Antenna recording studio
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={closeVoiceEditModal}
+                      disabled={voiceEditSaving}
+                      aria-label="Close"
+                      style={{
+                        border: "1px solid var(--ma-border)",
+                        background: "var(--ma-surface)",
+                        color: "var(--ma-text)",
+                        borderRadius: "50%",
+                        width: "36px",
+                        height: "36px",
+                        cursor: "pointer"
+                      }}
+                    >
+                      <span className="material-symbols-outlined">close</span>
+                    </button>
+                  </div>
+
+                  <div style={{
+                    padding: "18px",
+                    borderRadius: "14px",
+                    background: "var(--ma-surface, #f2f2f2)",
+                    border: "1px solid var(--ma-border, #dddddd)",
+                    textAlign: "center",
+                    marginBottom: "16px"
+                  }}>
+                    <div style={{
+                      fontSize: "34px",
+                      fontWeight: "800",
+                      fontVariantNumeric: "tabular-nums",
+                      color: voiceEditRecording
+                        ? "#e5484d"
+                        : "var(--ma-text)"
+                    }}>
+                      00:{String(voiceEditSeconds).padStart(2, "0")}
+                    </div>
+
+                    <div style={{
+                      fontSize: "12px",
+                      color: "var(--ma-text-secondary, #777)",
+                      marginTop: "5px"
+                    }}>
+                      {voiceEditRecording
+                        ? "Recording in progress"
+                        : voiceEditBlob
+                          ? "Recording ready to preview"
+                          : "Maximum recording time: 35 seconds"}
+                    </div>
+
+                    <div style={{
+                      height: "5px",
+                      background: "var(--ma-border, #dddddd)",
+                      borderRadius: "9px",
+                      overflow: "hidden",
+                      marginTop: "14px"
+                    }}>
+                      <div style={{
+                        height: "100%",
+                        width: `${(voiceEditSeconds / 35) * 100}%`,
+                        background: "var(--ma-accent, #ff365f)",
+                        transition: "width 0.2s"
+                      }} />
+                    </div>
+                  </div>
+
+                  {voiceEditPreviewUrl && (
+                    <div style={{
+                      padding: "12px",
+                      borderRadius: "12px",
+                      border: "1px solid var(--ma-border)",
+                      marginBottom: "14px"
+                    }}>
+                      <div style={{
+                        fontSize: "12px",
+                        fontWeight: "700",
+                        marginBottom: "8px"
+                      }}>
+                        Preview your new recording
+                      </div>
+                      <audio
+                        controls
+                        src={voiceEditPreviewUrl}
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                  )}
+
+                  <div style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: "9px",
+                    marginBottom: "16px"
+                  }}>
+                    {!voiceEditRecording ? (
+                      <button
+                        type="button"
+                        onClick={startVoiceEditRecording}
+                        disabled={voiceEditSaving || !!voiceEditBlob}
+                        style={{
+                          flex: "1 1 120px",
+                          minHeight: "42px",
+                          border: "0",
+                          borderRadius: "10px",
+                          background: "var(--ma-accent, #ff365f)",
+                          color: "#ffffff",
+                          fontWeight: "700",
+                          cursor: "pointer",
+                          opacity: voiceEditBlob ? 0.5 : 1
+                        }}
+                      >
+                        <span
+                          className="material-symbols-outlined"
+                          style={{ verticalAlign: "middle", fontSize: "18px" }}
+                        >
+                          mic
+                        </span>
+                        {" "}Start recording
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={stopVoiceEditRecording}
+                        style={{
+                          flex: "1 1 120px",
+                          minHeight: "42px",
+                          border: "0",
+                          borderRadius: "10px",
+                          background: "#d94343",
+                          color: "#ffffff",
+                          fontWeight: "700",
+                          cursor: "pointer"
+                        }}
+                      >
+                        <span
+                          className="material-symbols-outlined"
+                          style={{ verticalAlign: "middle", fontSize: "18px" }}
+                        >
+                          stop
+                        </span>
+                        {" "}Stop recording
+                      </button>
+                    )}
+
+                    {voiceEditBlob && !voiceEditRecording && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (voiceEditPreviewUrl) {
+                            URL.revokeObjectURL(voiceEditPreviewUrl);
+                          }
+                          setVoiceEditPreviewUrl("");
+                          setVoiceEditBlob(null);
+                          setVoiceEditSeconds(0);
+                        }}
+                        style={{
+                          flex: "1 1 100px",
+                          minHeight: "42px",
+                          border: "1px solid var(--ma-border)",
+                          borderRadius: "10px",
+                          background: "var(--ma-surface)",
+                          color: "var(--ma-text)",
+                          fontWeight: "700",
+                          cursor: "pointer"
+                        }}
+                      >
+                        Record again
+                      </button>
+                    )}
+                  </div>
+
+                  <div style={{
+                    fontSize: "11px",
+                    lineHeight: 1.5,
+                    color: "var(--ma-text-secondary, #777)",
+                    marginBottom: "16px"
+                  }}>
+                    Your existing voice note remains unchanged until you save the replacement.
+                  </div>
+
+                  <div style={{
+                    display: "flex",
+                    gap: "10px",
+                    justifyContent: "flex-end"
+                  }}>
+                    <button
+                      type="button"
+                      onClick={closeVoiceEditModal}
+                      disabled={voiceEditSaving}
+                      style={{
+                        minHeight: "42px",
+                        padding: "0 16px",
+                        borderRadius: "10px",
+                        border: "1px solid var(--ma-border)",
+                        background: "var(--ma-surface)",
+                        color: "var(--ma-text)",
+                        fontWeight: "700",
+                        cursor: "pointer"
+                      }}
+                    >
+                      Cancel
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={saveReplacementVoiceNote}
+                      disabled={!voiceEditBlob || voiceEditRecording || voiceEditSaving}
+                      style={{
+                        minHeight: "42px",
+                        padding: "0 18px",
+                        borderRadius: "10px",
+                        border: "1px solid var(--ma-accent, #ff365f)",
+                        background: "var(--ma-accent, #ff365f)",
+                        color: "#ffffff",
+                        fontWeight: "800",
+                        cursor: "pointer",
+                        opacity: !voiceEditBlob || voiceEditRecording || voiceEditSaving ? 0.5 : 1
+                      }}
+                    >
+                      {voiceEditSaving ? "Saving..." : "Save voice note"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Header */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
               <h3 style={{ margin: 0, color: "var(--ma-text, #000)", fontSize: "15px", fontWeight: "600" }}>Comments ({comments.length})</h3>
