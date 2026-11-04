@@ -7472,3 +7472,35 @@ p
 :root[data-theme="light"] .voice-edit-studio {
   color-scheme: light;
 }
+
+/* FINAL FIX: Connect Voice Studio to the real theme variables */
+
+.voice-edit-studio {
+  --ma-bg: var(--ma-bg-elevated, #ffffff);
+  --ma-text: var(--ma-text-primary, #111111);
+  --ma-surface: var(--ma-bg-secondary, #f2f2f2);
+
+  background: var(--ma-bg) !important;
+  color: var(--ma-text) !important;
+  border-color: var(--ma-border) !important;
+}
+
+.voice-edit-studio > div:nth-of-type(2) {
+  background: var(--ma-surface) !important;
+  color: var(--ma-text) !important;
+  border-color: var(--ma-border) !important;
+}
+
+.voice-edit-studio button.voice-edit-secondary {
+  background: var(--ma-surface) !important;
+  color: var(--ma-text) !important;
+  border-color: var(--ma-border) !important;
+}
+
+:root[data-theme="dark"] .voice-edit-studio {
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] .voice-edit-studio {
+  color-scheme: light;
+}
