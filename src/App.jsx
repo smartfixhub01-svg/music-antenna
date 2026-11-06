@@ -631,7 +631,6 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const timerRef = useRef(null);
 
   const [replyTarget, setReplyTarget] = useState(null);
-  const [replyingName, setReplyingName] = useState("");
   const [replyingToName, setReplyingToName] = useState("");
   const [commentsLoading, setCommentsLoading] = useState(false);
 
@@ -2663,24 +2662,53 @@ async function handleUpdateComment(commentId) {
       requestedStream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const stream = requestedStream;
 
-      let mimeType = "audio/webm";
-      if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = "audio/mp4";
+      const mimeCandidates = [
+        "audio/webm;codecs=opus",
+        "audio/webm",
+        "audio/mp4",
+        "audio/ogg;codecs=opus"
+      ];
 
-      mediaRecorderRef.current = new MediaRecorder(stream, { mimeType });
+      const supportedMime = mimeCandidates.find(type =>
+        MediaRecorder.isTypeSupported?.(type)
+      );
+
+      const recorder = supportedMime
+        ? new MediaRecorder(stream, { mimeType: supportedMime })
+        : new MediaRecorder(stream);
+
+      mediaRecorderRef.current = recorder;
       audioChunksRef.current = [];
 
-      mediaRecorderRef.current.ondataavailable = (e) => {
-        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      recorder.ondataavailable = (event) => {
+        if (event.data?.size > 0) audioChunksRef.current.push(event.data);
       };
 
-      mediaRecorderRef.current.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+      recorder.onerror = (event) => {
+        console.error("Voice recording error:", event.error || event);
+        clearInterval(timerRef.current);
+        setIsRecording(false);
+        stream.getTracks().forEach(track => track.stop());
+        setMessage("Recording failed. Please check microphone permission and try again.");
+      };
+
+      recorder.onstop = () => {
+        const actualType = recorder.mimeType || supportedMime || "application/octet-stream";
+        const audioBlob = new Blob(audioChunksRef.current, { type: actualType });
+
+        stream.getTracks().forEach(track => track.stop());
+
+        if (!audioBlob.size) {
+          setMessage("No audio was captured. Please record again.");
+          return;
+        }
+
         setCommentAudio(audioBlob);
         setCommentAudioUrl(URL.createObjectURL(audioBlob));
-        stream.getTracks().forEach(track => track.stop());
+        setMessage("Voice note ready to send.");
       };
 
-      mediaRecorderRef.current.start();
+      recorder.start();
       setIsRecording(true);
       setRecordingTime(0);
       setMessage("Recording started...");
@@ -2716,25 +2744,28 @@ async function handleUpdateComment(commentId) {
   }
 
   function stopRecording() {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      clearInterval(timerRef.current);
+    const recorder = mediaRecorderRef.current;
+    clearInterval(timerRef.current);
 
-      const playerToResume = window._commentRecordingPlayer;
-      const shouldResume = window._wasPlayingBeforeRecord;
-
-      if (shouldResume && playerToResume) {
-        setTimeout(() => {
-          if (playerToResume.paused) {
-            playerToResume.play().catch(() => {});
-          }
-        }, 300);
-      }
-
-      window._wasPlayingBeforeRecord = false;
-      window._commentRecordingPlayer = null;
+    if (recorder && recorder.state === "recording") {
+      recorder.stop();
     }
+
+    setIsRecording(false);
+
+    const playerToResume = window._commentRecordingPlayer;
+    const shouldResume = window._wasPlayingBeforeRecord;
+
+    if (shouldResume && playerToResume) {
+      setTimeout(() => {
+        if (playerToResume.paused) {
+          playerToResume.play().catch(() => {});
+        }
+      }, 300);
+    }
+
+    window._wasPlayingBeforeRecord = false;
+    window._commentRecordingPlayer = null;
   }
 
   async function handlePostComment(e) {
@@ -2776,7 +2807,7 @@ async function handleUpdateComment(commentId) {
         const { data: parentExists } = await supabase.from("comments").select("id").eq("id", submitReplyTarget).single();
         if (!parentExists) {
           setReplyTarget(null);
-          setReplyingName("");
+          setReplyingToName("");
           throw new Error("The comment you are replying to has been deleted.");
         }
       }
@@ -2790,7 +2821,12 @@ async function handleUpdateComment(commentId) {
       }
 
       if (submitAudio) {
-        const path = session.user.id + "/" + Date.now() + "-voice.webm";
+        const audioExtension = (submitAudio.type || "").includes("mp4")
+        ? "m4a"
+        : (submitAudio.type || "").includes("ogg")
+          ? "ogg"
+          : "webm";
+      const path = session.user.id + "/" + Date.now() + "-voice." + audioExtension;
         const { error: audErr } = await supabase.storage.from("comment-media").upload(path, submitAudio);
         if (audErr) throw audErr;
         audioUrl = supabase.storage.from("comment-media").getPublicUrl(path).data.publicUrl;
@@ -2819,7 +2855,7 @@ async function handleUpdateComment(commentId) {
       setVoicePreviewDuration(0);
       setVoicePreviewSpeed(1);
       setReplyTarget(null);
-      setReplyingName("");
+      setReplyingToName("");
       setMessage("Comment posted!");
 
     } catch (err) {
