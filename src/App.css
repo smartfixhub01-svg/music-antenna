@@ -7619,3 +7619,143 @@ p
 }
 
 /* End of scoped comments refinement */
+
+/* =====================================================
+   MUSIC ANTENNA — PROFESSIONAL COMMENTS REDESIGN
+   Scoped exclusively to the comments section.
+   ===================================================== */
+
+.ma-comments-modal {
+  --mc-accent: #ff365f;
+  --mc-card: var(--ma-surface, #f5f5f5);
+  --mc-line: var(--ma-border, #e5e5e5);
+  --mc-muted: var(--ma-text-secondary, #777);
+  --mc-ink: var(--ma-text, #111);
+  color: var(--mc-ink);
+  isolation: isolate;
+  overflow: hidden !important;
+}
+
+.ma-comments-modal > div {
+  scrollbar-width: thin;
+  scrollbar-color: var(--mc-line) transparent;
+}
+
+.ma-comments-modal button {
+  transition: background-color .18s ease, opacity .18s ease,
+    transform .18s ease, color .18s ease !important;
+}
+
+.ma-comments-modal button:active {
+  transform: scale(.96);
+}
+
+.ma-comments-modal input,
+.ma-comments-modal textarea {
+  color: var(--mc-ink) !important;
+  font-family: inherit !important;
+}
+
+.ma-comments-modal input::placeholder,
+.ma-comments-modal textarea::placeholder {
+  color: var(--mc-muted) !important;
+  opacity: .85;
+}
+
+.ma-comments-modal audio[controls] {
+  width: min(230px, 100%) !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  border-radius: 18px;
+}
+
+.ma-comments-modal img {
+  object-fit: cover;
+  max-width: 100%;
+}
+
+.ma-comments-modal .premium-comment-input-wrap {
+  min-height: 44px !important;
+  border: 1px solid var(--mc-line) !important;
+  background: var(--mc-card) !important;
+  border-radius: 24px !important;
+  padding: 3px 11px !important;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.ma-comments-modal .premium-comment-input-wrap:focus-within {
+  border-color: var(--mc-accent) !important;
+  box-shadow: 0 0 0 3px rgba(255,54,95,.10);
+}
+
+.ma-comments-modal .premium-comment-input-wrap input {
+  min-width: 0;
+  font-size: 13px !important;
+}
+
+.ma-comments-modal .voice-edit-studio {
+  width: min(360px, calc(100vw - 28px)) !important;
+  max-width: 360px !important;
+  max-height: 82vh !important;
+  overflow-y: auto !important;
+  border: 1px solid var(--mc-line);
+  border-radius: 20px !important;
+  box-shadow: 0 18px 60px rgba(0,0,0,.25);
+  padding: 16px !important;
+}
+
+.ma-comments-modal .voice-edit-studio audio[controls] {
+  width: 100% !important;
+}
+
+.ma-comments-modal button:focus-visible,
+.ma-comments-modal input:focus-visible {
+  outline: 2px solid var(--mc-accent) !important;
+  outline-offset: 3px !important;
+}
+
+.ma-comments-modal button:disabled {
+  opacity: .45 !important;
+  cursor: not-allowed !important;
+}
+
+/* Keep the comment sheet readable and properly sized. */
+@media (min-width: 700px) {
+  .ma-comments-modal {
+    width: min(760px, calc(100vw - 40px)) !important;
+    max-width: 760px !important;
+    height: min(88vh, 850px) !important;
+    margin-inline: auto;
+    border: 1px solid var(--mc-line);
+    border-radius: 20px 20px 0 0 !important;
+  }
+}
+
+@media (max-width: 699px) {
+  .ma-comments-modal {
+    width: 100% !important;
+    height: 90dvh !important;
+    max-height: 94dvh !important;
+    border-radius: 18px 18px 0 0 !important;
+  }
+
+  .ma-comments-modal audio[controls] {
+    width: min(205px, 100%) !important;
+  }
+
+  .ma-comments-modal .voice-edit-studio {
+    max-height: 78dvh !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ma-comments-modal *,
+  .ma-comments-modal *::before,
+  .ma-comments-modal *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* End professional comments refinement */
