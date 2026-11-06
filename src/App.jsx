@@ -590,6 +590,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
 
 
   const [deletingCommentId, setDeletingCommentId] = useState(null);
+  const [deletingVoiceNoteId, setDeletingVoiceNoteId] = useState(null);
   const [likedComments, setLikedComments] = useState([]);
   const [expandedReplies, setExpandedReplies] = useState([]);
   const [newComment, setNewComment] = useState("");
@@ -2093,21 +2094,57 @@ async function fetchPlaylists() {
 
   async function handlePinComment(commentId, currentPinned) {
     try {
-      await supabase.from("comments").update({ is_pinned: !currentPinned }).eq("id", commentId);
+      const nextPinned = !currentPinned;
+      const { data, error } = await supabase
+        .from("comments")
+        .update({ is_pinned: nextPinned })
+        .eq("id", commentId)
+        .select("id")
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!data) throw new Error("Pin status was not updated.");
+
       setComments(prev => {
-        const updated = prev.map(c => c.id === commentId ? { ...c, is_pinned: !currentPinned } : c);
-        return updated.sort((a, b) => (b.is_pinned ? 1 : 0) - (a.is_pinned ? 1 : 0));
+        const updated = prev.map(c =>
+          c.id === commentId ? { ...c, is_pinned: nextPinned } : c
+        );
+        return updated.sort(
+          (a, b) => Number(b.is_pinned) - Number(a.is_pinned)
+        );
       });
-    } catch (err) { setMessage(err.message); }
+      setMessage(nextPinned ? "Comment pinned." : "Comment unpinned.");
+    } catch (err) {
+      console.error("Comment pin failed:", err);
+      setMessage(err.message || "Could not update pin status.");
+    }
   }
 
   async function handleCreatorHeart(commentId, currentHeart) {
-    setComments(prev => prev.map(c => c.id === commentId ? { ...c, has_creator_heart: !currentHeart } : c));
+    const nextHeart = !currentHeart;
+
+    setComments(prev => prev.map(c =>
+      c.id === commentId ? { ...c, has_creator_heart: nextHeart } : c
+    ));
+
     try {
-      await supabase.from("comments").update({ has_creator_heart: !currentHeart }).eq("id", commentId);
+      const { data, error } = await supabase
+        .from("comments")
+        .update({ has_creator_heart: nextHeart })
+        .eq("id", commentId)
+        .select("id")
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!data) throw new Error("Creator Heart was not updated.");
+
+      setMessage(nextHeart ? "Creator Heart added." : "Creator Heart removed.");
     } catch (err) {
-      setComments(prev => prev.map(c => c.id === commentId ? { ...c, has_creator_heart: currentHeart } : c));
-      setMessage(err.message);
+      setComments(prev => prev.map(c =>
+        c.id === commentId ? { ...c, has_creator_heart: currentHeart } : c
+      ));
+      console.error("Creator Heart update failed:", err);
+      setMessage(err.message || "Could not update Creator Heart.");
     }
   }
 
@@ -2430,7 +2467,6 @@ async function handleReplaceVoiceNote(commentId) {
 }
 async function handleDeleteVoiceNote(commentId) {
   if (!session?.user?.id) return setMessage("Please sign in first.");
-  if (!window.confirm("Delete only this voice recording? The comment or reply will remain.")) return;
 
   try {
     const { data: row, error: readError } = await supabase
@@ -2469,9 +2505,11 @@ async function handleDeleteVoiceNote(commentId) {
     setMessage(warning
       ? "Voice note removed. Storage cleanup may need attention."
       : "Voice note deleted. The comment or reply remains.");
+    setDeletingVoiceNoteId(null);
   } catch (error) {
     console.error("Voice deletion failed:", error);
     setMessage(error.message || "Could not delete voice note.");
+    setDeletingVoiceNoteId(null);
   }
 }
 
@@ -2580,6 +2618,7 @@ async function handleUpdateComment(commentId) {
     } catch (err) {
       console.error("Comment deletion failed:", err);
       setMessage("Error deleting comment: " + err.message);
+      setDeletingCommentId(null);
     }
   }
 
@@ -2588,21 +2627,31 @@ async function handleUpdateComment(commentId) {
       return setMessage("Microphone not supported on this browser.");
     }
 
-    try {
-      // Pause ALL audio and video tags on the page (Main + Mini Player)
-      window._wasPlayingBeforeRecord = false;
-      document.querySelectorAll('audio, video').forEach(el => {
-        if (!el.paused) {
-          el.pause();
-          window._wasPlayingBeforeRecord = true;
-        }
-      });
+    let requestedStream = null;
+
+  try {
+      const mainPlayer =
+        activeMedia?.media_type === "audio"
+          ? audioRef.current
+          : activeMedia?.media_type === "video"
+            ? videoRef.current
+            : null;
+
+      window._commentRecordingPlayer = mainPlayer;
+      window._wasPlayingBeforeRecord = Boolean(
+        mainPlayer && !mainPlayer.paused
+      );
+
+      if (window._wasPlayingBeforeRecord) {
+        mainPlayer.pause();
+      }
 
       setMessage("Requesting microphone...");
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      requestedStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = requestedStream;
 
-      let mimeType = 'audio/webm';
-      if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'audio/mp4';
+      let mimeType = "audio/webm";
+      if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = "audio/mp4";
 
       mediaRecorderRef.current = new MediaRecorder(stream, { mimeType });
       audioChunksRef.current = [];
@@ -2628,14 +2677,26 @@ async function handleUpdateComment(commentId) {
           if (prev >= 35) {
             stopRecording();
             setMessage("Recording stopped at 35 seconds max.");
-
             return 35;
           }
           return prev + 1;
         });
       }, 1000);
-
     } catch (err) {
+      if (requestedStream) {
+        requestedStream.getTracks().forEach(track => track.stop());
+      }
+
+      const playerToResume = window._commentRecordingPlayer;
+      const shouldResume = window._wasPlayingBeforeRecord;
+
+      if (shouldResume && playerToResume?.paused) {
+        playerToResume.play().catch(() => {});
+      }
+
+      window._wasPlayingBeforeRecord = false;
+      window._commentRecordingPlayer = null;
+
       console.log("Mic Error:", err);
       setMessage("Error: " + err.message);
     }
@@ -2647,14 +2708,19 @@ async function handleUpdateComment(commentId) {
       setIsRecording(false);
       clearInterval(timerRef.current);
 
-      // Resume the main player if it was playing before
-      if (window._wasPlayingBeforeRecord) {
+      const playerToResume = window._commentRecordingPlayer;
+      const shouldResume = window._wasPlayingBeforeRecord;
+
+      if (shouldResume && playerToResume) {
         setTimeout(() => {
-          if (activeMedia?.media_type === 'audio' && audioRef.current) audioRef.current.play().catch(()=>{});
-          if (activeMedia?.media_type === 'video' && videoRef.current) videoRef.current.play().catch(()=>{});
+          if (playerToResume.paused) {
+            playerToResume.play().catch(() => {});
+          }
         }, 300);
-        window._wasPlayingBeforeRecord = false;
       }
+
+      window._wasPlayingBeforeRecord = false;
+      window._commentRecordingPlayer = null;
     }
   }
 
@@ -9621,7 +9687,7 @@ document.body
                                 src={c.audio_url}
                                 style={{ width: "100%", height: "36px" }}
                                 onPlay={(e) => {
-                                  document.querySelectorAll("audio, video").forEach(el => {
+                                  document.querySelectorAll(".ma-comments-modal audio").forEach(el => {
                                     if (el !== e.currentTarget) el.pause();
                                   });
                                 }}
@@ -9641,7 +9707,7 @@ document.body
           <span className="material-symbols-outlined">edit</span>
           Edit voice note
         </button>
-        <button type="button" onClick={() => handleDeleteVoiceNote(c.id)}
+        <button type="button" onClick={() => setDeletingVoiceNoteId(c.id)}
           style={{
             display: "inline-flex", alignItems: "center", gap: "6px",
             padding: "7px 11px", borderRadius: "8px",
@@ -9652,6 +9718,13 @@ document.body
           <span className="material-symbols-outlined">delete</span>
           Delete voice note
         </button>
+        {deletingVoiceNoteId === c.id && (
+          <span style={{ display: "inline-flex", alignItems: "center", flexWrap: "wrap", gap: "5px", fontSize: "10px", color: "var(--ma-text, #222)" }}>
+            Delete this voice note?
+            <button type="button" onClick={() => handleDeleteVoiceNote(c.id)} style={{ border: 0, borderRadius: "5px", padding: "3px 6px", background: "#c04444", color: "#fff", fontSize: "10px", fontWeight: 700, cursor: "pointer" }}>Confirm</button>
+            <button type="button" onClick={() => setDeletingVoiceNoteId(null)} style={{ border: "1px solid var(--ma-border, #888)", borderRadius: "5px", padding: "3px 6px", background: "var(--ma-surface, transparent)", color: "var(--ma-text, #222)", fontSize: "10px", cursor: "pointer" }}>Cancel</button>
+          </span>
+        )}
       </div>
     )}
 
@@ -9691,7 +9764,14 @@ document.body
                           {session?.user?.id && session.user.id === c.user_id && (
                             <>
                               <button onClick={() => { setEditingCommentId(c.id); setEditCommentText(c.content); }} style={{ background: "transparent", border: 0, color: "var(--ma-text, #222)", fontSize: "12px", fontWeight: "700", padding: "4px 2px", cursor: "pointer", marginLeft: "auto" }}>Edit</button>
-                              <button onClick={() => handleDeleteComment(c.id)} style={{ background: "transparent", border: 0, color: "#d62850", fontSize: "12px", fontWeight: "700", padding: "4px 2px", cursor: "pointer" }}>Delete</button>
+                              <button onClick={() => setDeletingCommentId(c.id)} style={{ background: "transparent", border: 0, color: "#d62850", fontSize: "12px", fontWeight: "700", padding: "4px 2px", cursor: "pointer" }}>Delete</button>
+        {deletingCommentId === c.id && (
+          <span style={{ display: "inline-flex", alignItems: "center", flexWrap: "wrap", gap: "5px", fontSize: "10px", color: "var(--ma-text, #222)" }}>
+            Delete this comment?
+            <button type="button" onClick={() => handleDeleteComment(c.id)} style={{ border: 0, borderRadius: "5px", padding: "3px 6px", background: "#c04444", color: "#fff", fontSize: "10px", fontWeight: 700, cursor: "pointer" }}>Confirm</button>
+            <button type="button" onClick={() => setDeletingCommentId(null)} style={{ border: "1px solid var(--ma-border, #888)", borderRadius: "5px", padding: "3px 6px", background: "var(--ma-surface, transparent)", color: "var(--ma-text, #222)", fontSize: "10px", cursor: "pointer" }}>Cancel</button>
+          </span>
+        )}
                             </>
                           )}
                         </div>
@@ -9758,7 +9838,7 @@ document.body
                                           src={reply.audio_url}
                                           style={{ width: "100%", height: "36px" }}
                                           onPlay={(e) => {
-                                            document.querySelectorAll("audio, video").forEach(el => {
+                                            document.querySelectorAll(".ma-comments-modal audio").forEach(el => {
                                               if (el !== e.currentTarget) el.pause();
                                             });
                                           }}
@@ -9778,7 +9858,7 @@ document.body
           <span className="material-symbols-outlined">edit</span>
           Edit voice note
         </button>
-        <button type="button" onClick={() => handleDeleteVoiceNote(reply.id)}
+        <button type="button" onClick={() => setDeletingVoiceNoteId(reply.id)}
           style={{
             display: "inline-flex", alignItems: "center", gap: "6px",
             padding: "7px 11px", borderRadius: "8px",
@@ -9789,6 +9869,13 @@ document.body
           <span className="material-symbols-outlined">delete</span>
           Delete voice note
         </button>
+        {deletingVoiceNoteId === reply.id && (
+          <span style={{ display: "inline-flex", alignItems: "center", flexWrap: "wrap", gap: "5px", fontSize: "10px", color: "var(--ma-text, #222)" }}>
+            Delete this voice note?
+            <button type="button" onClick={() => handleDeleteVoiceNote(reply.id)} style={{ border: 0, borderRadius: "5px", padding: "3px 6px", background: "#c04444", color: "#fff", fontSize: "10px", fontWeight: 700, cursor: "pointer" }}>Confirm</button>
+            <button type="button" onClick={() => setDeletingVoiceNoteId(null)} style={{ border: "1px solid var(--ma-border, #888)", borderRadius: "5px", padding: "3px 6px", background: "var(--ma-surface, transparent)", color: "var(--ma-text, #222)", fontSize: "10px", cursor: "pointer" }}>Cancel</button>
+          </span>
+        )}
       </div>
     )}
 
@@ -9799,7 +9886,14 @@ document.body
                                 {editingCommentId !== reply.id && session?.user?.id === reply.user_id && (
                                   <div style={{ display: "flex", gap: "14px", alignItems: "center", marginTop: "6px" }}>
                                     <button onClick={() => { setEditingCommentId(reply.id); setEditCommentText(reply.content || ""); }} style={{ background: "transparent", border: 0, color: "var(--ma-text, #222)", fontSize: "11px", fontWeight: "700", padding: "3px 2px", cursor: "pointer" }}>Edit</button>
-                                    <button onClick={() => handleDeleteComment(reply.id)} style={{ background: "transparent", border: 0, color: "#d62850", fontSize: "11px", fontWeight: "700", padding: "3px 2px", cursor: "pointer" }}>Delete</button>
+                                    <button onClick={() => setDeletingCommentId(reply.id)} style={{ background: "transparent", border: 0, color: "#d62850", fontSize: "11px", fontWeight: "700", padding: "3px 2px", cursor: "pointer" }}>Delete</button>
+        {deletingCommentId === reply.id && (
+          <span style={{ display: "inline-flex", alignItems: "center", flexWrap: "wrap", gap: "5px", fontSize: "10px", color: "var(--ma-text, #222)" }}>
+            Delete this comment?
+            <button type="button" onClick={() => handleDeleteComment(reply.id)} style={{ border: 0, borderRadius: "5px", padding: "3px 6px", background: "#c04444", color: "#fff", fontSize: "10px", fontWeight: 700, cursor: "pointer" }}>Confirm</button>
+            <button type="button" onClick={() => setDeletingCommentId(null)} style={{ border: "1px solid var(--ma-border, #888)", borderRadius: "5px", padding: "3px 6px", background: "var(--ma-surface, transparent)", color: "var(--ma-text, #222)", fontSize: "10px", cursor: "pointer" }}>Cancel</button>
+          </span>
+        )}
                                   </div>
                                 )}
                                 <button
@@ -9870,7 +9964,9 @@ document.body
                           onLoadedMetadata={(e) => setVoicePreviewDuration(e.target.duration)}
                           onEnded={() => setVoicePreviewPlaying(false)}
                           onPlay={() => {
-                            document.querySelectorAll('audio, video').forEach(el => { if (el !== voicePreviewRef.current) el.pause(); });
+                            document.querySelectorAll(".ma-comments-modal audio").forEach(el => {
+                              if (el !== voicePreviewRef.current) el.pause();
+                            });
                             setVoicePreviewPlaying(true);
                           }}
                           onPause={() => setVoicePreviewPlaying(false)}
