@@ -9608,7 +9608,7 @@ document.body
             )}
 
             {/* Header */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
+            <div className="ma-comments-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px", borderBottom: "1px solid var(--ma-border, #e5e5e5)" }}>
               <h3 style={{ margin: 0, color: "var(--ma-text, #000)", fontSize: "15px", fontWeight: "600" }}>Comments ({comments.length})</h3>
               <button onClick={() => setShowCommentsModal(false)} style={{ background: "transparent", border: 0, color: "var(--ma-text, #000)" }}>
                 <span className="material-symbols-outlined">close</span>
@@ -9616,22 +9616,22 @@ document.body
             </div>
 
             {/* Comments List */}
-            <div style={{ flex: 1, overflowY: "auto", padding: "16px", paddingBottom: "100px" }}>
+            <div className="ma-comments-list" style={{ flex: 1, overflowY: "auto", padding: "16px", paddingBottom: "100px" }}>
               {comments.length === 0 ? (
                 <p style={{ color: "var(--ma-text-secondary, #666)", textAlign: "center", marginTop: "40px" }}>No comments yet. Be the first!</p>
               ) : (
                 comments.filter(c => !c.parent_id).map(c => (
-                  <div key={c.id} style={{ display: "flex", gap: "10px", marginBottom: "16px", alignItems: "flex-start", textAlign: "left" }}>
+                  <div key={c.id} className="ma-comment-card" style={{ display: "flex", gap: "10px", marginBottom: "16px", alignItems: "flex-start", textAlign: "left" }}>
 
                     {/* Avatar - Smaller */}
-                    <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "#ff365f", flexShrink: 0, overflow: "hidden", display: "grid", placeItems: "center", color: "var(--ma-text)", fontSize: "12px" }}>
+                    <div className="ma-comment-avatar" style={{ width: "28px", height: "28px", borderRadius: "50%", background: "#ff365f", flexShrink: 0, overflow: "hidden", display: "grid", placeItems: "center", color: "var(--ma-text)", fontSize: "12px" }}>
                       {c.profiles?.avatar_url ? <img src={c.profiles.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : "♫"}
                     </div>
 
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "flex-start", minWidth: 0 }}>
 
                       {/* Name & Time - Compact */}
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "2px" }}>
+                      <div className="ma-comment-meta" style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "2px" }}>
                         <span style={{ fontSize: "12px", fontWeight: "bold", color: "var(--ma-text, #000)" }}>
                           @{c.profiles?.display_name || "user"}
                         </span>
@@ -9741,7 +9741,7 @@ document.body
 
                       {/* Action Row - Tighter */}
                       {editingCommentId !== c.id && (
-                        <div style={{ display: "flex", gap: "16px", alignItems: "center", width: "100%", marginTop: "8px" }}>
+                        <div className="ma-comment-actions" style={{ display: "flex", gap: "16px", alignItems: "center", width: "100%", marginTop: "8px" }}>
                           <button onClick={(e) => handleLikeComment(c.id, c.likes || 0, e)} style={{ background: "transparent", border: 0, color: likedComments.includes(c.id) ? "#ff365f" : "var(--ma-text-secondary, #666)", display: "flex", alignItems: "center", gap: "3px", fontSize: "11px", padding: 0, cursor: "pointer" }}>
                             <span className="material-symbols-outlined" style={{ fontSize: "14px", fontVariationSettings: likedComments.includes(c.id) ? "'FILL' 1" : "'FILL' 0" }}>thumb_up</span> {c.likes || 0}
                           </button>
@@ -9779,7 +9779,7 @@ document.body
 
                       {/* Nested Replies */}
                       {expandedReplies.includes(c.id) && (
-                        <div style={{ marginLeft: "36px", marginTop: "12px", display: "flex", flexDirection: "column", gap: "12px", borderLeft: "2px solid var(--ma-border, #e5e5e5)", paddingLeft: "12px" }}>
+                        <div className="ma-comment-replies" style={{ marginLeft: "36px", marginTop: "12px", display: "flex", flexDirection: "column", gap: "12px", borderLeft: "2px solid var(--ma-border, #e5e5e5)", paddingLeft: "12px" }}>
                           {comments.filter(r => r.parent_id === c.id).map(reply => (
                             <div key={reply.id} style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
                               <div style={{ width: "24px", height: "24px", borderRadius: "50%", overflow: "hidden", flexShrink: 0 }}>
