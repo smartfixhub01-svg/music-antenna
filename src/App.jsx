@@ -9824,6 +9824,21 @@ document.body
                                         {reply.content}
                                       </p>
                                     )}
+                                    {reply.image_url && (
+                                      <img
+                                        src={reply.image_url}
+                                        alt="Reply attachment"
+                                        loading="lazy"
+                                        style={{
+                                          display: "block",
+                                          maxWidth: "100%",
+                                          maxHeight: "220px",
+                                          objectFit: "contain",
+                                          borderRadius: "8px",
+                                          marginTop: "8px"
+                                        }}
+                                      />
+                                    )}
                                     {reply.audio_url && (
                                       <div style={{
                                         display: "flex",
