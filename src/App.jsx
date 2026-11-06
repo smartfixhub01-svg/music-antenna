@@ -596,6 +596,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [commentImage, setCommentImage] = useState(null);
+  const [commentImagePreviewUrl, setCommentImagePreviewUrl] = useState(null);
   const [commentAudio, setCommentAudio] = useState(null);
   const [commentAudioUrl, setCommentAudioUrl] = useState(null);
   const [voicePreviewPlaying, setVoicePreviewPlaying] = useState(false);
@@ -609,6 +610,18 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [voicePreviewProgress, setVoicePreviewProgress] = useState(0);
   const [voicePreviewSpeed, setVoicePreviewSpeed] = useState(1);
   const voicePreviewRef = useRef(null);
+  useEffect(() => {
+    if (!commentImage) return;
+    const url = URL.createObjectURL(commentImage);
+    setCommentImagePreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [commentImage]);
+
+  useEffect(() => {
+    if (!commentAudioUrl) return;
+    return () => URL.revokeObjectURL(commentAudioUrl);
+  }, [commentAudioUrl]);
+
 
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -2803,6 +2816,8 @@ async function handleUpdateComment(commentId) {
       setCommentAudioUrl(null);
       setVoicePreviewPlaying(false);
       setVoicePreviewProgress(0);
+      setVoicePreviewDuration(0);
+      setVoicePreviewSpeed(1);
       setReplyTarget(null);
       setReplyingName("");
       setMessage("Comment posted!");
@@ -9942,118 +9957,181 @@ document.body
                 </div>
               )}
 
-              <form onSubmit={handlePostComment} style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%" }}>
+              <form onSubmit={handlePostComment} className="ma-comment-composer">
+                <div className="ma-comment-composer-input">
+                  <button
+                    type="button"
+                    aria-label="Add emoji"
+                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                  >
+                    <span className="material-symbols-outlined">sentiment_satisfied</span>
+                  </button>
 
-                {(commentImage || commentAudioUrl) ? (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "10px", padding: "12px", background: "var(--ma-surface, #f0f0f0)", borderRadius: "12px", border: "1px solid var(--ma-border, #e5e5e5)" }}>
+                  <input
+                    value={newComment}
+                    onChange={e => setNewComment(e.target.value)}
+                    placeholder={replyTarget ? "Write a reply..." : "Add a comment..."}
+                    aria-label="Write a comment"
+                  />
 
-                    {commentImage && (
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <img src={URL.createObjectURL(commentImage)} style={{ height: "60px", borderRadius: "6px" }} />
-                        <button type="button" onClick={() => setCommentImage(null)} style={{ background: "transparent", border: 0, color: "#ff365f", fontSize: "12px", cursor: "pointer" }}>Remove</button>
-                      </div>
+                  <label className="ma-comment-attach" aria-label="Attach image">
+                    <span className="material-symbols-outlined">image</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        if (file) setCommentImage(file);
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+
+                  {isRecording ? (
+                    <button
+                      type="button"
+                      className="ma-comment-recording"
+                      onClick={stopRecording}
+                      aria-label="Stop recording"
+                    >
+                      {recordingTime}s
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="ma-comment-mic"
+                      onClick={startRecording}
+                      aria-label="Record voice note"
+                    >
+                      <span className="material-symbols-outlined">mic</span>
+                    </button>
+                  )}
+                </div>
+
+                {commentImage && (
+                  <div className="ma-comment-attachment-preview">
+                    {commentImagePreviewUrl && (
+                      <img src={commentImagePreviewUrl} alt="Comment attachment preview" />
                     )}
-
-                    {commentAudioUrl && (
-                      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-
-                        <audio
-                          ref={voicePreviewRef}
-                          src={commentAudioUrl}
-                          onTimeUpdate={(e) => setVoicePreviewProgress(e.target.currentTime)}
-                          onLoadedMetadata={(e) => setVoicePreviewDuration(e.target.duration)}
-                          onEnded={() => setVoicePreviewPlaying(false)}
-                          onPlay={() => {
-                            document.querySelectorAll(".ma-comments-modal audio").forEach(el => {
-                              if (el !== voicePreviewRef.current) el.pause();
-                            });
-                            setVoicePreviewPlaying(true);
-                          }}
-                          onPause={() => setVoicePreviewPlaying(false)}
-                        />
-
-                        {/* Top Row: Time, Waveform, Speed */}
-                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                          <span style={{ color: "var(--ma-text, #000)", fontSize: "13px", fontWeight: "bold", minWidth: "32px" }}>
-                            {formatVoiceTime(voicePreviewProgress)}
-                          </span>
-
-                          {/* Fake Waveform */}
-                          <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "2px", height: "24px" }}>
-                            {Array.from({ length: 40 }).map((_, i) => {
-                              const isActive = (voicePreviewProgress / (voicePreviewDuration || 1)) > (i / 40);
-                              const height = 6 + (Math.sin(i * 0.5) * 6) + (i % 3 === 0 ? 6 : 0);
-                              return <div key={i} style={{ width: "2px", height: `${Math.max(4, height)}px`, borderRadius: "1px", background: isActive ? "#ff365f" : "var(--ma-border, #e5e5e5)" }} />;
-                            })}
-                          </div>
-
-                          <button type="button" onClick={() => {
-                            const speeds = [1, 1.5, 2];
-                            const nextSpeed = speeds[(speeds.indexOf(voicePreviewSpeed) + 1) % speeds.length];
-                            setVoicePreviewSpeed(nextSpeed);
-                            if (voicePreviewRef.current) voicePreviewRef.current.playbackRate = nextSpeed;
-                          }} style={{ background: "transparent", border: "1px dashed var(--ma-border, #e5e5e5)", borderRadius: "50%", color: "var(--ma-text, #000)", width: "26px", height: "26px", display: "grid", placeItems: "center", fontSize: "10px", fontWeight: "bold", cursor: "pointer" }}>
-                            {voicePreviewSpeed}x
-                          </button>
-                        </div>
-
-                        {/* Bottom Row: Trash, Pause/Resume, Send */}
-                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                          <button type="button" onClick={() => { setCommentAudio(null); setCommentAudioUrl(null); setVoicePreviewPlaying(false); setVoicePreviewProgress(0); }} style={{ background: "rgba(255, 54, 95, 0.1)", border: 0, borderRadius: "50%", width: "40px", height: "40px", display: "grid", placeItems: "center", color: "#ff365f", cursor: "pointer", flexShrink: 0 }}>
-                            <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>delete</span>
-                          </button>
-
-                          <button type="button" onClick={() => {
-                            if (voicePreviewRef.current.paused) voicePreviewRef.current.play();
-                            else voicePreviewRef.current.pause();
-                          }} style={{ flex: 1, background: "var(--ma-surface, #f0f0f0)", border: 0, borderRadius: "24px", height: "40px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", color: "var(--ma-text, #000)", cursor: "pointer", fontSize: "14px", fontWeight: "bold" }}>
-                            <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>mic</span>
-                            {voicePreviewPlaying ? "Pause" : "Resume"}
-                          </button>
-
-                          <button type="submit" disabled={isPostingComment} style={{ background: "#ff365f", border: 0, borderRadius: "50%", width: "40px", height: "40px", display: "grid", placeItems: "center", color: "#ffffff", cursor: isPostingComment ? "not-allowed" : "pointer", flexShrink: 0, opacity: isPostingComment ? 0.5 : 1 }}>
-                            <span className="material-symbols-outlined" style={{ fontSize: "22px", fontVariationSettings: "'FILL' 1" }}>send</span>
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <div className="premium-comment-input-wrap" style={{ flex: 1, display: "flex", alignItems: "center", background: "var(--ma-surface, #f0f0f0)", borderRadius: "24px", padding: "4px 12px", border: "1px solid var(--ma-border, #e5e5e5)" }}>
-
-                      <button type="button" onClick={() => setShowEmojiPicker(!showEmojiPicker)} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", padding: 0, display: "flex", cursor: "pointer" }}>
-                        <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>sentiment_satisfied</span>
-                      </button>
-
-                      <input
-                        value={newComment}
-                        onChange={e => setNewComment(e.target.value)}
-                        placeholder="Add a comment..."
-                        style={{ flex: 1, padding: "10px", background: "transparent", border: 0, color: "var(--ma-text)", outline: "none", fontSize: "14px" }}
-                      />
-
-                      <label style={{ cursor: "pointer", display: "flex", alignItems: "center", color: "var(--ma-text-secondary, #666)" }}>
-                        <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>image</span>
-                        <input type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => setCommentImage(e.target.files[0])} />
-                      </label>
-
-                      {isRecording ? (
-                        <button type="button" onClick={stopRecording} style={{ background: "#ff365f", borderRadius: "50%", border: 0, width: "32px", height: "32px", display: "grid", placeItems: "center", color: "var(--ma-text)", marginLeft: "8px", cursor: "pointer" }}>
-                          <span style={{ fontSize: "12px", fontWeight: "bold" }}>{recordingTime}s</span>
-                        </button>
-                      ) : (
-                        <button type="button" onClick={startRecording} style={{ background: "transparent", border: 0, color: "var(--ma-text-secondary, #666)", display: "flex", cursor: "pointer", padding: 0, marginLeft: "8px" }}>
-                          <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>mic</span>
-                        </button>
-                      )}
-                    </div>
-
-                    <button type="submit" style={{ background: newComment.trim() ? "#3ea6ff" : "#212121", border: 0, borderRadius: "50%", width: "44px", height: "44px", display: "grid", placeItems: "center", color: newComment.trim() ? "#0f0f0f" : "#555", transition: "background 0.2s", cursor: "pointer" }}>
-                      <span className="material-symbols-outlined">send</span>
+                    <span>{commentImage.name || "Attached image"}</span>
+                    <button
+                      type="button"
+                      onClick={() => setCommentImage(null)}
+                      aria-label="Remove image"
+                    >
+                      <span className="material-symbols-outlined">close</span>
+                      Remove
                     </button>
                   </div>
                 )}
+
+                {commentAudioUrl && (
+                  <div className="ma-comment-voice-preview">
+                    <audio
+                      ref={voicePreviewRef}
+                      src={commentAudioUrl}
+                      onTimeUpdate={e => setVoicePreviewProgress(e.currentTarget.currentTime)}
+                      onLoadedMetadata={e => {
+                        const duration = e.currentTarget.duration;
+                        setVoicePreviewDuration(Number.isFinite(duration) ? duration : 0);
+                        e.currentTarget.playbackRate = voicePreviewSpeed;
+                      }}
+                      onEnded={() => setVoicePreviewPlaying(false)}
+                      onPlay={() => {
+                        document.querySelectorAll(".ma-comments-modal audio").forEach(el => {
+                          if (el !== voicePreviewRef.current) el.pause();
+                        });
+                        setVoicePreviewPlaying(true);
+                      }}
+                      onPause={() => setVoicePreviewPlaying(false)}
+                    />
+
+                    <div className="ma-comment-audio-timeline">
+                      <span>{formatVoiceTime(voicePreviewProgress)}</span>
+                      <input
+                        type="range"
+                        min="0"
+                        max={voicePreviewDuration || 0}
+                        step="0.1"
+                        value={Math.min(voicePreviewProgress, voicePreviewDuration || 0)}
+                        disabled={!voicePreviewDuration}
+                        aria-label="Seek voice note"
+                        onChange={e => {
+                          const audio = voicePreviewRef.current;
+                          if (audio) {
+                            audio.currentTime = Number(e.target.value);
+                            setVoicePreviewProgress(audio.currentTime);
+                          }
+                        }}
+                      />
+                      <span>{formatVoiceTime(voicePreviewDuration)}</span>
+                    </div>
+
+                    <div className="ma-comment-audio-actions">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const speeds = [1, 1.5, 2];
+                          const next = speeds[(speeds.indexOf(voicePreviewSpeed) + 1) % speeds.length];
+                          setVoicePreviewSpeed(next);
+                          if (voicePreviewRef.current) voicePreviewRef.current.playbackRate = next;
+                        }}
+                        aria-label="Change playback speed"
+                      >
+                        {voicePreviewSpeed}x
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!voicePreviewRef.current) return;
+                          if (voicePreviewRef.current.paused) {
+                            voicePreviewRef.current.play().catch(() => setVoicePreviewPlaying(false));
+                          } else {
+                            voicePreviewRef.current.pause();
+                          }
+                        }}
+                      >
+                        <span className="material-symbols-outlined">
+                          {voicePreviewPlaying ? "pause" : "play_arrow"}
+                        </span>
+                        {voicePreviewPlaying ? "Pause" : "Play"}
+                      </button>
+
+                      <button
+                        type="button"
+                        className="ma-comment-remove-audio"
+                        onClick={() => {
+                          voicePreviewRef.current?.pause();
+                          setCommentAudio(null);
+                          setCommentAudioUrl(null);
+                          setVoicePreviewPlaying(false);
+                          setVoicePreviewProgress(0);
+                          setVoicePreviewDuration(0);
+                        }}
+                        aria-label="Remove voice note"
+                      >
+                        <span className="material-symbols-outlined">delete</span>
+                        Remove voice
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  className="ma-comment-send"
+                  disabled={
+                    isPostingComment ||
+                    isRecording ||
+                    (!newComment.trim() && !commentImage && !commentAudio)
+                  }
+                  aria-label="Send comment"
+                >
+                  <span className="material-symbols-outlined">send</span>
+                  {isPostingComment ? "Sending..." : "Send"}
+                </button>
               </form>
 
               {showEmojiPicker && (
