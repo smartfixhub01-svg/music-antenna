@@ -52,7 +52,7 @@ header, .ma-header, .ma-mobile-nav, .yt-watch-topbar, .ma-sidebar {
 }
 
 /* Cards & Surfaces */
-.yt-video-card, .ma-subs-row, 
+.yt-video-card, .ma-subs-row,
 .yt-video-card:hover, .ma-subs-row:hover {
   background: var(--ma-bg-hover) !important;
 }
@@ -99,7 +99,7 @@ header, .ma-header, .ma-mobile-nav, .yt-watch-topbar, .ma-sidebar {
 }
 
 /* Cards & Surfaces */
-.yt-video-card, .ma-subs-row, 
+.yt-video-card, .ma-subs-row,
 .yt-video-card:hover, .ma-subs-row:hover {
   background: var(--ma-bg-hover) !important;
 }
@@ -483,7 +483,7 @@ button:disabled { opacity: .6; cursor: wait; }
   .ma-header { min-height: 64px; gap: 10px; padding: 10px 13px; }
   .ma-brand { gap: 7px; font-size: 14px; }
   .ma-brand-icon { width: 34px; height: 34px; font-size: 20px; }
-  
+
   .ma-search input { min-width: 0; padding: 10px 0; font-size: 12px; }
   .ma-user { gap: 6px; }
   .ma-avatar { width: 30px; height: 30px; }
@@ -717,7 +717,7 @@ body, .ma-app {
 
 
 
-.ma-search:focus-within 
+.ma-search:focus-within
 .ma-search input {
   flex: 1;
   min-width: 0;
@@ -822,16 +822,16 @@ body, .ma-app {
 
 @media (max-width: 1000px) {
   .ma-header-create { display: none; }
-  
+
 }
 
 @media (max-width: 700px) {
   .ma-header { padding: 0 8px; gap: 8px; }
   .ma-header-left { gap: 4px; }
   .ma-brand-text { display: none; }
-  
-  
-  
+
+
+
   .ma-avatar-menu { right: -8px; width: min(300px, calc(100vw - 16px)); }
 }
 
@@ -2928,7 +2928,7 @@ body, .ma-app {
 
   /* Buttons globally */
   .yt-you-btn { padding: 8px 14px !important; font-size: 13px !important; }
-  
+
   /* Cards grid gap */
   .ma-media-grid { gap: 16px !important; }
 }
@@ -3091,7 +3091,7 @@ body, .ma-app {
   }
   .yt-channel-meta h1 { font-size: 22px !important; margin-bottom: 4px !important; }
   .yt-channel-sub, .yt-channel-subscribers { font-size: 13px !important; }
-  
+
   .yt-channel-actions {
     justify-content: flex-start !important;
     padding: 0 16px 16px 16px !important;
@@ -4121,8 +4121,8 @@ body, .ma-app {
    ===================================================== */
 
 /* 1. Remove ugly white borders from top bar icons */
-.yt-icon-btn, 
-.ma-icon-btn, 
+.yt-icon-btn,
+.ma-icon-btn,
 button {
   border: none !important;
   outline: none !important;
@@ -4240,7 +4240,7 @@ button {
   flex-shrink: 0 !important;
 }
 
-.yt-mini-play-btn, 
+.yt-mini-play-btn,
 
 
 .yt-mini-play-btn {
@@ -4308,7 +4308,7 @@ button {
   flex-shrink: 0 !important;
 }
 
-.yt-mini-play-btn, 
+.yt-mini-play-btn,
 
 
 .yt-mini-play-btn {
@@ -4382,7 +4382,7 @@ button {
   flex-shrink: 0 !important;
 }
 
-.yt-mini-play-btn, 
+.yt-mini-play-btn,
 
 
 .yt-mini-play-btn {
@@ -4415,7 +4415,7 @@ button {
 
 .yt-upload {
   /* Add massive padding to the bottom so the form can scroll up past the nav */
-  padding-bottom: 250px !important; 
+  padding-bottom: 250px !important;
 }
 
 .yt-upload-actions {
@@ -4640,7 +4640,7 @@ input::placeholder, textarea::placeholder {
 }
 
 /* 8. Cards & Media Items */
-.yt-video-card, .ma-subs-row, 
+.yt-video-card, .ma-subs-row,
 
 
 .yt-manage-item h4 {
@@ -4872,16 +4872,16 @@ input::placeholder, textarea::placeholder {
 /* ===== HOME FEED TEXT FIX ===== */
 
 /* Force video titles and meta text to use theme variables */
-.yt-video-title, 
-.yt-video-card h3, 
+.yt-video-title,
+.yt-video-card h3,
 .yt-video-card h4,
 .ma-subs-name {
   color: var(--ma-text-primary) !important;
   font-weight: 700 !important;
 }
 
-.yt-video-meta, 
-.yt-video-card p, 
+.yt-video-meta,
+.yt-video-card p,
 .yt-watch-meta {
   color: var(--ma-text-secondary) !important;
 }
@@ -4922,7 +4922,7 @@ input::placeholder, textarea::placeholder {
 }
 
 /* Remove the pink background box around the old icon */
-.auth-screen-head-icon, 
+.auth-screen-head-icon,
 .auth-screen-head > div:first-child:not(.official-logo),
 .ma-brand-icon, .ma-logo-icon {
   background: transparent !important;
@@ -5423,7 +5423,7 @@ p
 }
 
 
-.ma-search-btn, 
+.ma-search-btn,
 .ma-search-btn:hover, .ma-mic-btn:hover {
   background-color: var(--ma-bg-hover) !important;
 }
@@ -5497,7 +5497,7 @@ p
   flex-shrink: 0; /* Prevents buttons from squishing */
 }
 
-.ma-search-btn .material-symbols-outlined, 
+.ma-search-btn .material-symbols-outlined,
 .ma-mic-btn .material-symbols-outlined {
   font-size: 18px !important;
 }
@@ -5568,7 +5568,7 @@ p
   flex: 1;
   min-width: 0;
   margin: 0 8px;
-  background: transparent !important; 
+  background: transparent !important;
   box-shadow: none !important;
 }
 .ma-search-box {
@@ -5955,9 +5955,9 @@ p
 }
 
 /* Back to 100% when tapped or dragging */
-.yt-mini-player:active, 
+.yt-mini-player:active,
 .yt-mini-player.is-dragging {
-  opacity: 1 !important; 
+  opacity: 1 !important;
 }
 
 /* ===== PREMIUM SHIMMER SKELETON LOADER ===== */
@@ -7982,6 +7982,54 @@ p
   font: inherit;
 }
 
+.ma-comments-modal .ma-comment-recording-controls {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.ma-comments-modal .ma-comment-recording-time {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ma-text, #17171c);
+  min-width: 28px;
+  text-align: center;
+}
+
+.ma-comments-modal .ma-comment-recording-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 36px;
+  padding: 0 11px;
+  border: 1px solid var(--ma-border, #dedee3);
+  border-radius: 20px;
+  background: var(--ma-surface, #fff);
+  color: var(--ma-text, #17171c);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ma-comments-modal .ma-comment-recording-action .material-symbols-outlined,
+.ma-comments-modal .ma-comment-recording .material-symbols-outlined {
+  font-size: 18px;
+}
+
+:root[data-theme="light"] .ma-comments-modal .ma-comment-recording-action {
+  background: #fff;
+  color: #17171c;
+  border-color: #dedee3;
+}
+
+:root[data-theme="dark"] .ma-comments-modal .ma-comment-recording-action {
+  background: #191a1f;
+  color: #f4f4f5;
+  border-color: #383940;
+}
+
 .ma-comments-modal .ma-comment-recording {
   min-width: 42px;
   min-height: 36px;
@@ -8090,4 +8138,219 @@ p
   .ma-comments-modal .ma-comment-audio-actions .ma-comment-remove-audio {
     margin-left: 0;
   }
+}
+
+
+/* ==================================================
+   MUSIC ANTENNA — PROFESSIONAL COMMENT SAVE BUTTONS
+   Consistent visibility in light and dark themes
+   ================================================== */
+
+.ma-comments-modal .ma-comment-save-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 76px !important;
+  min-height: 36px !important;
+  padding: 8px 18px !important;
+  border: 1px solid #ff365f !important;
+  border-radius: 9px !important;
+  background: #ff365f !important;
+  background-color: #ff365f !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  font-family: inherit !important;
+  font-size: 12px !important;
+  font-weight: 750 !important;
+  line-height: 1.2 !important;
+  letter-spacing: .2px !important;
+  text-align: center !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 2 !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 7px rgba(255, 54, 95, .18) !important;
+  transition: background-color .18s ease, box-shadow .18s ease,
+              transform .18s ease !important;
+}
+
+.ma-comments-modal .ma-comment-save-btn:hover {
+  background: #e92d54 !important;
+  background-color: #e92d54 !important;
+  border-color: #e92d54 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(255, 54, 95, .25) !important;
+}
+
+.ma-comments-modal .ma-comment-save-btn:active {
+  transform: scale(.97) !important;
+}
+
+.ma-comments-modal .ma-comment-save-btn:focus-visible {
+  outline: 3px solid rgba(255, 54, 95, .35) !important;
+  outline-offset: 3px !important;
+}
+
+.ma-comments-modal .ma-comment-save-btn:disabled {
+  opacity: .55 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+}
+
+
+
+/* Compact comment recording status - light and dark theme safe */
+.ma-comments-modal .ma-comment-recording-status {
+  display: inline-flex;
+  align-self: flex-end;
+  width: fit-content;
+  max-width: calc(100% - 16px);
+  box-sizing: border-box;
+  margin: 2px 8px 0 auto;
+  padding: 5px 10px;
+  border: 1px solid var(--ma-border, #d8d8d8);
+  border-radius: 999px;
+  background: var(--ma-surface, #f2f2f2);
+  color: var(--ma-text-primary, #222);
+  font-size: 11px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+
+/* Professional comment composer and confirmation controls */
+.ma-comments-modal .ma-comment-submit-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+}
+
+.ma-comments-modal .ma-comment-recording-status {
+  align-self: auto;
+  margin: 0;
+  max-width: calc(100% - 112px);
+  font-size: 12px;
+}
+
+.ma-comments-modal .ma-comment-send {
+  align-self: auto;
+  flex: 0 0 auto;
+  min-width: 104px;
+  min-height: 44px;
+  border-radius: 14px;
+  padding: 10px 18px;
+  background: #ff365f !important;
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  box-shadow: 0 3px 10px rgba(255, 54, 95, .18);
+}
+
+.ma-comments-modal .ma-comment-confirm-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--ma-border, #ddd);
+  border-radius: 10px;
+  background: var(--ma-surface, #f5f5f5);
+  color: var(--ma-text, #222);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.ma-comments-modal .ma-comment-confirm-row button {
+  min-height: 34px !important;
+  padding: 7px 13px !important;
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+}
+
+.ma-comments-modal .ma-comment-confirm-row button:first-of-type {
+  background: #c93643 !important;
+  border: 1px solid #c93643 !important;
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+}
+
+.ma-comments-modal .ma-comment-confirm-row button:last-of-type {
+  background: transparent !important;
+  border: 1px solid var(--ma-border, #999) !important;
+  color: var(--ma-text, #222) !important;
+  -webkit-text-fill-color: var(--ma-text, #222) !important;
+}
+
+:root[data-theme="light"] .ma-comments-modal .ma-comment-composer-input,
+:root[data-theme="light"] .ma-comments-modal .ma-comment-voice-preview,
+:root[data-theme="light"] .ma-comments-modal .ma-comment-attachment-preview,
+:root[data-theme="light"] .ma-comments-modal .ma-comment-confirm-row {
+  background: #fff !important;
+  color: #17171c !important;
+  border-color: #dedee3 !important;
+}
+
+:root[data-theme="light"] .ma-comments-modal .ma-comment-composer-input input {
+  color: #17171c !important;
+  -webkit-text-fill-color: #17171c !important;
+}
+
+:root[data-theme="light"] .ma-comments-modal .ma-comment-composer-input input::placeholder {
+  color: #777 !important;
+  -webkit-text-fill-color: #777 !important;
+  opacity: 1;
+}
+
+:root[data-theme="dark"] .ma-comments-modal .ma-comment-composer-input,
+:root[data-theme="dark"] .ma-comments-modal .ma-comment-voice-preview,
+:root[data-theme="dark"] .ma-comments-modal .ma-comment-attachment-preview,
+:root[data-theme="dark"] .ma-comments-modal .ma-comment-confirm-row {
+  background: #191a1f !important;
+  color: #f4f4f5 !important;
+  border-color: #383940 !important;
+}
+
+:root[data-theme="dark"] .ma-comments-modal .ma-comment-composer-input input {
+  color: #f4f4f5 !important;
+  -webkit-text-fill-color: #f4f4f5 !important;
+}
+
+:root[data-theme="dark"] .ma-comments-modal .ma-comment-composer-input input::placeholder {
+  color: #aaa !important;
+  -webkit-text-fill-color: #aaa !important;
+  opacity: 1;
+}
+
+:root[data-theme="dark"] .ma-comments-modal .ma-comment-confirm-row button:last-of-type {
+  color: #f4f4f5 !important;
+  -webkit-text-fill-color: #f4f4f5 !important;
+}
+
+@media (max-width: 380px) {
+  .ma-comments-modal .ma-comment-submit-row { gap: 7px; }
+  .ma-comments-modal .ma-comment-send {
+    min-width: 88px;
+    padding: 9px 12px;
+  }
+  .ma-comments-modal .ma-comment-recording-status {
+    font-size: 11px;
+    max-width: calc(100% - 96px);
+  }
+}
+
+
+:root[data-theme="light"] .ma-comments-modal .ma-comment-confirm-row button:last-of-type {
+  background: #fff !important;
+  color: #17171c !important;
+  -webkit-text-fill-color: #17171c !important;
+  border-color: #dedee3 !important;
 }

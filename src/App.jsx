@@ -205,6 +205,8 @@ export default function App() {
 
   const [category, setCategory] = useState("All");
   const [activeMedia, setActiveMedia] = useState(null);
+  const audioRef = useRef(null);
+  const videoRef = useRef(null);
   const [showWatchPage, setShowWatchPage] = useState(false);
   const playerHistoryRef = useRef(false);
   const playerReturnRef = useRef(null);
@@ -625,7 +627,12 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
 
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
+  const [commentRecordingStatus, setCommentRecordingStatus] = useState("");
   const mediaRecorderRef = useRef(null);
+  const [isRecordingPaused, setIsRecordingPaused] = useState(false);
+  const isRecordingRef = useRef(false);
+  const pausedBackgroundPlayersRef = useRef([]);
+  const commentAudioUrlRef = useRef(null);
   const wasPlayingRef = useRef(false);
   const audioChunksRef = useRef([]);
   const timerRef = useRef(null);
@@ -2478,51 +2485,8 @@ async function handleReplaceVoiceNote(commentId) {
   openVoiceNoteEditor(commentId);
 }
 async function handleDeleteVoiceNote(commentId) {
-  if (!session?.user?.id) return setMessage("Please sign in first.");
-
-  try {
-    const { data: row, error: readError } = await supabase
-      .from("comments").select("id,user_id,audio_url")
-      .eq("id", commentId).maybeSingle();
-    if (readError) throw readError;
-    if (!row || row.user_id !== session.user.id || !row.audio_url) {
-      throw new Error("You can only delete your own voice note.");
-    }
-
-    const { data: updated, error: updateError } = await supabase
-      .from("comments").update({ audio_url: null })
-      .eq("id", commentId).eq("user_id", session.user.id)
-      .select("id").maybeSingle();
-    if (updateError) throw updateError;
-    if (!updated) throw new Error("Voice note was not deleted.");
-
-    setComments(prev => prev.map(item =>
-      item.id === commentId ? { ...item, audio_url: null } : item
-    ));
-
-    let warning = false;
-    try {
-      const marker = "/storage/v1/object/public/comment-media/";
-      const url = row.audio_url || "";
-      const objectPath = url.includes(marker)
-        ? decodeURIComponent(url.split(marker)[1].split("?")[0]) : "";
-      if (objectPath.startsWith(session.user.id + "/")) {
-        const result = await supabase.storage.from("comment-media").remove([objectPath]);
-        if (result.error) warning = true;
-      }
-    } catch (cleanupError) {
-      warning = true;
-      console.warn("Voice storage cleanup failed:", cleanupError);
-    }
-    setMessage(warning
-      ? "Voice note removed. Storage cleanup may need attention."
-      : "Voice note deleted. The comment or reply remains.");
-    setDeletingVoiceNoteId(null);
-  } catch (error) {
-    console.error("Voice deletion failed:", error);
-    setMessage(error.message || "Could not delete voice note.");
-    setDeletingVoiceNoteId(null);
-  }
+  setDeletingVoiceNoteId(null);
+  await handleDeleteComment(commentId);
 }
 
 async function handleUpdateComment(commentId) {
@@ -2601,14 +2565,15 @@ async function handleUpdateComment(commentId) {
     }
 
     try {
-      const { data: existingComment, error: fetchError } = await supabase
+      const { data: rows, error: fetchError } = await supabase
         .from("comments")
-        .select("id, user_id")
-        .eq("id", commentId)
-        .maybeSingle();
+        .select("id, user_id, image_url, audio_url, parent_id")
+        .or(`id.eq.${commentId},parent_id.eq.${commentId}`);
 
       if (fetchError) throw fetchError;
-      if (!existingComment || existingComment.user_id !== session.user.id) {
+
+      const selectedComment = rows?.find(row => row.id === commentId);
+      if (!selectedComment || selectedComment.user_id !== session.user.id) {
         throw new Error("You can only delete your own comments.");
       }
 
@@ -2623,42 +2588,137 @@ async function handleUpdateComment(commentId) {
       if (error) throw error;
       if (!data) throw new Error("Comment was not deleted. Please try again.");
 
-      setComments(prev => prev.filter(c => c.id !== commentId));
+      const deletedIds = (rows || []).map(row => row.id);
+      setComments(prev => prev.filter(item => !deletedIds.includes(item.id)));
       setDeletingCommentId(null);
-      if (editingCommentId === commentId) setEditingCommentId(null);
-      setMessage("Comment deleted.");
+
+      if (deletedIds.includes(editingCommentId)) setEditingCommentId(null);
+      if (deletedIds.includes(replyTarget)) {
+        setReplyTarget(null);
+        setReplyingToName("");
+      }
+
+      let cleanupWarning = false;
+      const marker = "/storage/v1/object/public/comment-media/";
+      const ownPaths = [];
+
+      for (const row of rows || []) {
+        if (row.user_id !== session.user.id) continue;
+
+        for (const url of [row.image_url, row.audio_url]) {
+          if (!url || !url.includes(marker)) continue;
+          try {
+            const path = decodeURIComponent(url.split(marker)[1].split("?")[0]);
+            if (path.startsWith(session.user.id + "/")) ownPaths.push(path);
+          } catch {
+            cleanupWarning = true;
+          }
+        }
+      }
+
+      if (ownPaths.length) {
+        const { error: storageError } = await supabase
+          .storage.from("comment-media").remove([...new Set(ownPaths)]);
+        if (storageError) {
+          cleanupWarning = true;
+          console.warn("Comment attachment cleanup failed:", storageError);
+        }
+      }
+
+      setMessage(cleanupWarning
+        ? "Comment and replies deleted. Some attachments may need storage cleanup."
+        : "Comment and its replies deleted.");
     } catch (err) {
       console.error("Comment deletion failed:", err);
       setMessage("Error deleting comment: " + err.message);
+    } finally {
       setDeletingCommentId(null);
     }
   }
 
+  function pauseBackgroundPlayersForCommentAudio() {
+    const modal = document.querySelector(".ma-comments-modal");
+    const playingPlayers = Array.from(document.querySelectorAll("audio, video"))
+      .filter(player => !player.paused && !modal?.contains(player));
+
+    if (!pausedBackgroundPlayersRef.current.length && playingPlayers.length) {
+      pausedBackgroundPlayersRef.current = playingPlayers;
+    }
+
+    playingPlayers.forEach(player => player.pause());
+  }
+
+  function resumeBackgroundPlayersAfterCommentAudio() {
+    if (isRecordingRef.current) return;
+
+    // Wait briefly so a newly selected comment audio player can start first.
+    setTimeout(() => {
+      if (isRecordingRef.current) return;
+
+      const modal = document.querySelector(".ma-comments-modal");
+      const activeCommentAudio = Array.from(modal?.querySelectorAll("audio") || [])
+        .some(player => !player.paused);
+
+      if (activeCommentAudio) return;
+
+      const players = pausedBackgroundPlayersRef.current;
+      pausedBackgroundPlayersRef.current = [];
+
+      players.forEach(player => {
+        if (player.paused && player.isConnected) {
+          player.play().catch(() => {});
+        }
+      });
+    }, 0);
+  }
+
+  function pauseCommentRecording() {
+    const recorder = mediaRecorderRef.current;
+    if (recorder?.state === "recording") {
+      recorder.pause();
+      setIsRecordingPaused(true);
+      clearInterval(timerRef.current);
+      setCommentRecordingStatus("Recording paused.");
+    }
+  }
+
+  function resumeCommentRecording() {
+    const recorder = mediaRecorderRef.current;
+    if (recorder?.state === "paused") {
+      recorder.resume();
+      setIsRecordingPaused(false);
+      setCommentRecordingStatus("Recording…");
+      timerRef.current = setInterval(() => {
+        setRecordingTime(prev => {
+          if (prev >= 34) {
+            stopRecording();
+            return 35;
+          }
+          return prev + 1;
+        });
+      }, 1000);
+    }
+  }
+
   async function startRecording() {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      return setMessage("Microphone not supported on this browser.");
+    setCommentRecordingStatus("Requesting microphone permission…");
+
+    if (!window.isSecureContext) {
+      setCommentRecordingStatus("Microphone access requires HTTPS or localhost.");
+      return;
+    }
+
+    if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+      setCommentRecordingStatus("Voice recording is not supported by this browser.");
+      return;
     }
 
     let requestedStream = null;
 
-  try {
-      const mainPlayer =
-        activeMedia?.media_type === "audio"
-          ? audioRef.current
-          : activeMedia?.media_type === "video"
-            ? videoRef.current
-            : null;
+    try {
+      pauseBackgroundPlayersForCommentAudio();
+      setCommentRecordingStatus("Requesting microphone…");
 
-      window._commentRecordingPlayer = mainPlayer;
-      window._wasPlayingBeforeRecord = Boolean(
-        mainPlayer && !mainPlayer.paused
-      );
-
-      if (window._wasPlayingBeforeRecord) {
-        mainPlayer.pause();
-      }
-
-      setMessage("Requesting microphone...");
       requestedStream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const stream = requestedStream;
 
@@ -2680,16 +2740,19 @@ async function handleUpdateComment(commentId) {
       mediaRecorderRef.current = recorder;
       audioChunksRef.current = [];
 
-      recorder.ondataavailable = (event) => {
+      recorder.ondataavailable = event => {
         if (event.data?.size > 0) audioChunksRef.current.push(event.data);
       };
 
-      recorder.onerror = (event) => {
+      recorder.onerror = event => {
         console.error("Voice recording error:", event.error || event);
         clearInterval(timerRef.current);
+        isRecordingRef.current = false;
         setIsRecording(false);
+        setIsRecordingPaused(false);
         stream.getTracks().forEach(track => track.stop());
-        setMessage("Recording failed. Please check microphone permission and try again.");
+        setCommentRecordingStatus("Recording failed. Please try again.");
+        resumeBackgroundPlayersAfterCommentAudio(true);
       };
 
       recorder.onstop = () => {
@@ -2697,49 +2760,48 @@ async function handleUpdateComment(commentId) {
         const audioBlob = new Blob(audioChunksRef.current, { type: actualType });
 
         stream.getTracks().forEach(track => track.stop());
+        isRecordingRef.current = false;
+        setIsRecording(false);
+        setIsRecordingPaused(false);
 
         if (!audioBlob.size) {
-          setMessage("No audio was captured. Please record again.");
+          setCommentRecordingStatus("No audio was captured. Please record again.");
+          resumeBackgroundPlayersAfterCommentAudio(true);
           return;
         }
 
+        const previewUrl = URL.createObjectURL(audioBlob);
+        commentAudioUrlRef.current = previewUrl;
         setCommentAudio(audioBlob);
-        setCommentAudioUrl(URL.createObjectURL(audioBlob));
-        setMessage("Voice note ready to send.");
+        setCommentAudioUrl(previewUrl);
+        setCommentRecordingStatus("Voice note ready. Preview it or remove it to resume music.");
       };
 
       recorder.start();
+      isRecordingRef.current = true;
       setIsRecording(true);
+      setIsRecordingPaused(false);
       setRecordingTime(0);
-      setMessage("Recording started...");
+      setCommentRecordingStatus("Recording…");
 
       timerRef.current = setInterval(() => {
         setRecordingTime(prev => {
-          if (prev >= 35) {
+          if (prev >= 34) {
             stopRecording();
-            setMessage("Recording stopped at 35 seconds max.");
             return 35;
           }
           return prev + 1;
         });
       }, 1000);
     } catch (err) {
-      if (requestedStream) {
-        requestedStream.getTracks().forEach(track => track.stop());
-      }
+      if (requestedStream) requestedStream.getTracks().forEach(track => track.stop());
 
-      const playerToResume = window._commentRecordingPlayer;
-      const shouldResume = window._wasPlayingBeforeRecord;
-
-      if (shouldResume && playerToResume?.paused) {
-        playerToResume.play().catch(() => {});
-      }
-
-      window._wasPlayingBeforeRecord = false;
-      window._commentRecordingPlayer = null;
-
-      console.log("Mic Error:", err);
-      setMessage("Error: " + err.message);
+      isRecordingRef.current = false;
+      setIsRecording(false);
+      setIsRecordingPaused(false);
+      console.error("Mic Error:", err);
+      setCommentRecordingStatus("Microphone error: " + (err.message || "Please check microphone permission."));
+      resumeBackgroundPlayersAfterCommentAudio(true);
     }
   }
 
@@ -2747,25 +2809,13 @@ async function handleUpdateComment(commentId) {
     const recorder = mediaRecorderRef.current;
     clearInterval(timerRef.current);
 
-    if (recorder && recorder.state === "recording") {
+    if (recorder && (recorder.state === "recording" || recorder.state === "paused")) {
       recorder.stop();
     }
 
+    isRecordingRef.current = false;
     setIsRecording(false);
-
-    const playerToResume = window._commentRecordingPlayer;
-    const shouldResume = window._wasPlayingBeforeRecord;
-
-    if (shouldResume && playerToResume) {
-      setTimeout(() => {
-        if (playerToResume.paused) {
-          playerToResume.play().catch(() => {});
-        }
-      }, 300);
-    }
-
-    window._wasPlayingBeforeRecord = false;
-    window._commentRecordingPlayer = null;
+    setIsRecordingPaused(false);
   }
 
   async function handlePostComment(e) {
@@ -2847,10 +2897,13 @@ async function handleUpdateComment(commentId) {
       setComments(prev => prev.some(c => c.id === data.id) ? prev : [data, ...prev]);
 
       setNewComment("");
+      voicePreviewRef.current?.pause();
+      commentAudioUrlRef.current = null;
       setCommentImage(null);
       setCommentAudio(null);
       setCommentAudioUrl(null);
       setVoicePreviewPlaying(false);
+      resumeBackgroundPlayersAfterCommentAudio();
       setVoicePreviewProgress(0);
       setVoicePreviewDuration(0);
       setVoicePreviewSpeed(1);
@@ -6401,6 +6454,7 @@ document.body
             {activeMedia.playbackUrl ? (
               activeMedia.media_type === "video" ? (
                 <video
+                  ref={videoRef}
                   onPlay={handleFirstPlay} onEnded={handleVideoEnded}
                   className="yt-watch-video"
                   src={activeMedia.playbackUrl}
@@ -6420,7 +6474,7 @@ document.body
                       <img src="/logo.png" alt="" style={{ height: "36px", width: "auto", objectFit: "contain", borderRadius: "6px" }} />
                     )}
                   </div>
-                  <audio src={activeMedia.playbackUrl} controls autoPlay onPlay={handleFirstPlay} onEnded={handleVideoEnded} />
+                  <audio ref={audioRef} src={activeMedia.playbackUrl} controls autoPlay onPlay={handleFirstPlay} onEnded={handleVideoEnded} />
                 </div>
               )
             ) : (
@@ -9702,7 +9756,7 @@ document.body
                           <input value={editCommentText} onChange={e => setEditCommentText(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "8px", border: "1px solid var(--ma-border, #e5e5e5)", background: "var(--ma-surface, #f2f2f2)", color: "var(--ma-text, #000)", fontSize: "13px", marginBottom: "8px", outline: "none" }} />
                           <div style={{ display: "flex", gap: "8px" }}>
                             <button onClick={() => setEditingCommentId(null)} style={{ background: "var(--ma-surface)", border: "1px solid var(--ma-border)", borderRadius: "8px", padding: "7px 14px", color: "var(--ma-text)", fontSize: "12px", fontWeight: "600", minHeight: "34px", cursor: "pointer" }}>Cancel</button>
-                            <button onClick={() => handleUpdateComment(c.id)} style={{ background: "var(--ma-accent, #ff365f)", border: "1px solid var(--ma-accent, #ff365f)", borderRadius: "8px", padding: "7px 16px", color: "#ffffff", fontWeight: "700", fontSize: "12px", minHeight: "34px", cursor: "pointer" }}>Save</button>
+                            <button className="ma-comment-save-btn" onClick={() => handleUpdateComment(c.id)} style={{ background: "var(--ma-accent, #ff365f)", border: "1px solid var(--ma-accent, #ff365f)", borderRadius: "8px", padding: "7px 16px", color: "#ffffff", fontWeight: "700", fontSize: "12px", minHeight: "34px", cursor: "pointer" }}>Save</button>
                           </div>
                         </div>
                       ) : (
@@ -9738,10 +9792,13 @@ document.body
                                 src={c.audio_url}
                                 style={{ width: "100%", height: "36px" }}
                                 onPlay={(e) => {
+                                  pauseBackgroundPlayersForCommentAudio();
                                   document.querySelectorAll(".ma-comments-modal audio").forEach(el => {
                                     if (el !== e.currentTarget) el.pause();
                                   });
                                 }}
+                                onPause={resumeBackgroundPlayersAfterCommentAudio}
+                                onEnded={resumeBackgroundPlayersAfterCommentAudio}
                               />
     {session?.user?.id === c.user_id && (
       <div style={{
@@ -9770,11 +9827,11 @@ document.body
           Delete voice note
         </button>
         {deletingVoiceNoteId === c.id && (
-          <span style={{ display: "inline-flex", alignItems: "center", flexWrap: "wrap", gap: "5px", fontSize: "10px", color: "var(--ma-text, #222)" }}>
+          <div className="ma-comment-confirm-row">
             Delete this voice note?
             <button type="button" onClick={() => handleDeleteVoiceNote(c.id)} style={{ border: 0, borderRadius: "5px", padding: "3px 6px", background: "#c04444", color: "#fff", fontSize: "10px", fontWeight: 700, cursor: "pointer" }}>Confirm</button>
             <button type="button" onClick={() => setDeletingVoiceNoteId(null)} style={{ border: "1px solid var(--ma-border, #888)", borderRadius: "5px", padding: "3px 6px", background: "var(--ma-surface, transparent)", color: "var(--ma-text, #222)", fontSize: "10px", cursor: "pointer" }}>Cancel</button>
-          </span>
+          </div>
         )}
       </div>
     )}
@@ -9812,16 +9869,16 @@ document.body
                             </>
                           )}
 
-                          {session?.user?.id && session.user.id === c.user_id && (
+                          {session?.user?.id && session.user.id === c.user_id && !c.audio_url && (
                             <>
                               <button onClick={() => { setEditingCommentId(c.id); setEditCommentText(c.content); }} style={{ background: "transparent", border: 0, color: "var(--ma-text, #222)", fontSize: "12px", fontWeight: "700", padding: "4px 2px", cursor: "pointer", marginLeft: "auto" }}>Edit</button>
                               <button onClick={() => setDeletingCommentId(c.id)} style={{ background: "transparent", border: 0, color: "#d62850", fontSize: "12px", fontWeight: "700", padding: "4px 2px", cursor: "pointer" }}>Delete</button>
         {deletingCommentId === c.id && (
-          <span style={{ display: "inline-flex", alignItems: "center", flexWrap: "wrap", gap: "5px", fontSize: "10px", color: "var(--ma-text, #222)" }}>
+          <div className="ma-comment-confirm-row">
             Delete this comment?
             <button type="button" onClick={() => handleDeleteComment(c.id)} style={{ border: 0, borderRadius: "5px", padding: "3px 6px", background: "#c04444", color: "#fff", fontSize: "10px", fontWeight: 700, cursor: "pointer" }}>Confirm</button>
             <button type="button" onClick={() => setDeletingCommentId(null)} style={{ border: "1px solid var(--ma-border, #888)", borderRadius: "5px", padding: "3px 6px", background: "var(--ma-surface, transparent)", color: "var(--ma-text, #222)", fontSize: "10px", cursor: "pointer" }}>Cancel</button>
-          </span>
+          </div>
         )}
                             </>
                           )}
@@ -9850,7 +9907,7 @@ document.body
                                     />
                                     <div style={{ display: "flex", gap: "12px", marginTop: "6px" }}>
                                       <button onClick={() => setEditingCommentId(null)} style={{ background: "var(--ma-surface)", border: "1px solid var(--ma-border)", borderRadius: "8px", padding: "7px 14px", color: "var(--ma-text)", fontSize: "12px", fontWeight: "600", minHeight: "34px", cursor: "pointer" }}>Cancel</button>
-                                      <button onClick={() => handleUpdateComment(reply.id)} style={{ background: "var(--ma-accent, #ff365f)", border: "1px solid var(--ma-accent, #ff365f)", borderRadius: "8px", padding: "7px 16px", color: "#ffffff", fontWeight: "700", fontSize: "12px", minHeight: "34px", cursor: "pointer" }}>Save</button>
+                                      <button className="ma-comment-save-btn" onClick={() => handleUpdateComment(reply.id)} style={{ background: "var(--ma-accent, #ff365f)", border: "1px solid var(--ma-accent, #ff365f)", borderRadius: "8px", padding: "7px 16px", color: "#ffffff", fontWeight: "700", fontSize: "12px", minHeight: "34px", cursor: "pointer" }}>Save</button>
                                     </div>
                                   </div>
                                 ) : (
@@ -9904,10 +9961,13 @@ document.body
                                           src={reply.audio_url}
                                           style={{ width: "100%", height: "36px" }}
                                           onPlay={(e) => {
+                                            pauseBackgroundPlayersForCommentAudio();
                                             document.querySelectorAll(".ma-comments-modal audio").forEach(el => {
                                               if (el !== e.currentTarget) el.pause();
                                             });
                                           }}
+                                          onPause={resumeBackgroundPlayersAfterCommentAudio}
+                                          onEnded={resumeBackgroundPlayersAfterCommentAudio}
                                         />
     {session?.user?.id === reply.user_id && (
       <div style={{
@@ -9936,11 +9996,11 @@ document.body
           Delete voice note
         </button>
         {deletingVoiceNoteId === reply.id && (
-          <span style={{ display: "inline-flex", alignItems: "center", flexWrap: "wrap", gap: "5px", fontSize: "10px", color: "var(--ma-text, #222)" }}>
+          <div className="ma-comment-confirm-row">
             Delete this voice note?
             <button type="button" onClick={() => handleDeleteVoiceNote(reply.id)} style={{ border: 0, borderRadius: "5px", padding: "3px 6px", background: "#c04444", color: "#fff", fontSize: "10px", fontWeight: 700, cursor: "pointer" }}>Confirm</button>
             <button type="button" onClick={() => setDeletingVoiceNoteId(null)} style={{ border: "1px solid var(--ma-border, #888)", borderRadius: "5px", padding: "3px 6px", background: "var(--ma-surface, transparent)", color: "var(--ma-text, #222)", fontSize: "10px", cursor: "pointer" }}>Cancel</button>
-          </span>
+          </div>
         )}
       </div>
     )}
@@ -9949,16 +10009,16 @@ document.body
                                     )}
                                   </>
                                 )}
-                                {editingCommentId !== reply.id && session?.user?.id === reply.user_id && (
+                                {editingCommentId !== reply.id && session?.user?.id === reply.user_id && !reply.audio_url && (
                                   <div style={{ display: "flex", gap: "14px", alignItems: "center", marginTop: "6px" }}>
                                     <button onClick={() => { setEditingCommentId(reply.id); setEditCommentText(reply.content || ""); }} style={{ background: "transparent", border: 0, color: "var(--ma-text, #222)", fontSize: "11px", fontWeight: "700", padding: "3px 2px", cursor: "pointer" }}>Edit</button>
                                     <button onClick={() => setDeletingCommentId(reply.id)} style={{ background: "transparent", border: 0, color: "#d62850", fontSize: "11px", fontWeight: "700", padding: "3px 2px", cursor: "pointer" }}>Delete</button>
         {deletingCommentId === reply.id && (
-          <span style={{ display: "inline-flex", alignItems: "center", flexWrap: "wrap", gap: "5px", fontSize: "10px", color: "var(--ma-text, #222)" }}>
+          <div className="ma-comment-confirm-row">
             Delete this comment?
             <button type="button" onClick={() => handleDeleteComment(reply.id)} style={{ border: 0, borderRadius: "5px", padding: "3px 6px", background: "#c04444", color: "#fff", fontSize: "10px", fontWeight: 700, cursor: "pointer" }}>Confirm</button>
             <button type="button" onClick={() => setDeletingCommentId(null)} style={{ border: "1px solid var(--ma-border, #888)", borderRadius: "5px", padding: "3px 6px", background: "var(--ma-surface, transparent)", color: "var(--ma-text, #222)", fontSize: "10px", cursor: "pointer" }}>Cancel</button>
-          </span>
+          </div>
         )}
                                   </div>
                                 )}
@@ -10040,14 +10100,39 @@ document.body
                   </label>
 
                   {isRecording ? (
-                    <button
-                      type="button"
-                      className="ma-comment-recording"
-                      onClick={stopRecording}
-                      aria-label="Stop recording"
-                    >
-                      {recordingTime}s
-                    </button>
+                    <div className="ma-comment-recording-controls">
+                      <span className="ma-comment-recording-time">{recordingTime}s</span>
+                      {isRecordingPaused ? (
+                        <button
+                          type="button"
+                          className="ma-comment-recording-action"
+                          onClick={resumeCommentRecording}
+                          aria-label="Resume recording"
+                        >
+                          <span className="material-symbols-outlined">play_arrow</span>
+                          Resume
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="ma-comment-recording-action"
+                          onClick={pauseCommentRecording}
+                          aria-label="Pause recording"
+                        >
+                          <span className="material-symbols-outlined">pause</span>
+                          Pause
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className="ma-comment-recording"
+                        onClick={stopRecording}
+                        aria-label="Stop recording"
+                      >
+                        <span className="material-symbols-outlined">stop</span>
+                        Stop
+                      </button>
+                    </div>
                   ) : (
                     <button
                       type="button"
@@ -10059,6 +10144,8 @@ document.body
                     </button>
                   )}
                 </div>
+
+
 
                 {commentImage && (
                   <div className="ma-comment-attachment-preview">
@@ -10088,14 +10175,21 @@ document.body
                         setVoicePreviewDuration(Number.isFinite(duration) ? duration : 0);
                         e.currentTarget.playbackRate = voicePreviewSpeed;
                       }}
-                      onEnded={() => setVoicePreviewPlaying(false)}
+                      onEnded={() => {
+                        setVoicePreviewPlaying(false);
+                        resumeBackgroundPlayersAfterCommentAudio();
+                      }}
                       onPlay={() => {
+                        pauseBackgroundPlayersForCommentAudio();
                         document.querySelectorAll(".ma-comments-modal audio").forEach(el => {
                           if (el !== voicePreviewRef.current) el.pause();
                         });
                         setVoicePreviewPlaying(true);
                       }}
-                      onPause={() => setVoicePreviewPlaying(false)}
+                      onPause={() => {
+                        setVoicePreviewPlaying(false);
+                        resumeBackgroundPlayersAfterCommentAudio();
+                      }}
                     />
 
                     <div className="ma-comment-audio-timeline">
@@ -10155,9 +10249,11 @@ document.body
                         className="ma-comment-remove-audio"
                         onClick={() => {
                           voicePreviewRef.current?.pause();
+                          commentAudioUrlRef.current = null;
                           setCommentAudio(null);
                           setCommentAudioUrl(null);
                           setVoicePreviewPlaying(false);
+                          resumeBackgroundPlayersAfterCommentAudio();
                           setVoicePreviewProgress(0);
                           setVoicePreviewDuration(0);
                         }}
@@ -10170,7 +10266,13 @@ document.body
                   </div>
                 )}
 
-                <button
+                <div className="ma-comment-submit-row">
+      {commentRecordingStatus && (
+                  <div className="ma-comment-recording-status" role="status" aria-live="polite">
+                    {isRecording ? (isRecordingPaused ? "⏸ Recording paused · " : "🔴 Recording… ") + recordingTime + "s" : commentRecordingStatus}
+                  </div>
+                )}
+      <button
                   type="submit"
                   className="ma-comment-send"
                   disabled={
@@ -10183,6 +10285,7 @@ document.body
                   <span className="material-symbols-outlined">send</span>
                   {isPostingComment ? "Sending..." : "Send"}
                 </button>
+    </div>
               </form>
 
               {showEmojiPicker && (
