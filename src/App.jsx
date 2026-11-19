@@ -7397,6 +7397,7 @@ document.body
             {profileTab === "admin" && isOwner && (
               <OwnerControlCentre
                 session={session}
+                handleLogout={handleLogout}
                 adminSection={adminSection}
                 setAdminSection={setAdminSection}
                 adminOverview={adminOverview}

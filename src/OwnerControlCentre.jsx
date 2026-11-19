@@ -289,10 +289,32 @@ export default function OwnerControlCentre(p) {
           <input type="checkbox" checked={liveControlEnabled(key)} disabled={p.adminSettingsBusy || p.adminSettingsLoading} onChange={e=>saveLiveControl(key,e.target.checked)} />
           <span style={{display:"grid",gap:5}}><strong>{name}</strong><span>{description}</span><small>{liveControlEnabled(key) ? "Enabled" : "Disabled"}</small></span>
         </label>)}
-        <article className="occ-settings-category">
-          <strong>Security</strong>
-          <span>Existing owner-only access policies remain active. Additional security controls require server-side enforcement.</span>
-          <small>Protected by existing access policies</small>
+        <article className="occ-settings-category" style={{gridColumn:"1 / -1", gap:12}}>
+          <strong>Security Centre</strong>
+          <span>Owner access is restricted to approved accounts.</span>
+          <div style={{display:"grid",gap:6}}>
+            <small>AUTHENTICATED ACCOUNT</small>
+            <strong>{p.session?.user?.email || "No email available"}</strong>
+            <small>Session: {p.session?.user?.id ? "Authenticated" : "Not authenticated"}</small>
+            <small>Access: Owner dashboard</small>
+          </div>
+          <div style={{display:"flex",gap:10,flexWrap:"wrap",marginTop:8}}>
+            <button type="button" onClick={() => p.setAdminSection?.("audit")}>
+              View security audit logs
+            </button>
+            <button
+              type="button"
+              disabled={!p.session?.user?.id}
+              onClick={() => {
+                if (window.confirm("Sign out of this device?")) {
+                  p.handleLogout?.();
+                }
+              }}
+            >
+              Sign out this device
+            </button>
+          </div>
+          <small>Multi-factor authentication and remote session termination are not configured here.</small>
         </article>
       </div>
     </section>
