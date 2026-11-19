@@ -3822,6 +3822,12 @@ async function loadAdminSettings() {
 
     const { data, error } = await settingsQuery.order("setting_key", { ascending: true });
     if (error) throw error;
+    console.info("[MAINTENANCE DEBUG] Settings query:", {
+      returnedRows: data?.length ?? 0,
+      maintenanceValue: data?.find(
+        item => item.setting_key === "platform.maintenance"
+      )?.setting_value ?? null
+    });
     setAdminSettings(data || []);
   } catch (error) {
     setAdminSettingsError(error.message || "Could not load platform settings.");
@@ -5178,6 +5184,13 @@ document.body
 const maintenanceEnabled =
   maintenanceSetting?.setting_value === true ||
   maintenanceSetting?.setting_value?.enabled === true;
+
+console.info("[MAINTENANCE DEBUG] Access check:", {
+  isOwner,
+  settingsReady: maintenanceSettingsReady,
+  settingFound: Boolean(maintenanceSetting),
+  maintenanceEnabled
+});
 
 if (!isOwner && !maintenanceSettingsReady) {
   return (
