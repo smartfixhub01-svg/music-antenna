@@ -1478,6 +1478,25 @@ useEffect(() => {
 
     try {
       if (modeVal === "register") {
+        const { data: registrationSetting, error: settingError } = await supabase
+          .from("platform_settings")
+          .select("setting_value")
+          .eq("setting_key", "accounts.registration_enabled")
+          .maybeSingle();
+
+        if (settingError) throw new Error(
+          "Could not verify registration availability. Please try again."
+        );
+
+        const registrationValue = registrationSetting?.setting_value;
+        const registrationEnabled = typeof registrationValue === "boolean"
+          ? registrationValue
+          : registrationValue?.enabled ?? true;
+
+        if (!registrationEnabled) {
+          throw new Error("New registrations are temporarily disabled. Please try again later.");
+        }
+
         const { data, error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
@@ -4263,10 +4282,24 @@ async function loadAdminUsers(page = adminUsersPage, query = adminUsersQuery) {
       });
 
       if (insertError) {
+        const cleanupResults = await Promise.allSettled([
+          supabase.storage.from(BUCKET).remove([path]),
+          ...(thumbnailPath
+            ? [supabase.storage.from("track-covers").remove([thumbnailPath])]
+            : []),
+        ]);
+
+        const cleanupFailed = cleanupResults.some(
+          (result) => result.status === "rejected" ||
+            result.value?.error
+        );
+
         setMessage(
-          "The file uploaded, but the media record could not be saved: " +
+          "The media record could not be saved: " +
             insertError.message +
-            ". The uploaded file remains in storage."
+            (cleanupFailed
+              ? ". Storage cleanup needs attention."
+              : ". Uploaded files were cleaned up.")
         );
         return;
       }

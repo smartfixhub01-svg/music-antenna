@@ -57,6 +57,20 @@ export default function OwnerControlCentre(p) {
     ["Video views",p.adminOverview?.videoViews ?? p.adminOverview?.video_views ?? p.adminOverview?.total_video_views,"▣"]
   ];
   const empty = (title,desc) => <div className="occ-empty"><b>{title}</b><p>{desc}</p></div>;
+  const liveControlEnabled = key => {
+    const item = (p.adminSettings || []).find(row => row.setting_key === key);
+    const value = item?.setting_value;
+    return typeof value === "boolean" ? value : value?.enabled ?? true;
+  };
+  const saveLiveControl = async (key, enabled) => {
+    setSettingsInputError("");
+    try {
+      await p.handleSaveAdminSetting?.(key, { enabled });
+    } catch (error) {
+      setSettingsInputError(error.message || "Could not save platform control.");
+    }
+  };
+
   const refresh = () => {
     if(p.adminSection==="overview") p.loadAdminOverview?.();
     if(p.adminSection==="users") p.loadAdminUsers?.(p.adminUsersPage || 1,search);
@@ -260,6 +274,28 @@ export default function OwnerControlCentre(p) {
     {p.adminSettingsError && <div className="occ-alert" role="alert">{p.adminSettingsError}</div>}
     {p.adminSettingsMessage && <div className="occ-settings-success" role="status">✓ {p.adminSettingsMessage}</div>}
     {settingsInputError && <div className="occ-alert" role="alert">{settingsInputError}</div>}
+
+    <section className="occ-panel" style={{marginBottom:16}}>
+      <h3>Live Platform Controls</h3>
+      <p>Manage platform settings from your owner console.</p>
+      <div className="occ-settings-category-grid">
+        {[
+          ["Maintenance mode","Temporarily restrict normal platform access","platform.maintenance"],
+          ["New user registration","Allow or pause new account registrations","accounts.registration_enabled"],
+          ["Music uploads","Allow or pause music uploads","uploads.music"],
+          ["Video uploads","Allow or pause video uploads","uploads.video"],
+          ["Platform notifications","Enable or pause platform notifications","notifications.platform"]
+        ].map(([name,description,key])=><label className="occ-settings-category" key={key} style={{display:"flex",gap:12,alignItems:"center",cursor:"pointer"}}>
+          <input type="checkbox" checked={liveControlEnabled(key)} disabled={p.adminSettingsBusy || p.adminSettingsLoading} onChange={e=>saveLiveControl(key,e.target.checked)} />
+          <span style={{display:"grid",gap:5}}><strong>{name}</strong><span>{description}</span><small>{liveControlEnabled(key) ? "Enabled" : "Disabled"}</small></span>
+        </label>)}
+        <article className="occ-settings-category">
+          <strong>Security</strong>
+          <span>Existing owner-only access policies remain active. Additional security controls require server-side enforcement.</span>
+          <small>Protected by existing access policies</small>
+        </article>
+      </div>
+    </section>
 
     <section className="occ-panel occ-settings-categories">
       <h3>Configuration categories</h3>
