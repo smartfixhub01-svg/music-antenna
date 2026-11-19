@@ -8354,3 +8354,26 @@ p
   -webkit-text-fill-color: #17171c !important;
   border-color: #dedee3 !important;
 }
+
+/* Maintenance screen action buttons */
+.auth-card button.maintenance-action-button {
+  height: 48px !important;
+  min-width: 130px;
+  padding: 12px 20px !important;
+  border-radius: 10px !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  opacity: 1;
+}
+
+.auth-card button.maintenance-signout {
+  background: #e2e8f0 !important;
+  color: #172033 !important;
+  border: 1px solid #94a3b8 !important;
+}
+
+.auth-card button.maintenance-retry {
+  background: #db2777 !important;
+  color: #ffffff !important;
+  border: 1px solid #be185d !important;
+}

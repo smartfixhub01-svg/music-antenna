@@ -564,6 +564,7 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
 
   const [adminSettings, setAdminSettings] = useState([]);
   const [adminSettingsLoading, setAdminSettingsLoading] = useState(false);
+  const [maintenanceSettingsReady, setMaintenanceSettingsReady] = useState(false);
   const [adminSettingsError, setAdminSettingsError] = useState("");
   const [adminSettingsMessage, setAdminSettingsMessage] = useState("");
   const [adminSettingsBusy, setAdminSettingsBusy] = useState(false);
@@ -917,6 +918,15 @@ useEffect(() => {
       subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    if (!session?.user?.id) {
+      setAdminSettings([]);
+      setMaintenanceSettingsReady(false);
+      return;
+    }
+    loadAdminSettings();
+  }, [session?.user?.id]);
 
   useEffect(() => {
     loadMedia();
@@ -3797,21 +3807,27 @@ async function handleAdminNotificationDelete(id) {
 }
 
 async function loadAdminSettings() {
-  if (!isMusicAntennaOwner(session?.user?.id)) return;
   setAdminSettingsLoading(true);
+  setMaintenanceSettingsReady(false);
   setAdminSettingsError("");
   setAdminSettingsMessage("");
   try {
-    const { data, error } = await supabase
+    let settingsQuery = supabase
       .from("platform_settings")
-      .select("setting_key,setting_value,updated_by,updated_at")
-      .order("setting_key", { ascending: true });
+      .select("setting_key,setting_value,updated_by,updated_at");
+
+    if (!isMusicAntennaOwner(session?.user?.id)) {
+      settingsQuery = settingsQuery.eq("setting_key", "platform.maintenance");
+    }
+
+    const { data, error } = await settingsQuery.order("setting_key", { ascending: true });
     if (error) throw error;
     setAdminSettings(data || []);
   } catch (error) {
     setAdminSettingsError(error.message || "Could not load platform settings.");
   } finally {
     setAdminSettingsLoading(false);
+    setMaintenanceSettingsReady(true);
   }
 }
 
@@ -5156,7 +5172,83 @@ document.body
     );
   }
 
-  const displayUser =
+  const maintenanceSetting = adminSettings.find(
+  (setting) => setting.setting_key === "platform.maintenance"
+);
+const maintenanceEnabled =
+  maintenanceSetting?.setting_value === true ||
+  maintenanceSetting?.setting_value?.enabled === true;
+
+if (!isOwner && !maintenanceSettingsReady) {
+  return (
+    <main className="auth-screen">
+      <section className="auth-card">
+        <h1>Checking platform status</h1>
+        <p>Please wait while we verify platform availability.</p>
+      </section>
+    </main>
+  );
+}
+
+if (!isOwner && adminSettingsError) {
+  return (
+    <main className="auth-screen">
+      <section className="auth-card">
+        <h1>Unable to verify platform status</h1>
+        <p>Please try again later. Platform access is paused until its status can be verified.</p>
+      </section>
+    </main>
+  );
+}
+
+if (!isOwner && maintenanceEnabled) {
+  return (
+    <main className="auth-screen">
+      <section className="auth-card">
+        <h1>Music Antenna is under maintenance</h1>
+        <p>We're working on the platform. Please check back soon.</p>
+
+        <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap", marginTop: "24px" }}>
+          <button
+            className="maintenance-action-button maintenance-signout"
+            type="button"
+            onClick={handleLogout}
+          >
+            Sign Out
+          </button>
+
+          <button
+            className="maintenance-action-button maintenance-retry"
+            type="button"
+            disabled={adminSettingsLoading}
+            onClick={async () => {
+              setAdminSettingsLoading(true);
+              setAdminSettingsError("");
+              try {
+                const { data, error } = await supabase
+                  .from("platform_settings")
+                  .select("setting_key,setting_value,updated_by,updated_at")
+                  .eq("setting_key", "platform.maintenance");
+                if (error) throw error;
+                setAdminSettings(data || []);
+              } catch (error) {
+                setAdminSettingsError(error.message || "Could not check platform status.");
+              } finally {
+                setAdminSettingsLoading(false);
+                setMaintenanceSettingsReady(true);
+              }
+            }}
+            style={{ cursor: adminSettingsLoading ? "wait" : "pointer", opacity: adminSettingsLoading ? 0.6 : 1 }}
+          >
+            {adminSettingsLoading ? "Checking..." : "Try Again"}
+          </button>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+const displayUser =
     session.user.user_metadata?.display_name ||
     session.user.email?.split("@")[0] ||
     "Listener";
