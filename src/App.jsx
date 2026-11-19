@@ -557,6 +557,17 @@ const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [adminUserBusyId, setAdminUserBusyId] = useState("");
   const [adminSuspendTarget, setAdminSuspendTarget] = useState(null);
   const [adminSuspendReason, setAdminSuspendReason] = useState("");
+  const [adminNotifications, setAdminNotifications] = useState([]);
+  const [adminNotificationsLoading, setAdminNotificationsLoading] = useState(false);
+  const [adminNotificationsError, setAdminNotificationsError] = useState("");
+  const [adminNotificationBusyId, setAdminNotificationBusyId] = useState(null);
+
+  const [adminSettings, setAdminSettings] = useState([]);
+  const [adminSettingsLoading, setAdminSettingsLoading] = useState(false);
+  const [adminSettingsError, setAdminSettingsError] = useState("");
+  const [adminSettingsMessage, setAdminSettingsMessage] = useState("");
+  const [adminSettingsBusy, setAdminSettingsBusy] = useState(false);
+
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -3705,7 +3716,137 @@ async function handleUpdateComment(commentId) {
     }
   }
 
-  async function loadAdminUsers(page = adminUsersPage, query = adminUsersQuery) {
+  
+async function loadAdminNotifications() {
+  if (!isMusicAntennaOwner(session?.user?.id)) return;
+  setAdminNotificationsLoading(true);
+  setAdminNotificationsError("");
+  try {
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("id,user_id,actor_id,type,media_id,video_id,is_read,created_at,message,comment_text,reply_text")
+      .eq("user_id", session.user.id)
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) throw error;
+    setAdminNotifications(data || []);
+  } catch (error) {
+    setAdminNotificationsError(error.message || "Could not load owner notifications.");
+  } finally {
+    setAdminNotificationsLoading(false);
+  }
+}
+
+async function handleAdminNotificationRead(id, isRead = true) {
+  if (!isMusicAntennaOwner(session?.user?.id) || !id) return;
+  setAdminNotificationBusyId(id);
+  setAdminNotificationsError("");
+  try {
+    const { error } = await supabase
+      .from("notifications")
+      .update({ is_read: isRead })
+      .eq("id", id)
+      .eq("user_id", session.user.id);
+    if (error) throw error;
+    setAdminNotifications(items =>
+      items.map(item => item.id === id ? { ...item, is_read: isRead } : item)
+    );
+  } catch (error) {
+    setAdminNotificationsError(error.message || "Could not update notification.");
+  } finally {
+    setAdminNotificationBusyId(null);
+  }
+}
+
+async function handleAdminNotificationDelete(id) {
+  if (!isMusicAntennaOwner(session?.user?.id) || !id) return;
+  setAdminNotificationBusyId(id);
+  setAdminNotificationsError("");
+  try {
+    const { error } = await supabase
+      .from("notifications")
+      .delete()
+      .eq("id", id)
+      .eq("user_id", session.user.id);
+    if (error) throw error;
+    setAdminNotifications(items => items.filter(item => item.id !== id));
+  } catch (error) {
+    setAdminNotificationsError(error.message || "Could not delete notification.");
+  } finally {
+    setAdminNotificationBusyId(null);
+  }
+}
+
+async function loadAdminSettings() {
+  if (!isMusicAntennaOwner(session?.user?.id)) return;
+  setAdminSettingsLoading(true);
+  setAdminSettingsError("");
+  setAdminSettingsMessage("");
+  try {
+    const { data, error } = await supabase
+      .from("platform_settings")
+      .select("setting_key,setting_value,updated_by,updated_at")
+      .order("setting_key", { ascending: true });
+    if (error) throw error;
+    setAdminSettings(data || []);
+  } catch (error) {
+    setAdminSettingsError(error.message || "Could not load platform settings.");
+  } finally {
+    setAdminSettingsLoading(false);
+  }
+}
+
+async function handleSaveAdminSetting(settingKey, settingValue) {
+  if (!isMusicAntennaOwner(session?.user?.id)) return;
+  const key = String(settingKey || "").trim();
+  if (!key) {
+    setAdminSettingsError("Enter a setting key.");
+    return;
+  }
+  setAdminSettingsBusy(true);
+  setAdminSettingsError("");
+  setAdminSettingsMessage("");
+  try {
+    const { error } = await supabase
+      .from("platform_settings")
+      .upsert({
+        setting_key: key,
+        setting_value: settingValue,
+        updated_by: session.user.id,
+        updated_at: new Date().toISOString()
+      }, { onConflict: "setting_key" });
+    if (error) throw error;
+    setAdminSettingsMessage("Setting saved successfully.");
+    await loadAdminSettings();
+  } catch (error) {
+    setAdminSettingsError(error.message || "Could not save platform setting.");
+  } finally {
+    setAdminSettingsBusy(false);
+  }
+}
+
+async function handleDeleteAdminSetting(settingKey) {
+  if (!isMusicAntennaOwner(session?.user?.id)) return;
+  if (!settingKey) return;
+  setAdminSettingsBusy(true);
+  setAdminSettingsError("");
+  setAdminSettingsMessage("");
+  try {
+    const { error } = await supabase
+      .from("platform_settings")
+      .delete()
+      .eq("setting_key", settingKey);
+    if (error) throw error;
+    setAdminSettings(prev => prev.filter(item => item.setting_key !== settingKey));
+    setAdminSettingsMessage("Setting deleted.");
+  } catch (error) {
+    setAdminSettingsError(error.message || "Could not delete platform setting.");
+  } finally {
+    setAdminSettingsBusy(false);
+  }
+}
+
+async function loadAdminUsers(page = adminUsersPage, query = adminUsersQuery) {
     if (!isMusicAntennaOwner(session?.user?.id)) return;
 
     setAdminUsersLoading(true);
@@ -7251,6 +7392,22 @@ document.body
                 adminAuditError={adminAuditError}
                 loadAdminAuditLogs={loadAdminAuditLogs}
                 adminUsers={adminUsers}
+                adminNotifications={adminNotifications}
+                adminNotificationsLoading={adminNotificationsLoading}
+                adminNotificationsError={adminNotificationsError}
+                adminNotificationBusyId={adminNotificationBusyId}
+                loadAdminNotifications={loadAdminNotifications}
+                handleAdminNotificationRead={handleAdminNotificationRead}
+                handleAdminNotificationDelete={handleAdminNotificationDelete}
+                adminSettings={adminSettings}
+                adminSettingsLoading={adminSettingsLoading}
+                adminSettingsError={adminSettingsError}
+                adminSettingsMessage={adminSettingsMessage}
+                adminSettingsBusy={adminSettingsBusy}
+                loadAdminSettings={loadAdminSettings}
+                handleSaveAdminSetting={handleSaveAdminSetting}
+                handleDeleteAdminSetting={handleDeleteAdminSetting}
+
                 adminUsersLoading={adminUsersLoading}
                 adminUsersError={adminUsersError}
                 adminUsersQuery={adminUsersQuery}

@@ -17,6 +17,12 @@ export default function OwnerControlCentre(p) {
   const [search,setSearch] = React.useState(p.adminUsersQuery || "");
   const [contentSearch,setContentSearch] = React.useState("");
   const [contentFilter,setContentFilter] = React.useState("all");
+  const [newSettingKey,setNewSettingKey]=React.useState("");
+  const [newSettingValue,setNewSettingValue]=React.useState("{}");
+  const [editingSettingKey,setEditingSettingKey]=React.useState(null);
+  const [editingSettingValue,setEditingSettingValue]=React.useState("{}");
+  const [settingsInputError,setSettingsInputError]=React.useState("");
+
   const contentItems = (p.adminMedia || []).filter(item => {
     const term = contentSearch.trim().toLowerCase();
     const matchesSearch = !term || [
@@ -38,6 +44,8 @@ export default function OwnerControlCentre(p) {
     if(id==="content") p.loadAdminMedia?.();
     if(id==="audit") p.loadAdminAuditLogs?.();
     if(id==="reports") p.loadAdminReports?.();
+    if(id==="notifications") p.loadAdminNotifications?.();
+    if(id==="settings") p.loadAdminSettings?.();
   };
   const back = () => { p.setAdminSuspendTarget?.(null); setSuspendReason(""); };
   const metrics = [
@@ -56,6 +64,8 @@ export default function OwnerControlCentre(p) {
     if(p.adminSection==="content") p.loadAdminMedia?.();
     if(p.adminSection==="audit") p.loadAdminAuditLogs?.();
     if(p.adminSection==="reports") p.loadAdminReports?.();
+    if(p.adminSection==="notifications") p.loadAdminNotifications?.();
+    if(p.adminSection==="settings") p.loadAdminSettings?.();
   };
   let page;
   if(p.adminSection==="overview") page = <>
@@ -217,6 +227,92 @@ export default function OwnerControlCentre(p) {
     {p.adminAuditError&&<div className="occ-alert">{p.adminAuditError}</div>}
     <section className="occ-panel">{p.adminAuditLoading?<div className="occ-loading">Loading audit records…</div>:p.adminAuditLogs?.length?<div className="occ-table-wrap"><table><thead><tr><th>EVENT</th><th>ACTOR</th><th>DETAILS</th><th>TIME</th></tr></thead><tbody>{p.adminAuditLogs.map((a,i)=><tr key={a.id||i}><td>{a.action||a.event_type||"Admin event"}</td><td>{a.admin_email||a.actor_email||a.admin_user_id||a.actor_id||"Owner"}</td><td>{typeof a.details === "string" ? a.details : a.details ? JSON.stringify(a.details) : a.reason || a.target_user_id || "—"}</td><td>{when(a.created_at||a.timestamp)}</td></tr>)}</tbody></table></div>:empty("No audit activity yet","Administrative actions will appear here when recorded.")}</section>
   </>;
+  
+  else if(p.adminSection==="notifications") page = <>
+    <div className="occ-heading">
+      <div><small>OWNER WORKSPACE</small><h2>Notifications</h2><p>Your owner-account notification inbox.</p></div>
+      <button onClick={()=>p.loadAdminNotifications?.()}>↻ Refresh</button>
+    </div>
+    {p.adminNotificationsError && <div className="occ-alert">{p.adminNotificationsError}</div>}
+    {p.adminNotificationsLoading ? <div className="occ-loading">Loading notifications...</div> :
+      !p.adminNotifications?.length ? empty("No notifications","Your owner inbox is currently empty.") :
+      <section className="occ-panel">
+        <div className="occ-table-wrap"><table>
+          <thead><tr><th>NOTIFICATION</th><th>DETAILS</th><th>DATE</th><th>STATUS</th><th>ACTIONS</th></tr></thead>
+          <tbody>{p.adminNotifications.map(n=><tr key={n.id}>
+            <td>{n.type || "Notification"}</td>
+            <td>{n.message || n.comment_text || n.reply_text || (n.media_id ? "Media notification" : "No additional details")}</td>
+            <td>{when(n.created_at)}</td>
+            <td><span className={"occ-status " + (n.is_read ? "" : "warn")}>{n.is_read ? "Read" : "Unread"}</span></td>
+            <td>
+              <button disabled={p.adminNotificationBusyId===n.id} onClick={()=>p.handleAdminNotificationRead?.(n.id,!n.is_read)}>{n.is_read ? "Mark unread" : "Mark read"}</button>
+              <button className="danger" disabled={p.adminNotificationBusyId===n.id} onClick={()=>{if(window.confirm("Delete this notification?"))p.handleAdminNotificationDelete?.(n.id)}}>Delete</button>
+            </td>
+          </tr>)}</tbody>
+        </table></div>
+      </section>}
+  </>
+  else if(p.adminSection==="settings") page = <>
+    <div className="occ-heading">
+      <div><small>OWNER WORKSPACE</small><h2>Platform settings</h2><p>Manage saved platform configuration values.</p></div>
+      <button onClick={()=>p.loadAdminSettings?.()}>↻ Refresh</button>
+    </div>
+    {p.adminSettingsError && <div className="occ-alert">{p.adminSettingsError}</div>}
+    {p.adminSettingsMessage && <div className="occ-alert">{p.adminSettingsMessage}</div>}
+    {settingsInputError && <div className="occ-alert">{settingsInputError}</div>}
+    <section className="occ-panel">
+      <h3>Add platform setting</h3>
+      <label>Setting key</label>
+      <input value={newSettingKey} onChange={e=>setNewSettingKey(e.target.value)} placeholder="example: platform_name" />
+      <label>JSON value</label>
+      <textarea rows="4" value={newSettingValue} onChange={e=>setNewSettingValue(e.target.value)} />
+      <button disabled={p.adminSettingsBusy} onClick={async()=>{
+        setSettingsInputError("");
+        try {
+          if(!newSettingKey.trim()) throw new Error("Enter a setting key.");
+          const parsed=JSON.parse(newSettingValue);
+          await p.handleSaveAdminSetting?.(newSettingKey.trim(),parsed);
+          setNewSettingKey(""); setNewSettingValue("{}");
+        } catch(e) { setSettingsInputError(e.message || "Invalid JSON value."); }
+      }}>Save setting</button>
+    </section>
+    <section className="occ-panel">
+      <h3>Existing settings</h3>
+      {p.adminSettingsLoading ? <div className="occ-loading">Loading settings...</div> :
+       !p.adminSettings?.length ? empty("No settings saved","Add your first platform setting above.") :
+       <div className="occ-table-wrap"><table>
+        <thead><tr><th>SETTING KEY</th><th>JSON VALUE</th><th>ACTIONS</th></tr></thead>
+        <tbody>{p.adminSettings.map(setting=><tr key={setting.setting_key}>
+          <td><strong>{setting.setting_key}</strong></td>
+          <td>{editingSettingKey===setting.setting_key ?
+            <textarea rows="5" value={editingSettingValue} onChange={e=>setEditingSettingValue(e.target.value)} /> :
+            <pre style={{whiteSpace:"pre-wrap",overflowWrap:"anywhere"}}>{JSON.stringify(setting.setting_value,null,2)}</pre>}
+          </td>
+          <td>{editingSettingKey===setting.setting_key ? <>
+            <button disabled={p.adminSettingsBusy} onClick={async()=>{
+              setSettingsInputError("");
+              try {
+                const parsed=JSON.parse(editingSettingValue);
+                await p.handleSaveAdminSetting?.(setting.setting_key,parsed);
+                setEditingSettingKey(null);
+              } catch(e) { setSettingsInputError(e.message || "Invalid JSON value."); }
+            }}>Save</button>
+            <button onClick={()=>setEditingSettingKey(null)}>Cancel</button>
+          </> : <>
+            <button onClick={()=>{
+              setSettingsInputError("");
+              setEditingSettingKey(setting.setting_key);
+              setEditingSettingValue(JSON.stringify(setting.setting_value,null,2));
+            }}>Edit</button>
+            <button className="danger" disabled={p.adminSettingsBusy} onClick={()=>{
+              if(window.confirm("Delete setting " + setting.setting_key + "?")) p.handleDeleteAdminSetting?.(setting.setting_key);
+            }}>Delete</button>
+          </>}</td>
+        </tr>)}</tbody>
+       </table></div>}
+    </section>
+  </>
+
   else page = <><div className="occ-heading"><div><small>OWNER WORKSPACE</small><h2>{active[1]}</h2><p>Administration workspace for {active[1].toLowerCase()}.</p></div></div><section className="occ-panel occ-placeholder"><strong>{active[1]}</strong><p>This area will only show controls after its owner-only database permissions and secure backend actions are connected. No simulated controls or sample records are displayed.</p><span className="occ-status warn">Backend integration required</span></section></>;
 
   if(typeof document==="undefined") return null;
