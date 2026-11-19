@@ -3820,6 +3820,7 @@ async function handleSaveAdminSetting(settingKey, settingValue) {
     await loadAdminSettings();
   } catch (error) {
     setAdminSettingsError(error.message || "Could not save platform setting.");
+    throw error;
   } finally {
     setAdminSettingsBusy(false);
   }

@@ -254,65 +254,85 @@ export default function OwnerControlCentre(p) {
   </>
   else if(p.adminSection==="settings") page = <>
     <div className="occ-heading">
-      <div><small>OWNER WORKSPACE</small><h2>Platform settings</h2><p>Manage saved platform configuration values.</p></div>
-      <button onClick={()=>p.loadAdminSettings?.()}>↻ Refresh</button>
+      <div><small>OWNER WORKSPACE / CONFIGURATION</small><h2>Platform settings</h2><p>Organise and manage saved platform configuration values.</p></div>
+      <button type="button" onClick={()=>p.loadAdminSettings?.()} disabled={p.adminSettingsLoading}>↻ {p.adminSettingsLoading ? "Loading..." : "Refresh"}</button>
     </div>
-    {p.adminSettingsError && <div className="occ-alert">{p.adminSettingsError}</div>}
-    {p.adminSettingsMessage && <div className="occ-alert">{p.adminSettingsMessage}</div>}
-    {settingsInputError && <div className="occ-alert">{settingsInputError}</div>}
-    <section className="occ-panel">
-      <h3>Add platform setting</h3>
-      <label>Setting key</label>
-      <input value={newSettingKey} onChange={e=>setNewSettingKey(e.target.value)} placeholder="example: platform_name" />
-      <label>JSON value</label>
-      <textarea rows="4" value={newSettingValue} onChange={e=>setNewSettingValue(e.target.value)} />
-      <button disabled={p.adminSettingsBusy} onClick={async()=>{
-        setSettingsInputError("");
-        try {
-          if(!newSettingKey.trim()) throw new Error("Enter a setting key.");
-          const parsed=JSON.parse(newSettingValue);
-          await p.handleSaveAdminSetting?.(newSettingKey.trim(),parsed);
-          setNewSettingKey(""); setNewSettingValue("{}");
-        } catch(e) { setSettingsInputError(e.message || "Invalid JSON value."); }
-      }}>Save setting</button>
+    {p.adminSettingsError && <div className="occ-alert" role="alert">{p.adminSettingsError}</div>}
+    {p.adminSettingsMessage && <div className="occ-settings-success" role="status">✓ {p.adminSettingsMessage}</div>}
+    {settingsInputError && <div className="occ-alert" role="alert">{settingsInputError}</div>}
+
+    <section className="occ-panel occ-settings-categories">
+      <h3>Configuration categories</h3>
+      <p>Choose a category to start a setting key with its namespace.</p>
+      <div className="occ-settings-category-grid">
+        {[
+          ["General","Platform identity and preferences","general."],
+          ["Accounts","Registration and account preferences","accounts."],
+          ["Content","Upload and content preferences","content."],
+          ["Notifications","Notification preferences","notifications."],
+          ["Security","Session and access preferences","security."],
+          ["Monetization","Plans and payment configuration","monetization."]
+        ].map(([name,description,prefix])=><button type="button" className="occ-settings-category" key={name} onClick={()=>{setNewSettingKey(prefix);setSettingsInputError("");document.getElementById("occ-setting-key")?.focus();}}>
+          <strong>{name}</strong><span>{description}</span><small>Use {prefix}</small>
+        </button>)}
+      </div>
+      <p className="occ-settings-note">Categories organise stored configuration keys. A setting changes live platform behaviour only when the relevant Music Antenna feature is programmed to read it.</p>
     </section>
-    <section className="occ-panel">
-      <h3>Existing settings</h3>
+
+    <section className="occ-panel occ-settings-editor">
+      <h3>Add platform setting</h3>
+      <p>Save a key and its JSON value to Supabase.</p>
+      <div className="occ-settings-form">
+        <div className="occ-setting-field">
+          <label htmlFor="occ-setting-key">Setting key</label>
+          <input id="occ-setting-key" value={newSettingKey} onChange={e=>setNewSettingKey(e.target.value)} placeholder="example: general.platform_name" autoComplete="off" />
+          <small>Use a clear category prefix.</small>
+        </div>
+        <div className="occ-setting-field">
+          <label htmlFor="occ-setting-value">JSON value</label>
+          <textarea id="occ-setting-value" rows="5" value={newSettingValue} onChange={e=>setNewSettingValue(e.target.value)} spellCheck="false" placeholder='{"enabled": true}' />
+          <small>Enter valid JSON: text in quotes, numbers, true/false, arrays or objects.</small>
+        </div>
+        <div className="occ-settings-form-actions">
+          <button type="button" disabled={p.adminSettingsBusy} onClick={async()=>{
+            setSettingsInputError("");
+            try {
+              if(!newSettingKey.trim()) throw new Error("Enter a setting key.");
+              const parsed=JSON.parse(newSettingValue);
+              await p.handleSaveAdminSetting?.(newSettingKey.trim(),parsed);
+              setNewSettingKey(""); setNewSettingValue("{}");
+            } catch(e) { setSettingsInputError(e.message || "Could not save setting. Check JSON and Supabase permissions."); }
+          }}>{p.adminSettingsBusy ? "Saving..." : "Save setting"}</button>
+        </div>
+      </div>
+    </section>
+
+    <section className="occ-panel occ-settings-existing">
+      <h3>Saved configuration</h3>
+      <p>{p.adminSettings?.length || 0} saved setting(s)</p>
       {p.adminSettingsLoading ? <div className="occ-loading">Loading settings...</div> :
-       !p.adminSettings?.length ? empty("No settings saved","Add your first platform setting above.") :
-       <div className="occ-table-wrap"><table>
-        <thead><tr><th>SETTING KEY</th><th>JSON VALUE</th><th>ACTIONS</th></tr></thead>
-        <tbody>{p.adminSettings.map(setting=><tr key={setting.setting_key}>
-          <td><strong>{setting.setting_key}</strong></td>
-          <td>{editingSettingKey===setting.setting_key ?
-            <textarea rows="5" value={editingSettingValue} onChange={e=>setEditingSettingValue(e.target.value)} /> :
-            <pre style={{whiteSpace:"pre-wrap",overflowWrap:"anywhere"}}>{JSON.stringify(setting.setting_value,null,2)}</pre>}
-          </td>
-          <td>{editingSettingKey===setting.setting_key ? <>
-            <button disabled={p.adminSettingsBusy} onClick={async()=>{
-              setSettingsInputError("");
-              try {
-                const parsed=JSON.parse(editingSettingValue);
-                await p.handleSaveAdminSetting?.(setting.setting_key,parsed);
-                setEditingSettingKey(null);
-              } catch(e) { setSettingsInputError(e.message || "Invalid JSON value."); }
-            }}>Save</button>
-            <button onClick={()=>setEditingSettingKey(null)}>Cancel</button>
-          </> : <>
-            <button onClick={()=>{
-              setSettingsInputError("");
-              setEditingSettingKey(setting.setting_key);
-              setEditingSettingValue(JSON.stringify(setting.setting_value,null,2));
-            }}>Edit</button>
-            <button className="danger" disabled={p.adminSettingsBusy} onClick={()=>{
-              if(window.confirm("Delete setting " + setting.setting_key + "?")) p.handleDeleteAdminSetting?.(setting.setting_key);
-            }}>Delete</button>
-          </>}</td>
-        </tr>)}</tbody>
-       </table></div>}
+       !p.adminSettings?.length ? empty("No settings saved","Choose a category above or add your first setting.") :
+       <div className="occ-settings-list">{p.adminSettings.map(setting=><article className="occ-settings-item" key={setting.setting_key}>
+          <div className="occ-settings-item-head"><strong>{setting.setting_key}</strong><span className="occ-status">Saved</span></div>
+          {editingSettingKey===setting.setting_key ? <div className="occ-setting-field">
+            <label>Edit JSON value</label>
+            <textarea rows="6" value={editingSettingValue} onChange={e=>setEditingSettingValue(e.target.value)} spellCheck="false" />
+            <div className="occ-settings-item-actions">
+              <button type="button" disabled={p.adminSettingsBusy} onClick={async()=>{
+                setSettingsInputError("");
+                try { const parsed=JSON.parse(editingSettingValue); await p.handleSaveAdminSetting?.(setting.setting_key,parsed); setEditingSettingKey(null); }
+                catch(e) { setSettingsInputError(e.message || "Could not update setting."); }
+              }}>{p.adminSettingsBusy ? "Saving..." : "Save changes"}</button>
+              <button type="button" onClick={()=>setEditingSettingKey(null)}>Cancel</button>
+            </div>
+          </div> : <pre className="occ-settings-json">{JSON.stringify(setting.setting_value,null,2)}</pre>}
+          {editingSettingKey!==setting.setting_key && <div className="occ-settings-item-actions">
+            <button type="button" onClick={()=>{setSettingsInputError("");setEditingSettingKey(setting.setting_key);setEditingSettingValue(JSON.stringify(setting.setting_value,null,2));}}>Edit</button>
+            <button type="button" className="danger" disabled={p.adminSettingsBusy} onClick={()=>{if(window.confirm("Delete setting " + setting.setting_key + "?"))p.handleDeleteAdminSetting?.(setting.setting_key);}}>Delete</button>
+          </div>}
+       </article>)}</div>}
     </section>
   </>
-
   else page = <><div className="occ-heading"><div><small>OWNER WORKSPACE</small><h2>{active[1]}</h2><p>Administration workspace for {active[1].toLowerCase()}.</p></div></div><section className="occ-panel occ-placeholder"><strong>{active[1]}</strong><p>This area will only show controls after its owner-only database permissions and secure backend actions are connected. No simulated controls or sample records are displayed.</p><span className="occ-status warn">Backend integration required</span></section></>;
 
   if(typeof document==="undefined") return null;
